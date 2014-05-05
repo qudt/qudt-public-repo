@@ -9,7 +9,11 @@ Release 2.0 of QUDT will be organized in increments. The first increment will be
 
 Overview
 --------
-<p>The QUDT Ontologies, and derived XML Vocabularies, are being developed by TopQuadrant and NASA. Originally, they were developed for the NASA Exploration Initiatives Ontology Models (NExIOM) project, a Constellation Program initiative at the AMES Research Center (ARC). They now are the basis of the NASA QUDT Handbook to be published by NASA Headquarters.</p>
+
+The QUDT Ontologies, and derived XML Vocabularies, are being developed by TopQuadrant and NASA. Originally, they were developed for the NASA Exploration Initiatives Ontology Models (NExIOM) project, a Constellation Program initiative at the AMES Research Center (ARC). 
+They now are the basis of the NASA QUDT Handbook to be published by NASA Headquarters.
+
+The QUDT public repository holds source files for the graphs making up the QUDT collection. Each QUDT graph is held in both a versioned and an unversioned form on the qudt.org website.
 
 Content
 -------
