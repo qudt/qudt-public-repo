@@ -6,7 +6,7 @@ QUDT -Quantities, Units, Dimensions and dataTypes - public repository
 Status
 ------
 
-Release 2.0 of QUDT will be organizaed in increments. The first increment will be a release of the schemas and base vocabularies for quantities, units and dimensions.
+Release 2.0 of QUDT will be organized in increments. The first increment will be a release of the schemas and base vocabularies for quantities, units and dimensions.
 
 ----
 
