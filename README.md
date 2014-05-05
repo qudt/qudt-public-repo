@@ -71,10 +71,28 @@ Content
  <th>Release Date</th>
 </tr>
 <tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td>VOCAB_UNITS-ACOUSTICS-v2.0.ttl</td>
+<td>http://qudt.org/2.0/vocab/unit/acoustics</td>
+<td>unit</td>
+<td>May 19, 2014</td>
+</tr>
+<tr>
+<td>VOCAB_UNITS-ATOMIC-AND-NUCLEAR-PHYSICS-v2.0.ttl</td>
+<td>http://qudt.org/2.0/vocab/unit/acoustics</td>
+<td>unit</td>
+<td>May 19, 2014</td>
+</tr>
+<tr>
+<td>VOCAB_UNITS-BASE-v2.0.ttl</td>
+<td>http://qudt.org/2.0/vocab/unit/base</td>
+<td>unit</td>
+<td>May 19, 2014</td>
+</tr>
+<tr>
+<td>VOCAB_UNITS-ELECTROMAGNETISM-v2.0.ttl</td>
+<td>http://qudt.org/2.0/vocab/unit/electormagnetism</td>
+<td>unit</td>
+<td>May 19, 2014</td>
 </tr>
 </table>
 
