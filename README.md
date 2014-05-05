@@ -4,7 +4,7 @@ QUDT - Quantities, Units, Dimensions and dataTypes - public repository
 Overview
 --------
 
-The QUDT<sup>1</sup> public repository holds source files for the graphs making up the QUDT collection. Each QUDT graph is held in both a versioned and an unversioned form on the qudt.org website.
+The QUDT<sup>1</sup> public repository holds source files for the graphs making up the QUDT collection. Each QUDT graph will be held in both a versioned and an unversioned form on the <a href="http://qudt.org">qudt.org</a> website.
 
 Status
 ------
