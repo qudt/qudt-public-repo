@@ -1,19 +1,15 @@
 QUDT - Quantities, Units, Dimensions and dataTypes - public repository
 ======================================================================
 
+Overview
+--------
+
+The QUDT<sup>1</sup> public repository holds source files for the graphs making up the QUDT collection. Each QUDT graph is held in both a versioned and an unversioned form on the qudt.org website.
 
 Status
 ------
 
 Release 2.0 of QUDT will be organized in increments. The first increment will be a release of the schemas and base vocabularies for quantities, units and dimensions.
-
-Overview
---------
-
-The QUDT Ontologies, and derived XML Vocabularies, are being developed by TopQuadrant and NASA. Originally, they were developed for the NASA Exploration Initiatives Ontology Models (NExIOM) project, a Constellation Program initiative at the AMES Research Center (ARC). 
-They now are the basis of the NASA QUDT Handbook to be published by NASA Headquarters.
-
-The QUDT public repository holds source files for the graphs making up the QUDT collection. Each QUDT graph is held in both a versioned and an unversioned form on the qudt.org website.
 
 Content
 -------
@@ -106,14 +102,30 @@ Content
  <th>Release Date</th>
 </tr>
 <tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td>VOCAB_QUDT-QUANTITY-CHEMISTRY-v2.0.ttl</td>
+<td>http://qudt.org/2.0/vocab/quantity/chemistry</td>
+<td>quantity</td>
+<td>TBD</td>
+</tr>
+<tr>
+<td>VOCAB_QUDT-QUANTITY-PHYSICS-v2.0.ttl</td>
+<td>http://qudt.org/2.0/vocab/quantity/physics</td>
+<td>quantity</td>
+<td>TBD</td>
+</tr>
+<tr>
+<td>VOCAB_QUDT-QUANTITY-TELEBIOMETRICS-v2.0.ttl</td>
+<td>http://qudt.org/2.0/vocab/quantity/telebiometrics</td>
+<td>quantity</td>
+<td>TBD</td>
 </tr>
 </table>
 
-----
+<hr/>
+<p style="font-size=xx-small;"><sup>1</sup>The QUDT Ontologies, and derived XML Vocabularies, are being developed by TopQuadrant and NASA. Originally, they were developed for the NASA Exploration Initiatives Ontology Models (NExIOM) project, a Constellation Program initiative at the AMES Research Center (ARC). 
+They now are the basis of the NASA QUDT Handbook to be published by NASA Headquarters.</p>
+
+<hr/>
 
 Last updated by: Ralph Hodgson (rhodgson@topquadrant.com)
 
