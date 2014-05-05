@@ -18,44 +18,40 @@ The QUDT public repository holds source files for the graphs making up the QUDT 
 Content
 -------
 
+<h3>Schemas</h3>
+
 <table>
 <tr>
- <th>Graph Type</th>
  <th>File Name</th>
- <th>Base URI</th>
+ <th>Base URIs</th>
  <th>Prefix</th>
  <th>Release Date</th>
 </tr>
 <tr>
-<td>SCHEMA</td>
 <td>SCHEMA_DATATYPE-v2.0.ttl</td>
 <td>http://qudt.org/2.0/schema/datatype</td>
 <td>qudt</td>
 <td>TBD</td>
 </tr>
 <tr>
-<td>SCHEMA</td>
 <td>SCHEMA_DIMENSION-v2.0.ttl</td>
 <td>http://qudt.org/2.0/schema/dimension</td>
 <td>qudt</td>
 <td>May 9, 2014</td>
 </tr>
 <tr>
-<td>SCHEMA</td>
 <td>SCHEMA_QUDT-v2.0.ttl</td>
 <td>http://qudt.org/2.0/schema/qudt</td>
 <td>qudt</td>
 <td>May 9, 2014</td>
 </tr>
 <tr>
-<td>SCHEMA</td>
 <td>SCHEMA_QUANTITY-v2.0.ttl</td>
 <td>http://qudt.org/2.0/schema/quantity</td>
 <td>qudt</td>
 <td>May 9, 2014</td>
 </tr>
 <tr>
-<td>SCHEMA</td>
 <td>SCHEMA_UNICODE-v2.0.ttl</td>
 <td>http://qudt.org/2.0/schema/unicode</td>
 <td>uc</td>
@@ -63,8 +59,44 @@ Content
 </tr>
 </table>
 
+<h3>Vocabularies</h3>
+
+<h4>Units</h4>
+
+<table>
+<tr>
+ <th>File Name</th>
+ <th>Base URIs</th>
+ <th>Prefix</th>
+ <th>Release Date</th>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</table>
+
+<h4>Quantities</h4>
+
+<table>
+<tr>
+ <th>File Name</th>
+ <th>Base URIs</th>
+ <th>Prefix</th>
+ <th>Release Date</th>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</table>
+
 ----
 
-If you have questions contact rhodgson@topquadrant.com
+Last updated by: Ralph Hodgson (rhodgson@topquadrant.com)
 
 Last updated: May 4, 2014
