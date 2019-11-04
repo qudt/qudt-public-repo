@@ -4,129 +4,98 @@ QUDT - Quantities, Units, Dimensions and dataTypes - public repository
 Overview
 --------
 
-The QUDT<sup>1</sup> public repository holds source files for the graphs making up the QUDT collection. Each QUDT graph will be held in both a versioned and an unversioned form on the <a href="http://qudt.org">qudt.org</a> website.
+This QUDT<sup>1</sup> public repository was originally intended to hold source files for the graphs making up the QUDT collection. However, our current plan is to deliver these files in more powerful ways:
+
+<nl>
+<li>Today: Each QUDT graph is currently available in both a versioned and an unversioned form on the <a href="http://qudt.org">qudt.org</a> website.</li>
+<li>Soon: The website will eventually host an engine supporting SPARQL and GraphQL queries, and fully resolvable URIs at the individual class and instance level will be put online.</li>
+</nl>
 
 Status
 ------
 
-Release 2.0 of QUDT will be organized in increments. The first increment will be a release of the schemas and base vocabularies for quantities, units and dimensions.
+Release 2.1 of QUDT is being published in increments. The first increment is a release of the schemas and base vocabularies for units, quantity kinds and dimension vectors. Please check the <a href="http://qudt.org">qudt.org</a> website for the latest updates.</li>
 
-Content
+Content (as of November 4, 2019)
 -------
 
 <h3>Schemas</h3>
 
 <table>
 <tr>
- <th>File Name</th>
  <th>Base URIs</th>
  <th>Prefix</th>
  <th>Release Date</th>
+ <th>Dereferenceable URI</th>
 </tr>
 <tr>
-<td>SCHEMA_DATATYPE-v2.0.ttl</td>
-<td>http://qudt.org/2.0/schema/datatype</td>
+<td>http://qudt.org/2.1/schema/qudt</td>
 <td>qudt</td>
-<td>TBD</td>
+<td>October 4, 2019</td>
+<td>http://qudt.org/schema/qudt</td>
 </tr>
 <tr>
-<td>SCHEMA_DIMENSION-v2.0.ttl</td>
-<td>http://qudt.org/2.0/schema/dimension</td>
-<td>qudt</td>
-<td>May 9, 2014</td>
+<td>http://qudt.org/2.0/schema/qudt/science<sup>2</sup></td>
+<td></td>
+<td>October 4, 2019</td>
+<td>http://qudt.org/schema/qudt/science</td>
 </tr>
 <tr>
-<td>SCHEMA_QUDT-v2.0.ttl</td>
-<td>http://qudt.org/2.0/schema/qudt</td>
-<td>qudt</td>
-<td>May 9, 2014</td>
-</tr>
-<tr>
-<td>SCHEMA_QUANTITY-v2.0.ttl</td>
-<td>http://qudt.org/2.0/schema/quantity</td>
-<td>qudt</td>
-<td>May 9, 2014</td>
-</tr>
-<tr>
-<td>SCHEMA_UNICODE-v2.0.ttl</td>
-<td>http://qudt.org/2.0/schema/unicode</td>
-<td>uc</td>
-<td>May 9, 2014</td>
+<td>http://qudt.org/2.1/vocab/discipline<sup>2</sup></td>
+<td></td>
+<td>October 4, 2019</td>
+<td>http://qudt.org/vocab/discipline</td>
 </tr>
 </table>
 
 <h3>Vocabularies</h3>
 
-<h4>Units</h4>
+<h4>Units, Quantity Kinds, Dimension Vectors</h4>
 
 <table>
 <tr>
- <th>File Name</th>
  <th>Base URIs</th>
  <th>Prefix</th>
  <th>Release Date</th>
+ <th>Dereferenceable URI</th>
 </tr>
 <tr>
-<td>VOCAB_UNITS-ACOUSTICS-v2.0.ttl</td>
-<td>http://qudt.org/2.0/vocab/unit/acoustics</td>
+<td>http://qudt.org/2.1/vocab/unit</td>
 <td>unit</td>
-<td>May 19, 2014</td>
+<td>October 11, 2019</td>
+<td>http://qudt.org/vocab/unit</td>
 </tr>
 <tr>
-<td>VOCAB_UNITS-ATOMIC-AND-NUCLEAR-PHYSICS-v2.0.ttl</td>
-<td>http://qudt.org/2.0/vocab/unit/acoustics</td>
-<td>unit</td>
-<td>May 19, 2014</td>
+<td>http://qudt.org/2.1/vocab/quantitykind</td>
+<td>quantitykind</td>
+<td>October 4, 2019</td>
+<td>http://qudt.org/vocab/quantitykind</td>
 </tr>
 <tr>
-<td>VOCAB_UNITS-BASE-v2.0.ttl</td>
-<td>http://qudt.org/2.0/vocab/unit/base</td>
-<td>unit</td>
-<td>May 19, 2014</td>
+<td>http://qudt.org/2.1/vocab/dimension</td>
+<td>dimension</td>
+<td>October 4, 2019</td>
+<td>http://qudt.org/vocab/dimension</td>
 </tr>
 <tr>
-<td>VOCAB_UNITS-ELECTROMAGNETISM-v2.0.ttl</td>
-<td>http://qudt.org/2.0/vocab/unit/electormagnetism</td>
-<td>unit</td>
-<td>May 19, 2014</td>
+<td>http://qudt.org/2.1/vocab/discipline</td>
+<td>discipline</td>
+<td>October 4, 2019</td>
+<td>http://qudt.org/vocab/discipline</td>
 </tr>
 </table>
 
-<h4>Quantities</h4>
 
-<table>
-<tr>
- <th>File Name</th>
- <th>Base URIs</th>
- <th>Prefix</th>
- <th>Release Date</th>
-</tr>
-<tr>
-<td>VOCAB_QUDT-QUANTITY-CHEMISTRY-v2.0.ttl</td>
-<td>http://qudt.org/2.0/vocab/quantity/chemistry</td>
-<td>quantity</td>
-<td>TBD</td>
-</tr>
-<tr>
-<td>VOCAB_QUDT-QUANTITY-PHYSICS-v2.0.ttl</td>
-<td>http://qudt.org/2.0/vocab/quantity/physics</td>
-<td>quantity</td>
-<td>TBD</td>
-</tr>
-<tr>
-<td>VOCAB_QUDT-QUANTITY-TELEBIOMETRICS-v2.0.ttl</td>
-<td>http://qudt.org/2.0/vocab/quantity/telebiometrics</td>
-<td>quantity</td>
-<td>TBD</td>
-</tr>
-</table>
 
 <hr/>
-<p style="font-size=xx-small;"><sup>1</sup>The QUDT Ontologies, and derived XML Vocabularies, are being developed by TopQuadrant and NASA. Originally, they were developed for the NASA Exploration Initiatives Ontology Models (NExIOM) project, a Constellation Program initiative at the AMES Research Center (ARC). 
-They now are the basis of the NASA QUDT Handbook to be published by NASA Headquarters.</p>
+<p style="font-size=xx-small;"><sup>1</sup> QUDT.org is a 501(c)(3) not-for-profit organization founded to provide semantic specifications for units of measure, quantity kind, dimensions and data types.   QUDT is an advocate for the development and implementation of standards to quantify data expressed in RDF and JSON.   Our mission is to improve interoperability of data and the specification of information structures through industry standards for Units of Measure, Quantity Kinds, Dimensions and Data Types.
+
+QUDT.org is a member of the World Wide Web Consortium (W3C)
+
+<p style="font-size=xx-small;"><sup>2</sup> The science and discipline schemas may get folded into the main qudt schema to simplify things.
 
 <hr/>
 
-Last updated by: Ralph Hodgson (rhodgson@topquadrant.com)
+Last updated by: Steve Ray (steve.ray@qudt.org)
 
-Last updated: May 4, 2014
+Last updated: November 4, 2019
