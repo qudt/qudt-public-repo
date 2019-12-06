@@ -4,17 +4,16 @@ QUDT - Quantities, Units, Dimensions and dataTypes - public repository
 Overview
 --------
 
-This QUDT<sup>1</sup> public repository was originally intended to hold source files for the graphs making up the QUDT collection. However, our current plan is to deliver these files in more powerful ways:
+This QUDT<sup>1</sup> public repository contains the schema and vocabulary source files for the graphs making up the QUDT collection. It is probably the most convenient way for software developers to include the QUDT ontoligies in their work. However, for those who prefer the linked data world, each QUDT graph is also available in both a versioned and an unversioned form on the <a href="http://qudt.org">qudt.org</a> website.
 
-<nl>
-<li>Today: Each QUDT graph is currently available in both a versioned and an unversioned form on the <a href="http://qudt.org">qudt.org</a> website.</li>
-<li>Soon: The website will eventually host an engine supporting SPARQL and GraphQL queries, and fully resolvable URIs at the individual class and instance level will be put online.</li>
-</nl>
+Our current plan is to deliver this material in even more powerful ways. The website will eventually host an engine supporting SPARQL and GraphQL queries, and fully resolvable URIs at the individual class and instance level will be available online.
+
+We encourage you to get involved. If you have particular needs or see errors, please create an Issue and/or make changes or additions yourself (please see our <a href="./wiki">Wiki</a> for more detailed instructions.)
 
 Status
 ------
 
-Release 2.1 of QUDT is being published in increments. The first increment is a release of the schemas and base vocabularies for units, quantity kinds and dimension vectors. Please check the <a href="http://qudt.org">qudt.org</a> website for the latest updates.</li>
+Release 2.1 of QUDT is being published in increments. The first increment is a release of the schemas and base vocabularies for units, quantity kinds and dimension vectors. Please check this repository or the <a href="http://qudt.org">qudt.org</a> website for the latest updates.
 
 Content (as of November 4, 2019)
 -------
