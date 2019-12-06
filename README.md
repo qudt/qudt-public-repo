@@ -72,7 +72,7 @@ Content (as of November 4, 2019)
 </tr>
 <tr>
 <td>http://qudt.org/2.1/vocab/dimensionvector</td>
-<td>dimension</td>
+<td>dimensionvector</td>
 <td>October 4, 2019</td>
 <td>http://qudt.org/vocab/dimensionvector</td>
 </tr>
