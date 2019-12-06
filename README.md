@@ -71,10 +71,10 @@ Content (as of November 4, 2019)
 <td>http://qudt.org/vocab/quantitykind</td>
 </tr>
 <tr>
-<td>http://qudt.org/2.1/vocab/dimension</td>
+<td>http://qudt.org/2.1/vocab/dimensionvector</td>
 <td>dimension</td>
 <td>October 4, 2019</td>
-<td>http://qudt.org/vocab/dimension</td>
+<td>http://qudt.org/vocab/dimensionvector</td>
 </tr>
 <tr>
 <td>http://qudt.org/2.1/vocab/discipline</td>
