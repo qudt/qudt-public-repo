@@ -8,7 +8,7 @@ This QUDT<sup>1</sup> public repository contains the schema and vocabulary sourc
 
 Our current plan is to deliver this material in even more powerful ways. The website will eventually host an engine supporting SPARQL and GraphQL queries, and fully resolvable URIs at the individual class and instance level will be available online.
 
-We encourage you to get involved. If you have particular needs or see errors, please create an Issue and/or make changes or additions yourself (please see our <a href="./wiki">Wiki</a> for more detailed instructions.)
+We encourage you to get involved. If you have particular needs or see errors, please create an Issue and/or make changes or additions yourself (please see our <a href="https://github.com/qudt/qudt-public-repo/wiki">   Wiki</a> for more detailed instructions.)
 
 Status
 ------
@@ -71,10 +71,10 @@ Content (as of November 4, 2019)
 <td>http://qudt.org/vocab/quantitykind</td>
 </tr>
 <tr>
-<td>http://qudt.org/2.1/vocab/dimension</td>
-<td>dimension</td>
+<td>http://qudt.org/2.1/vocab/dimensionvector</td>
+<td>dimensionvector</td>
 <td>October 4, 2019</td>
-<td>http://qudt.org/vocab/dimension</td>
+<td>http://qudt.org/vocab/dimensionvector</td>
 </tr>
 <tr>
 <td>http://qudt.org/2.1/vocab/discipline</td>
