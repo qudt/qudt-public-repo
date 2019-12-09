@@ -4,7 +4,7 @@ QUDT - Quantities, Units, Dimensions and dataTypes - public repository
 Overview
 --------
 
-This QUDT<sup>1</sup> public repository contains the schema and vocabulary source files for the graphs making up the QUDT collection. It is probably the most convenient way for software developers to include the QUDT ontoligies in their work. However, for those who prefer the linked data world, each QUDT graph is also available in both a versioned and an unversioned form on the <a href="http://qudt.org">qudt.org</a> website.
+This QUDT<sup>1</sup> public repository contains the schema and vocabulary source files for the graphs making up the QUDT collection. It is probably the most convenient way for software developers to include the QUDT ontologies in their work, and is the most up-to-date. However, for those who prefer the linked data world, each QUDT graph is also available in both a versioned and an unversioned form on the <a href="http://qudt.org">qudt.org</a> website.
 
 Our current plan is to deliver this material in even more powerful ways. The website will eventually host an engine supporting SPARQL and GraphQL queries, and fully resolvable URIs at the individual class and instance level will be available online.
 
