@@ -15,74 +15,7 @@ Status
 
 Release 2.1 of QUDT is being published in increments. The first increment is a release of the schemas and base vocabularies for units, quantity kinds and dimension vectors. Please check this repository or the <a href="http://qudt.org">qudt.org</a> website for the latest updates.
 
-Content (as of November 4, 2019)
--------
 
-<h3>Schemas</h3>
-
-<table>
-<tr>
- <th>Base URIs</th>
- <th>Prefix</th>
- <th>Release Date</th>
- <th>Dereferenceable URI</th>
-</tr>
-<tr>
-<td>http://qudt.org/2.1/schema/qudt</td>
-<td>qudt</td>
-<td>October 4, 2019</td>
-<td>http://qudt.org/schema/qudt</td>
-</tr>
-<tr>
-<td>http://qudt.org/2.0/schema/qudt/science<sup>2</sup></td>
-<td></td>
-<td>October 4, 2019</td>
-<td>http://qudt.org/schema/qudt/science</td>
-</tr>
-<tr>
-<td>http://qudt.org/2.1/vocab/discipline<sup>2</sup></td>
-<td></td>
-<td>October 4, 2019</td>
-<td>http://qudt.org/vocab/discipline</td>
-</tr>
-</table>
-
-<h3>Vocabularies</h3>
-
-<h4>Units, Quantity Kinds, Dimension Vectors</h4>
-
-<table>
-<tr>
- <th>Base URIs</th>
- <th>Prefix</th>
- <th>Release Date</th>
- <th>Dereferenceable URI</th>
-</tr>
-<tr>
-<td>http://qudt.org/2.1/vocab/unit</td>
-<td>unit</td>
-<td>October 11, 2019</td>
-<td>http://qudt.org/vocab/unit</td>
-</tr>
-<tr>
-<td>http://qudt.org/2.1/vocab/quantitykind</td>
-<td>quantitykind</td>
-<td>October 4, 2019</td>
-<td>http://qudt.org/vocab/quantitykind</td>
-</tr>
-<tr>
-<td>http://qudt.org/2.1/vocab/dimensionvector</td>
-<td>dimensionvector</td>
-<td>October 4, 2019</td>
-<td>http://qudt.org/vocab/dimensionvector</td>
-</tr>
-<tr>
-<td>http://qudt.org/2.1/vocab/discipline</td>
-<td>discipline</td>
-<td>October 4, 2019</td>
-<td>http://qudt.org/vocab/discipline</td>
-</tr>
-</table>
 
 
 
@@ -91,11 +24,11 @@ Content (as of November 4, 2019)
 
 QUDT.org is a member of the World Wide Web Consortium (W3C)
 
-<p style="font-size=xx-small;"><sup>2</sup> The science and discipline schemas may get folded into the main qudt schema to simplify things.
+
 
 <hr/>
 
 
 Last updated by: Steve Ray (steve.ray@qudt.org)
 
-Last updated: November 4, 2019
+Last updated: December 12, 2019
