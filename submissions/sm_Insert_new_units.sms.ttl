@@ -34,6 +34,7 @@
 sm_Insert_new_units:BindBySelect_GetUnitInstances
   a sml:BindBySelect ;
   sm:next sm_Insert_new_units:PerformUpdate_InsertNewInstances ;
+  sm:next sm_Insert_new_units:convertDimensions_1 ;
   sm:nodeX 319 ;
   sm:nodeY 233 ;
   sml:selectQuery [
@@ -72,10 +73,763 @@ sm_Insert_new_units:BindBySelect_GetUnitInstances
   sml:baseURI "http://qudt-public-repo/submissions/newunits_spin" ;
   rdfs:label "Import newunits_spin.spin.ttl" ;
 .
+sm_Insert_new_units:IterateOverSelect_1
+  a sml:IterateOverSelect ;
+  sm:next sm_Insert_new_units:PerformUpdate_InsertNewInstances ;
+  sm:nodeX 714 ;
+  sm:nodeY 229 ;
+  sml:iterationVariable "index" ;
+  sml:selectQuery [
+      a sp:Select ;
+      sp:resultVariables (
+          [
+            sp:varName "unitDV" ;
+          ]
+        ) ;
+      sp:where (
+          [
+            sp:object [
+                sp:varName "?0" ;
+              ] ;
+            sp:predicate spif:split ;
+            sp:subject [
+                sp:varName "elem" ;
+              ] ;
+          ]
+          [
+            sp:object spin:_arg1 ;
+            sp:predicate rdf:first ;
+            sp:subject [
+                sp:varName "?0" ;
+              ] ;
+          ]
+          [
+            sp:object [
+                sp:varName "?1" ;
+              ] ;
+            sp:predicate rdf:rest ;
+            sp:subject [
+                sp:varName "?0" ;
+              ] ;
+          ]
+          [
+            sp:object " " ;
+            sp:predicate rdf:first ;
+            sp:subject [
+                sp:varName "?1" ;
+              ] ;
+          ]
+          [
+            sp:object () ;
+            sp:predicate rdf:rest ;
+            sp:subject [
+                sp:varName "?1" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a sp:if ;
+                sp:arg1 [
+                    a sp:and ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "A" ;
+                      ] ;
+                    sp:arg2 [
+                        a sp:eq ;
+                        sp:arg1 [
+                            a fn:string-length ;
+                            sp:arg1 [
+                                sp:varName "elem" ;
+                              ] ;
+                          ] ;
+                        sp:arg2 1 ;
+                      ] ;
+                  ] ;
+                sp:arg2 "1" ;
+                sp:arg3 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "A" ;
+                      ] ;
+                    sp:arg2 [
+                        a fn:substring ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 2 ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "apower" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a sp:if ;
+                sp:arg1 [
+                    a sp:and ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "E" ;
+                      ] ;
+                    sp:arg2 [
+                        a sp:eq ;
+                        sp:arg1 [
+                            a fn:string-length ;
+                            sp:arg1 [
+                                sp:varName "elem" ;
+                              ] ;
+                          ] ;
+                        sp:arg2 1 ;
+                      ] ;
+                  ] ;
+                sp:arg2 "1" ;
+                sp:arg3 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "E" ;
+                      ] ;
+                    sp:arg2 [
+                        a fn:substring ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 2 ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "epower" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a sp:if ;
+                sp:arg1 [
+                    a sp:and ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "L" ;
+                      ] ;
+                    sp:arg2 [
+                        a sp:eq ;
+                        sp:arg1 [
+                            a fn:string-length ;
+                            sp:arg1 [
+                                sp:varName "elem" ;
+                              ] ;
+                          ] ;
+                        sp:arg2 1 ;
+                      ] ;
+                  ] ;
+                sp:arg2 "1" ;
+                sp:arg3 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "L" ;
+                      ] ;
+                    sp:arg2 [
+                        a fn:substring ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 2 ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "lpower" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a sp:if ;
+                sp:arg1 [
+                    a sp:and ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "I" ;
+                      ] ;
+                    sp:arg2 [
+                        a sp:eq ;
+                        sp:arg1 [
+                            a fn:string-length ;
+                            sp:arg1 [
+                                sp:varName "elem" ;
+                              ] ;
+                          ] ;
+                        sp:arg2 1 ;
+                      ] ;
+                  ] ;
+                sp:arg2 "1" ;
+                sp:arg3 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "I" ;
+                      ] ;
+                    sp:arg2 [
+                        a fn:substring ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 2 ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "ipower" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a sp:if ;
+                sp:arg1 [
+                    a sp:and ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "M" ;
+                      ] ;
+                    sp:arg2 [
+                        a sp:eq ;
+                        sp:arg1 [
+                            a fn:string-length ;
+                            sp:arg1 [
+                                sp:varName "elem" ;
+                              ] ;
+                          ] ;
+                        sp:arg2 1 ;
+                      ] ;
+                  ] ;
+                sp:arg2 "1" ;
+                sp:arg3 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "M" ;
+                      ] ;
+                    sp:arg2 [
+                        a fn:substring ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 2 ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "mpower" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a sp:if ;
+                sp:arg1 [
+                    a sp:and ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "H" ;
+                      ] ;
+                    sp:arg2 [
+                        a sp:eq ;
+                        sp:arg1 [
+                            a fn:string-length ;
+                            sp:arg1 [
+                                sp:varName "elem" ;
+                              ] ;
+                          ] ;
+                        sp:arg2 1 ;
+                      ] ;
+                  ] ;
+                sp:arg2 "1" ;
+                sp:arg3 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "H" ;
+                      ] ;
+                    sp:arg2 [
+                        a fn:substring ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 2 ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "hpower" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a sp:if ;
+                sp:arg1 [
+                    a sp:and ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "T" ;
+                      ] ;
+                    sp:arg2 [
+                        a sp:eq ;
+                        sp:arg1 [
+                            a fn:string-length ;
+                            sp:arg1 [
+                                sp:varName "elem" ;
+                              ] ;
+                          ] ;
+                        sp:arg2 1 ;
+                      ] ;
+                  ] ;
+                sp:arg2 "1" ;
+                sp:arg3 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "T" ;
+                      ] ;
+                    sp:arg2 [
+                        a fn:substring ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 2 ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "tpower" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a sp:if ;
+                sp:arg1 [
+                    a sp:and ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "D" ;
+                      ] ;
+                    sp:arg2 [
+                        a sp:eq ;
+                        sp:arg1 [
+                            a fn:string-length ;
+                            sp:arg1 [
+                                sp:varName "elem" ;
+                              ] ;
+                          ] ;
+                        sp:arg2 1 ;
+                      ] ;
+                  ] ;
+                sp:arg2 "1" ;
+                sp:arg3 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a fn:starts-with ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 "D" ;
+                      ] ;
+                    sp:arg2 [
+                        a fn:substring ;
+                        sp:arg1 [
+                            sp:varName "elem" ;
+                          ] ;
+                        sp:arg2 2 ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "dpower" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a fn:concat ;
+                sp:arg1 "A" ;
+                sp:arg2 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "apower" ;
+                          ] ;
+                        sp:arg2 "" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "apower" ;
+                      ] ;
+                    sp:arg3 "0" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "aresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a fn:concat ;
+                sp:arg1 "E" ;
+                sp:arg2 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "epower" ;
+                          ] ;
+                        sp:arg2 "" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "epower" ;
+                      ] ;
+                    sp:arg3 "0" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "eresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a fn:concat ;
+                sp:arg1 "L" ;
+                sp:arg2 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "lpower" ;
+                          ] ;
+                        sp:arg2 "" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "lpower" ;
+                      ] ;
+                    sp:arg3 "0" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "lresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a fn:concat ;
+                sp:arg1 "I" ;
+                sp:arg2 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "ipower" ;
+                          ] ;
+                        sp:arg2 "" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "ipower" ;
+                      ] ;
+                    sp:arg3 "0" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "iresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a fn:concat ;
+                sp:arg1 "M" ;
+                sp:arg2 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "mpower" ;
+                          ] ;
+                        sp:arg2 "" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "mpower" ;
+                      ] ;
+                    sp:arg3 "0" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "mresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a fn:concat ;
+                sp:arg1 "H" ;
+                sp:arg2 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "hpower" ;
+                          ] ;
+                        sp:arg2 "" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "hpower" ;
+                      ] ;
+                    sp:arg3 "0" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "hresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a fn:concat ;
+                sp:arg1 "T" ;
+                sp:arg2 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "tpower" ;
+                          ] ;
+                        sp:arg2 "" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "tpower" ;
+                      ] ;
+                    sp:arg3 "0" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "tresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a fn:concat ;
+                sp:arg1 "D" ;
+                sp:arg2 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "dpower" ;
+                          ] ;
+                        sp:arg2 "" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "dpower" ;
+                      ] ;
+                    sp:arg3 "0" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "dresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a fn:concat ;
+                sp:arg1 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "aresult" ;
+                          ] ;
+                        sp:arg2 "A0" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "aresult" ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+                sp:arg2 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "eresult" ;
+                          ] ;
+                        sp:arg2 "E0" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "eresult" ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+                sp:arg3 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "lresult" ;
+                          ] ;
+                        sp:arg2 "L0" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "lresult" ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+                sp:arg4 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "iresult" ;
+                          ] ;
+                        sp:arg2 "I0" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "iresult" ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+                sp:arg5 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "mresult" ;
+                          ] ;
+                        sp:arg2 "M0" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "mresult" ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+                sp:arg6 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "hresult" ;
+                          ] ;
+                        sp:arg2 "H0" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "hresult" ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+                sp:arg7 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "tresult" ;
+                          ] ;
+                        sp:arg2 "T0" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "tresult" ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+                sp:arg8 [
+                    a sp:if ;
+                    sp:arg1 [
+                        a sp:ne ;
+                        sp:arg1 [
+                            sp:varName "dresult" ;
+                          ] ;
+                        sp:arg2 "D0" ;
+                      ] ;
+                    sp:arg2 [
+                        sp:varName "dresult" ;
+                      ] ;
+                    sp:arg3 "" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "unitDV" ;
+              ] ;
+          ]
+        ) ;
+    ] ;
+.
 sm_Insert_new_units:PerformUpdate_InsertNewInstances
   a sml:PerformUpdate ;
-  sm:nodeX 726 ;
-  sm:nodeY 242 ;
+  sm:nodeX 672 ;
+  sm:nodeY 438 ;
   sml:updateQuery [
       a sp:Modify ;
       sp:insertPattern (
@@ -83,7 +837,7 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
             a sp:NamedGraph ;
             sp:elements (
                 [
-                  sp:object <http://qudt-public-repo/schema/qudt#Unit> ;
+                  sp:object qudt:Unit ;
                   sp:predicate rdf:type ;
                   sp:subject [
                       sp:varName "newUnitQname" ;
@@ -102,7 +856,7 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
                   sp:object [
                       sp:varName "IEC_CODE" ;
                     ] ;
-                  sp:predicate <http://qudt-public-repo/schema/qudt#iec61360Code> ;
+                  sp:predicate qudt:iec61360Code ;
                   sp:subject [
                       sp:varName "newUnitQname" ;
                     ] ;
@@ -111,7 +865,7 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
                   sp:object [
                       sp:varName "UNECE_CODE" ;
                     ] ;
-                  sp:predicate <http://qudt-public-repo/schema/qudt#uneceCommonCode> ;
+                  sp:predicate qudt:uneceCommonCode ;
                   sp:subject [
                       sp:varName "newUnitQname" ;
                     ] ;
@@ -120,37 +874,37 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
                   sp:object [
                       sp:varName "IEC_DEFN" ;
                     ] ;
-                  sp:predicate <http://qudt-public-repo/schema/qudt#description> ;
+                  sp:predicate qudt:description ;
                   sp:subject [
                       sp:varName "newUnitQname" ;
                     ] ;
                 ]
                 [
                   sp:object "CM PLACEHOLDER" ;
-                  sp:predicate <http://qudt-public-repo/schema/qudt#conversionMultiplier> ;
+                  sp:predicate qudt:conversionMultiplier ;
                   sp:subject [
                       sp:varName "newUnitQname" ;
                     ] ;
                 ]
                 [
                   sp:object "CO PLACEHOLDER" ;
-                  sp:predicate <http://qudt-public-repo/schema/qudt#conversionOffset> ;
+                  sp:predicate qudt:conversionOffset ;
                   sp:subject [
                       sp:varName "newUnitQname" ;
                     ] ;
                 ]
                 [
                   sp:object "QK PLACEHOLDER" ;
-                  sp:predicate <http://qudt-public-repo/schema/qudt#hasQuantityKind> ;
+                  sp:predicate <http://qudt.org/schema/hasQuantityKind> ;
                   sp:subject [
                       sp:varName "newUnitQname" ;
                     ] ;
                 ]
                 [
                   sp:object [
-                      sp:varName "IEC_DIMS" ;
+                      sp:varName "unitDV" ;
                     ] ;
-                  sp:predicate <http://qudt-public-repo/schema/qudt#baseUnitDimensions> ;
+                  sp:predicate <http://qudt.org/schema/baseUnitDimensions> ;
                   sp:subject [
                       sp:varName "newUnitQname" ;
                     ] ;
@@ -173,7 +927,7 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
             sp:object [
                 sp:varName "IEC_CODE" ;
               ] ;
-            sp:predicate <http://qudt-public-repo/newUnits3#code> ;
+            sp:predicate newUnits3:code ;
             sp:subject [
                 sp:varName "unit" ;
               ] ;
@@ -182,7 +936,7 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
             sp:object [
                 sp:varName "UNECE" ;
               ] ;
-            sp:predicate <http://qudt-public-repo/newUnits3#emark.EN> ;
+            sp:predicate <http://qudt-public-repo/submissions/newUnits3/remark.EN> ;
             sp:subject [
                 sp:varName "unit" ;
               ] ;
@@ -191,7 +945,7 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
             sp:object [
                 sp:varName "IEC_DEFN" ;
               ] ;
-            sp:predicate <http://qudt-public-repo/newUnits3#definition.EN> ;
+            sp:predicate <http://qudt-public-repo/submissions/newUnits3/definition.EN> ;
             sp:subject [
                 sp:varName "unit" ;
               ] ;
@@ -200,7 +954,7 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
             sp:object [
                 sp:varName "IEC_LABEL" ;
               ] ;
-            sp:predicate <http://qudt-public-repo/newUnits3#preferredName.EN> ;
+            sp:predicate <http://qudt-public-repo/submissions/newUnits3/preferredName.EN> ;
             sp:subject [
                 sp:varName "unit" ;
               ] ;
@@ -209,7 +963,7 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
             sp:object [
                 sp:varName "IEC_UNIT" ;
               ] ;
-            sp:predicate <http://qudt-public-repo/newUnits3#primaryUnit> ;
+            sp:predicate newUnits3:primaryUnit ;
             sp:subject [
                 sp:varName "unit" ;
               ] ;
@@ -218,7 +972,7 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
             sp:object [
                 sp:varName "iecLabel" ;
               ] ;
-            sp:predicate <http://qudt-public-repo/newUnits3#unitText> ;
+            sp:predicate newUnits3:unitText ;
             sp:subject [
                 sp:varName "unit" ;
               ] ;
@@ -277,4 +1031,12 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
           ]
         ) ;
     ] ;
+.
+sm_Insert_new_units:convertDimensions_1
+  a newunits_spin:convertDimensions ;
+  sp:arg1 "unit3" ;
+  sm:next sm_Insert_new_units:IterateOverSelect_1 ;
+  sm:nodeX 705 ;
+  sm:nodeY 28 ;
+  sm:outputVariable "convertedUnitDIMS" ;
 .
