@@ -4471,7 +4471,7 @@ newunits_spin:replaceAllConversionsIntoDVTemplate
   spin:constraint [
       a spl:Argument ;
       spl:predicate sp:arg1 ;
-      spl:valueType rdfs:Resource ;
+      spl:valueType xsd:string ;
     ] ;
   spin:constraint [
       a spl:Argument ;
@@ -4643,11 +4643,21 @@ newunits_spin:replaceConversionInDVTemplate
       spl:valueType xsd:string ;
       rdfs:comment "The DV template (or current modification of it)" ;
     ] ;
-  rdfs:comment """Given a converted unit string (e.g., \"L M T-1\",
-          a type (e.g., \"L\"),
-          a template component (e.g., \"L0\"), and
-          a template (e.g., \"A0 E0 L0 I0 M0 H0 T0 D0\")
+  rdfs:comment """Given a converted unit string, ?arg1 (e.g., \"L M T-1\",
+          a type, ?arg2 (e.g., \"L\"),
+          a template component, ?arg3 (e.g., \"L0\"), and
+          a template, ?arg4 (e.g., \"A0 E0 L0 I0 M0 H0 T0 D0\")
 Return the template modified for each term int he unit string (in this example: \"A0 E0 L1 I0 M1 H0 T-1 D0\"
+
+ALGORITHM: 1. Find the index of ?arg2 in ?arg1 and bind the result to ?typeIndex
+                        2. Find the substring of ?arg1 at ?typeIndex + 2 and length of 1 and bind the result to ?typeNext (this will have a value of \"\", \" \", a number, or \"-\"
+                        3. Find the two characters after ?typeIndex + 2 and bind the result to ?typePower
+                        4. Concatenate the value of ?arg2 with the result of testing for the power
+                            a. If the value of ?typeNext is \"\" or \" \" (in which case the value returned is 1)
+                            b. Else, if the value of ?typeNext is \"-\" (in which case the value of ?typePower is returned)
+                            c. Else, return the value of ?typeNext (which is now a number)
+
+CALLED BY: newunits_spin:replaceAllConversionsIntoDVTemplate
 
 TEST:
 
@@ -4657,6 +4667,17 @@ WHERE {
     ?unit a newUnits3:Export .
     BIND (newunits_spin:convertDimensions(?unit) AS ?convresult) .
     BIND (newunits_spin:replaceConversionInDVTemplate(?convresult, \"A\", \"A0\", ?template) AS ?aresult) .
+}
+
+FULL LOGIC:
+
+SELECT ?componentDVResult
+WHERE {
+    BIND (spif:indexOf(?arg1, ?arg2) AS ?typeIndex) .
+    BIND (fn:substring(?arg1, (?typeIndex + 2), 1) AS ?typeNext) .
+    BIND (fn:substring(?arg1, (?typeIndex + 2), 2) AS ?typePower) .
+    BIND (fn:concat(?arg2, IF(((?typeNext = \" \") || (?typeNext = \"\")), 1, IF((?typeNext = \"-\"), ?typePower, ?typeNext))) AS ?typeDVComponent) .
+    BIND (IF(bound(?typeIndex), spif:replaceAll(?arg4, ?arg3, ?typeDVComponent), ?arg4) AS ?componentDVResult) .
 }""" ;
   rdfs:subClassOf spin:Functions ;
 .
