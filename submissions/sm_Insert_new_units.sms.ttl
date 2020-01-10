@@ -31,6 +31,68 @@
   owl:imports <http://topbraid.org/sparqlmotionlib-tb> ;
   owl:versionInfo "Created with TopBraid Composer" ;
 .
+sm_Insert_new_units:BindBySelect_GetQKFromDV
+  a sml:BindBySelect ;
+  sm:next sm_Insert_new_units:PerformUpdate_InsertNewInstances ;
+  sm:nodeX 704 ;
+  sm:nodeY 334 ;
+  sml:selectQuery [
+      a sp:Select ;
+      sp:resultVariables (
+          [
+            sp:varName "qk" ;
+          ]
+        ) ;
+      sp:where (
+          [
+            a sp:Bind ;
+            sp:expression [
+                a fn:concat ;
+                sp:arg1 "qkdv:" ;
+                sp:arg2 [
+                    sp:varName "result" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "newDVName" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a smf:buildURI ;
+                sp:arg1 [
+                    sp:varName "newDVName" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "newDVQname" ;
+              ] ;
+          ]
+          [
+            sp:object [
+                sp:varName "dv" ;
+              ] ;
+            sp:predicate qudt:hasDimensionVector ;
+            sp:subject [
+                sp:varName "qk" ;
+              ] ;
+          ]
+          [
+            a sp:Filter ;
+            sp:expression [
+                a sp:eq ;
+                sp:arg1 [
+                    sp:varName "newDVQname" ;
+                  ] ;
+                sp:arg2 [
+                    sp:varName "dv" ;
+                  ] ;
+              ] ;
+          ]
+        ) ;
+    ] ;
+.
 sm_Insert_new_units:BindBySelect_GetUnitInstances
   a sml:BindBySelect ;
   sm:next sm_Insert_new_units:PerformUpdate_InsertNewInstances ;
@@ -73,763 +135,10 @@ sm_Insert_new_units:BindBySelect_GetUnitInstances
   sml:baseURI "http://qudt-public-repo/submissions/newunits_spin" ;
   rdfs:label "Import newunits_spin.spin.ttl" ;
 .
-sm_Insert_new_units:IterateOverSelect_1
-  a sml:IterateOverSelect ;
-  sm:next sm_Insert_new_units:PerformUpdate_InsertNewInstances ;
-  sm:nodeX 714 ;
-  sm:nodeY 229 ;
-  sml:iterationVariable "index" ;
-  sml:selectQuery [
-      a sp:Select ;
-      sp:resultVariables (
-          [
-            sp:varName "unitDV" ;
-          ]
-        ) ;
-      sp:where (
-          [
-            sp:object [
-                sp:varName "?0" ;
-              ] ;
-            sp:predicate spif:split ;
-            sp:subject [
-                sp:varName "elem" ;
-              ] ;
-          ]
-          [
-            sp:object spin:_arg1 ;
-            sp:predicate rdf:first ;
-            sp:subject [
-                sp:varName "?0" ;
-              ] ;
-          ]
-          [
-            sp:object [
-                sp:varName "?1" ;
-              ] ;
-            sp:predicate rdf:rest ;
-            sp:subject [
-                sp:varName "?0" ;
-              ] ;
-          ]
-          [
-            sp:object " " ;
-            sp:predicate rdf:first ;
-            sp:subject [
-                sp:varName "?1" ;
-              ] ;
-          ]
-          [
-            sp:object () ;
-            sp:predicate rdf:rest ;
-            sp:subject [
-                sp:varName "?1" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a sp:if ;
-                sp:arg1 [
-                    a sp:and ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "A" ;
-                      ] ;
-                    sp:arg2 [
-                        a sp:eq ;
-                        sp:arg1 [
-                            a fn:string-length ;
-                            sp:arg1 [
-                                sp:varName "elem" ;
-                              ] ;
-                          ] ;
-                        sp:arg2 1 ;
-                      ] ;
-                  ] ;
-                sp:arg2 "1" ;
-                sp:arg3 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "A" ;
-                      ] ;
-                    sp:arg2 [
-                        a fn:substring ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 2 ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "apower" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a sp:if ;
-                sp:arg1 [
-                    a sp:and ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "E" ;
-                      ] ;
-                    sp:arg2 [
-                        a sp:eq ;
-                        sp:arg1 [
-                            a fn:string-length ;
-                            sp:arg1 [
-                                sp:varName "elem" ;
-                              ] ;
-                          ] ;
-                        sp:arg2 1 ;
-                      ] ;
-                  ] ;
-                sp:arg2 "1" ;
-                sp:arg3 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "E" ;
-                      ] ;
-                    sp:arg2 [
-                        a fn:substring ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 2 ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "epower" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a sp:if ;
-                sp:arg1 [
-                    a sp:and ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "L" ;
-                      ] ;
-                    sp:arg2 [
-                        a sp:eq ;
-                        sp:arg1 [
-                            a fn:string-length ;
-                            sp:arg1 [
-                                sp:varName "elem" ;
-                              ] ;
-                          ] ;
-                        sp:arg2 1 ;
-                      ] ;
-                  ] ;
-                sp:arg2 "1" ;
-                sp:arg3 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "L" ;
-                      ] ;
-                    sp:arg2 [
-                        a fn:substring ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 2 ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "lpower" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a sp:if ;
-                sp:arg1 [
-                    a sp:and ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "I" ;
-                      ] ;
-                    sp:arg2 [
-                        a sp:eq ;
-                        sp:arg1 [
-                            a fn:string-length ;
-                            sp:arg1 [
-                                sp:varName "elem" ;
-                              ] ;
-                          ] ;
-                        sp:arg2 1 ;
-                      ] ;
-                  ] ;
-                sp:arg2 "1" ;
-                sp:arg3 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "I" ;
-                      ] ;
-                    sp:arg2 [
-                        a fn:substring ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 2 ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "ipower" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a sp:if ;
-                sp:arg1 [
-                    a sp:and ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "M" ;
-                      ] ;
-                    sp:arg2 [
-                        a sp:eq ;
-                        sp:arg1 [
-                            a fn:string-length ;
-                            sp:arg1 [
-                                sp:varName "elem" ;
-                              ] ;
-                          ] ;
-                        sp:arg2 1 ;
-                      ] ;
-                  ] ;
-                sp:arg2 "1" ;
-                sp:arg3 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "M" ;
-                      ] ;
-                    sp:arg2 [
-                        a fn:substring ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 2 ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "mpower" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a sp:if ;
-                sp:arg1 [
-                    a sp:and ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "H" ;
-                      ] ;
-                    sp:arg2 [
-                        a sp:eq ;
-                        sp:arg1 [
-                            a fn:string-length ;
-                            sp:arg1 [
-                                sp:varName "elem" ;
-                              ] ;
-                          ] ;
-                        sp:arg2 1 ;
-                      ] ;
-                  ] ;
-                sp:arg2 "1" ;
-                sp:arg3 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "H" ;
-                      ] ;
-                    sp:arg2 [
-                        a fn:substring ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 2 ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "hpower" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a sp:if ;
-                sp:arg1 [
-                    a sp:and ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "T" ;
-                      ] ;
-                    sp:arg2 [
-                        a sp:eq ;
-                        sp:arg1 [
-                            a fn:string-length ;
-                            sp:arg1 [
-                                sp:varName "elem" ;
-                              ] ;
-                          ] ;
-                        sp:arg2 1 ;
-                      ] ;
-                  ] ;
-                sp:arg2 "1" ;
-                sp:arg3 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "T" ;
-                      ] ;
-                    sp:arg2 [
-                        a fn:substring ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 2 ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "tpower" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a sp:if ;
-                sp:arg1 [
-                    a sp:and ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "D" ;
-                      ] ;
-                    sp:arg2 [
-                        a sp:eq ;
-                        sp:arg1 [
-                            a fn:string-length ;
-                            sp:arg1 [
-                                sp:varName "elem" ;
-                              ] ;
-                          ] ;
-                        sp:arg2 1 ;
-                      ] ;
-                  ] ;
-                sp:arg2 "1" ;
-                sp:arg3 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a fn:starts-with ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 "D" ;
-                      ] ;
-                    sp:arg2 [
-                        a fn:substring ;
-                        sp:arg1 [
-                            sp:varName "elem" ;
-                          ] ;
-                        sp:arg2 2 ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "dpower" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a fn:concat ;
-                sp:arg1 "A" ;
-                sp:arg2 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "apower" ;
-                          ] ;
-                        sp:arg2 "" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "apower" ;
-                      ] ;
-                    sp:arg3 "0" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "aresult" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a fn:concat ;
-                sp:arg1 "E" ;
-                sp:arg2 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "epower" ;
-                          ] ;
-                        sp:arg2 "" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "epower" ;
-                      ] ;
-                    sp:arg3 "0" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "eresult" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a fn:concat ;
-                sp:arg1 "L" ;
-                sp:arg2 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "lpower" ;
-                          ] ;
-                        sp:arg2 "" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "lpower" ;
-                      ] ;
-                    sp:arg3 "0" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "lresult" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a fn:concat ;
-                sp:arg1 "I" ;
-                sp:arg2 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "ipower" ;
-                          ] ;
-                        sp:arg2 "" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "ipower" ;
-                      ] ;
-                    sp:arg3 "0" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "iresult" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a fn:concat ;
-                sp:arg1 "M" ;
-                sp:arg2 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "mpower" ;
-                          ] ;
-                        sp:arg2 "" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "mpower" ;
-                      ] ;
-                    sp:arg3 "0" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "mresult" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a fn:concat ;
-                sp:arg1 "H" ;
-                sp:arg2 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "hpower" ;
-                          ] ;
-                        sp:arg2 "" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "hpower" ;
-                      ] ;
-                    sp:arg3 "0" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "hresult" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a fn:concat ;
-                sp:arg1 "T" ;
-                sp:arg2 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "tpower" ;
-                          ] ;
-                        sp:arg2 "" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "tpower" ;
-                      ] ;
-                    sp:arg3 "0" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "tresult" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a fn:concat ;
-                sp:arg1 "D" ;
-                sp:arg2 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "dpower" ;
-                          ] ;
-                        sp:arg2 "" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "dpower" ;
-                      ] ;
-                    sp:arg3 "0" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "dresult" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a fn:concat ;
-                sp:arg1 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "aresult" ;
-                          ] ;
-                        sp:arg2 "A0" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "aresult" ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-                sp:arg2 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "eresult" ;
-                          ] ;
-                        sp:arg2 "E0" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "eresult" ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-                sp:arg3 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "lresult" ;
-                          ] ;
-                        sp:arg2 "L0" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "lresult" ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-                sp:arg4 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "iresult" ;
-                          ] ;
-                        sp:arg2 "I0" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "iresult" ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-                sp:arg5 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "mresult" ;
-                          ] ;
-                        sp:arg2 "M0" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "mresult" ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-                sp:arg6 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "hresult" ;
-                          ] ;
-                        sp:arg2 "H0" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "hresult" ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-                sp:arg7 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "tresult" ;
-                          ] ;
-                        sp:arg2 "T0" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "tresult" ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-                sp:arg8 [
-                    a sp:if ;
-                    sp:arg1 [
-                        a sp:ne ;
-                        sp:arg1 [
-                            sp:varName "dresult" ;
-                          ] ;
-                        sp:arg2 "D0" ;
-                      ] ;
-                    sp:arg2 [
-                        sp:varName "dresult" ;
-                      ] ;
-                    sp:arg3 "" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "unitDV" ;
-              ] ;
-          ]
-        ) ;
-    ] ;
-.
 sm_Insert_new_units:PerformUpdate_InsertNewInstances
   a sml:PerformUpdate ;
-  sm:nodeX 672 ;
-  sm:nodeY 438 ;
+  sm:nodeX 664 ;
+  sm:nodeY 519 ;
   sml:updateQuery [
       a sp:Modify ;
       sp:insertPattern (
@@ -894,7 +203,9 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
                     ] ;
                 ]
                 [
-                  sp:object "QK PLACEHOLDER" ;
+                  sp:object [
+                      sp:varName "qk" ;
+                    ] ;
                   sp:predicate <http://qudt.org/schema/hasQuantityKind> ;
                   sp:subject [
                       sp:varName "newUnitQname" ;
@@ -902,7 +213,7 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
                 ]
                 [
                   sp:object [
-                      sp:varName "unitDV" ;
+                      sp:varName "result" ;
                     ] ;
                   sp:predicate <http://qudt.org/schema/baseUnitDimensions> ;
                   sp:subject [
@@ -1035,8 +346,16 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
 sm_Insert_new_units:convertDimensions_1
   a newunits_spin:convertDimensions ;
   sp:arg1 "unit3" ;
-  sm:next sm_Insert_new_units:IterateOverSelect_1 ;
+  sm:next sm_Insert_new_units:replaceAllConversionsIntoDVTemplate_1 ;
   sm:nodeX 705 ;
   sm:nodeY 28 ;
   sm:outputVariable "convertedUnitDIMS" ;
+.
+sm_Insert_new_units:replaceAllConversionsIntoDVTemplate_1
+  a newunits_spin:replaceAllConversionsIntoDVTemplate ;
+  sp:arg2 "\"A0 E0 L0 I0 M0 H0 T0 D0\"" ;
+  sm:next sm_Insert_new_units:BindBySelect_GetQKFromDV ;
+  sm:nodeX 673 ;
+  sm:nodeY 198 ;
+  sm:outputVariable "result" ;
 .
