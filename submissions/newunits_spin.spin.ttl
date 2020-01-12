@@ -514,6 +514,103 @@ newunits_spin:UpdateTemplates_1
   spin:labelTemplate "The unit ?newUnitQname is added with the label: ?newUnitLabel" ;
   rdfs:subClassOf spin:UpdateTemplates ;
 .
+newunits_spin:compareDVAndGetQK
+  a spin:MagicProperty ;
+  spin:body [
+      a sp:Select ;
+      sp:resultVariables (
+          [
+            sp:varName "qk" ;
+          ]
+          [
+            sp:varName "dv" ;
+          ]
+        ) ;
+      sp:where (
+          [
+            a sp:Bind ;
+            sp:expression [
+                a fn:concat ;
+                sp:arg1 "qkdv:" ;
+                sp:arg2 spin:_arg1 ;
+              ] ;
+            sp:variable [
+                sp:varName "newDVName" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a smf:buildURI ;
+                sp:arg1 [
+                    sp:varName "newDVName" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "newDVQname" ;
+              ] ;
+          ]
+          [
+            sp:object [
+                sp:varName "dv" ;
+              ] ;
+            sp:predicate qudt:hasDimensionVector ;
+            sp:subject [
+                sp:varName "qk" ;
+              ] ;
+          ]
+          [
+            a sp:Filter ;
+            sp:expression [
+                a sp:eq ;
+                sp:arg1 [
+                    sp:varName "newDVQname" ;
+                  ] ;
+                sp:arg2 [
+                    sp:varName "dv" ;
+                  ] ;
+              ] ;
+          ]
+        ) ;
+    ] ;
+  spin:constraint [
+      a spl:Argument ;
+      spl:predicate sp:arg1 ;
+      spl:valueType xsd:string ;
+    ] ;
+  rdfs:comment """Return links to real dimension vectors and quantity kinds associated with the calculated dimension vector string:
+
+    \"A0E0L-1I0M0H0T0D0\" -> quantitykind:InverseLength, qkdv:A0E0L-1I0M0H0T0D0
+
+
+TEST MAGIC PROPERTY:
+
+SELECT ?unit
+WHERE {
+    BIND (\"A0 E0 L0 I0 M0 H0 T0 D0\" AS ?template) .
+    ?unit a newUnits3:Export .
+    ?unit newunits_spin:convertDimensionsProperty ?convresult .
+    (?convresult ?template) newunits_spin:replaceAllConversionsIntoDVTemplateProperty ?dvresult .
+    ?dvresult newunits_spin:compareDVAndGetQK (?qk ?dv)
+}
+
+
+TEST SPARQL for magic property:
+
+SELECT ?qk ?dv
+WHERE {
+    BIND (\"A0E0L0I1M1H0T0D0\" AS ?arg1) .
+    BIND (fn:concat(\"qkdv:\", ?arg1) AS ?newDVName) .
+    BIND (smf:buildURI(?newDVName) AS ?newDVQname) .
+    ?qk qudt:hasDimensionVector ?dv .
+    FILTER (?newDVQname = ?dv) .
+}
+
+""" ;
+  rdfs:label "unit dimensions" ;
+  rdfs:subClassOf spin:MagicProperties ;
+  skos:prefLabel "unit dimensions" ;
+.
 newunits_spin:convertDimensions
   a spin:Function ;
   spin:body [
@@ -693,6 +790,187 @@ WHERE {
 
 Send the result into a function that will break the result up and rewrite the template based on the items in it""" ;
   rdfs:subClassOf spin:Functions ;
+.
+newunits_spin:convertDimensionsProperty
+  a spin:MagicProperty ;
+  spin:body [
+      a sp:Select ;
+      sp:resultVariables (
+          [
+            sp:varName "convertedUnitDIMS" ;
+          ]
+        ) ;
+      sp:where (
+          [
+            sp:object [
+                sp:varName "IEC_UNIT" ;
+              ] ;
+            sp:predicate newUnits3:primaryUnit ;
+            sp:subject spin:_arg1 ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a fn:upper-case ;
+                sp:arg1 [
+                    sp:varName "IEC_UNIT" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "IEC_UC_UNIT" ;
+              ] ;
+          ]
+          [
+            sp:object [
+                sp:varName "?0" ;
+              ] ;
+            sp:predicate spif:split ;
+            sp:subject [
+                sp:varName "elem" ;
+              ] ;
+          ]
+          [
+            sp:object [
+                sp:varName "IEC_UC_UNIT" ;
+              ] ;
+            sp:predicate rdf:first ;
+            sp:subject [
+                sp:varName "?0" ;
+              ] ;
+          ]
+          [
+            sp:object [
+                sp:varName "?1" ;
+              ] ;
+            sp:predicate rdf:rest ;
+            sp:subject [
+                sp:varName "?0" ;
+              ] ;
+          ]
+          [
+            sp:object " " ;
+            sp:predicate rdf:first ;
+            sp:subject [
+                sp:varName "?1" ;
+              ] ;
+          ]
+          [
+            sp:object () ;
+            sp:predicate rdf:rest ;
+            sp:subject [
+                sp:varName "?1" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a spif:replaceAll ;
+                sp:arg1 [
+                    a spif:replaceAll ;
+                    sp:arg1 [
+                        a spif:replaceAll ;
+                        sp:arg1 [
+                            a spif:replaceAll ;
+                            sp:arg1 [
+                                a spif:replaceAll ;
+                                sp:arg1 [
+                                    a spif:replaceAll ;
+                                    sp:arg1 [
+                                        a spif:replaceAll ;
+                                        sp:arg1 [
+                                            a spif:replaceAll ;
+                                            sp:arg1 [
+                                                a spif:replaceAll ;
+                                                sp:arg1 [
+                                                    sp:varName "IEC_UC_UNIT" ;
+                                                  ] ;
+                                                sp:arg2 "RAD" ;
+                                                sp:arg3 "D" ;
+                                              ] ;
+                                            sp:arg2 "A" ;
+                                            sp:arg3 "E" ;
+                                          ] ;
+                                        sp:arg2 "MOL" ;
+                                        sp:arg3 "A" ;
+                                      ] ;
+                                    sp:arg2 "M" ;
+                                    sp:arg3 "L" ;
+                                  ] ;
+                                sp:arg2 "CD" ;
+                                sp:arg3 "I" ;
+                              ] ;
+                            sp:arg2 "KG" ;
+                            sp:arg3 "M" ;
+                          ] ;
+                        sp:arg2 "K" ;
+                        sp:arg3 "H" ;
+                      ] ;
+                    sp:arg2 "SR" ;
+                    sp:arg3 "D" ;
+                  ] ;
+                sp:arg2 "S" ;
+                sp:arg3 "T" ;
+              ] ;
+            sp:variable [
+                sp:varName "convertedUnitDIMS" ;
+              ] ;
+          ]
+        ) ;
+    ] ;
+  spin:constraint [
+      a spl:Argument ;
+      spl:predicate sp:arg1 ;
+      spl:valueType xsd:string ;
+    ] ;
+  rdfs:comment """Convert something like \"m2 s-1\" into \"L T-1\"
+
+1. Convert LC to UC
+2. Match and replace types (add one at a time)
+    a. Aggregate like terms (e.g., K and K-1)
+    b. Sum exponents (e.g., 1 -1 = 0) -> K0 D1
+    c. S -> T, KG -> M, M -> L, A -> E, CD -> I, SR -> L, MOL -> A, K -> H, RAD -> L,
+3. Remove spaces (easy)
+
+CALLED BY: newunits_spin:getDimensionComponents
+
+REAL TEST:
+
+SELECT ?result
+WHERE {
+  ?arg1 a newUnits3:Export .
+  ?arg1 newunits_spin:convertDimensionsProperty ?result .
+}
+
+FULL SPARQL TEST:
+
+SELECT ?IEC_UNIT ?result
+WHERE {
+    ?arg1 a newUnits3:Export .
+    ?arg1 newUnits3:primaryUnit ?IEC_UNIT .
+    BIND (fn:upper-case(?IEC_UNIT) AS ?IEC_UC_UNIT) .
+    ?elem spif:split (?IEC_UC_UNIT \" \") .
+    BIND (spif:replaceAll(
+                   spif:replaceAll(
+                       spif:replaceAll(
+                           spif:replaceAll(
+                               spif:replaceAll(
+                                   spif:replaceAll(
+                                       spif:replaceAll(
+                                           spif:replaceAll(
+                                               spif:replaceAll(?IEC_UC_UNIT, \"RAD\", \"D\"),
+                                               \"A\", \"E\"),
+                                           \"MOL\", \"A\"),
+                                       \"M\", \"L\"),
+                                   \"CD\", \"I\"),
+                               \"KG\", \"M\"),
+                           \"K\", \"H\"),
+                       \"SR\", \"D\"),
+                   \"S\", \"T\") AS ?result) .
+}
+
+Send the result into a function that will break the result up and rewrite the template based on the items in it
+""" ;
+  rdfs:subClassOf spin:MagicProperties ;
 .
 newunits_spin:convertIECLabel1
   a spin:Function ;
@@ -4490,6 +4768,174 @@ WHERE {
     BIND (newunits_spin:replaceAllConversionsIntoDVTemplate(?convresult, ?template) AS ?dvresult) .
 }""" ;
   rdfs:subClassOf spin:Functions ;
+.
+newunits_spin:replaceAllConversionsIntoDVTemplateProperty
+  a spin:MagicProperty ;
+  spin:body [
+      a sp:Select ;
+      sp:resultVariables (
+          [
+            sp:varName "result" ;
+          ]
+        ) ;
+      sp:where (
+          [
+            a sp:Bind ;
+            sp:expression [
+                a newunits_spin:replaceConversionInDVTemplate ;
+                sp:arg1 spin:_arg1 ;
+                sp:arg2 "A" ;
+                sp:arg3 "A0" ;
+                sp:arg4 spin:_arg2 ;
+              ] ;
+            sp:variable [
+                sp:varName "aresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a newunits_spin:replaceConversionInDVTemplate ;
+                sp:arg1 spin:_arg1 ;
+                sp:arg2 "E" ;
+                sp:arg3 "E0" ;
+                sp:arg4 [
+                    sp:varName "aresult" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "eresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a newunits_spin:replaceConversionInDVTemplate ;
+                sp:arg1 spin:_arg1 ;
+                sp:arg2 "L" ;
+                sp:arg3 "L0" ;
+                sp:arg4 [
+                    sp:varName "eresult" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "lresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a newunits_spin:replaceConversionInDVTemplate ;
+                sp:arg1 spin:_arg1 ;
+                sp:arg2 "I" ;
+                sp:arg3 "I0" ;
+                sp:arg4 [
+                    sp:varName "lresult" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "iresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a newunits_spin:replaceConversionInDVTemplate ;
+                sp:arg1 spin:_arg1 ;
+                sp:arg2 "M" ;
+                sp:arg3 "M0" ;
+                sp:arg4 [
+                    sp:varName "iresult" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "mresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a newunits_spin:replaceConversionInDVTemplate ;
+                sp:arg1 spin:_arg1 ;
+                sp:arg2 "H" ;
+                sp:arg3 "H0" ;
+                sp:arg4 [
+                    sp:varName "mresult" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "hresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a newunits_spin:replaceConversionInDVTemplate ;
+                sp:arg1 spin:_arg1 ;
+                sp:arg2 "T" ;
+                sp:arg3 "T0" ;
+                sp:arg4 [
+                    sp:varName "hresult" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "tresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a newunits_spin:replaceConversionInDVTemplate ;
+                sp:arg1 spin:_arg1 ;
+                sp:arg2 "D" ;
+                sp:arg3 "D0" ;
+                sp:arg4 [
+                    sp:varName "tresult" ;
+                  ] ;
+              ] ;
+            sp:variable [
+                sp:varName "dresult" ;
+              ] ;
+          ]
+          [
+            a sp:Bind ;
+            sp:expression [
+                a spif:replaceAll ;
+                sp:arg1 [
+                    sp:varName "dresult" ;
+                  ] ;
+                sp:arg2 " " ;
+                sp:arg3 "" ;
+              ] ;
+            sp:variable [
+                sp:varName "result" ;
+              ] ;
+          ]
+        ) ;
+    ] ;
+  spin:constraint [
+      a spl:Argument ;
+      spl:predicate sp:arg1 ;
+      spl:valueType xsd:string ;
+    ] ;
+  spin:constraint [
+      a spl:Argument ;
+      spl:predicate sp:arg2 ;
+      spl:valueType xsd:string ;
+      rdfs:comment "Second argument is the template string (e.g., \"A0 E0 L0 I0 M0 H0 T0 D0\")" ;
+    ] ;
+  rdfs:comment """This function modifies a DImension Vector template by the contents of a unit converstion
+
+TEST:
+
+SELECT ?dvresult
+WHERE {
+    BIND (\"A0 E0 L0 I0 M0 H0 T0 D0\" AS ?template) .
+    ?unit a newUnits3:Export .
+    ?unit newunits_spin:convertDimensionsProperty ?convresult .
+    (?convresult ?template) newunits_spin:replaceAllConversionsIntoDVTemplateProperty ?dvresult .
+}""" ;
+  rdfs:subClassOf spin:MagicProperties ;
 .
 newunits_spin:replaceConversionInDVTemplate
   a spin:Function ;

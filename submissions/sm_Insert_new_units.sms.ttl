@@ -31,75 +31,10 @@
   owl:imports <http://topbraid.org/sparqlmotionlib-tb> ;
   owl:versionInfo "Created with TopBraid Composer" ;
 .
-sm_Insert_new_units:BindBySelect_GetQKFromDV
-  a sml:BindBySelect ;
-  sm:next sm_Insert_new_units:PerformUpdate_InsertNewInstances ;
-  sm:nodeX 704 ;
-  sm:nodeY 334 ;
-  sml:selectQuery [
-      a sp:Select ;
-      sp:resultVariables (
-          [
-            sp:varName "qk" ;
-          ]
-          [
-            sp:varName "dv" ;
-          ]
-        ) ;
-      sp:where (
-          [
-            a sp:Bind ;
-            sp:expression [
-                a fn:concat ;
-                sp:arg1 "qkdv:" ;
-                sp:arg2 [
-                    sp:varName "result" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "newDVName" ;
-              ] ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a smf:buildURI ;
-                sp:arg1 [
-                    sp:varName "newDVName" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "newDVQname" ;
-              ] ;
-          ]
-          [
-            sp:object [
-                sp:varName "dv" ;
-              ] ;
-            sp:predicate qudt:hasDimensionVector ;
-            sp:subject [
-                sp:varName "qk" ;
-              ] ;
-          ]
-          [
-            a sp:Filter ;
-            sp:expression [
-                a sp:eq ;
-                sp:arg1 [
-                    sp:varName "newDVQname" ;
-                  ] ;
-                sp:arg2 [
-                    sp:varName "dv" ;
-                  ] ;
-              ] ;
-          ]
-        ) ;
-    ] ;
-.
 sm_Insert_new_units:BindBySelect_GetUnitInstances
   a sml:BindBySelect ;
   sm:next sm_Insert_new_units:PerformUpdate_InsertNewInstances ;
-  sm:next sm_Insert_new_units:convertDimensions_1 ;
+  sm:next sm_Insert_new_units:convertDimensionsProperty_1 ;
   sm:nodeX 319 ;
   sm:nodeY 233 ;
   sml:selectQuery [
@@ -140,8 +75,8 @@ sm_Insert_new_units:BindBySelect_GetUnitInstances
 .
 sm_Insert_new_units:PerformUpdate_InsertNewInstances
   a sml:PerformUpdate ;
-  sm:nodeX 664 ;
-  sm:nodeY 519 ;
+  sm:nodeX 730 ;
+  sm:nodeY 452 ;
   sml:updateQuery [
       a sp:Modify ;
       sp:insertPattern (
@@ -228,6 +163,99 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
           ]
         ) ;
       sp:where (
+          [
+            sp:object [
+                sp:varName "convresult" ;
+              ] ;
+            sp:predicate newunits_spin:convertDimensionsProperty ;
+            sp:subject [
+                sp:varName "unit3" ;
+              ] ;
+          ]
+          [
+            sp:object [
+                sp:varName "convresult" ;
+              ] ;
+            sp:predicate rdf:first ;
+            sp:subject [
+                sp:varName "?0" ;
+              ] ;
+          ]
+          [
+            sp:object [
+                sp:varName "?1" ;
+              ] ;
+            sp:predicate rdf:rest ;
+            sp:subject [
+                sp:varName "?0" ;
+              ] ;
+          ]
+          [
+            sp:object "A0 E0 L0 I0 M0 H0 T0 D0" ;
+            sp:predicate rdf:first ;
+            sp:subject [
+                sp:varName "?1" ;
+              ] ;
+          ]
+          [
+            sp:object () ;
+            sp:predicate rdf:rest ;
+            sp:subject [
+                sp:varName "?1" ;
+              ] ;
+          ]
+          [
+            sp:object [
+                sp:varName "dvresult" ;
+              ] ;
+            sp:predicate newunits_spin:replaceAllConversionsIntoDVTemplateProperty ;
+            sp:subject [
+                sp:varName "?0" ;
+              ] ;
+          ]
+          [
+            sp:object [
+                sp:varName "?2" ;
+              ] ;
+            sp:predicate newunits_spin:compareDVAndGetQK ;
+            sp:subject [
+                sp:varName "dvresult" ;
+              ] ;
+          ]
+          [
+            sp:object [
+                sp:varName "qk" ;
+              ] ;
+            sp:predicate rdf:first ;
+            sp:subject [
+                sp:varName "?2" ;
+              ] ;
+          ]
+          [
+            sp:object [
+                sp:varName "?3" ;
+              ] ;
+            sp:predicate rdf:rest ;
+            sp:subject [
+                sp:varName "?2" ;
+              ] ;
+          ]
+          [
+            sp:object [
+                sp:varName "dv" ;
+              ] ;
+            sp:predicate rdf:first ;
+            sp:subject [
+                sp:varName "?3" ;
+              ] ;
+          ]
+          [
+            sp:object () ;
+            sp:predicate rdf:rest ;
+            sp:subject [
+                sp:varName "?3" ;
+              ] ;
+          ]
           [
             sp:object [
                 sp:varName "unit3" ;
@@ -346,20 +374,20 @@ sm_Insert_new_units:PerformUpdate_InsertNewInstances
         ) ;
     ] ;
 .
-sm_Insert_new_units:convertDimensions_1
-  a newunits_spin:convertDimensions ;
+sm_Insert_new_units:convertDimensionsProperty_1
+  a newunits_spin:convertDimensionsProperty ;
   sp:arg1 "unit3" ;
-  sm:next sm_Insert_new_units:replaceAllConversionsIntoDVTemplate_1 ;
-  sm:nodeX 705 ;
-  sm:nodeY 28 ;
+  sm:next sm_Insert_new_units:replaceAllConversionsIntoDVTemplateProperty_1 ;
+  sm:nodeX 735 ;
+  sm:nodeY 47 ;
   sm:outputVariable "convertedUnitDIMS" ;
 .
-sm_Insert_new_units:replaceAllConversionsIntoDVTemplate_1
-  a newunits_spin:replaceAllConversionsIntoDVTemplate ;
+sm_Insert_new_units:replaceAllConversionsIntoDVTemplateProperty_1
+  a newunits_spin:replaceAllConversionsIntoDVTemplateProperty ;
   sp:arg1 "convertedUnitDIMS" ;
   sp:arg2 "\"A0 E0 L0 I0 M0 H0 T0 D0\"" ;
-  sm:next sm_Insert_new_units:BindBySelect_GetQKFromDV ;
-  sm:nodeX 673 ;
-  sm:nodeY 198 ;
+  sm:next sm_Insert_new_units:PerformUpdate_InsertNewInstances ;
+  sm:nodeX 689 ;
+  sm:nodeY 237 ;
   sm:outputVariable "result" ;
 .
