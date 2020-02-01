@@ -78,7 +78,7 @@ dct:title
 <http://qudt.org/2.1/schema/qudt>
   a owl:Ontology ;
   vaem:hasGraphMetadata vaem:GMD_QUDT-SCHEMA ;
-  rdfs:label "QUDT Collection - Schemas - Version 2.1" ;
+  rdfs:label "QUDT Schema - Version 2.1.1" ;
   owl:imports <http://www.linkedmodel.org/schema/dtype> ;
   owl:imports <http://www.linkedmodel.org/schema/vaem> ;
   owl:imports <http://www.w3.org/2004/02/skos/core> ;
@@ -91,11 +91,18 @@ qudt:Acronym
   rdfs:label "Acronym" ;
   rdfs:subClassOf qudt:Term ;
 .
+qudt:Aspect
+  a qudt:AspectClass ;
+  rdfs:comment "An aspect is an abstract type class that defines properties that can be reused."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "QUDT Aspect" ;
+  rdfs:subClassOf owl:Thing ;
+.
 qudt:AspectClass
   a owl:Class ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "Aspect Class" ;
-  rdfs:subClassOf owl:Thing ;
+  rdfs:subClassOf rdfs:Class ;
 .
 qudt:Attribution
   a rdfs:Class ;
@@ -221,6 +228,7 @@ qudt:Concept
   rdfs:comment "The root class for all QUDT concepts."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "QUDT Concept" ;
+  rdfs:subClassOf owl:Thing ;
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:allValuesFrom qudt:Rule ;
@@ -616,7 +624,7 @@ qudt:Quantifiable
   rdfs:comment "<p><em>Quantifiable</em> ascribes to some thing the capability of being measured, observed, or counted.</p>"^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "Quantifiable" ;
-  rdfs:subClassOf qudt:AspectClass ;
+  rdfs:subClassOf qudt:Aspect ;
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:minCardinality "1"^^xsd:nonNegativeInteger ;
@@ -703,8 +711,18 @@ qudt:QuantityKind
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
+      owl:allValuesFrom xsd:string ;
+      owl:onProperty qudt:expresion ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
       owl:cardinality "1"^^xsd:nonNegativeInteger ;
       owl:onProperty qudt:id ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:maxCardinality "1"^^xsd:int ;
+      owl:onProperty qudt:expresion ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -1367,6 +1385,11 @@ qudt:Unit
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:allValuesFrom xsd:string ;
+      owl:onProperty qudt:expresion ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:allValuesFrom xsd:string ;
       owl:onProperty qudt:iec61360Code ;
     ] ;
   rdfs:subClassOf [
@@ -1383,6 +1406,11 @@ qudt:Unit
       a owl:Restriction ;
       owl:maxCardinality "1"^^xsd:int ;
       owl:onProperty qudt:conversionOffset ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:maxCardinality "1"^^xsd:int ;
+      owl:onProperty qudt:expresion ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -1432,9 +1460,10 @@ qudt:Unit
 .
 qudt:Verifiable
   a qudt:AspectClass ;
+  rdfs:comment "An aspect class that holds properties that provide external knowledge and specifications of a given resource." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "Verifiable" ;
-  rdfs:subClassOf qudt:AspectClass ;
+  rdfs:subClassOf qudt:Aspect ;
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:allValuesFrom rdfs:Resource ;
@@ -1802,6 +1831,13 @@ qudt:example
   rdfs:comment "The 'qudt:example' property is used to annotate an instance of a class with a reference to a concept that is an example. The type of this property is 'rdf:Property'. This allows both scalar and object ranges."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "example" ;
+.
+qudt:expression
+  a owl:AnnotationProperty ;
+  dct:description "An 'expression' is a finite combination of symbols that are well-formed according to rules that apply to units of measure, quantity kinds and their dimensions." ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "expression" ;
+  rdfs:range xsd:string ;
 .
 qudt:fieldCode
   a owl:AnnotationProperty ;
