@@ -1,6 +1,7 @@
 # baseURI: http://qudt.org/2.1/schema/qudt.shapes
 # imports: http://datashapes.org/dash
 # imports: http://qudt.org/2.1/schema/qudt
+# imports: http://qudt.org/2.1/shacl/schema/overlay/qudt
 
 @prefix dash: <http://datashapes.org/dash#> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
@@ -25,19 +26,13 @@
   <http://datashapes.org/owl2shacl#createPropertyShapeURIsWithPrefixes> true ;
   owl:imports <http://datashapes.org/dash> ;
   owl:imports <http://qudt.org/2.1/schema/qudt> ;
+  owl:imports <http://qudt.org/2.1/shacl/schema/overlay/qudt> ;
 .
 qudt:Aspect
   a sh:NodeShape ;
 .
 qudt:AspectClass
   a sh:NodeShape ;
-.
-qudt:Attribution-qudt_url
-  a sh:PropertyShape ;
-  sh:path qudt:url ;
-  sh:datatype xsd:anyURI ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
 .
 qudt:BaseDimensionMagnitude
   a sh:NodeShape ;
@@ -100,15 +95,42 @@ qudt:Citation-qudt_url
   sh:datatype xsd:anyURI ;
   sh:maxCount 1 ;
 .
+qudt:Comment
+  a sh:NodeShape ;
+  sh:property qudt:Comment-dcterms_description ;
+  sh:property qudt:Comment-qudt_description ;
+  sh:property qudt:Comment-qudt_rationale ;
+.
+qudt:Comment-dcterms_description
+  a sh:PropertyShape ;
+  sh:path dcterms:description ;
+  sh:maxCount 1 ;
+.
+qudt:Comment-qudt_description
+  a sh:PropertyShape ;
+  sh:path qudt:description ;
+  sh:datatype rdf:HTML ;
+  sh:maxCount 1 ;
+.
+qudt:Comment-qudt_rationale
+  a sh:PropertyShape ;
+  sh:path qudt:rationale ;
+  sh:datatype rdf:HTML ;
+.
 qudt:Concept
   a sh:NodeShape ;
+  sh:property qudt:Concept-dcterms_description ;
   sh:property qudt:Concept-qudt_abbreviation ;
   sh:property qudt:Concept-qudt_code ;
   sh:property qudt:Concept-qudt_description ;
   sh:property qudt:Concept-qudt_guidance ;
   sh:property qudt:Concept-qudt_hasRule ;
   sh:property qudt:Concept-qudt_id ;
-  sh:property qudt:Concept-qudt_url ;
+.
+qudt:Concept-dcterms_description
+  a sh:PropertyShape ;
+  sh:path dcterms:description ;
+  sh:maxCount 1 ;
 .
 qudt:Concept-qudt_abbreviation
   a sh:PropertyShape ;
@@ -141,12 +163,6 @@ qudt:Concept-qudt_id
   sh:path qudt:id ;
   sh:datatype xsd:string ;
   sh:maxCount 1 ;
-.
-qudt:Concept-qudt_url
-  a sh:PropertyShape ;
-  sh:path qudt:url ;
-  sh:datatype xsd:anyURI ;
-  sh:minCount 0 ;
 .
 qudt:ConstantValue
   a sh:NodeShape ;
@@ -204,9 +220,7 @@ qudt:DomainSpecificUnit
 qudt:EnumeratedValue
   a sh:NodeShape ;
   sh:property qudt:EnumeratedValue-qudt_abbreviation ;
-  sh:property qudt:EnumeratedValue-qudt_code ;
   sh:property qudt:EnumeratedValue-qudt_description ;
-  sh:property qudt:EnumeratedValue-qudt_order ;
   sh:property qudt:EnumeratedValue-qudt_symbol ;
 .
 qudt:EnumeratedValue-qudt_abbreviation
@@ -215,21 +229,10 @@ qudt:EnumeratedValue-qudt_abbreviation
   sh:datatype xsd:string ;
   sh:maxCount 1 ;
 .
-qudt:EnumeratedValue-qudt_code
-  a sh:PropertyShape ;
-  sh:path qudt:code ;
-  sh:maxCount 1 ;
-.
 qudt:EnumeratedValue-qudt_description
   a sh:PropertyShape ;
   sh:path qudt:description ;
   sh:datatype rdf:HTML ;
-  sh:maxCount 1 ;
-.
-qudt:EnumeratedValue-qudt_order
-  a sh:PropertyShape ;
-  sh:path qudt:order ;
-  sh:datatype xsd:nonNegativeInteger ;
   sh:maxCount 1 ;
 .
 qudt:EnumeratedValue-qudt_symbol
@@ -340,6 +343,9 @@ qudt:MKS-Unit
 qudt:MathFunctionType
   a sh:NodeShape ;
 .
+qudt:NIST_SP811_Comment
+  a sh:NodeShape ;
+.
 qudt:NominalScale
   a sh:NodeShape ;
 .
@@ -369,7 +375,6 @@ qudt:Organization-qudt_url
 .
 qudt:PhysicalConstant
   a sh:NodeShape ;
-  sh:property qudt:Quantity-qudt_applicablePhysicalConstant ;
 .
 qudt:PrefixUnit
   a sh:NodeShape ;
@@ -394,11 +399,6 @@ qudt:Quantity
   sh:property qudt:Quantity-qudt_mathMLdefinition ;
   sh:property qudt:Quantity-qudt_quantityValue ;
 .
-qudt:Quantity-qudt_applicablePhysicalConstant
-  a sh:PropertyShape ;
-  sh:path qudt:applicablePhysicalConstant ;
-  sh:class qudt:PhysicalConstant ;
-.
 qudt:Quantity-qudt_baseUnitDimensions
   a sh:PropertyShape ;
   sh:path qudt:baseUnitDimensions ;
@@ -409,6 +409,7 @@ qudt:Quantity-qudt_belongsToSystemOfQuantities
   a sh:PropertyShape ;
   sh:path qudt:belongsToSystemOfQuantities ;
   sh:class qudt:SystemOfQuantities ;
+  sh:minCount 0 ;
 .
 qudt:Quantity-qudt_description
   a sh:PropertyShape ;
@@ -440,12 +441,12 @@ qudt:Quantity-qudt_quantityValue
 .
 qudt:QuantityKind
   a sh:NodeShape ;
-  sh:property qudt:QuantityKind-applicableUnit ;
   sh:property qudt:QuantityKind-qudt_applicableCGSUnit ;
   sh:property qudt:QuantityKind-qudt_applicableISOUnit ;
   sh:property qudt:QuantityKind-qudt_applicableImperialUnit ;
   sh:property qudt:QuantityKind-qudt_applicableSIUnit ;
   sh:property qudt:QuantityKind-qudt_applicableUSCustomaryUnit ;
+  sh:property qudt:QuantityKind-qudt_applicableUnit ;
   sh:property qudt:QuantityKind-qudt_baseCGSUnitDimensions ;
   sh:property qudt:QuantityKind-qudt_baseISOUnitDimensions ;
   sh:property qudt:QuantityKind-qudt_baseImperialUnitDimensions ;
@@ -453,7 +454,6 @@ qudt:QuantityKind
   sh:property qudt:QuantityKind-qudt_baseUSCustomaryUnitDimensions ;
   sh:property qudt:QuantityKind-qudt_baseUnitDimensions ;
   sh:property qudt:QuantityKind-qudt_belongsToSystemOfQuantities ;
-  sh:property qudt:QuantityKind-qudt_denominatorDimensionVector ;
   sh:property qudt:QuantityKind-qudt_dimensionVectorForSI ;
   sh:property qudt:QuantityKind-qudt_expresion ;
   sh:property qudt:QuantityKind-qudt_generalization ;
@@ -462,14 +462,10 @@ qudt:QuantityKind
   sh:property qudt:QuantityKind-qudt_latexDefinition ;
   sh:property qudt:QuantityKind-qudt_latexSymbol ;
   sh:property qudt:QuantityKind-qudt_mathMLdefinition ;
-  sh:property qudt:QuantityKind-qudt_numeratorDimensionVector ;
+  sh:property qudt:QuantityKind-qudt_qkdvDenominator ;
+  sh:property qudt:QuantityKind-qudt_qkdvNumerator ;
   sh:property qudt:QuantityKind-qudt_symbol ;
   sh:property qudt:QuantityKind-skos_broader ;
-.
-qudt:QuantityKind-applicableUnit
-  a sh:PropertyShape ;
-  sh:path qudt:applicableUnit ;
-  sh:class qudt:Unit ;
 .
 qudt:QuantityKind-qudt_applicableCGSUnit
   a sh:PropertyShape ;
@@ -500,6 +496,11 @@ qudt:QuantityKind-qudt_applicableUSCustomaryUnit
   sh:path qudt:applicableUSCustomaryUnit ;
   sh:class qudt:Unit ;
   sh:minCount 0 ;
+.
+qudt:QuantityKind-qudt_applicableUnit
+  a sh:PropertyShape ;
+  sh:path qudt:applicableUnit ;
+  sh:class qudt:Unit ;
 .
 qudt:QuantityKind-qudt_baseCGSUnitDimensions
   a sh:PropertyShape ;
@@ -541,12 +542,6 @@ qudt:QuantityKind-qudt_belongsToSystemOfQuantities
   a sh:PropertyShape ;
   sh:path qudt:belongsToSystemOfQuantities ;
   sh:class qudt:SystemOfQuantities ;
-.
-qudt:QuantityKind-qudt_denominatorDimensionVector
-  a sh:PropertyShape ;
-  sh:path qudt:denominatorDimensionVector ;
-  sh:class qudt:QuantityKindDimensionVector ;
-  sh:maxCount 1 ;
 .
 qudt:QuantityKind-qudt_dimensionVectorForSI
   a sh:PropertyShape ;
@@ -593,9 +588,15 @@ qudt:QuantityKind-qudt_mathMLdefinition
   sh:datatype xsd:string ;
   sh:maxCount 1 ;
 .
-qudt:QuantityKind-qudt_numeratorDimensionVector
+qudt:QuantityKind-qudt_qkdvDenominator
   a sh:PropertyShape ;
-  sh:path qudt:numeratorDimensionVector ;
+  sh:path qudt:qkdvDenominator ;
+  sh:class qudt:QuantityKindDimensionVector ;
+  sh:maxCount 1 ;
+.
+qudt:QuantityKind-qudt_qkdvNumerator
+  a sh:PropertyShape ;
+  sh:path qudt:qkdvNumerator ;
   sh:class qudt:QuantityKindDimensionVector ;
   sh:maxCount 1 ;
 .
@@ -611,58 +612,16 @@ qudt:QuantityKind-skos_broader
 .
 qudt:QuantityKindDimensionVector
   a sh:NodeShape ;
-  sh:property qudt:QuantityKindDimensionVector-dimensionExponentForMass ;
-  sh:property qudt:QuantityKindDimensionVector-dimensionlessExponent ;
   sh:property qudt:QuantityKindDimensionVector-qudt_baseUnitDimensions ;
-  sh:property qudt:QuantityKindDimensionVector-qudt_dimensionExponentForAmountOfSubstance ;
-  sh:property qudt:QuantityKindDimensionVector-qudt_dimensionExponentForElectricCurrent ;
-  sh:property qudt:QuantityKindDimensionVector-qudt_dimensionExponentForLength ;
-  sh:property qudt:QuantityKindDimensionVector-qudt_dimensionExponentForLuminousIntensity ;
   sh:property qudt:QuantityKindDimensionVector-qudt_hasReferenceQuantityKind ;
   sh:property qudt:QuantityKindDimensionVector-qudt_isDimensionInSystem ;
   sh:property qudt:QuantityKindDimensionVector-qudt_latexDefinition ;
-.
-qudt:QuantityKindDimensionVector-dimensionExponentForMass
-  a sh:PropertyShape ;
-  sh:path qudt:dimensionExponentForMass ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
-.
-qudt:QuantityKindDimensionVector-dimensionlessExponent
-  a sh:PropertyShape ;
-  sh:path qudt:dimensionlessExponent ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
 .
 qudt:QuantityKindDimensionVector-qudt_baseUnitDimensions
   a sh:PropertyShape ;
   sh:path qudt:baseUnitDimensions ;
   sh:datatype xsd:string ;
   sh:maxCount 1 ;
-.
-qudt:QuantityKindDimensionVector-qudt_dimensionExponentForAmountOfSubstance
-  a sh:PropertyShape ;
-  sh:path qudt:dimensionExponentForAmountOfSubstance ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
-.
-qudt:QuantityKindDimensionVector-qudt_dimensionExponentForElectricCurrent
-  a sh:PropertyShape ;
-  sh:path qudt:dimensionExponentForElectricCurrent ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
-.
-qudt:QuantityKindDimensionVector-qudt_dimensionExponentForLength
-  a sh:PropertyShape ;
-  sh:path qudt:dimensionExponentForLength ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
-.
-qudt:QuantityKindDimensionVector-qudt_dimensionExponentForLuminousIntensity
-  a sh:PropertyShape ;
-  sh:path qudt:dimensionExponentForLuminousIntensity ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
 .
 qudt:QuantityKindDimensionVector-qudt_hasReferenceQuantityKind
   a sh:PropertyShape ;
@@ -683,11 +642,149 @@ qudt:QuantityKindDimensionVector-qudt_latexDefinition
 qudt:QuantityKindDimensionVector_CGS
   a sh:NodeShape ;
 .
+qudt:QuantityKindDimensionVector_CGS-EMU
+  a sh:NodeShape ;
+.
+qudt:QuantityKindDimensionVector_CGS-ESU
+  a sh:NodeShape ;
+.
+qudt:QuantityKindDimensionVector_CGS-GAUSS
+  a sh:NodeShape ;
+.
+qudt:QuantityKindDimensionVector_CGS-LH
+  a sh:NodeShape ;
+.
 qudt:QuantityKindDimensionVector_ISO
   a sh:NodeShape ;
+  sh:property qudt:QuantityKindDimensionVector_ISO-qudt_dimensionExponentForAmountOfSubstance ;
+  sh:property qudt:QuantityKindDimensionVector_ISO-qudt_dimensionExponentForElectricCurrent ;
+  sh:property qudt:QuantityKindDimensionVector_ISO-qudt_dimensionExponentForLength ;
+  sh:property qudt:QuantityKindDimensionVector_ISO-qudt_dimensionExponentForLuminousIntensity ;
+  sh:property qudt:QuantityKindDimensionVector_ISO-qudt_dimensionExponentForMass ;
+  sh:property qudt:QuantityKindDimensionVector_ISO-qudt_dimensionExponentForThermodynamicTemperature ;
+  sh:property qudt:QuantityKindDimensionVector_ISO-qudt_dimensionExponentForTime ;
+  sh:property qudt:QuantityKindDimensionVector_ISO-qudt_dimensionlessExponent ;
+.
+qudt:QuantityKindDimensionVector_ISO-qudt_dimensionExponentForAmountOfSubstance
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionExponentForAmountOfSubstance ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:QuantityKindDimensionVector_ISO-qudt_dimensionExponentForElectricCurrent
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionExponentForElectricCurrent ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:QuantityKindDimensionVector_ISO-qudt_dimensionExponentForLength
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionExponentForLength ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:QuantityKindDimensionVector_ISO-qudt_dimensionExponentForLuminousIntensity
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionExponentForLuminousIntensity ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:QuantityKindDimensionVector_ISO-qudt_dimensionExponentForMass
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionExponentForMass ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:QuantityKindDimensionVector_ISO-qudt_dimensionExponentForThermodynamicTemperature
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionExponentForThermodynamicTemperature ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:QuantityKindDimensionVector_ISO-qudt_dimensionExponentForTime
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionExponentForTime ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:QuantityKindDimensionVector_ISO-qudt_dimensionlessExponent
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionlessExponent ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
 .
 qudt:QuantityKindDimensionVector_Imperial
   a sh:NodeShape ;
+  sh:property qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionExponentForAmountOfSubstance ;
+  sh:property qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionExponentForElectricCurrent ;
+  sh:property qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionExponentForLength ;
+  sh:property qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionExponentForLuminousIntensity ;
+  sh:property qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionExponentForMass ;
+  sh:property qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionExponentForThermodynamicTemperature ;
+  sh:property qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionExponentForTime ;
+  sh:property qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionlessExponent ;
+.
+qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionExponentForAmountOfSubstance
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionExponentForAmountOfSubstance ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionExponentForElectricCurrent
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionExponentForElectricCurrent ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionExponentForLength
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionExponentForLength ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionExponentForLuminousIntensity
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionExponentForLuminousIntensity ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionExponentForMass
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionExponentForMass ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionExponentForThermodynamicTemperature
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionExponentForThermodynamicTemperature ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionExponentForTime
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionExponentForTime ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:QuantityKindDimensionVector_Imperial-qudt_dimensionlessExponent
+  a sh:PropertyShape ;
+  sh:path qudt:dimensionlessExponent ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
 .
 qudt:QuantityKindDimensionVector_SI
   a sh:NodeShape ;
@@ -703,12 +800,14 @@ qudt:QuantityKindDimensionVector_SI
 qudt:QuantityKindDimensionVector_SI-qudt_dimensionExponentForAmountOfSubstance
   a sh:PropertyShape ;
   sh:path qudt:dimensionExponentForAmountOfSubstance ;
+  sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
 .
 qudt:QuantityKindDimensionVector_SI-qudt_dimensionExponentForElectricCurrent
   a sh:PropertyShape ;
   sh:path qudt:dimensionExponentForElectricCurrent ;
+  sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
 .
@@ -721,30 +820,35 @@ qudt:QuantityKindDimensionVector_SI-qudt_dimensionExponentForLength
 qudt:QuantityKindDimensionVector_SI-qudt_dimensionExponentForLuminousIntensity
   a sh:PropertyShape ;
   sh:path qudt:dimensionExponentForLuminousIntensity ;
+  sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
 .
 qudt:QuantityKindDimensionVector_SI-qudt_dimensionExponentForMass
   a sh:PropertyShape ;
   sh:path qudt:dimensionExponentForMass ;
+  sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
 .
 qudt:QuantityKindDimensionVector_SI-qudt_dimensionExponentForThermodynamicTemperature
   a sh:PropertyShape ;
   sh:path qudt:dimensionExponentForThermodynamicTemperature ;
+  sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
 .
 qudt:QuantityKindDimensionVector_SI-qudt_dimensionExponentForTime
   a sh:PropertyShape ;
   sh:path qudt:dimensionExponentForTime ;
+  sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
 .
 qudt:QuantityKindDimensionVector_SI-qudt_dimensionlessExponent
   a sh:PropertyShape ;
   sh:path qudt:dimensionlessExponent ;
+  sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
 .
@@ -809,15 +913,26 @@ qudt:Rule
   a sh:NodeShape ;
   sh:property qudt:Rule-qudt_example ;
   sh:property qudt:Rule-qudt_rationale ;
+  sh:property qudt:Rule-qudt_ruleType ;
 .
 qudt:Rule-qudt_example
   a sh:PropertyShape ;
   sh:path qudt:example ;
+  sh:minCount 0 ;
 .
 qudt:Rule-qudt_rationale
   a sh:PropertyShape ;
   sh:path qudt:rationale ;
   sh:datatype rdf:HTML ;
+  sh:minCount 0 ;
+.
+qudt:Rule-qudt_ruleType
+  a sh:PropertyShape ;
+  sh:path qudt:ruleType ;
+  sh:class qudt:RuleType ;
+.
+qudt:RuleType
+  a sh:NodeShape ;
 .
 qudt:SI-Unit
   a sh:NodeShape ;
@@ -895,6 +1010,7 @@ qudt:Symbol
 .
 qudt:SystemOfQuantities
   a sh:NodeShape ;
+  sh:property qudt:SystemOfQuantities-qudt_baseDimensionEnumeration ;
   sh:property qudt:SystemOfQuantities-qudt_hasQuantityKind ;
   sh:property qudt:SystemOfQuantities-qudt_hasUnitSystem ;
 .
@@ -908,6 +1024,7 @@ qudt:SystemOfQuantities-qudt_hasQuantityKind
   a sh:PropertyShape ;
   sh:path qudt:hasQuantityKind ;
   sh:class qudt:QuantityKind ;
+  sh:minCount 1 ;
 .
 qudt:SystemOfQuantities-qudt_hasUnitSystem
   a sh:PropertyShape ;
@@ -917,6 +1034,7 @@ qudt:SystemOfQuantities-qudt_hasUnitSystem
 .
 qudt:SystemOfUnits
   a sh:NodeShape ;
+  sh:property qudt:SystemOfUnits-qudt_applicablePhysicalConstant ;
   sh:property qudt:SystemOfUnits-qudt_hasAllowedUnit ;
   sh:property qudt:SystemOfUnits-qudt_hasBaseUnit ;
   sh:property qudt:SystemOfUnits-qudt_hasCoherentUnit ;
@@ -924,6 +1042,11 @@ qudt:SystemOfUnits
   sh:property qudt:SystemOfUnits-qudt_hasDerivedCoherentUnit ;
   sh:property qudt:SystemOfUnits-qudt_hasDerivedUnit ;
   sh:property qudt:SystemOfUnits-qudt_hasUnit ;
+.
+qudt:SystemOfUnits-qudt_applicablePhysicalConstant
+  a sh:PropertyShape ;
+  sh:path qudt:applicablePhysicalConstant ;
+  sh:class qudt:PhysicalConstant ;
 .
 qudt:SystemOfUnits-qudt_hasAllowedUnit
   a sh:PropertyShape ;
@@ -933,7 +1056,7 @@ qudt:SystemOfUnits-qudt_hasAllowedUnit
 qudt:SystemOfUnits-qudt_hasBaseUnit
   a sh:PropertyShape ;
   sh:path qudt:hasBaseUnit ;
-  sh:class qudt:Unit ;
+  sh:class qudt:BaseUnit ;
 .
 qudt:SystemOfUnits-qudt_hasCoherentUnit
   a sh:PropertyShape ;
@@ -1047,7 +1170,7 @@ qudt:Unit-qudt_latexSymbol
   a sh:PropertyShape ;
   sh:path qudt:latexSymbol ;
   sh:datatype xsd:string ;
-  sh:maxCount 1 ;
+  sh:minCount 0 ;
 .
 qudt:Unit-qudt_mathMLdefinition
   a sh:PropertyShape ;
@@ -1063,12 +1186,13 @@ qudt:Unit-qudt_siUnitsExpression
   a sh:PropertyShape ;
   sh:path qudt:siUnitsExpression ;
   sh:datatype xsd:string ;
-  sh:maxCount 1 ;
+  sh:minCount 0 ;
 .
 qudt:Unit-qudt_symbol
   a sh:PropertyShape ;
   sh:path qudt:symbol ;
   sh:datatype xsd:string ;
+  sh:minCount 0 ;
 .
 qudt:Unit-qudt_ucumCaseInsensitiveCode
   a sh:PropertyShape ;
@@ -1103,6 +1227,7 @@ qudt:Verifiable
 qudt:Verifiable-qudt_dbpediaMatch
   a sh:PropertyShape ;
   sh:path qudt:dbpediaMatch ;
+  sh:nodeKind sh:BlankNodeOrIRI ;
 .
 qudt:Verifiable-qudt_informativeReference
   a sh:PropertyShape ;
@@ -1118,7 +1243,6 @@ qudt:Verifiable-qudt_normativeReference
   a sh:PropertyShape ;
   sh:path qudt:normativeReference ;
   sh:datatype xsd:anyURI ;
-  sh:maxCount 1 ;
 .
 qudt:floatPercentage
   a sh:NodeShape ;
@@ -1127,8 +1251,5 @@ qudt:integerPercentage
   a sh:NodeShape ;
 .
 qudt:latexMathString
-  a sh:NodeShape ;
-.
-provo:Attribution
   a sh:NodeShape ;
 .
