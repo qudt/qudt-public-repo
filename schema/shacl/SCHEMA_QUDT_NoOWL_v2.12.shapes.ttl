@@ -363,6 +363,35 @@ qudt:CurrencyUnit
   rdfs:subClassOf qudt:ResourceUnit ;
   rdfs:subClassOf qudt:Unit ;
 .
+qudt:DataEncoding
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:comment "<p><em>Data Encoding</em> expresses the properties that specify how data is represented at the bit and byte level. These properties are applicable to describing raw data.</p>"^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
+  rdfs:label "Data Encoding" ;
+  rdfs:subClassOf qudt:Aspect ;
+  sh:property qudt:DataEncoding-qudt_bitOrder ;
+  sh:property qudt:DataEncoding-qudt_byteOrder ;
+  sh:property qudt:DataEncoding-qudt_encoding ;
+.
+qudt:DataEncoding-qudt_bitOrder
+  a sh:PropertyShape ;
+  sh:path qudt:bitOrder ;
+  sh:class qudt:EndianType ;
+  sh:maxCount 1 ;
+.
+qudt:DataEncoding-qudt_byteOrder
+  a sh:PropertyShape ;
+  sh:path qudt:byteOrder ;
+  sh:class qudt:EndianType ;
+  sh:maxCount 1 ;
+.
+qudt:DataEncoding-qudt_encoding
+  a sh:PropertyShape ;
+  sh:path qudt:encoding ;
+  sh:class qudt:Encoding ;
+  sh:maxCount 1 ;
+.
 qudt:Datatype
   a owl:Class ;
   a sh:NodeShape ;
@@ -962,7 +991,6 @@ qudt:Quantifiable
   rdfs:label "Quantifiable" ;
   rdfs:subClassOf qudt:Aspect ;
   sh:property qudt:Quantifiable-qudt_dataType ;
-  sh:property qudt:Quantifiable-qudt_hasQuantityKind ;
   sh:property qudt:Quantifiable-qudt_relativeStandardUncertainty ;
   sh:property qudt:Quantifiable-qudt_standardUncertainty ;
   sh:property qudt:Quantifiable-qudt_unit ;
@@ -973,11 +1001,6 @@ qudt:Quantifiable-qudt_dataType
   sh:path qudt:dataType ;
   sh:class qudt:Datatype ;
   sh:maxCount 1 ;
-.
-qudt:Quantifiable-qudt_hasQuantityKind
-  a sh:PropertyShape ;
-  sh:path qudt:hasQuantityKind ;
-  sh:class qudt:QuantityKind ;
 .
 qudt:Quantifiable-qudt_relativeStandardUncertainty
   a sh:PropertyShape ;
@@ -1020,7 +1043,9 @@ qudt:Quantity
   rdfs:subClassOf qudt:Quantifiable ;
   rdfs:subClassOf qudt:Verifiable ;
   sh:property qudt:Quantity-qudt_baseUnitDimensions ;
+  sh:property qudt:Quantity-qudt_dataEncoding ;
   sh:property qudt:Quantity-qudt_description ;
+  sh:property qudt:Quantity-qudt_hasQuantityKind ;
   sh:property qudt:Quantity-qudt_latexDefinition ;
   sh:property qudt:Quantity-qudt_mathMLdefinition ;
   sh:property qudt:Quantity-qudt_quantityValue ;
@@ -1031,11 +1056,22 @@ qudt:Quantity-qudt_baseUnitDimensions
   sh:datatype xsd:string ;
   sh:maxCount 1 ;
 .
+qudt:Quantity-qudt_dataEncoding
+  a sh:PropertyShape ;
+  sh:path qudt:dataEncoding ;
+  sh:class qudt:DataEncoding ;
+  sh:maxCount 1 ;
+.
 qudt:Quantity-qudt_description
   a sh:PropertyShape ;
   sh:path qudt:description ;
   sh:datatype rdf:HTML ;
   sh:maxCount 1 ;
+.
+qudt:Quantity-qudt_hasQuantityKind
+  a sh:PropertyShape ;
+  sh:path qudt:hasQuantityKind ;
+  sh:class qudt:QuantityKind ;
 .
 qudt:Quantity-qudt_latexDefinition
   a sh:PropertyShape ;
@@ -1500,11 +1536,8 @@ qudt:ScalarDatatype
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
   rdfs:label "Scalar Datatype" ;
   rdfs:subClassOf qudt:Datatype ;
-  sh:property qudt:ScalarDatatype-qudt_bitOrder ;
   sh:property qudt:ScalarDatatype-qudt_bits ;
-  sh:property qudt:ScalarDatatype-qudt_byteOrder ;
   sh:property qudt:ScalarDatatype-qudt_bytes ;
-  sh:property qudt:ScalarDatatype-qudt_encoding ;
   sh:property qudt:ScalarDatatype-qudt_length ;
   sh:property qudt:ScalarDatatype-qudt_maxExclusive ;
   sh:property qudt:ScalarDatatype-qudt_maxInclusive ;
@@ -1512,34 +1545,16 @@ qudt:ScalarDatatype
   sh:property qudt:ScalarDatatype-qudt_minInclusive ;
   sh:property qudt:ScalarDatatype-qudt_rdfsDatatype ;
 .
-qudt:ScalarDatatype-qudt_bitOrder
-  a sh:PropertyShape ;
-  sh:path qudt:bitOrder ;
-  sh:class qudt:EndianType ;
-  sh:maxCount 1 ;
-.
 qudt:ScalarDatatype-qudt_bits
   a sh:PropertyShape ;
   sh:path qudt:bits ;
   sh:datatype xsd:integer ;
   sh:maxCount 1 ;
 .
-qudt:ScalarDatatype-qudt_byteOrder
-  a sh:PropertyShape ;
-  sh:path qudt:byteOrder ;
-  sh:class qudt:EndianType ;
-  sh:maxCount 1 ;
-.
 qudt:ScalarDatatype-qudt_bytes
   a sh:PropertyShape ;
   sh:path qudt:bytes ;
   sh:datatype xsd:integer ;
-  sh:maxCount 1 ;
-.
-qudt:ScalarDatatype-qudt_encoding
-  a sh:PropertyShape ;
-  sh:path qudt:encoding ;
-  sh:class qudt:Encoding ;
   sh:maxCount 1 ;
 .
 qudt:ScalarDatatype-qudt_length
@@ -2273,6 +2288,11 @@ qudt:currencyExponent
   dct:description "The currency exponent indicates the number of decimal places between a major currency unit and its minor currency unit. For example, the US dollar is the major currency unit of the United States, and the US cent is the minor currency unit. Since one cent is 1/100 of a dollar, the US dollar has a currency exponent of 2. However, the Japanese Yen has no minor currency units, so the yen has a currency exponent of 0."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
   rdfs:label "currency exponent" ;
+.
+qudt:dataEncoding
+  a owl:ObjectProperty ;
+  rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
+  rdfs:label "data encoding" ;
 .
 qudt:dataStructure
   a owl:DatatypeProperty ;
