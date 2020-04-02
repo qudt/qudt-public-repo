@@ -9,7 +9,7 @@
 @prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
 @prefix graphql: <http://datashapes.org/graphql#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix provo: <http://www.w3.org/ns/prov#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix qudt.type: <http://qudt.org/vocab/type/> .
@@ -32,6 +32,16 @@
   <http://datashapes.org/owl2shacl#createPropertyShapeURIsWithPrefixes> true ;
   owl:imports <http://datashapes.org/dash> ;
   owl:imports <http://qudt.org/2.1.3/schema/shacl/qudt> ;
+  sh:declare [
+      a sh:PrefixDeclaration ;
+      sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+      sh:prefix "qudt" ;
+    ] ;
+  sh:declare [
+      a sh:PrefixDeclaration ;
+      sh:namespace "http://qudt.org/vocab/unit/"^^xsd:anyURI ;
+      sh:prefix "unit" ;
+    ] ;
 .
 qudt:Concept-dct_description
   sh:group qudt:ConceptDescriptionPropertyGroup ;
@@ -144,6 +154,41 @@ qudt:QuantityValue-value
 .
 qudt:Rule-example
   sh:or qudt:HTMLOrStringOrLangString ;
+.
+qudt:SymbolAndExpressionDisjointPropertiesConstraint
+  a sh:NodeShape ;
+  rdfs:label "Symbol and expression disjoint properties constraint" ;
+  sh:sparql [
+      rdfs:comment "Checks that a uint or quantitykind does not have both a symbol and an expression" ;
+      sh:message "A uint or quantity kind must not have both a symbol and an expression." ;
+      sh:prefixes <http://qudt.org/2.1/shacl/schema/overlay/qudt> ;
+      sh:select """SELECT $this
+WHERE {
+	$this qudt:symbol ?symbol .
+	$this qudt:expression ?expression .
+	
+}""" ;
+    ] ;
+  sh:targetClass qudt:QuantityKind ;
+  sh:targetClass qudt:Unit ;
+.
+qudt:UniqueSymbolPropertyConstraint
+  a sh:NodeShape ;
+  rdfs:label "Unique symbol property constraint" ;
+  sh:sparql [
+      rdfs:comment "Checks that a uint has a unique symbol" ;
+      sh:message "Uint has non-unique symbol conflicts with '{?anotherUnit}'" ;
+      sh:prefixes <http://qudt.org/2.1/shacl/schema/overlay/qudt> ;
+      sh:select """SELECT $this ?anotherUnit
+WHERE {
+	$this qudt:symbol ?symbol .
+     ?anotherUnit qudt:symbol ?symbol .
+    FILTER (?anotherUnit != $this)
+    ?unitClass rdfs:subClassOf* qudt:Unit .
+    ?anotherUnit a ?unitClass .  
+}""" ;
+    ] ;
+  sh:targetClass qudt:Unit ;
 .
 qudt:Unit
   rdfs:subClassOf qudt:Narratable ;
