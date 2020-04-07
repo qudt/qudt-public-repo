@@ -173,18 +173,21 @@ qudt:UniqueSymbolPropertyConstraint
   a sh:NodeShape ;
   rdfs:label "Unique symbol property constraint" ;
   sh:sparql [
-      rdfs:comment "Checks that a uint has a unique symbol" ;
-      sh:message "Uint has non-unique symbol conflicts with '{?anotherUnit}'" ;
+      rdfs:comment "Checks that a unit or quantity kind has a unique symbol" ;
+      sh:message "Unit or Quantity Kind has non-unique symbol conflicts with '{?another}'" ;
       sh:prefixes <http://qudt.org/2.1/shacl/schema/overlay/qudt> ;
-      sh:select """SELECT $this ?anotherUnit
-WHERE {
+      sh:select """SELECT $this ?another
+WHERE {{
 	$this qudt:symbol ?symbol .
-     ?anotherUnit qudt:symbol ?symbol .
-    FILTER (?anotherUnit != $this)
+     ?another qudt:symbol ?symbol .
+    FILTER (?another != $this) .}
+?another a ?class .
     ?unitClass rdfs:subClassOf* qudt:Unit .
-    ?anotherUnit a ?unitClass .  
+    ?qkClass rdfs:subClassOf* qudt:QuantityKind .
+FILTER (?class = ?unitClass || ?class = ?qkClass) .
 }""" ;
     ] ;
+  sh:targetClass qudt:QuantityKind ;
   sh:targetClass qudt:Unit ;
 .
 qudt:Unit
