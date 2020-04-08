@@ -187,11 +187,34 @@ qudt:UniqueSymbolPropertyConstraint
       sh:prefixes <http://qudt.org/2.1/shacl/schema/overlay/qudt> ;
       sh:select """SELECT $this ?anotherUnit
 WHERE {
+  FILTER(?false)
 	$this qudt:symbol ?symbol .
      ?anotherUnit qudt:symbol ?symbol .
     FILTER (?anotherUnit != $this)
     ?unitClass rdfs:subClassOf* qudt:Unit .
     ?anotherUnit a ?unitClass .  
+}""" ;
+    ] ;
+  sh:targetClass qudt:Unit ;
+.
+qudt:UniqueSymbolTypeRestrictedPropertyConstraint
+  a sh:NodeShape ;
+  rdfs:label "Unique symbol type restricted property constraint" ;
+  sh:sparql [
+      rdfs:comment "Checks that a resource has a unique symbol within its type hierarchy below qudt:Concept" ;
+      sh:message "Resource, '{$this}' of type '{?myType}', has non-unique symbol, '{?symbol}', that conflicts with '{?another}' of type '{?anotherType}'" ;
+      sh:prefixes <http://qudt.org/2.1/shacl/schema/overlay/qudt> ;
+      sh:select """SELECT DISTINCT $this ?symbol ?another ?myType ?anotherType
+WHERE {{
+	$this qudt:symbol ?symbol .
+     ?another qudt:symbol ?symbol .
+    FILTER (?another != $this)
+   }
+    $this a ?myType .
+    ?myType rdfs:subClassOf+ qudt:Concept .
+    ?another a ?anotherType .
+    ?anotherType rdfs:subClassOf+ qudt:Concept .
+   FILTER (?myType = ?anotherType)
 }""" ;
     ] ;
   sh:targetClass qudt:Unit ;
