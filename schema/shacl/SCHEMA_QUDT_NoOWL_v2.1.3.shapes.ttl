@@ -45,7 +45,6 @@ dct:creator
   rdfs:label "creator" ;
 .
 dct:description
-  a qudt:LatexString ;
   a rdf:Property ;
   a owl:AnnotationProperty ;
   rdfs:label "description" ;
@@ -280,7 +279,6 @@ qudt:Citation-qudt_description
   sh:path qudt:description ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
-  sh:or <http://datashapes.org/dash#HTMLOrStringOrLangString> ;
 .
 qudt:Citation-qudt_url
   a sh:PropertyShape ;
@@ -330,11 +328,11 @@ qudt:Concept
   sh:property qudt:Concept-qudt_guidance ;
   sh:property qudt:Concept-qudt_hasRule ;
   sh:property qudt:Concept-qudt_id ;
+  sh:property qudt:Concept-qudt_plainTextDescription ;
 .
 qudt:Concept-dct_description
   a sh:PropertyShape ;
   sh:path dct:description ;
-  sh:maxCount 1 ;
 .
 qudt:Concept-qudt_abbreviation
   a sh:PropertyShape ;
@@ -366,6 +364,11 @@ qudt:Concept-qudt_id
   a sh:PropertyShape ;
   sh:path qudt:id ;
   sh:datatype xsd:string ;
+  sh:maxCount 1 ;
+.
+qudt:Concept-qudt_plainTextDescription
+  a sh:PropertyShape ;
+  sh:path qudt:plainTextDescription ;
   sh:maxCount 1 ;
 .
 qudt:ConstantValue
@@ -729,7 +732,6 @@ qudt:EnumeratedValue-qudt_description
   a sh:PropertyShape ;
   sh:path qudt:description ;
   sh:maxCount 1 ;
-  sh:or <http://datashapes.org/dash#HTMLOrStringOrLangString> ;
 .
 qudt:EnumeratedValue-qudt_symbol
   a sh:PropertyShape ;
@@ -897,12 +899,11 @@ qudt:IntervalScale
   rdfs:subClassOf qudt:Scale ;
 .
 qudt:LatexString
-  a rdfs:Class ;
-  a sh:NodeShape ;
-  rdfs:comment "A property type whose values need to be wrapped with '\\(' and '/) characters for LaTeX rendering." ;
+  a rdfs:Datatype ;
+  rdfs:comment "A type of string in which some characters may be wrapped with '\\(' and '\\) characters for LaTeX rendering." ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
-  rdfs:label "Latex String" ;
-  rdfs:subClassOf rdf:Property ;
+  rdfs:label "LaTeX" ;
+  rdfs:subClassOf xsd:string ;
 .
 qudt:LittleEndian
   a qudt:EndianType ;
@@ -1114,7 +1115,6 @@ qudt:Quantity
 qudt:Quantity-qudt_baseUnitDimensions
   a sh:PropertyShape ;
   sh:path qudt:baseUnitDimensions ;
-  sh:datatype xsd:string ;
   sh:maxCount 1 ;
 .
 qudt:Quantity-qudt_dataEncoding
@@ -1127,7 +1127,6 @@ qudt:Quantity-qudt_description
   a sh:PropertyShape ;
   sh:path qudt:description ;
   sh:maxCount 1 ;
-  sh:or <http://datashapes.org/dash#HTMLOrStringOrLangString> ;
 .
 qudt:Quantity-qudt_hasQuantityKind
   a sh:PropertyShape ;
@@ -1138,7 +1137,7 @@ qudt:Quantity-qudt_hasQuantityKind
 qudt:Quantity-qudt_latexDefinition
   a sh:PropertyShape ;
   sh:path qudt:latexDefinition ;
-  sh:datatype xsd:string ;
+  sh:datatype qudt:LatexString ;
   sh:maxCount 1 ;
 .
 qudt:Quantity-qudt_mathMLdefinition
@@ -1226,7 +1225,6 @@ qudt:QuantityKind-qudt_applicableUnit
 qudt:QuantityKind-qudt_baseCGSUnitDimensions
   a sh:PropertyShape ;
   sh:path qudt:baseCGSUnitDimensions ;
-  sh:datatype xsd:string ;
   sh:maxCount 1 ;
 .
 qudt:QuantityKind-qudt_baseISOUnitDimensions
@@ -1238,25 +1236,21 @@ qudt:QuantityKind-qudt_baseISOUnitDimensions
 qudt:QuantityKind-qudt_baseImperialUnitDimensions
   a sh:PropertyShape ;
   sh:path qudt:baseImperialUnitDimensions ;
-  sh:datatype xsd:string ;
   sh:maxCount 1 ;
 .
 qudt:QuantityKind-qudt_baseSIUnitDimensions
   a sh:PropertyShape ;
   sh:path qudt:baseSIUnitDimensions ;
-  sh:datatype xsd:string ;
   sh:maxCount 1 ;
 .
 qudt:QuantityKind-qudt_baseUSCustomaryUnitDimensions
   a sh:PropertyShape ;
   sh:path qudt:baseUSCustomaryUnitDimensions ;
-  sh:datatype xsd:string ;
   sh:maxCount 1 ;
 .
 qudt:QuantityKind-qudt_baseUnitDimensions
   a sh:PropertyShape ;
   sh:path qudt:baseUnitDimensions ;
-  sh:datatype xsd:string ;
   sh:maxCount 4 ;
 .
 qudt:QuantityKind-qudt_belongsToSystemOfQuantities
@@ -1294,13 +1288,13 @@ qudt:QuantityKind-qudt_isQuantityKindOf
 qudt:QuantityKind-qudt_latexDefinition
   a sh:PropertyShape ;
   sh:path qudt:latexDefinition ;
-  sh:datatype xsd:string ;
+  sh:datatype qudt:LatexString ;
   sh:maxCount 1 ;
 .
 qudt:QuantityKind-qudt_latexSymbol
   a sh:PropertyShape ;
   sh:path qudt:latexSymbol ;
-  sh:datatype xsd:string ;
+  sh:datatype qudt:LatexString ;
   sh:minCount 0 ;
 .
 qudt:QuantityKind-qudt_mathMLdefinition
@@ -1413,7 +1407,7 @@ qudt:QuantityKindDimensionVector-qudt_dimensionlessExponent
 qudt:QuantityKindDimensionVector-qudt_latexDefinition
   a sh:PropertyShape ;
   sh:path qudt:latexDefinition ;
-  sh:datatype xsd:string ;
+  sh:datatype qudt:LatexString ;
   sh:maxCount 1 ;
 .
 qudt:QuantityKindDimensionVector_CGS
@@ -2060,13 +2054,12 @@ qudt:Unit-qudt_isUnitOfSystem
 qudt:Unit-qudt_latexDefinition
   a sh:PropertyShape ;
   sh:path qudt:latexDefinition ;
-  sh:datatype xsd:string ;
-  sh:maxCount 1 ;
+  sh:datatype qudt:LatexString ;
 .
 qudt:Unit-qudt_latexSymbol
   a sh:PropertyShape ;
   sh:path qudt:latexSymbol ;
-  sh:datatype xsd:string ;
+  sh:datatype qudt:LatexString ;
   sh:minCount 0 ;
 .
 qudt:Unit-qudt_mathMLdefinition
@@ -2236,7 +2229,6 @@ qudt:applicableUnit
   rdfs:label "applicable unit" ;
 .
 qudt:baseCGSUnitDimensions
-  a qudt:LatexString ;
   a owl:DatatypeProperty ;
   dct:description "<em>qudt:baseCGSUnitDimensions</em> is a string datatype property expressing the dimensions of a unit, or quantity, as a vector over the base units in the CGS System."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
@@ -2251,7 +2243,6 @@ qudt:baseDimensionEnumeration
   rdfs:label "base dimension enumeration" ;
 .
 qudt:baseISOUnitDimensions
-  a qudt:LatexString ;
   a owl:DatatypeProperty ;
   dct:description "<strong>qudt:baseISOUnitDimensions</strong> is a string datatype property expressing the dimensions of a unit, or quantity, as a vector over the base units in the ISO System."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
@@ -2259,7 +2250,6 @@ qudt:baseISOUnitDimensions
   rdfs:subPropertyOf qudt:baseUnitDimensions ;
 .
 qudt:baseImperialUnitDimensions
-  a qudt:LatexString ;
   a owl:DatatypeProperty ;
   dct:description "<strong>qudt:baseImperialUnitDimensions</strong> is a string datatype property expressing the dimensions of a unit, or quantity, as a vector over the base units in the Imperial System."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
@@ -2267,7 +2257,6 @@ qudt:baseImperialUnitDimensions
   rdfs:subPropertyOf qudt:baseUnitDimensions ;
 .
 qudt:baseSIUnitDimensions
-  a qudt:LatexString ;
   a owl:DatatypeProperty ;
   dct:description "<strong>qudt:baseSIUnitDimensions</strong> is a string datatype property expressing the dimensions of a unit, or quantity, as a vector over the base units. For example, in the SI system \\(capacitance\\) has the unit \\(Farad\\) and base unit dimensions of \\(C^2 \\cdot s^2 / (kg \\cdot m^2)\\)."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
@@ -2275,7 +2264,6 @@ qudt:baseSIUnitDimensions
   rdfs:subPropertyOf qudt:baseUnitDimensions ;
 .
 qudt:baseUSCustomaryUnitDimensions
-  a qudt:LatexString ;
   a owl:DatatypeProperty ;
   dct:description "\"qudt:baseUSCustomaryUnitDimensions\" is a string datatype property expressing the dimensions of a unit, or quantity, as a vector over the base units in the US Customary System."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
@@ -2283,7 +2271,6 @@ qudt:baseUSCustomaryUnitDimensions
   rdfs:subPropertyOf qudt:baseUnitDimensions ;
 .
 qudt:baseUnitDimensions
-  a qudt:LatexString ;
   a owl:DatatypeProperty ;
   dct:description "\"qudt:baseUnitDimensions\" is a string datatype property expressing the dimensions of a unit, or quantity, as a vector over the base units."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
@@ -2431,7 +2418,6 @@ qudt:derivedQuantityKindOfSystem
   owl:inverseOf qudt:systemDerivedQuantityKind ;
 .
 qudt:description
-  a qudt:LatexString ;
   a owl:AnnotationProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
   rdfs:label "qudt description" ;
@@ -2536,7 +2522,6 @@ qudt:exactMatch
   rdfs:label "exact match" ;
 .
 qudt:example
-  a qudt:LatexString ;
   a owl:AnnotationProperty ;
   rdfs:comment "The 'qudt:example' property is used to annotate an instance of a class with a reference to a concept that is an example. The type of this property is 'rdf:Property'. This allows both scalar and object ranges."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
@@ -2908,18 +2893,15 @@ qudt:landscape
   rdfs:label "landscape" ;
 .
 qudt:latexDefinition
-  a qudt:LatexString ;
   a owl:AnnotationProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
   rdfs:label "latex definition" ;
 .
 qudt:latexSymbol
-  a qudt:LatexString ;
   a owl:DatatypeProperty ;
   dct:description "The symbol is a glyph that is used to represent some concept, typically a unit or a quantity, in a compact form. For example, the symbol for an Ohm is \\(ohm\\). This contrasts with 'unit:abbreviation', which gives a short alphanumeric abbreviation for the unit, 'ohm' for Ohm."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
   rdfs:label "latex symbol" ;
-  rdfs:subPropertyOf qudt:literal ;
 .
 qudt:length
   a rdf:Property ;
@@ -3072,6 +3054,13 @@ qudt:permissibleTransformation
   a owl:ObjectProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
   rdfs:label "permissible transformation" ;
+.
+qudt:plainTextDescription
+  a rdf:Property ;
+  dct:description "A plain text description is used to provide a description with only simple ASCII characters for cases where LaTeX , HTML or other markup would not be appropriate."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
+  rdfs:label "description (plain text)" ;
+  rdfs:range xsd:string ;
 .
 qudt:positiveDeltaLimit
   a owl:DatatypeProperty ;
