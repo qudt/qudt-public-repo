@@ -5,6 +5,7 @@
 # imports: http://www.linkedmodel.org/schema/vaem
 # imports: http://www.w3.org/2004/02/skos/core
 
+@prefix dash: <http://datashapes.org/dash#> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dct: <http://purl.org/dc/terms/> .
 @prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
@@ -81,6 +82,19 @@ dct:title
   owl:imports <http://www.linkedmodel.org/schema/vaem> ;
   owl:imports <http://www.w3.org/2004/02/skos/core> ;
   owl:versionIRI <http://qudt.org/2.1.3/schema/shacl/qudt> ;
+.
+qudt:AbstractQuantityKind
+  a owl:Class ;
+  a sh:NodeShape ;
+  dash:abstract true ;
+  qudt:informativeReference "http://www.electropedia.org/iev/iev.nsf/display?openform&ievref=112-01-04"^^xsd:anyURI ;
+  rdfs:comment "A <b>Quantity Kind</b> is any observable property that can be  measured and quantified numerically. Familiar examples include physical properties such as length, mass, time, force, energy, power, electric charge, etc. Less familiar examples include currency, interest rate, price to earning ratio, and information capacity."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
+  rdfs:label "Quantity Kind (abstract)" ;
+  rdfs:subClassOf qudt:Concept ;
+  sh:property qudt:QuantityKind-qudt_latexSymbol ;
+  sh:property qudt:QuantityKind-qudt_symbol ;
+  sh:property qudt:QuantityKind-skos_broader ;
 .
 qudt:Aspect
   a qudt:AspectClass ;
@@ -306,7 +320,7 @@ qudt:Comment-qudt_description
   a sh:PropertyShape ;
   sh:path qudt:description ;
   sh:maxCount 1 ;
-  sh:or <http://datashapes.org/dash#HTMLOrStringOrLangString> ;
+  sh:or dash:HTMLOrStringOrLangString ;
 .
 qudt:Comment-qudt_rationale
   a sh:PropertyShape ;
@@ -349,7 +363,7 @@ qudt:Concept-qudt_description
   a sh:PropertyShape ;
   sh:path qudt:description ;
   sh:maxCount 1 ;
-  sh:or <http://datashapes.org/dash#HTMLOrStringOrLangString> ;
+  sh:or dash:HTMLOrStringOrLangString ;
 .
 qudt:Concept-qudt_guidance
   a sh:PropertyShape ;
@@ -392,6 +406,14 @@ qudt:ConstantValue-qudt_exactConstant
   sh:path qudt:exactConstant ;
   sh:datatype xsd:boolean ;
   sh:maxCount 1 ;
+.
+qudt:ContextualQuantityKind
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:comment "A contextual quantity kind is a subclass of QuantityKind that, while it is dimensionless, it also has a context that can be used to determine whether it is commensurate with other quantity kinds. An example might be relative humidity. Strictly speaking, relative humidity is expressed as a percentage, but it is not meaningful to compare a relative humidity value with, say, the interest rate on a savings account that is also mesaured as a percentage. The context is specified through one of a number of possibilities, either simply through the implied context given by a unit name, or in conjunction with a contextual quantity kind, or in conjunction with a contextual quantity kind that in turn has pointers to dimensionless and numerator and denominator dimension vectors." ;
+  rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
+  rdfs:label "Contextual Quantity Kind" ;
+  rdfs:subClassOf qudt:QuantityKind ;
 .
 qudt:CountingUnit
   a owl:Class ;
@@ -789,23 +811,6 @@ qudt:EnumerationScale
   rdfs:subClassOf qudt:Scale ;
   rdfs:subClassOf dtype:Enumeration ;
 .
-qudt:ExtrinsicQuantity
-  a owl:Class ;
-  a sh:NodeShape ;
-  rdfs:comment "An extrinsic quantity is one that is used by external applications. An extrinsic (or relational) property is a property that depends on a thing's relationship with other things. For example, mass is an intrinsic property of any physical object, whereas weight is an extrinsic property that varies depending on the strength of the gravitational field in which the respective object is placed. As such, the question of intrinsicality and extrinsicality in empirically observable objects is a significant field of study in ontology, the branch of philosophy concerned with explaining the fundamental nature of being. [Wikipedia]"^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
-  rdfs:label "Extrinsic Quantity" ;
-  rdfs:subClassOf qudt:Quantity ;
-  sh:property qudt:ExtrinsicQuantity-qudt_definedAs ;
-.
-qudt:ExtrinsicQuantity-qudt_definedAs
-  a sh:PropertyShape ;
-  sh:path qudt:definedAs ;
-  sh:class qudt:Quantity ;
-  sh:description "Associates an extrinsic quantity with a controlled QUDT quantity." ;
-  sh:maxCount 1 ;
-  sh:name "defined as" ;
-.
 qudt:Figure
   a owl:Class ;
   a sh:NodeShape ;
@@ -1063,6 +1068,10 @@ qudt:PhysicalConstant
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
   rdfs:label "Physical Constant" ;
   rdfs:subClassOf qudt:Quantity ;
+  rdfs:subClassOf qudt:Verifiable ;
+  sh:property qudt:Quantity-qudt_latexDefinition ;
+  sh:property qudt:Quantity-qudt_latexSymbol ;
+  sh:property qudt:Quantity-qudt_mathMLdefinition ;
 .
 qudt:PrefixUnit
   a owl:Class ;
@@ -1078,11 +1087,18 @@ qudt:Quantifiable
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
   rdfs:label "Quantifiable" ;
   rdfs:subClassOf qudt:Aspect ;
+  sh:property qudt:Quantifiable-qudt_dataEncoding ;
   sh:property qudt:Quantifiable-qudt_dataType ;
   sh:property qudt:Quantifiable-qudt_relativeStandardUncertainty ;
   sh:property qudt:Quantifiable-qudt_standardUncertainty ;
   sh:property qudt:Quantifiable-qudt_unit ;
   sh:property qudt:Quantifiable-qudt_value ;
+.
+qudt:Quantifiable-qudt_dataEncoding
+  a sh:PropertyShape ;
+  sh:path qudt:dataEncoding ;
+  sh:class qudt:DataEncoding ;
+  sh:maxCount 1 ;
 .
 qudt:Quantifiable-qudt_dataType
   a sh:PropertyShape ;
@@ -1128,14 +1144,8 @@ qudt:Quantity
   rdfs:label "Quantity" ;
   rdfs:subClassOf qudt:Concept ;
   rdfs:subClassOf qudt:Quantifiable ;
-  rdfs:subClassOf qudt:Verifiable ;
-  sh:property qudt:Quantity-qudt_applicableUnit ;
-  sh:property qudt:Quantity-qudt_baseUnitDimensions ;
-  sh:property qudt:Quantity-qudt_dataEncoding ;
+  sh:property qudt:Quantity-qudt_hasContextualQuantityKind ;
   sh:property qudt:Quantity-qudt_hasQuantityKind ;
-  sh:property qudt:Quantity-qudt_latexDefinition ;
-  sh:property qudt:Quantity-qudt_latexSymbol ;
-  sh:property qudt:Quantity-qudt_mathMLdefinition ;
   sh:property qudt:Quantity-qudt_quantityValue ;
 .
 qudt:Quantity-qudt_applicableUnit
@@ -1148,22 +1158,24 @@ qudt:Quantity-qudt_baseUnitDimensions
   sh:path qudt:baseUnitDimensions ;
   sh:maxCount 1 ;
 .
-qudt:Quantity-qudt_dataEncoding
-  a sh:PropertyShape ;
-  sh:path qudt:dataEncoding ;
-  sh:class qudt:DataEncoding ;
-  sh:maxCount 1 ;
-.
 qudt:Quantity-qudt_description
   a sh:PropertyShape ;
   sh:path qudt:description ;
   sh:maxCount 1 ;
 .
+qudt:Quantity-qudt_hasContextualQuantityKind
+  a sh:PropertyShape ;
+  sh:path qudt:hasContextualQuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
+  sh:class qudt:ContextualQuantityKind ;
+  sh:maxValue 1 ;
+.
 qudt:Quantity-qudt_hasQuantityKind
   a sh:PropertyShape ;
   sh:path qudt:hasQuantityKind ;
-  sh:class qudt:QuantityKind ;
-  sh:minCount 0 ;
+  sh:class qudt:AbstractQuantityKind ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
 .
 qudt:Quantity-qudt_latexDefinition
   a sh:PropertyShape ;
@@ -1195,7 +1207,7 @@ qudt:QuantityKind
   rdfs:comment "A <b>Quantity Kind</b> is any observable property that can be  measured and quantified numerically. Familiar examples include physical properties such as length, mass, time, force, energy, power, electric charge, etc. Less familiar examples include currency, interest rate, price to earning ratio, and information capacity."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
   rdfs:label "Quantity Kind" ;
-  rdfs:subClassOf qudt:Concept ;
+  rdfs:subClassOf qudt:AbstractQuantityKind ;
   rdfs:subClassOf qudt:Verifiable ;
   sh:property qudt:QuantityKind-qudt_applicableCGSUnit ;
   sh:property qudt:QuantityKind-qudt_applicableISOUnit ;
@@ -1213,14 +1225,10 @@ qudt:QuantityKind
   sh:property qudt:QuantityKind-qudt_expression ;
   sh:property qudt:QuantityKind-qudt_generalization ;
   sh:property qudt:QuantityKind-qudt_hasDimensionVector ;
-  sh:property qudt:QuantityKind-qudt_isQuantityKindOf ;
   sh:property qudt:QuantityKind-qudt_latexDefinition ;
-  sh:property qudt:QuantityKind-qudt_latexSymbol ;
   sh:property qudt:QuantityKind-qudt_mathMLdefinition ;
   sh:property qudt:QuantityKind-qudt_qkdvDenominator ;
   sh:property qudt:QuantityKind-qudt_qkdvNumerator ;
-  sh:property qudt:QuantityKind-qudt_symbol ;
-  sh:property qudt:QuantityKind-skos_broader ;
 .
 qudt:QuantityKind-qudt_applicableCGSUnit
   a sh:PropertyShape ;
@@ -1353,7 +1361,7 @@ qudt:QuantityKind-qudt_symbol
 qudt:QuantityKind-skos_broader
   a sh:PropertyShape ;
   sh:path skos:broader ;
-  sh:class qudt:QuantityKind ;
+  sh:class qudt:AbstractQuantityKind ;
 .
 qudt:QuantityKindDimensionVector
   a owl:Class ;
@@ -2149,6 +2157,35 @@ qudt:UnsignedIntegerEncoding
   qudt:bytes 4 ;
   rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
   rdfs:label "Unsigned Integer Encoding" ;
+.
+qudt:UserQuantityKind
+  a owl:Class ;
+  a sh:NodeShape ;
+  qudt:informativeReference "http://www.electropedia.org/iev/iev.nsf/display?openform&ievref=112-01-04"^^xsd:anyURI ;
+  rdfs:comment "A <b>User Quantity Kind</b> is any observable property that can be  measured and quantified numerically.  These quantity kinds are typically associaed with some physical entity. Examples are glass thickness, tank pressure and boiler temperature."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1.3/schema/shacl/qudt> ;
+  rdfs:label "User Quantity Kind" ;
+  rdfs:subClassOf qudt:AbstractQuantityKind ;
+  sh:property qudt:UserQuantityKind-qudt_hasQuantityKind ;
+.
+qudt:UserQuantityKind-qudt_dataType
+  a sh:PropertyShape ;
+  sh:path qudt:dataType ;
+  sh:class qudt:Datatype ;
+  sh:maxCount 1 ;
+.
+qudt:UserQuantityKind-qudt_hasQuantityKind
+  a sh:PropertyShape ;
+  sh:path qudt:hasQuantityKind ;
+  sh:class qudt:QuantityKind ;
+  sh:maxValue 1 ;
+  sh:minValue 1 ;
+.
+qudt:UserQuantityKind-qudt_unit
+  a sh:PropertyShape ;
+  sh:path qudt:unit ;
+  sh:class qudt:Unit ;
+  sh:maxCount 1 ;
 .
 qudt:Verifiable
   a qudt:AspectClass ;
