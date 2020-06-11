@@ -88,6 +88,26 @@ dct:title
   owl:imports <http://www.w3.org/2004/02/skos/core> ;
   owl:versionIRI <http://qudt.org/2.1/schema/qudt> ;
 .
+qudt:AbstractQuantityKind
+  a owl:Class ;
+  rdfs:label "Quantity Kind (abstract)" ;
+  rdfs:subClassOf qudt:Concept ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:allValuesFrom qudt:QuantityKind ;
+      owl:onProperty skos:broader ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+      owl:onProperty qudt:latexSymbol ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+      owl:onProperty qudt:symbol ;
+    ] ;
+.
 qudt:Aspect
   a qudt:AspectClass ;
   rdfs:comment "An aspect is an abstract type class that defines properties that can be reused."^^rdf:HTML ;
@@ -717,23 +737,6 @@ qudt:EnumerationScale
   rdfs:subClassOf qudt:Scale ;
   rdfs:subClassOf dtype:Enumeration ;
 .
-qudt:ExtrinsicQuantity
-  a owl:Class ;
-  rdfs:comment "An extrinsic quantity is one that is used by external applications. An extrinsic (or relational) property is a property that depends on a thing's relationship with other things. For example, mass is an intrinsic property of any physical object, whereas weight is an extrinsic property that varies depending on the strength of the gravitational field in which the respective object is placed. As such, the question of intrinsicality and extrinsicality in empirically observable objects is a significant field of study in ontology, the branch of philosophy concerned with explaining the fundamental nature of being. [Wikipedia]"^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "Extrinsic Quantity" ;
-  rdfs:subClassOf qudt:Quantity ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:allValuesFrom qudt:Quantity ;
-      owl:onProperty qudt:definedAs ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
-      owl:onProperty qudt:definedAs ;
-    ] ;
-.
 qudt:Figure
   a owl:Class ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
@@ -1081,17 +1084,12 @@ qudt:QuantityKind
   rdfs:comment "A <b>Quantity Kind</b> is any observable property that can be  measured and quantified numerically. Familiar examples include physical properties such as length, mass, time, force, energy, power, electric charge, etc. Less familiar examples include currency, interest rate, price to earning ratio, and information capacity."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "Quantity Kind" ;
-  rdfs:subClassOf qudt:Concept ;
+  rdfs:subClassOf qudt:AbstractQuantityKind ;
   rdfs:subClassOf qudt:Verifiable ;
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:allValuesFrom qudt:QuantityKind ;
       owl:onProperty qudt:generalization ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:allValuesFrom qudt:QuantityKind ;
-      owl:onProperty skos:broader ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -1204,16 +1202,6 @@ qudt:QuantityKind
       a owl:Restriction ;
       owl:minCardinality "0"^^xsd:nonNegativeInteger ;
       owl:onProperty qudt:expression ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-      owl:onProperty qudt:latexSymbol ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-      owl:onProperty qudt:symbol ;
     ] ;
 .
 qudt:QuantityKindDimensionVector
@@ -1908,6 +1896,21 @@ qudt:UnsignedIntegerEncoding
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "Unsigned Integer Encoding" ;
 .
+qudt:UserQuantityKind
+  a owl:Class ;
+  rdfs:label "User Quantity Kind" ;
+  rdfs:subClassOf qudt:AbstractQuantityKind ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:allValuesFrom qudt:QuantityKind ;
+      owl:onProperty qudt:hasQuantityKind ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
+      owl:onProperty qudt:hasQuantityKind ;
+    ] ;
+.
 qudt:Verifiable
   a qudt:AspectClass ;
   rdfs:comment "An aspect class that holds properties that provide external knowledge and specifications of a given resource." ;
@@ -2220,11 +2223,6 @@ qudt:default
   dct:description "The default element in an enumeration"^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "default" ;
-.
-qudt:definedAs
-  a owl:ObjectProperty ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "defined as" ;
 .
 qudt:denominatorDimensionVector
   a owl:ObjectProperty ;
