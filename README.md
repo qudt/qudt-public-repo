@@ -13,14 +13,14 @@ Here is the core design pattern of the QUDT ontology:
 
 Our current plan is to deliver this material in even more powerful ways. The website now hosts an engine supporting SPARQL and GraphQL queries. Fully resolvable URIs at the graph and instance level are available online. Eventually we will also support resolvable class URIs as well. We are also creating a series of <a href="https://github.com/qudt/qudt-public-repo/wiki/User-Guide-for-QUDT"> User Guides</a> on the wiki for this repository.
 
-We encourage you to get involved. If you have particular needs or see errors, please create an Issue and/or make changes or additions yourself (please see our <a href="https://github.com/qudt/qudt-public-repo/wiki">   Wiki</a> for more detailed instructions.) We are a volunteer-staffed effort, but we do have infrastructural expenses. Please consider making a [DONATION](https://github.com/sponsors/qudt).
+We encourage you to get involved. If you have particular needs or see errors, please create an Issue and/or make changes or additions yourself (please see our <a href="https://github.com/qudt/qudt-public-repo/wiki">   Wiki</a> for more detailed instructions, and specifically <a href="https://github.com/qudt/qudt-public-repo/wiki/Unit-Vocabulary-Submission-Guidelines"> the Units Submission Guide</a> if you would like to suggest additional units.) We are a volunteer-staffed effort, but we do have infrastructural expenses. Please consider making a [DONATION](https://github.com/sponsors/qudt).
 
 Status
 ------
 Release 2.1 of QUDT is continually being updated, beginning with a release of the schemas and base vocabularies for units, quantity kinds and dimension vectors. Please check this repository or the <a href="http://qudt.org">qudt.org</a> website for the latest updates.
 
 June 29, 2020
-- We are excited to announce a powerful new way to browse, explore and SPARQL-query the QUDT ontology and vocabularies, using the state-of-the-art EDG environment from [TopQuadrant](http://topquadrant.com). Please click [here](http://qudt.org/edg/) to check out our new environment! There is also an [introductory video](http://qudt.org/video/intro.html) to help you get started.
+- We are excited to announce a powerful new way to browse, explore and SPARQL-query the QUDT ontology and vocabularies, using the state-of-the-art EDG environment from [TopQuadrant](http://topquadrant.com). Please click [here](http://qudt.org/edg/) to check out the beta version of our new environment! There is also an [introductory video](http://qudt.org/video/intro.html) to help you get started.
 
 June 1, 2020
 - QUDT Release 2.1.3 - Increased the unit vocabulary including IEC 61360 units.
