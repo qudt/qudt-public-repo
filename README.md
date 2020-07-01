@@ -19,8 +19,8 @@ Status
 ------
 Release 2.1 of QUDT is continually being updated, beginning with a release of the schemas and base vocabularies for units, quantity kinds and dimension vectors. Please check this repository or the <a href="http://qudt.org">qudt.org</a> website for the latest updates.
 
-June 29, 2020
-- We are excited to announce a powerful new way to browse, explore and SPARQL-query the QUDT ontology and vocabularies, using the state-of-the-art EDG environment from [TopQuadrant](http://topquadrant.com). Please click [here](http://qudt.org/edg/) to check out the beta version of our new environment! There is also an [introductory video](http://qudt.org/video/intro.html) to help you get started.
+July 1, 2020
+- We are excited to announce a powerful new way to browse, explore and SPARQL-query the QUDT ontology and vocabularies, using the state-of-the-art TopBraid EDG environment from [TopQuadrant](http://topquadrant.com). Please click [here](http://qudt.org/edg/) to check out our new environment! There is also an [introductory video](http://qudt.org/video/intro.html) to help you get started.
 
 June 1, 2020
 - QUDT Release 2.1.3 - Increased the unit vocabulary including IEC 61360 units.
@@ -45,4 +45,4 @@ QUDT.org is a member of the World Wide Web Consortium (W3C)
 
 Last updated by: Steve Ray (steve.ray@qudt.org)
 
-Last updated: June 29, 2020
+Last updated: July 1, 2020
