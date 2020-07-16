@@ -1850,7 +1850,7 @@ qudt:Unit
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:allValuesFrom qudt:SystemOfUnits ;
-      owl:onProperty qudt:isUnitOfSystem ;
+      owl:onProperty qudt:unitOfSystem ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -2011,6 +2011,14 @@ qudt:allowedPattern
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
 .
+qudt:allowedUnitOfSystem
+  a owl:ObjectProperty ;
+  dcterms:description "This property relates a unit of measure with a unit system that does not define the unit, but allows its use within the system. An allowed unit must be convertible to some dimensionally eqiuvalent unit that is defined by the system."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "allowed unit of system" ;
+  rdfs:subPropertyOf qudt:unitOfSystem ;
+  owl:inverseOf qudt:hasAllowedUnit ;
+.
 qudt:ansiSQLName
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
@@ -2125,6 +2133,14 @@ qudt:baseUnitDimensions
   rdfs:label "base unit dimensions" ;
   rdfs:range xsd:string ;
 .
+qudt:baseUnitOfSystem
+  a owl:ObjectProperty ;
+  dcterms:description "This property relates a unit of measure to the system of units in which it is defined as a base unit for the system. The base units of a system are used to define the derived units of the system by expressing the derived units as products of the base units raised to a rational power."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "is base unit of system" ;
+  rdfs:subPropertyOf qudt:coherentUnitOfSystem ;
+  owl:inverseOf qudt:hasBaseUnit ;
+.
 qudt:basis
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
@@ -2199,6 +2215,16 @@ qudt:code
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "code" ;
 .
+qudt:coherentUnitOfSystem
+  a owl:DeprecatedProperty ;
+  a owl:ObjectProperty ;
+  dcterms:description "A coherent unit of measurement for a unit system is a defined unit that may be expressed as a product of powers of the system's base units with the proportionality factor of one. A system of units is coherent with respect to a system of quantities and equations if the system of units is chosen in such a way that the equations between numerical values have exactly the same form (including the numerical factors) as the corresponding equations between the quantities. For example, the 'newton' and the 'joule'. These two are, respectively, the force that causes one kilogram to be accelerated at 1 metre per second per  second, and the work done by 1 newton acting over 1 metre. Being coherent refers to this consistent use of 1. In the old c.g.s. system , with its base units the centimetre and the gram, the corresponding coherent units were the dyne and the erg, respectively the force that causes 1 gram to be accelerated at 1 centimetre per second per second, and the work done by 1 dyne acting over 1 centimetre. So \\(1 newton = 10^5\\,dyne\\), \\(1 joule = 10^7\\,erg\\), making each of the four compatible in a decimal sense within its respective other system, but not coherent therein."^^qudt:LatexString ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "is coherent unit of system" ;
+  rdfs:range qudt:DerivedCoherentUnit ;
+  rdfs:subPropertyOf qudt:definedUnitOfSystem ;
+  owl:inverseOf qudt:hasCoherentUnit ;
+.
 qudt:coherentUnitSystem
   a owl:FunctionalProperty ;
   a owl:ObjectProperty ;
@@ -2265,11 +2291,37 @@ qudt:default
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "default" ;
 .
+qudt:definedUnitOfSystem
+  a owl:ObjectProperty ;
+  dcterms:description "This property relates a unit of measure with the unit system that defines the unit."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "defined unit of system" ;
+  rdfs:subPropertyOf qudt:unitOfSystem ;
+  owl:inverseOf qudt:hasDefinedUnit ;
+.
 qudt:denominatorDimensionVector
   a owl:ObjectProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "denominator dimension vector" ;
   rdfs:range qudt:QuantityKindDimensionVector ;
+.
+qudt:derivedCoherentUnitOfSystem
+  a owl:ObjectProperty ;
+  dcterms:description "This property relates a unit of measure to the unit system in which the unit is derived from the system's base units with a proportionality constant of one."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "is coherent derived unit of system" ;
+  rdfs:subPropertyOf qudt:coherentUnitOfSystem ;
+  rdfs:subPropertyOf qudt:derivedUnitOfSystem ;
+  owl:inverseOf qudt:hasDerivedCoherentUnit ;
+.
+qudt:derivedNonCoherentUnitOfSystem
+  a owl:ObjectProperty ;
+  dcterms:description "This property relates a unit of measure to the unit system in which the unit is derived from the system's base units without proportionality constant of one."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "is non-coherent derived unit of system" ;
+  rdfs:range qudt:DerivedNonCoherentUnit ;
+  rdfs:subPropertyOf qudt:derivedUnitOfSystem ;
+  owl:inverseOf qudt:hasDerivedNonCoherentUnit ;
 .
 qudt:derivedQuantityKindOfSystem
   a owl:ObjectProperty ;
@@ -2277,6 +2329,14 @@ qudt:derivedQuantityKindOfSystem
   rdfs:label "derived quantity kind of system" ;
   rdfs:subPropertyOf qudt:isQuantityKindOf ;
   owl:inverseOf qudt:systemDerivedQuantityKind ;
+.
+qudt:derivedUnitOfSystem
+  a owl:ObjectProperty ;
+  dcterms:description "This property relates a unit of measure to the system of units in which it is defined as a derived unit. That is, the derived unit is defined as a product of the base units for the system raised to some rational power."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "is derived unit of system" ;
+  rdfs:subPropertyOf qudt:unitOfSystem ;
+  owl:inverseOf qudt:hasDerivedUnit ;
 .
 qudt:description
   a owl:AnnotationProperty ;
@@ -2483,7 +2543,7 @@ qudt:hasBaseUnit
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "base unit" ;
   rdfs:subPropertyOf qudt:hasCoherentUnit ;
-  owl:inverseOf qudt:isBaseUnitOfSystem ;
+  owl:inverseOf qudt:baseUnitOfSystem ;
 .
 qudt:hasCoherentUnit
   a owl:ObjectProperty ;
@@ -2491,7 +2551,7 @@ qudt:hasCoherentUnit
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "coherent unit" ;
   rdfs:subPropertyOf qudt:hasDefinedUnit ;
-  owl:inverseOf qudt:isCoherentUnitOfSystem ;
+  owl:inverseOf qudt:coherentUnitOfSystem ;
 .
 qudt:hasDefinedUnit
   a owl:ObjectProperty ;
@@ -2511,20 +2571,21 @@ qudt:hasDerivedCoherentUnit
   rdfs:label "derived coherent unit" ;
   rdfs:subPropertyOf qudt:hasCoherentUnit ;
   rdfs:subPropertyOf qudt:hasDerivedUnit ;
-  owl:inverseOf qudt:isDerivedCoherentUnitOfSystem ;
+  owl:inverseOf qudt:derivedCoherentUnitOfSystem ;
 .
 qudt:hasDerivedNonCoherentUnit
   a owl:ObjectProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "has coherent derived unit" ;
   rdfs:subPropertyOf qudt:hasDerivedUnit ;
-  owl:inverseOf qudt:isDerivedNonCoherentUnitOfSystem ;
+  owl:inverseOf qudt:derivedNonCoherentUnitOfSystem ;
 .
 qudt:hasDerivedUnit
   a owl:ObjectProperty ;
   dcterms:description "This property relates a system of units to a unit of measure that is defined within the system in terms of the base units for the system. That is, the derived unit is defined as a product of the base units for the system raised to some rational power."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "derived unit" ;
+  owl:inverseOf qudt:derivedUnitOfSystem ;
 .
 qudt:hasDimension
   a owl:ObjectProperty ;
@@ -2544,7 +2605,7 @@ qudt:hasNonCoherentUnit
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "has non-coherent unit" ;
   rdfs:subPropertyOf qudt:hasDefinedUnit ;
-  owl:inverseOf qudt:isCoherentUnitOfSystem ;
+  owl:inverseOf qudt:coherentUnitOfSystem ;
 .
 qudt:hasNumeratorPart
   a owl:ObjectProperty ;
@@ -2585,7 +2646,7 @@ qudt:hasUnit
   dcterms:description "This property relates a system of units with a unit of measure that is either a) defined by the system, or b) accepted for use by the system and is convertible to a unit of equivalent dimension that is defined by the system. Systems of units may distinguish between base and derived units. Base units are the units which measure the base quantities for the corresponding system of quantities. The base units are used to define units for all other quantities as products of powers of the base units. Such units are called derived units for the system."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "has unit" ;
-  owl:inverseOf qudt:isUnitOfSystem ;
+  owl:inverseOf qudt:unitOfSystem ;
 .
 qudt:hasUnitSystem
   a owl:FunctionalProperty ;
@@ -2658,72 +2719,12 @@ qudt:integerPercentage
         ) ;
     ] ;
 .
-qudt:isAllowedUnitOfSystem
-  a owl:ObjectProperty ;
-  dcterms:description "This property relates a unit of measure with a unit system that does not define the unit, but allows its use within the system. An allowed unit must be convertible to some dimensionally eqiuvalent unit that is defined by the system."^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "allowed unit of system" ;
-  rdfs:subPropertyOf qudt:isUnitOfSystem ;
-  owl:inverseOf qudt:hasAllowedUnit ;
-.
 qudt:isBaseQuantityKindOfSystem
   a owl:ObjectProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "is base quantity kind of system" ;
   rdfs:subPropertyOf qudt:isQuantityKindOf ;
   owl:inverseOf qudt:hasBaseQuantityKind ;
-.
-qudt:isBaseUnitOfSystem
-  a owl:ObjectProperty ;
-  dcterms:description "This property relates a unit of measure to the system of units in which it is defined as a base unit for the system. The base units of a system are used to define the derived units of the system by expressing the derived units as products of the base units raised to a rational power."^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "is base unit of system" ;
-  rdfs:subPropertyOf qudt:isCoherentUnitOfSystem ;
-  owl:inverseOf qudt:hasBaseUnit ;
-.
-qudt:isCoherentUnitOfSystem
-  a owl:DeprecatedProperty ;
-  a owl:ObjectProperty ;
-  dcterms:description "A coherent unit of measurement for a unit system is a defined unit that may be expressed as a product of powers of the system's base units with the proportionality factor of one. A system of units is coherent with respect to a system of quantities and equations if the system of units is chosen in such a way that the equations between numerical values have exactly the same form (including the numerical factors) as the corresponding equations between the quantities. For example, the 'newton' and the 'joule'. These two are, respectively, the force that causes one kilogram to be accelerated at 1 metre per second per  second, and the work done by 1 newton acting over 1 metre. Being coherent refers to this consistent use of 1. In the old c.g.s. system , with its base units the centimetre and the gram, the corresponding coherent units were the dyne and the erg, respectively the force that causes 1 gram to be accelerated at 1 centimetre per second per second, and the work done by 1 dyne acting over 1 centimetre. So \\(1 newton = 10^5\\,dyne\\), \\(1 joule = 10^7\\,erg\\), making each of the four compatible in a decimal sense within its respective other system, but not coherent therein."^^qudt:LatexString ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "is coherent unit of system" ;
-  rdfs:range qudt:DerivedCoherentUnit ;
-  rdfs:subPropertyOf qudt:isDefinedUnitOfSystem ;
-  owl:inverseOf qudt:hasCoherentUnit ;
-.
-qudt:isDefinedUnitOfSystem
-  a owl:ObjectProperty ;
-  dcterms:description "This property relates a unit of measure with the unit system that defines the unit."^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "defined unit of system" ;
-  rdfs:subPropertyOf qudt:isUnitOfSystem ;
-  owl:inverseOf qudt:hasDefinedUnit ;
-.
-qudt:isDerivedCoherentUnitOfSystem
-  a owl:ObjectProperty ;
-  dcterms:description "This property relates a unit of measure to the unit system in which the unit is derived from the system's base units with a proportionality constant of one."^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "is coherent derived unit of system" ;
-  rdfs:subPropertyOf qudt:isCoherentUnitOfSystem ;
-  rdfs:subPropertyOf qudt:isDerivedUnitOfSystem ;
-  owl:inverseOf qudt:hasDerivedCoherentUnit ;
-.
-qudt:isDerivedNonCoherentUnitOfSystem
-  a owl:ObjectProperty ;
-  dcterms:description "This property relates a unit of measure to the unit system in which the unit is derived from the system's base units without proportionality constant of one."^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "is non-coherent derived unit of system" ;
-  rdfs:range qudt:DerivedNonCoherentUnit ;
-  rdfs:subPropertyOf qudt:isDerivedUnitOfSystem ;
-  owl:inverseOf qudt:hasDerivedNonCoherentUnit ;
-.
-qudt:isDerivedUnitOfSystem
-  a owl:ObjectProperty ;
-  dcterms:description "This property relates a unit of measure to the system of units in which it is defined as a derived unit. That is, the derived unit is defined as a product of the base units for the system raised to some rational power."^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "is derived unit of system" ;
-  rdfs:subPropertyOf qudt:isUnitOfSystem ;
-  owl:inverseOf qudt:hasDerivedUnit ;
 .
 qudt:isDimensionInSystem
   a owl:ObjectProperty ;
@@ -2747,15 +2748,6 @@ qudt:isScalingOf
   a owl:TransitiveProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "is scaling of" ;
-.
-qudt:isUnitOfSystem
-  a owl:ObjectProperty ;
-  dcterms:description "This property relates a unit of measure with a system of units that either a) defines the unit or b) allows the unit to be used within the system."^^rdf:HTML ;
-  rdfs:domain qudt:Unit ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "is unit of system" ;
-  rdfs:range qudt:SystemOfUnits ;
-  owl:inverseOf qudt:hasUnit ;
 .
 qudt:isoNormativeReference
   a owl:AnnotationProperty ;
@@ -3061,6 +3053,13 @@ qudt:relevantQuantityKind
   rdfs:label "relevant quantity kind" ;
   rdfs:range qudt:QuantityKind ;
 .
+qudt:relevantUnit
+  a owl:ObjectProperty ;
+  rdfs:comment "This property is used for qudt:Discipline instances to identify the Unit instances that are used within a given discipline." ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "Relevant Unit" ;
+  rdfs:range qudt:Unit ;
+.
 qudt:ruleType
   a owl:ObjectProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
@@ -3157,6 +3156,15 @@ qudt:unitFor
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "unit for" ;
   owl:inverseOf qudt:unit ;
+.
+qudt:unitOfSystem
+  a owl:ObjectProperty ;
+  dcterms:description "This property relates a unit of measure with a system of units that either a) defines the unit or b) allows the unit to be used within the system."^^rdf:HTML ;
+  rdfs:domain qudt:Unit ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "is unit of system" ;
+  rdfs:range qudt:SystemOfUnits ;
+  owl:inverseOf qudt:hasUnit ;
 .
 qudt:upperBound
   a owl:DatatypeProperty ;
