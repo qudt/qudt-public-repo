@@ -852,7 +852,7 @@ qudt:Prefix
   rdfs:subClassOf qudt:Verifiable ;
   rdfs:subClassOf [
       a owl:Restriction ;
-      owl:allValuesFrom xsd:string ;
+      owl:allValuesFrom qudt:UCUMcs-term ;
       owl:onProperty qudt:ucumCode ;
     ] ;
   rdfs:subClassOf [
@@ -1552,6 +1552,7 @@ qudt:UCUMci
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "case-insensitive UCUM code" ;
   rdfs:subClassOf rdfs:Resource ;
+  owl:deprecated true ;
   owl:onDatatype xsd:string ;
   owl:withRestrictions (
       [
@@ -1565,6 +1566,7 @@ qudt:UCUMci-term
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "case-insensitive UCUM term" ;
   rdfs:subClassOf rdfs:Resource ;
+  owl:deprecated true ;
   owl:onDatatype xsd:string ;
   owl:withRestrictions (
       [
@@ -1574,9 +1576,11 @@ qudt:UCUMci-term
 .
 qudt:UCUMcs
   a rdfs:Datatype ;
+  dcterms:source <https://ucum.org/ucum.html> ;
   rdfs:comment "Lexical pattern for the case-sensitive version of UCUM code" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "case-sensitive UCUM code" ;
+  rdfs:seeAlso <https://ucum.org/ucum.html> ;
   rdfs:subClassOf rdfs:Resource ;
   owl:onDatatype xsd:string ;
   owl:withRestrictions (
@@ -1587,9 +1591,11 @@ qudt:UCUMcs
 .
 qudt:UCUMcs-term
   a rdfs:Datatype ;
+  dcterms:source <https://ucum.org/ucum.html> ;
   rdfs:comment "Lexical pattern for the terminal symbols in the case-sensitive version of UCUM code" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "case-sensitive UCUM terminal" ;
+  rdfs:seeAlso <https://ucum.org/ucum.html> ;
   rdfs:subClassOf rdfs:Resource ;
   owl:onDatatype xsd:string ;
   owl:withRestrictions (
@@ -1636,23 +1642,13 @@ qudt:Unit
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
-      owl:allValuesFrom qudt:UCUMci-term ;
-      owl:onProperty qudt:ucumCaseInsensitiveCode ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:allValuesFrom qudt:UCUMcs-term ;
-      owl:onProperty qudt:ucumCaseSensitiveCode ;
+      owl:allValuesFrom qudt:UCUMcs ;
+      owl:onProperty qudt:ucumCode ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:allValuesFrom xsd:string ;
       owl:onProperty qudt:iec61360Code ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:allValuesFrom xsd:string ;
-      owl:onProperty qudt:ucumCode ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -2908,24 +2904,38 @@ qudt:systemDimension
   rdfs:label "system dimension" ;
 .
 qudt:ucumCaseInsensitiveCode
+  a owl:AnnotationProperty ;
   a owl:DatatypeProperty ;
   dcterms:description "<em>ucumCode</em> associates a QUDT unit with a UCUM case-insensitive code."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "ucum case-insensitive code" ;
   rdfs:subPropertyOf qudt:ucumCode ;
+  owl:deprecated true ;
 .
 qudt:ucumCaseSensitiveCode
+  a owl:AnnotationProperty ;
   a owl:DatatypeProperty ;
   dcterms:description "<em>ucumCode</em> associates a QUDT unit with with a UCUM case-sensitive code."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "ucum case-sensitive code" ;
   rdfs:subPropertyOf qudt:ucumCode ;
+  owl:deprecated true ;
 .
 qudt:ucumCode
+  a owl:AnnotationProperty ;
   a owl:DatatypeProperty ;
-  dcterms:description "<p><em>ucumCode</em> associates a QUDT unit with its UCUM counterpart.</p><p>In SHACL the values are derived from specifi ucum properties using 'sh:values'.</p>"^^rdf:HTML ;
+  dcterms:description "<p><em>ucumCode</em> associates a QUDT unit with its UCUM code (case-sensitive). </p><p>In SHACL the values are derived from specifi ucum properties using 'sh:values'.</p>"^^rdf:HTML ;
+  dcterms:source <https://ucum.org/ucum.html> ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "ucum code" ;
+  rdfs:range [
+      a owl:Class ;
+      owl:unionOf (
+          qudt:UCUMcs
+          qudt:UCUMcs-term
+        ) ;
+    ] ;
+  rdfs:seeAlso <https://ucum.org/ucum.html> ;
   rdfs:subPropertyOf skos:notation ;
 .
 qudt:uneceCommonCode
