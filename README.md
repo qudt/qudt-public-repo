@@ -6,6 +6,8 @@ Overview
 
 This QUDT<sup>1</sup> public repository contains the schema and vocabulary source files for the graphs making up the QUDT collection. It is probably the most convenient way for software developers to include the QUDT ontologies in their work, and is the most up-to-date. However, for those who prefer the linked data world, each QUDT graph is also available in both a versioned and an unversioned form on the <a href="http://qudt.org">qudt.org</a> website.
 
+DOI reference for citations: https://doi.org/10.25504/FAIRsharing.d3pqw7
+
 
 Here is the core design pattern of the QUDT ontology:
 
@@ -45,4 +47,4 @@ QUDT.org is a member of the World Wide Web Consortium (W3C)
 
 Last updated by: Steve Ray (steve.ray@qudt.org)
 
-Last updated: July 1, 2020
+Last updated: September 10, 2020
