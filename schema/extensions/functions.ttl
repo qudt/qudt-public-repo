@@ -26,86 +26,53 @@
       sp:distinct true ;
       sp:resultVariables (
           [
-            sp:varName "result" ;
+            sp:varName "unit" ;
           ]
         ) ;
       sp:where (
           [
-            a sp:Optional ;
+            a sp:Union ;
             sp:elements (
-                [
-                  sp:object spin:_arg1 ;
-                  sp:predicate <http://qudt.org/schema/qudt/hasQuantityKind> ;
-                  sp:subject [
-                      sp:varName "unit" ;
-                    ] ;
-                ]
+                (
+                  [
+                    sp:object spin:_arg1 ;
+                    sp:predicate <http://qudt.org/schema/qudt/hasQuantityKind> ;
+                    sp:subject [
+                        sp:varName "unit" ;
+                      ] ;
+                  ]
+                )
+                (
+                  [
+                    a sp:NotExists ;
+                    sp:elements (
+                        [
+                          sp:object spin:_arg1 ;
+                          sp:predicate <http://qudt.org/schema/qudt/hasQuantityKind> ;
+                          sp:subject [
+                              sp:varName "unit" ;
+                            ] ;
+                        ]
+                      ) ;
+                  ]
+                  [
+                    sp:object [
+                        sp:varName "parent1" ;
+                      ] ;
+                    sp:predicate <http://www.w3.org/2004/02/skos/core#broader> ;
+                    sp:subject spin:_arg1 ;
+                  ]
+                  [
+                    sp:object [
+                        sp:varName "unit" ;
+                      ] ;
+                    sp:predicate <http://qudt.org/schema/qudt/appropriateUnit> ;
+                    sp:subject [
+                        sp:varName "parent1" ;
+                      ] ;
+                  ]
+                )
               ) ;
-          ]
-          [
-            a sp:Optional ;
-            sp:elements (
-                [
-                  sp:object [
-                      sp:varName "parent1" ;
-                    ] ;
-                  sp:predicate <http://www.w3.org/2004/02/skos/core#broader> ;
-                  sp:subject spin:_arg1 ;
-                ]
-                [
-                  sp:object [
-                      sp:varName "parent1" ;
-                    ] ;
-                  sp:predicate <http://qudt.org/schema/qudt/hasQuantityKind> ;
-                  sp:subject [
-                      sp:varName "parentUnit1" ;
-                    ] ;
-                ]
-              ) ;
-          ]
-          [
-            a sp:Optional ;
-            sp:elements (
-                [
-                  a sp:TriplePath ;
-                  sp:object [
-                      sp:varName "parent2" ;
-                    ] ;
-                  sp:path [
-                      a sp:SeqPath ;
-                      sp:path1 <http://www.w3.org/2004/02/skos/core#broader> ;
-                      sp:path2 <http://www.w3.org/2004/02/skos/core#broader> ;
-                    ] ;
-                  sp:subject spin:_arg1 ;
-                ]
-                [
-                  sp:object [
-                      sp:varName "parent2" ;
-                    ] ;
-                  sp:predicate <http://qudt.org/schema/qudt/hasQuantityKind> ;
-                  sp:subject [
-                      sp:varName "parentUnit2" ;
-                    ] ;
-                ]
-              ) ;
-          ]
-          [
-            a sp:Bind ;
-            sp:expression [
-                a sp:coalesce ;
-                sp:arg1 [
-                    sp:varName "unit" ;
-                  ] ;
-                sp:arg2 [
-                    sp:varName "parentUnit1" ;
-                  ] ;
-                sp:arg3 [
-                    sp:varName "parentUnit2" ;
-                  ] ;
-              ] ;
-            sp:variable [
-                sp:varName "result" ;
-              ] ;
           ]
         ) ;
     ] ;
