@@ -187,6 +187,30 @@ qudt:QuantityDimensionsGroup
   rdfs:label "Dimensions" ;
   sh:order "40"^^xsd:decimal ;
 .
+qudt:QuantityKind-appropriateUnit
+  a sh:NodeShape ;
+  sh:property [
+      sh:path qudt:appropriateUnit ;
+      sh:values [
+          sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+          sh:select """SELECT DISTINCT ?unit
+WHERE {
+{
+?unit qudt:hasQuantityKind $this .
+}
+UNION
+{
+NOT EXISTS {
+?unit qudt:hasQuantityKind $this .
+} .
+$this skos:broader ?parent1 . 
+?parent1 qudt:appropriateUnit ?unit .
+} .
+} """ ;
+        ] ;
+    ] ;
+  sh:targetClass qudt:QuantityKind ;
+.
 qudt:QuantityKind-qudt_applicableCGSUnit
   sh:group qudt:ApplicableUnitsGroup ;
 .
@@ -261,30 +285,6 @@ qudt:QuantityKind-qudt_qkdvNumerator
 qudt:QuantityKind-qudt_symbol
   sh:group qudt:ConceptDescriptionPropertyGroup ;
   sh:order "10"^^xsd:decimal ;
-.
-qudt:QuantityKind-shaclappropriateUnit
-  a sh:NodeShape ;
-  sh:property [
-      sh:path qudt:shaclappropriateUnit ;
-      sh:values [
-          sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
-          sh:select """SELECT DISTINCT ?unit
-WHERE {
-{
-?unit qudt:hasQuantityKind $this .
-}
-UNION
-{
-NOT EXISTS {
-?unit qudt:hasQuantityKind $this .
-} .
-$this skos:broader ?parent1 . 
-?parent1 qudt:shaclappropriateUnit ?unit .
-} .
-} """ ;
-        ] ;
-    ] ;
-  sh:targetClass qudt:QuantityKind ;
 .
 qudt:QuantityKind-skos_broader
   sh:group qudt:ConceptDescriptionPropertyGroup ;
