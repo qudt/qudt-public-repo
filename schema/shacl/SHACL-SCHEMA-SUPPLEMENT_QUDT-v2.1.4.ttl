@@ -1,5 +1,4 @@
 # baseURI: http://qudt.org/2.1/schema/shacl/overlay/qudt
-# imports: http://qudt.org/2.1/schema/shacl/qudt
 # imports: http://www.w3.org/ns/shacl#
 
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
@@ -22,12 +21,21 @@
 <http://qudt.org/2.1/schema/shacl/overlay/qudt>
   a owl:Ontology ;
   rdfs:label "QUDT SHACL Schema Supplement- Version 2.1" ;
-  owl:imports <http://qudt.org/2.1/schema/shacl/qudt> ;
   owl:imports sh: ;
   sh:declare [
       a sh:PrefixDeclaration ;
       sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
       sh:prefix "qudt" ;
+    ] ;
+  sh:declare [
+      a sh:PrefixDeclaration ;
+      sh:namespace "http://qudt.org/vocab/quantitykind/"^^xsd:anyURI ;
+      sh:prefix "quantitykind" ;
+    ] ;
+  sh:declare [
+      a sh:PrefixDeclaration ;
+      sh:namespace "http://qudt.org/vocab/unit/"^^xsd:anyURI ;
+      sh:prefix "unit" ;
     ] ;
   sh:declare [
       a sh:PrefixDeclaration ;
@@ -190,25 +198,27 @@ qudt:QuantityDimensionsGroup
 qudt:QuantityKind-appropriateUnit
   a sh:NodeShape ;
   sh:property [
-      sh:path qudt:appropriateUnit ;
-      sh:values [
-          sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
-          sh:select """SELECT DISTINCT ?unit
-WHERE {
-{
-?unit qudt:hasQuantityKind $this .
-}
-UNION
-{
-NOT EXISTS {
-?unit qudt:hasQuantityKind $this .
-} .
-$this skos:broader ?parent1 . 
-?parent1 qudt:appropriateUnit ?unit .
-} .
-} """ ;
+    a sh:PropertyShape ;
+    sh:path qudt:appropriateUnit ;
+    sh:values [
+      sh:distinct [
+        sh:if [
+          sh:exists [
+            sh:path [ sh:inversePath qudt:hasQuantityKind ]  ;             
+          ] ;
         ] ;
+        sh:then [
+          sh:path [ sh:inversePath qudt:hasQuantityKind ] ;
+        ] ; 
+        sh:else [
+          sh:path qudt:appropriateUnit ;
+          sh:nodes [
+            sh:path skos:broader ;
+          ] ;
+        ] ;
+      ] ;
     ] ;
+  ] ;
   sh:targetClass qudt:QuantityKind ;
 .
 qudt:QuantityKind-qudt_applicableCGSUnit
@@ -480,3 +490,8 @@ qudt:Verifiable-qudt_normativeReference
   sh:group qudt:ConceptDescriptionPropertyGroup ;
   sh:order "80"^^xsd:decimal ;
 .
+qudt:appropriateUnit
+  a owl:ObjectProperty ;
+  rdfs:label "appropriate unit" ;
+.
+
