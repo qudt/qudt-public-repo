@@ -1,5 +1,6 @@
 # baseURI: http://qudt.org/2.1/schema/shacl/overlay/qudt
-# imports: http://qudt.org/2.1/schema/qudt
+# imports: http://qudt.org/2.1/schema/shacl/qudt
+# imports: http://www.w3.org/ns/shacl#
 
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
@@ -21,7 +22,8 @@
 <http://qudt.org/2.1/schema/shacl/overlay/qudt>
   a owl:Ontology ;
   rdfs:label "QUDT SHACL Schema Supplement- Version 2.1" ;
-  owl:imports <http://qudt.org/2.1/schema/qudt> ;
+  owl:imports <http://qudt.org/2.1/schema/shacl/qudt> ;
+  owl:imports sh: ;
   sh:declare [
       a sh:PrefixDeclaration ;
       sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
@@ -29,8 +31,8 @@
     ] ;
   sh:declare [
       a sh:PrefixDeclaration ;
-      sh:namespace "http://qudt.org/vocab/unit/"^^xsd:anyURI ;
-      sh:prefix "unit" ;
+      sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
+      sh:prefix "skos" ;
     ] ;
 .
 qudt:ApplicableUnitsGroup
@@ -184,6 +186,30 @@ qudt:QuantityDimensionsGroup
   a sh:PropertyGroup ;
   rdfs:label "Dimensions" ;
   sh:order "40"^^xsd:decimal ;
+.
+qudt:QuantityKind-appropriateUnit
+  a sh:NodeShape ;
+  sh:property [
+      sh:path qudt:appropriateUnit ;
+      sh:values [
+          sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+          sh:select """SELECT DISTINCT ?unit
+WHERE {
+{
+?unit qudt:hasQuantityKind $this .
+}
+UNION
+{
+NOT EXISTS {
+?unit qudt:hasQuantityKind $this .
+} .
+$this skos:broader ?parent1 . 
+?parent1 qudt:appropriateUnit ?unit .
+} .
+} """ ;
+        ] ;
+    ] ;
+  sh:targetClass qudt:QuantityKind ;
 .
 qudt:QuantityKind-qudt_applicableCGSUnit
   sh:group qudt:ApplicableUnitsGroup ;
