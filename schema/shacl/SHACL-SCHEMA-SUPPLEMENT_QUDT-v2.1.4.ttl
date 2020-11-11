@@ -50,7 +50,7 @@ qudt:ApplicableUnitsGroup
 .
 qudt:AppropriateUnitsGroup
   a sh:PropertyGroup ;
-  rdfs:label "Appropriate Units" ;
+  rdfs:label "Appropriate Units 2" ;
   sh:order "15"^^xsd:decimal ;
 .
 qudt:Citation-qudt_description
@@ -203,34 +203,43 @@ qudt:QuantityDimensionsGroup
 qudt:QuantityKind-appropriateUnit
   a sh:NodeShape ;
   sh:property [
-    a sh:PropertyShape ;
-    sh:path qudt:appropriateUnit ;
-    sh:group qudt:AppropriateUnitsGroup ;
+      a sh:PropertyShape ;
+      sh:path qudt:appropriateUnit ;
+      sh:group qudt:AppropriateUnitsGroup ;
       sh:order "15"^^xsd:decimal ;
-    sh:values [
-      sh:distinct [
-        sh:if [
-          sh:exists [
-            sh:nodes [
-            sh:path [ sh:inversePath qudt:hasQuantityKind ]  ;             
-          ] ;
-          sh:filterShape qudt:Unit ;
-          ] ;
+      sh:values [
+          sh:distinct [
+              sh:else [
+                  sh:path qudt:appropriateUnit ;
+                  sh:nodes [
+                      sh:path skos:broader ;
+                    ] ;
+                ] ;
+              sh:if [
+                  sh:exists [
+                      sh:filterShape [
+                          sh:class qudt:Unit ;
+                        ] ;
+                      sh:nodes [
+                          sh:path [
+                              sh:inversePath qudt:hasQuantityKind ;
+                            ] ;
+                        ] ;
+                    ] ;
+                ] ;
+              sh:then [
+                  sh:filterShape [
+                      sh:class qudt:Unit ;
+                    ] ;
+                  sh:nodes [
+                      sh:path [
+                          sh:inversePath qudt:hasQuantityKind ;
+                        ] ;
+                    ] ;
+                ] ;
+            ] ;
         ] ;
-        sh:then [
-            sh:nodes [
-            sh:path [ sh:inversePath qudt:hasQuantityKind ]  ;             
-          ] ;
-          sh:filterShape qudt:Unit ;        ] ; 
-        sh:else [
-          sh:path qudt:appropriateUnit ;
-          sh:nodes [
-            sh:path skos:broader ;
-          ] ;
-        ] ;
-      ] ;
     ] ;
-  ] ;
   sh:targetClass qudt:QuantityKind ;
 .
 qudt:QuantityKind-qudt_applicableCGSUnit
@@ -506,4 +515,3 @@ qudt:appropriateUnit
   a owl:ObjectProperty ;
   rdfs:label "appropriate unit" ;
 .
-
