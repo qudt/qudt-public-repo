@@ -1,22 +1,23 @@
-# baseURI: http://qudt.org/2.1/schema/shacl/qudt
+# baseURI: http://qudt.org/2.1/schema/qudt
+# imports: http://datashapes.org/dash
 # imports: http://qudt.org/2.1/schema/extensions/imports
-# imports: http://qudt.org/2.1/schema/shacl/overlay/qudt
 # imports: http://www.linkedmodel.org/schema/dtype
 # imports: http://www.linkedmodel.org/schema/vaem
 # imports: http://www.w3.org/2004/02/skos/core
-# imports: http://www.w3.org/ns/shacl#
 
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix qudt.type: <http://qudt.org/vocab/type/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
 @prefix vaem: <http://www.linkedmodel.org/schema/vaem#> .
 @prefix voag: <http://voag.linkedmodel.org/schema/voag#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -65,18 +66,18 @@ dcterms:title
   a owl:AnnotationProperty ;
   rdfs:label "title" ;
 .
-<http://qudt.org/2.1/schema/shacl/qudt>
+<http://qudt.org/2.1/schema/qudt>
   a owl:Ontology ;
+  <http://datashapes.org/owl2shacl#createPropertyShapeURIsWithPrefixes> true ;
   vaem:hasGraphMetadata vaem:GMD_QUDT-SCHEMA ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "QUDT SHACL Schema  (noOWL)- Version 2.1.4" ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "QUDT Schema - Version 2.1.2" ;
+  owl:imports <http://datashapes.org/dash> ;
   owl:imports <http://qudt.org/2.1/schema/extensions/imports> ;
-  owl:imports <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   owl:imports <http://www.linkedmodel.org/schema/dtype> ;
   owl:imports <http://www.linkedmodel.org/schema/vaem> ;
   owl:imports <http://www.w3.org/2004/02/skos/core> ;
-  owl:imports sh: ;
-  owl:versionIRI <http://qudt.org/2.1.4/schema/shacl/qudt> ;
+  owl:versionIRI <http://qudt.org/2.1/schema/qudt> ;
 .
 qudt:AbstractQuantityKind
   a owl:Class ;
@@ -506,6 +507,7 @@ qudt:Datatype-qudt_mySQLName
   a sh:PropertyShape ;
   sh:path qudt:mySQLName ;
   sh:datatype xsd:string ;
+  sh:maxCount 1 ;
 .
 qudt:Datatype-qudt_odbcName
   a sh:PropertyShape ;
@@ -995,6 +997,7 @@ qudt:Prefix-qudt_ucumCode
   a sh:PropertyShape ;
   sh:path qudt:ucumCode ;
   sh:datatype xsd:string ;
+  sh:pattern "[\\x21,\\x23-\\x27,\\x2a,\\x2c,\\x30-\\x3c,\\x3e-\\x5a,\\x5c,\\x5e-\\x7a,\\x7c,\\x7e]+" ;
 .
 qudt:Quantifiable
   a owl:Class ;
@@ -1765,6 +1768,7 @@ qudt:UCUMci
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "case-insensitive UCUM code" ;
   rdfs:subClassOf rdfs:Resource ;
+  owl:deprecated true ;
   owl:onDatatype xsd:string ;
   owl:withRestrictions (
       [
@@ -1779,6 +1783,7 @@ qudt:UCUMci-term
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "case-insensitive UCUM term" ;
   rdfs:subClassOf rdfs:Resource ;
+  owl:deprecated true ;
   owl:onDatatype xsd:string ;
   owl:withRestrictions (
       [
@@ -1789,9 +1794,11 @@ qudt:UCUMci-term
 qudt:UCUMcs
   a rdfs:Datatype ;
   a sh:NodeShape ;
+  dcterms:source <https://ucum.org/ucum.html> ;
   rdfs:comment "Lexical pattern for the case-sensitive version of UCUM code" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "case-sensitive UCUM code" ;
+  rdfs:seeAlso <https://ucum.org/ucum.html> ;
   rdfs:subClassOf rdfs:Resource ;
   owl:onDatatype xsd:string ;
   owl:withRestrictions (
@@ -1803,9 +1810,11 @@ qudt:UCUMcs
 qudt:UCUMcs-term
   a rdfs:Datatype ;
   a sh:NodeShape ;
+  dcterms:source <https://ucum.org/ucum.html> ;
   rdfs:comment "Lexical pattern for the terminal symbols in the case-sensitive version of UCUM code" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "case-sensitive UCUM terminal" ;
+  rdfs:seeAlso <https://ucum.org/ucum.html> ;
   rdfs:subClassOf rdfs:Resource ;
   owl:onDatatype xsd:string ;
   owl:withRestrictions (
@@ -1844,12 +1853,15 @@ qudt:Unit
   sh:property qudt:Unit-qudt_abbreviation ;
   sh:property qudt:Unit-qudt_conversionMultiplier ;
   sh:property qudt:Unit-qudt_conversionOffset ;
+  sh:property qudt:Unit-qudt_denominatorDimensionVector ;
   sh:property qudt:Unit-qudt_expression ;
+  sh:property qudt:Unit-qudt_hasDimensionVector ;
   sh:property qudt:Unit-qudt_hasQuantityKind ;
   sh:property qudt:Unit-qudt_iec61360Code ;
   sh:property qudt:Unit-qudt_latexDefinition ;
   sh:property qudt:Unit-qudt_latexSymbol ;
   sh:property qudt:Unit-qudt_mathMLdefinition ;
+  sh:property qudt:Unit-qudt_numeratorDimensionVector ;
   sh:property qudt:Unit-qudt_omUnit ;
   sh:property qudt:Unit-qudt_siUnitsExpression ;
   sh:property qudt:Unit-qudt_symbol ;
@@ -1875,15 +1887,28 @@ qudt:Unit-qudt_conversionOffset
   sh:datatype xsd:double ;
   sh:maxCount 1 ;
 .
+qudt:Unit-qudt_denominatorDimensionVector
+  a sh:PropertyShape ;
+  sh:path qudt:denominatorDimensionVector ;
+  sh:class qudt:QuantityKindDimensionVector ;
+  sh:maxCount 1 ;
+.
 qudt:Unit-qudt_expression
   a sh:PropertyShape ;
   sh:path qudt:expression ;
   sh:minCount 0 ;
 .
+qudt:Unit-qudt_hasDimensionVector
+  a sh:PropertyShape ;
+  sh:path qudt:hasDimensionVector ;
+  sh:class qudt:QuantityKindDimensionVector ;
+  sh:maxCount 1 ;
+.
 qudt:Unit-qudt_hasQuantityKind
   a sh:PropertyShape ;
   sh:path qudt:hasQuantityKind ;
   sh:class qudt:QuantityKind ;
+  sh:maxCount 1 ;
 .
 qudt:Unit-qudt_iec61360Code
   a sh:PropertyShape ;
@@ -1908,6 +1933,12 @@ qudt:Unit-qudt_mathMLdefinition
   sh:datatype xsd:string ;
   sh:maxCount 1 ;
 .
+qudt:Unit-qudt_numeratorDimensionVector
+  a sh:PropertyShape ;
+  sh:path qudt:numeratorDimensionVector ;
+  sh:class qudt:QuantityKindDimensionVector ;
+  sh:maxCount 1 ;
+.
 qudt:Unit-qudt_omUnit
   a sh:PropertyShape ;
   sh:path qudt:omUnit ;
@@ -1928,7 +1959,7 @@ qudt:Unit-qudt_ucumCode
   a sh:PropertyShape ;
   sh:path qudt:ucumCode ;
   sh:datatype xsd:string ;
-  sh:pattern "[\\x21,\\x23-\\x27,\\x2a,\\x2c,\\x30-\\x3c,\\x3e-\\x5a,\\x5c,\\x5e-\\x7a,\\x7c,\\x7e]+" ;
+  sh:pattern "[\\x21-\\x7e]+" ;
 .
 qudt:Unit-qudt_uneceCommonCode
   a sh:PropertyShape ;
@@ -2202,9 +2233,10 @@ qudt:citation
 .
 qudt:code
   a owl:DatatypeProperty ;
-  dcterms:description "A code is a string that uniquely identifies a QUDT concept.  The code is constructed from the designator."^^rdf:HTML ;
+  dcterms:description "A code is a string that uniquely identifies a QUDT concept.  The code is constructed from the designator. The use of this property has been deprecated."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "code" ;
+  owl:deprecated true ;
 .
 qudt:coherentUnitOfSystem
   a owl:DeprecatedProperty ;
@@ -2214,7 +2246,6 @@ qudt:coherentUnitOfSystem
   rdfs:label "is coherent unit of system" ;
   rdfs:subPropertyOf qudt:definedUnitOfSystem ;
   owl:inverseOf qudt:hasCoherentUnit ;
-  owl:inverseOf qudt:hasNonCoherentUnit ;
 .
 qudt:coherentUnitSystem
   a owl:FunctionalProperty ;
@@ -2467,7 +2498,6 @@ qudt:floatPercentage
   owl:equivalentClass [
       a rdfs:Datatype ;
       rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-      owl:equivalentClass qudt:floatPercentage ;
       owl:onDatatype xsd:float ;
       owl:withRestrictions (
           [
@@ -2500,7 +2530,6 @@ qudt:hasAllowedUnit
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "allowed unit" ;
   rdfs:subPropertyOf qudt:hasUnit ;
-  owl:inverseOf qudt:allowedUnitOfSystem ;
 .
 qudt:hasBaseQuantityKind
   a owl:FunctionalProperty ;
@@ -2532,7 +2561,6 @@ qudt:hasDefinedUnit
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "defined unit" ;
   rdfs:subPropertyOf qudt:hasUnit ;
-  owl:inverseOf qudt:definedUnitOfSystem ;
 .
 qudt:hasDenominatorPart
   a owl:ObjectProperty ;
@@ -2565,6 +2593,11 @@ qudt:hasDimension
   a owl:ObjectProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "has dimension" ;
+.
+qudt:hasDimensionExpression
+  a owl:ObjectProperty ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "dimension expression" ;
 .
 qudt:hasDimensionVector
   a owl:ObjectProperty ;
@@ -2672,7 +2705,6 @@ qudt:integerPercentage
   owl:equivalentClass [
       a rdfs:Datatype ;
       rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-      owl:equivalentClass qudt:integerPercentage ;
       owl:onDatatype xsd:integer ;
       owl:withRestrictions (
           [
@@ -2770,12 +2802,12 @@ qudt:lowerBound
   rdfs:label "lower bound" ;
 .
 qudt:mathDefinition
-  a owl:DatatypeProperty ;
+  a owl:AnnotationProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "math definition" ;
 .
 qudt:mathMLdefinition
-  a owl:DatatypeProperty ;
+  a owl:AnnotationProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "mathML definition" ;
   rdfs:subPropertyOf qudt:mathDefinition ;
@@ -2900,7 +2932,7 @@ qudt:permissibleTransformation
   rdfs:label "permissible transformation" ;
 .
 qudt:plainTextDescription
-  a owl:DatatypeProperty ;
+  a owl:AnnotationProperty ;
   dcterms:description "A plain text description is used to provide a description with only simple ASCII characters for cases where LaTeX , HTML or other markup would not be appropriate."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "description (plain text)" ;
@@ -2953,7 +2985,6 @@ qudt:quantityValue
   a owl:ObjectProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "quantity value" ;
-  owl:inverseOf qudt:valueQuantity ;
 .
 qudt:rationale
   a owl:DatatypeProperty ;
@@ -3046,11 +3077,29 @@ qudt:systemDimension
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "system dimension" ;
 .
+qudt:ucumCaseInsensitiveCode
+  a owl:AnnotationProperty ;
+  dcterms:description "<em>ucumCode</em> associates a QUDT unit with a UCUM case-insensitive code."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "ucum case-insensitive code" ;
+  rdfs:subPropertyOf qudt:ucumCode ;
+  owl:deprecated true ;
+.
+qudt:ucumCaseSensitiveCode
+  a owl:AnnotationProperty ;
+  dcterms:description "<em>ucumCode</em> associates a QUDT unit with with a UCUM case-sensitive code."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "ucum case-sensitive code" ;
+  rdfs:subPropertyOf qudt:ucumCode ;
+  owl:deprecated true ;
+.
 qudt:ucumCode
-  a owl:DatatypeProperty ;
-  dcterms:description "<p><em>ucumCode</em> associates a QUDT unit with its UCUM counterpart.</p><p>In SHACL the values are derived from specifi ucum properties using 'sh:values'.</p>"^^rdf:HTML ;
+  a owl:AnnotationProperty ;
+  dcterms:description "<p><em>ucumCode</em> associates a QUDT unit with its UCUM code (case-sensitive). </p><p>In SHACL the values are derived from specifi ucum properties using 'sh:values'.</p>"^^rdf:HTML ;
+  dcterms:source <https://ucum.org/ucum.html> ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "ucum code" ;
+  rdfs:seeAlso <https://ucum.org/ucum.html> ;
   rdfs:subPropertyOf skos:notation ;
 .
 qudt:uneceCommonCode
@@ -3109,7 +3158,6 @@ qudt:valueUnion
   rdfs:subClassOf rdfs:Resource ;
   owl:equivalentClass [
       a owl:Class ;
-      owl:equivalentClass qudt:valueUnion ;
       owl:unionOf (
           xsd:anySimpleType
           dtype:EnumeratedValue
@@ -3142,13 +3190,17 @@ voag:supersededBy
   rdfs:isDefinedBy <http://voag.linkedmodel.org/schema/voag> ;
   rdfs:label "superseded by" ;
 .
+<http://www.linkedmodel.org/schema/dtype>
+  vaem:namespace "http://www.linkedmodel.org/schema/dtype#"^^xsd:anyURI ;
+  vaem:namespacePrefix "dtype" ;
+.
 vaem:GMD_QUDT-SCHEMA
   a vaem:GraphMetaData ;
   dcterms:contributor "Daniel Mekonnen" ;
   dcterms:contributor "David Price" ;
   dcterms:contributor "Jack Hodges" ;
   dcterms:contributor "James E. Masters" ;
-  dcterms:contributor "Simon Cox" ;
+  dcterms:contributor "Simon J D Cox" ;
   dcterms:contributor "Steve Ray" ;
   dcterms:created "2011-04-20"^^xsd:date ;
   dcterms:creator "Ralph Hodgson" ;
@@ -3157,29 +3209,34 @@ vaem:GMD_QUDT-SCHEMA
 <p class=\"lm-para\">Except for unit prefixes, all units are specified in separate vocabularies. Descriptions are provided in both HTML and LaTeX formats. A quantity is a measure of an observable phenomenon, that, when associated with something, becomes a property of that thing; a particular object, event, or physical system. </p>
 
 <p class=\"lm-para\">A quantity has meaning in the context of a measurement (i.e. the thing measured, the measured value, the accuracy of measurement, etc.) whereas the underlying quantity kind is independent of any particular measurement. Thus, length is a quantity kind while the height of a rocket is a specific quantity of length; its magnitude that may be expressed in meters, feet, inches, etc.  Or, as stated at Wikipedia, in the language of measurement, quantities are quantifiable aspects of the world, such as time, distance, velocity, mass, momentum, energy, and weight, and units are used to describe their measure. Many of these quantities are related to each other by various physical laws, and as a result the units of some of the quantities can be expressed as products (or ratios) of powers of other units (e.g., momentum is mass times velocity and velocity is measured in distance divided by time).</p>"""^^rdf:HTML ;
-  dcterms:modified "2020-07-20T13:05:52.579-07:00"^^xsd:dateTime ;
+  dcterms:modified "2020-11-13T16:11:36.591-08:00"^^xsd:dateTime ;
+  dcterms:rights """
+  This product includes all or a portion of the UCUM table, UCUM codes, and UCUM definitions or is derived from it, subject to a license from Regenstrief Institute, Inc. and The UCUM Organization. Your use of the UCUM table, UCUM codes, UCUM definitions also is subject to this license, a copy of which is available at ​http://unitsofmeasure.org. The current complete UCUM table, UCUM Specification are available for download at ​http://unitsofmeasure.org. The UCUM table and UCUM codes are copyright © 1995-2009, Regenstrief Institute, Inc. and the Unified Codes for Units of Measures (UCUM) Organization. All rights reserved.
+
+THE UCUM TABLE (IN ALL FORMATS), UCUM DEFINITIONS, AND SPECIFICATION ARE PROVIDED 'AS IS.' ANY EXPRESS OR IMPLIED WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+  """ ;
   dcterms:rights "The QUDT Ontologies are issued under a Creative Commons Attribution 4.0 International License (CC BY 4.0), available at https://creativecommons.org/licenses/by/4.0/. Attribution should be made to QUDT.org" ;
   dcterms:subject "QUDT" ;
-  dcterms:title "QUDT Schema - Version 2.1.4" ;
+  dcterms:title "QUDT Schema - Version 2.1.2" ;
   qudt:informativeReference "http://unitsofmeasure.org/trac"^^xsd:anyURI ;
   qudt:informativeReference "http://www.bipm.org/en/publications/si-brochure"^^xsd:anyURI ;
   qudt:informativeReference "http://www.bipm.org/utils/common/documents/jcgm/JCGM_200_2008.pdf"^^xsd:anyURI ;
   qudt:informativeReference "https://books.google.com/books?id=pIlCAAAAIAAJ&dq=dimensional+analysis&hl=en"^^xsd:anyURI ;
   qudt:informativeReference "https://www.nist.gov/physical-measurement-laboratory/special-publication-811"^^xsd:anyURI ;
   vaem:graphName "qudt" ;
-  vaem:graphTitle "Quantities, Units, Dimensions and Types (QUDT) Schema - Version 2.1.4" ;
+  vaem:graphTitle "Quantities, Units, Dimensions and Types (QUDT) Schema - Version 2.1.2" ;
   vaem:hasGraphRole vaem:SchemaGraph ;
   vaem:hasOwner vaem:QUDT ;
   vaem:hasSteward vaem:QUDT ;
   vaem:intent "Specifies the schema for quantities, units and dimensions. Types are defined in other schemas." ;
   vaem:isMetadataFor <http://qudt.org/2.1/schema/qudt> ;
-  vaem:latestPublishedVersion "http://www.qudt.org/doc/2020/07/DOC_SCHEMA-QUDT-v2.1.html"^^xsd:anyURI ;
+  vaem:latestPublishedVersion "http://www.qudt.org/doc/2020/11/DOC_SCHEMA-QUDT-v2.1.html"^^xsd:anyURI ;
   vaem:logo "http://www.linkedmodel.org/lib/lm/images/logos/qudt_logo-300x110.png"^^xsd:anyURI ;
   vaem:namespace "http://qudt.org/schema/qudt/" ;
   vaem:namespacePrefix "qudt" ;
   vaem:owner "qudt.org" ;
-  vaem:previousPublishedVersion "http://www.qudt.org/doc/2020/06/DOC_SCHEMA-QUDT-v2.1.html"^^xsd:anyURI ;
-  vaem:revision "2.1.4" ;
+  vaem:previousPublishedVersion "http://www.qudt.org/doc/2020/10/DOC_SCHEMA-QUDT-v2.1.html"^^xsd:anyURI ;
+  vaem:revision "2.1" ;
   vaem:turtleFileURL "http://qudt.org/2.1/schema/qudt"^^xsd:anyURI ;
   vaem:usesNonImportedResource dcterms:abstract ;
   vaem:usesNonImportedResource dcterms:contributor ;
@@ -3193,7 +3250,7 @@ vaem:GMD_QUDT-SCHEMA
   vaem:usesNonImportedResource voag:QUDT-Attribution ;
   vaem:withAttributionTo voag:QUDT-Attribution ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "QUDT Schema - Version 2.1.4" ;
+  rdfs:label "QUDT Schema - Version 2.1.2" ;
   owl:versionIRI <http://qudt.org/2.1/schema/qudt> ;
 .
 vaem:QUDT
