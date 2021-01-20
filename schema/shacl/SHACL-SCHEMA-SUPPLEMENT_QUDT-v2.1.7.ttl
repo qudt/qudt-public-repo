@@ -1,4 +1,7 @@
 # baseURI: http://qudt.org/2.1/schema/shacl/overlay/qudt
+# imports: http://datashapes.org/dash
+# imports: http://qudt.org/2.1/schema/shacl/customisations/qudt
+# imports: http://qudt.org/2.1/schema/shacl/qudt
 # imports: http://www.w3.org/ns/shacl#
 
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
@@ -20,7 +23,10 @@
 
 <http://qudt.org/2.1/schema/shacl/overlay/qudt>
   a owl:Ontology ;
-  rdfs:label "QUDT SHACL Schema Supplement- Version 2.1" ;
+  rdfs:label "QUDT SHACL Schema Supplement- Version 2.1.7" ;
+  owl:imports <http://datashapes.org/dash> ;
+  owl:imports <http://qudt.org/2.1/schema/shacl/customisations/qudt> ;
+  owl:imports <http://qudt.org/2.1/schema/shacl/qudt> ;
   owl:imports sh: ;
   sh:declare [
       a sh:PrefixDeclaration ;
@@ -43,29 +49,68 @@
       sh:prefix "skos" ;
     ] ;
 .
+qudt:AppropriateUnitPropertyShape
+  a sh:PropertyShape ;
+  sh:path qudt:appropriateUnit ;
+  rdfs:label "Appropriate Unit Property Shape" ;
+  sh:values [
+      sh:distinct [
+          sh:else [
+              sh:path qudt:appropriateUnit ;
+              sh:nodes [
+                  sh:path skos:broader ;
+                ] ;
+            ] ;
+          sh:if [
+              sh:exists [
+                  sh:filterShape [
+                      sh:class qudt:Unit ;
+                    ] ;
+                  sh:nodes [
+                      sh:path [
+                          sh:inversePath qudt:hasQuantityKind ;
+                        ] ;
+                    ] ;
+                ] ;
+            ] ;
+          sh:then [
+              sh:filterShape [
+                  sh:class qudt:Unit ;
+                ] ;
+              sh:nodes [
+                  sh:path [
+                      sh:inversePath qudt:hasQuantityKind ;
+                    ] ;
+                ] ;
+            ] ;
+        ] ;
+    ] ;
+.
 qudt:Citation-qudt_description
   sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
 .
 qudt:Concept
   sh:property qudt:Concept-rdf_type ;
   sh:property qudt:Concept-rdfs_label ;
-.
-qudt:Concept-dct_description
-  sh:deactivated true ;
-  sh:group qudt:ConceptDescriptionPropertyGroup ;
-  sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
-  sh:order "25"^^xsd:decimal ;
+  sh:property qudt:Concept-rdfs_seeAlso ;
 .
 qudt:Concept-rdf_type
   a sh:PropertyShape ;
   sh:path rdf:type ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   sh:minCount 1 ;
 .
 qudt:Concept-rdfs_label
   a sh:PropertyShape ;
   sh:path rdfs:label ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   sh:minCount 1 ;
   sh:order "10"^^xsd:decimal ;
+.
+qudt:Concept-rdfs_seeAlso
+  a sh:PropertyShape ;
+  sh:path rdfs:seeAlso ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
 .
 qudt:EnumeratedValue-qudt_description
   sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
@@ -86,15 +131,15 @@ qudt:HTMLOrStringOrLangStringOrLatexString
         sh:datatype qudt:LatexString ;
       ]
     ) ;
-  rdfs:comment "Defines an rdf:List that can be used in property constraints as value for sh:or to indicate that all values of a property must be either rdf:HTML, xsd:string or rdf:langString, or a qudf:LatexString" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt.shapes.all> ;
+  rdfs:comment "Defines an rdf:List that can be used in property constraints as value for sh:or to indicate that all values of a property must be either rdf:HTML, xsd:string or rdf:langString, or a qudt:LatexString" ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   rdfs:label "HTML or string or langString or LatexString" ;
 .
 qudt:Narratable
   a qudt:AspectClass ;
   a sh:NodeShape ;
   rdfs:comment "<p><em>Narratable</em> specifies properties that provide for documentation and references.</p>"^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   rdfs:label "Narratable" ;
   rdfs:subClassOf qudt:Aspect ;
 .
@@ -127,75 +172,31 @@ qudt:NumericUnionList
       ]
     ) ;
   rdfs:comment "An rdf:List that can be used in property constraints as value for sh:or to indicate that all values of a property must be either xsd:integer, xsd:float, xsd:double or xsd:decimal." ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt.shapes.all> ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   rdfs:label "Numeric Union List" ;
-.
-qudt:Quantity-qudt_baseUnitDimensions
-  sh:group qudt:QuantityDimensionsGroup ;
-  sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
-  sh:order "20"^^xsd:decimal ;
 .
 qudt:Quantity-qudt_description
   sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
 .
-qudt:QuantityKind-appropriateUnit
-  a sh:NodeShape ;
-  sh:property [
-      a sh:PropertyShape ;
-      sh:path qudt:appropriateUnit ;
-      sh:values [
-          sh:distinct [
-              sh:else [
-                  sh:path qudt:appropriateUnit ;
-                  sh:nodes [
-                      sh:path skos:broader ;
-                    ] ;
-                ] ;
-              sh:if [
-                  sh:exists [
-                      sh:filterShape [
-                          sh:class qudt:Unit ;
-                        ] ;
-                      sh:nodes [
-                          sh:path [
-                              sh:inversePath qudt:hasQuantityKind ;
-                            ] ;
-                        ] ;
-                    ] ;
-                ] ;
-              sh:then [
-                  sh:filterShape [
-                      sh:class qudt:Unit ;
-                    ] ;
-                  sh:nodes [
-                      sh:path [
-                          sh:inversePath qudt:hasQuantityKind ;
-                        ] ;
-                    ] ;
-                ] ;
-            ] ;
-        ] ;
-    ] ;
-  sh:targetClass qudt:QuantityKind ;
+qudt:QuantityKind
+  sh:property qudt:AppropriateUnitPropertyShape ;
 .
 qudt:QuantityKind-qudt_baseCGSUnitDimensions
-  sh:group qudt:QuantityDimensionsGroup ;
   sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
 .
 qudt:QuantityKind-qudt_baseISOUnitDimensions
-  sh:group qudt:QuantityDimensionsGroup ;
   sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
 .
 qudt:QuantityKind-qudt_baseImperialUnitDimensions
-  sh:group qudt:QuantityDimensionsGroup ;
   sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
 .
 qudt:QuantityKind-qudt_baseSIUnitDimensions
-  sh:group qudt:QuantityDimensionsGroup ;
   sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
 .
 qudt:QuantityKind-qudt_baseUSCustomaryUnitDimensions
-  sh:group qudt:QuantityDimensionsGroup ;
+  sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
+.
+qudt:QuantityKind-qudt_baseUnitDimensions
   sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
 .
 qudt:QuantityKindDimensionVector-dimensionExponentForAmountOfSubstance
@@ -233,6 +234,7 @@ qudt:Rule-qudt_example
 .
 qudt:SymbolAndExpressionDisjointPropertiesConstraint
   a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   rdfs:label "Symbol and expression disjoint properties constraint" ;
   sh:sparql [
       rdfs:comment "Checks that a unit or quantitykind does not have both a symbol and an expression" ;
@@ -250,6 +252,7 @@ WHERE {
 .
 qudt:UniqueSymbolTypeRestrictedPropertyConstraint
   a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   rdfs:label "Unique symbol type restricted property constraint" ;
   sh:severity sh:Info ;
   sh:sparql [
@@ -276,5 +279,6 @@ qudt:Unit
 .
 qudt:appropriateUnit
   a owl:ObjectProperty ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   rdfs:label "appropriate unit" ;
 .
