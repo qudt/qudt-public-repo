@@ -23,7 +23,7 @@
 
 <http://qudt.org/2.1/schema/shacl/overlay/qudt>
   a owl:Ontology ;
-  rdfs:label "QUDT SHACL Schema Supplement- Version 2.1.7" ;
+  rdfs:label "QUDT SHACL Schema Supplement- Version 2.1.8" ;
   owl:imports <http://datashapes.org/dash> ;
   owl:imports <http://qudt.org/2.1/schema/shacl/customisations/qudt> ;
   owl:imports <http://qudt.org/2.1/schema/shacl/qudt> ;
@@ -47,43 +47,6 @@
       a sh:PrefixDeclaration ;
       sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
       sh:prefix "skos" ;
-    ] ;
-.
-qudt:AppropriateUnitPropertyShape
-  a sh:PropertyShape ;
-  sh:path qudt:appropriateUnit ;
-  rdfs:label "Appropriate Unit Property Shape" ;
-  sh:values [
-      sh:distinct [
-          sh:else [
-              sh:path qudt:appropriateUnit ;
-              sh:nodes [
-                  sh:path skos:broader ;
-                ] ;
-            ] ;
-          sh:if [
-              sh:exists [
-                  sh:filterShape [
-                      sh:class qudt:Unit ;
-                    ] ;
-                  sh:nodes [
-                      sh:path [
-                          sh:inversePath qudt:hasQuantityKind ;
-                        ] ;
-                    ] ;
-                ] ;
-            ] ;
-          sh:then [
-              sh:filterShape [
-                  sh:class qudt:Unit ;
-                ] ;
-              sh:nodes [
-                  sh:path [
-                      sh:inversePath qudt:hasQuantityKind ;
-                    ] ;
-                ] ;
-            ] ;
-        ] ;
     ] ;
 .
 qudt:Citation-qudt_description
@@ -178,9 +141,6 @@ qudt:NumericUnionList
 qudt:Quantity-qudt_description
   sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
 .
-qudt:QuantityKind
-  sh:property qudt:AppropriateUnitPropertyShape ;
-.
 qudt:QuantityKind-qudt_baseCGSUnitDimensions
   sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
 .
@@ -255,6 +215,7 @@ qudt:UniqueSymbolTypeRestrictedPropertyConstraint
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   rdfs:label "Unique symbol type restricted property constraint" ;
   sh:severity sh:Info ;
+  sh:deactivated true ;
   sh:sparql [
       rdfs:comment "Checks that a resource has a unique symbol within its type hierarchy below qudt:Concept" ;
       sh:message "Resource, '{$this}' of type '{?myType}', has non-unique symbol, '{?symbol}', that conflicts with '{?another}' of type '{?anotherType}'" ;
@@ -277,8 +238,8 @@ WHERE {{
 qudt:Unit
   rdfs:subClassOf qudt:Narratable ;
 .
-qudt:appropriateUnit
+qudt:applicableUnit
   a owl:ObjectProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
-  rdfs:label "appropriate unit" ;
+  rdfs:label "applicable unit" ;
 .
