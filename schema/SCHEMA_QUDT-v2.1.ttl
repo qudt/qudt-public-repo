@@ -38,7 +38,6 @@ dcterms:created
 .
 dcterms:creator
   a owl:AnnotationProperty ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "creator" ;
   rdfs:range xsd:string ;
 .
@@ -164,15 +163,25 @@ qudt:BinaryPrefix
   rdfs:label "Binary Prefix" ;
   rdfs:subClassOf qudt:Prefix ;
 .
+qudt:BitEncoding
+  a qudt:BitEncodingType ;
+  qudt:bits 1 ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "Bit Encoding" ;
+.
 qudt:BitEncodingType
   a owl:Class ;
   dcterms:description "A bit encoding is a correspondence between the two possible values of a bit, 0 or 1, and some interpretation. For example, in a boolean encoding, a bit denotes a truth value, where 0 corresponds to False and 1 corresponds to True." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "Bit Encoding" ;
   rdfs:subClassOf qudt:Encoding ;
+  owl:oneOf (
+      qudt:BitEncoding
+    ) ;
 .
 qudt:BooleanEncoding
   a qudt:BooleanEncodingType ;
+  qudt:bits 1 ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "Boolean Encoding" ;
 .
@@ -181,6 +190,11 @@ qudt:BooleanEncodingType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "Boolean encoding type" ;
   rdfs:subClassOf qudt:Encoding ;
+  owl:oneOf (
+    qudt:BooleanEncoding
+    qudt:BitEncoding
+    qudt:OctetEncoding
+  ) ;
 .
 qudt:ByteEncodingType
   a owl:Class ;
@@ -239,6 +253,9 @@ qudt:CharEncodingType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "Char Encoding Type" ;
   rdfs:subClassOf qudt:Encoding ;
+  owl:oneOf (
+      qudt:CharEncoding
+    ) ;
 .
 qudt:Citation
   a owl:Class ;
@@ -307,12 +324,12 @@ qudt:Concept
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
-      owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
+      owl:maxCardinality "1"^^xsd:int ;
       owl:onProperty qudt:abbreviation ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
-      owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
+      owl:maxCardinality "1"^^xsd:int ;
       owl:onProperty qudt:id ;
     ] ;
 .
@@ -511,7 +528,6 @@ qudt:DecimalPrefix
 .
 qudt:DerivedUnit
   a owl:Class ;
-  a owl:DeprecatedClass ;
   qudt:dbpediaMatch "http://dbpedia.org/resource/Category:SI_derived_units"^^xsd:anyURI ;
   rdfs:comment "A DerivedUnit is a type specification for units that are derived from other units."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
@@ -686,6 +702,11 @@ qudt:FloatingPointEncodingType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "Floating Point Encoding" ;
   rdfs:subClassOf qudt:Encoding ;
+  owl:oneOf (
+     qudt:DoublePrecisionEncoding
+     qudt:IEEE754_1985RealEncoding
+     qudt:SinglePrecisionRealEncoding
+  ) ;
 .
 qudt:IEEE754_1985RealEncoding
   a qudt:FloatingPointEncodingType ;
@@ -706,6 +727,13 @@ qudt:IntegerEncodingType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "Integer Encoding" ;
   rdfs:subClassOf qudt:Encoding ;
+  owl:oneOf (
+       qudt:LongUnsignedIntegerEncoding
+       qudt:ShortUnsignedIntegerEncoding
+       qudt:ShortUnsignedIntegerEncoding
+       qudt:SignedIntegerEncoding
+       qudt:UnsignedIntegerEncoding
+  ) ;
 .
 qudt:IntervalScale
   a owl:Class ;
@@ -1620,13 +1648,18 @@ qudt:UTF8-StringEncoding
 .
 qudt:Unit
   a owl:Class ;
+  dcterms:description "A unit of measure, or unit, is a particular quantity value that has been chosen as a scale for measuring other quantities the same kind (more generally of equivalent dimension). For example, the meter is a quantity of length that has been rigorously defined and standardized by the BIPM (International Board of Weights and Measures). Any measurement of the length can be expressed as a number multiplied by the unit meter. More formally, the value of a physical quantity Q with respect to a unit (U) is expressed as the scalar multiple of a real number (n) and U, as  \\(Q = nU\\)."^^qudt:LatexString ;
   qudt:informativeReference "http://dbpedia.org/resource/Category:Units_of_measure"^^xsd:anyURI ;
   qudt:informativeReference "http://www.allmeasures.com/Fullconversion.asp"^^xsd:anyURI ;
-  rdfs:comment "A unit of measure, or unit, is a particular quantity value that has been chosen as a scale for measuring other quantities the same kind (more generally of equivalent dimension). For example, the meter is a quantity of length that has been rigorously defined and standardized by the BIPM (International Board of Weights and Measures). Any measurement of the length can be expressed as a number multiplied by the unit meter. More formally, the value of a physical quantity Q with respect to a unit (U) is expressed as the scalar multiple of a real number (n) and U, as  \\(Q = nU\\)."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "Unit" ;
   rdfs:subClassOf qudt:Concept ;
   rdfs:subClassOf qudt:Verifiable ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:allValuesFrom qudt:SystemOfUnits ;
+      owl:onProperty qudt:allowedUnitOfSystem ;
+    ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:allValuesFrom qudt:QuantityKind ;
@@ -1671,11 +1704,6 @@ qudt:Unit
       a owl:Restriction ;
       owl:allValuesFrom xsd:string ;
       owl:onProperty qudt:uneceCommonCode ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:maxCardinality "1"^^xsd:int ;
-      owl:onProperty qudt:abbreviation ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -2015,7 +2043,7 @@ qudt:citation
 .
 qudt:code
   a owl:DatatypeProperty ;
-  dcterms:description "A code is a string that uniquely identifies a QUDT concept.  The code is constructed from the designator. The use of this property has been deprecated."^^rdf:HTML ;
+  dcterms:description "A code is a string that uniquely identifies a QUDT concept. The use of this property has been deprecated."^^rdf:HTML ;
   rdfs:domain qudt:Concept ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "code" ;
@@ -3090,7 +3118,7 @@ vaem:GMD_QUDT-SCHEMA
 <p class=\"lm-para\">Except for unit prefixes, all units are specified in separate vocabularies. Descriptions are provided in both HTML and LaTeX formats. A quantity is a measure of an observable phenomenon, that, when associated with something, becomes a property of that thing; a particular object, event, or physical system. </p>
 
 <p class=\"lm-para\">A quantity has meaning in the context of a measurement (i.e. the thing measured, the measured value, the accuracy of measurement, etc.) whereas the underlying quantity kind is independent of any particular measurement. Thus, length is a quantity kind while the height of a rocket is a specific quantity of length; its magnitude that may be expressed in meters, feet, inches, etc.  Or, as stated at Wikipedia, in the language of measurement, quantities are quantifiable aspects of the world, such as time, distance, velocity, mass, momentum, energy, and weight, and units are used to describe their measure. Many of these quantities are related to each other by various physical laws, and as a result the units of some of the quantities can be expressed as products (or ratios) of powers of other units (e.g., momentum is mass times velocity and velocity is measured in distance divided by time).</p>"""^^rdf:HTML ;
-  dcterms:modified "2022-04-20T11:00:01.493-04:00"^^xsd:dateTime ;
+  dcterms:modified "2022-04-25T11:00:01.493-04:00"^^xsd:dateTime ;
   dcterms:rights """
   This product includes all or a portion of the UCUM table, UCUM codes, and UCUM definitions or is derived from it, subject to a license from Regenstrief Institute, Inc. and The UCUM Organization. Your use of the UCUM table, UCUM codes, UCUM definitions also is subject to this license, a copy of which is available at ​http://unitsofmeasure.org. The current complete UCUM table, UCUM Specification are available for download at ​http://unitsofmeasure.org. The UCUM table and UCUM codes are copyright © 1995-2009, Regenstrief Institute, Inc. and the Unified Codes for Units of Measures (UCUM) Organization. All rights reserved.
 
