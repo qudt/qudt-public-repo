@@ -1989,67 +1989,15 @@ qudt:TransformType
   rdfs:subClassOf qudt:EnumeratedValue ;
   skos:prefLabel "Transform type" ;
 .
-qudt:UCUMci
-  a rdfs:Datatype ;
-  a sh:NodeShape ;
-  rdfs:comment "Lexical pattern for the case-insensitive version of UCUM code" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "case-insensitive UCUM code" ;
-  rdfs:subClassOf rdfs:Resource ;
-  owl:deprecated true ;
-  owl:onDatatype xsd:string ;
-  owl:withRestrictions (
-      [
-        xsd:pattern "[\\x21-\\x60,\\x7b-\\x7e]+" ;
-      ]
-    ) ;
-.
-qudt:UCUMci-term
-  a rdfs:Datatype ;
-  a sh:NodeShape ;
-  rdfs:comment "Lexical pattern for the terminal symbols in the case-insensitive version of UCUM code" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "case-insensitive UCUM term" ;
-  rdfs:subClassOf rdfs:Resource ;
-  owl:deprecated true ;
-  owl:onDatatype xsd:string ;
-  owl:withRestrictions (
-      [
-        xsd:pattern "[\\x21,\\x23-\\x27,\\x2a,\\x2c,\\x30-\\x3c,\\x3e-\\x5a,\\x5c,\\x5e-\\x60,\\x7c,\\x7e]+" ;
-      ]
-    ) ;
-.
 qudt:UCUMcs
   a rdfs:Datatype ;
   a sh:NodeShape ;
-  dcterms:source "https://ucum.org/ucum.html"^^xsd:anyURI ;
+  dcterms:source <https://ucum.org/ucum.html> ;
   rdfs:comment "Lexical pattern for the case-sensitive version of UCUM code" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "case-sensitive UCUM code" ;
   rdfs:seeAlso <https://ucum.org/ucum.html> ;
-  rdfs:subClassOf rdfs:Resource ;
-  owl:onDatatype xsd:string ;
-  owl:withRestrictions (
-      [
-        xsd:pattern "[\\x21-\\x7e]+" ;
-      ]
-    ) ;
-.
-qudt:UCUMcs-term
-  a rdfs:Datatype ;
-  a sh:NodeShape ;
-  dcterms:source "https://ucum.org/ucum.html"^^xsd:anyURI ;
-  rdfs:comment "Lexical pattern for the terminal symbols in the case-sensitive version of UCUM code" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "case-sensitive UCUM terminal" ;
-  rdfs:seeAlso <https://ucum.org/ucum.html> ;
-  rdfs:subClassOf rdfs:Resource ;
-  owl:onDatatype xsd:string ;
-  owl:withRestrictions (
-      [
-        xsd:pattern "[\\x21,\\x23-\\x27,\\x2a,\\x2c,\\x30-\\x3c,\\x3e-\\x5a,\\x5c,\\x5e-\\x7a,\\x7c,\\x7e]+" ;
-      ]
-    ) ;
+  rdfs:subClassOf xsd:string ;
 .
 qudt:UNSIGNED
   a qudt:SignednessType ;
@@ -2108,14 +2056,34 @@ qudt:Unit-conversionMultiplier
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   sh:path qudt:conversionMultiplier ;
-  sh:class dtype:numericUnion ;
+  sh:or (
+      [
+        sh:datatype xsd:decimal ;
+      ]
+      [
+        sh:datatype xsd:double ;
+      ]
+      [
+        sh:datatype xsd:float ;
+      ]
+    ) ;
   sh:maxCount 1 ;
 .
 qudt:Unit-conversionOffset
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   sh:path qudt:conversionOffset ;
-  sh:class dtype:numericUnion ;
+  sh:or (
+      [
+        sh:datatype xsd:decimal ;
+      ]
+      [
+        sh:datatype xsd:double ;
+      ]
+      [
+        sh:datatype xsd:float ;
+      ]
+    ) ;
   sh:maxCount 1 ;
 .
 qudt:Unit-expression
@@ -2200,7 +2168,7 @@ qudt:Unit-ucumCode
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   sh:path qudt:ucumCode ;
-  sh:datatype xsd:string ;
+  sh:datatype qudt:UCUMcs ;
   sh:pattern "[\\x21-\\x7e]+" ;
 .
 qudt:Unit-udunitsCode
@@ -3363,21 +3331,6 @@ qudt:valueQuantity
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "value for quantity" ;
-.
-qudt:valueUnion
-  a rdfs:Datatype ;
-  a sh:NodeShape ;
-  dcterms:description "A datatype that is the union of numeric xsd data types. \"numericUnion\" is equivalent to the xsd specification that uses an xsd:union of memberTypes=\"xsd:decimal xsd:double xsd:float xsd:integer\"." ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "value union" ;
-  rdfs:subClassOf rdfs:Resource ;
-  owl:equivalentClass [
-  a rdfs:Class ;
-      owl:unionOf (
-          xsd:anySimpleType
-          dtype:EnumeratedValue
-        ) ;
-    ] ;
 .
 qudt:vbName
   a rdf:Property ;
