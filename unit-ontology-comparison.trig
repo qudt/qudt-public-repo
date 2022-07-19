@@ -1,0 +1,820 @@
+@base                     <https://raw.githubusercontent.com/qudt/qudt-public-repo/master/.github/workflows/unit-ontology-comparison.trig#> .
+@prefix abecto:           <java:de.uni_jena.cs.fusion.abecto.processor.> .
+@prefix av:               <http://w3id.org/abecto/vocabulary#> .
+@prefix dqv:              <http://www.w3.org/ns/dqv#> .
+@prefix oa:               <http://www.w3.org/ns/oa#> .
+@prefix om:               <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
+@prefix pplan:            <http://purl.org/net/p-plan#> .
+@prefix qudt:             <http://qudt.org/schema/qudt/> .
+@prefix qudtQuantityKind: <http://qudt.org/vocab/quantitykind/> .
+@prefix qudtUnit:         <http://qudt.org/vocab/unit/> .
+@prefix rdf:              <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:             <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sorepsu:          <http://sweetontology.net/reprSciUnits/> .
+@prefix wd:               <http://www.wikidata.org/entity/> .
+@prefix xsd:              <http://www.w3.org/2001/XMLSchema#> .
+
+<plan> a av:Plan ;
+    rdfs:label "Unit Ontology Comparison"@en;
+    .
+
+<aspectUnit> a av:Aspect ;
+    rdfs:label "Unit of Measurement"@en;
+    av:keyVariableName "unit" ;
+    .
+[]  a av:AspectPattern ;
+    av:ofAspect <aspectUnit> ;
+    av:associatedDataset <http://www.ontology-of-units-of-measure.org/resource/om-2/> ;
+    av:definingQuery """
+        PREFIX om: <http://www.ontology-of-units-of-measure.org/resource/om-2/>
+        PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        SELECT ?unit ?label ?symbol ?definition ?quantityKind ?ucum ?sameAs ?zeroAt ?oneEqualsOfBase
+        WHERE {
+            ?unit a/rdfs:subClassOf* om:Unit .
+            OPTIONAL { ?unit rdfs:label|om:alternativeLabel  ?label }
+            OPTIONAL { ?unit om:symbol ?symbol }
+            OPTIONAL { ?unit rdfs:comment ?definition }
+            OPTIONAL { ?unit ^om:commonlyHasUnit ?quantityKind }
+            OPTIONAL {
+                ?unit skos:notation ?ucumTmp .
+                BIND(str(?ucumTmp) AS ?ucum)
+            }
+            OPTIONAL { ?unit owl:sameAs ?sameAs }
+            OPTIONAL { ?unit <tmp:oneEqualsOfBase> ?oneEqualsOfBase }
+            OPTIONAL {
+                ?unit ^om:hasUnit/om:hasOff-Set ?offset .
+                BIND(?offset*-1.0 AS ?zeroAt)
+            }
+        }
+    """^^av:SparqlQuery ;
+    av:hasVariablePath
+        [ a av:VariablePath ; av:propertyPath "<http://www.w3.org/2004/02/skos/core#notation>"^^av:SparqlPropertyPath ; av:variableName "ucum" ],
+        [ a av:VariablePath ; av:propertyPath "^<http://www.ontology-of-units-of-measure.org/resource/om-2/hasUnit>/<http://www.ontology-of-units-of-measure.org/resource/om-2/hasOff-Set>"^^av:SparqlPropertyPath ; av:variableName "offset" ] ;
+    .
+[]  a av:AspectPattern ;
+    av:ofAspect <aspectUnit> ;
+    av:associatedDataset <http://qudt.org/> ;
+    av:definingQuery """
+        PREFIX qudt: <http://qudt.org/schema/qudt/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        SELECT ?unit ?label ?symbol ?definition ?quantityKind ?ucum ?sameAs ?zeroAt ?oneEqualsOfBase
+        WHERE {
+            ?unit a/rdfs:subClassOf* qudt:Unit .
+            OPTIONAL { ?unit qudt:description ?definition }
+            OPTIONAL { ?unit qudt:symbol ?symbol }
+            OPTIONAL { { ?unit rdfs:label ?label } UNION { ?unit skos:prefLabel ?label } UNION { ?unit skos:altLabel ?label } }
+            OPTIONAL { ?unit qudt:hasQuantityKind ?quantityKind }
+            OPTIONAL {
+                ?unit qudt:ucumCode ?ucumTmp .
+                BIND(str(?ucumTmp) AS ?ucum)
+            }
+            OPTIONAL { ?unit qudt:omUnit ?sameAs }
+            OPTIONAL { ?unit qudt:conversionMultiplier ?oneEqualsOfBase }
+            OPTIONAL { ?unit qudt:conversionOffset ?zeroAt }
+        }
+    """^^av:SparqlQuery ;
+    av:hasVariablePath
+        [ a av:VariablePath ; av:propertyPath "<http://qudt.org/schema/qudt/ucumCode>"^^av:SparqlPropertyPath ; av:variableName "ucum" ] ;
+    .
+[]  a av:AspectPattern ;
+    av:ofAspect <aspectUnit> ;
+    av:associatedDataset <http://sweetontology.net/> ;
+    av:definingQuery """
+        PREFIX sorepsu: <http://sweetontology.net/reprSciUnits/>
+        PREFIX sorelsc: <http://sweetontology.net/relaSci/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        SELECT ?unit ?label ?symbol ?ucum ?zeroAt ?oneEqualsOfBase
+        WHERE {
+            ?unit a/rdfs:subClassOf* sorepsu:Unit .
+            OPTIONAL { ?unit rdfs:label ?label }
+            OPTIONAL { ?unit sorelsc:hasSymbol ?symbol }
+            OPTIONAL {
+                ?unit skos:notation ?ucumTmp .
+                BIND(str(?ucumTmp) AS ?ucum)
+            }
+            OPTIONAL { ?unit <tmp:oneEqualsOfBase> ?oneEqualsOfBase }
+            OPTIONAL { ?unit <tmp:zeroAtOfBase> ?zeroAt }
+        }
+    """^^av:SparqlQuery ;
+    .
+[]  a av:AspectPattern ;
+    av:ofAspect <aspectUnit> ;
+    av:associatedDataset <http://www.wikidata.org/> ;
+    av:definingQuery """
+		PREFIX p: <http://www.wikidata.org/prop/>
+		PREFIX psv: <http://www.wikidata.org/prop/statement/value/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX wikibase: <http://wikiba.se/ontology#>
+        PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+        PREFIX wd: <http://www.wikidata.org/entity/>
+        SELECT ?unit ?label ?symbol ?quantityKind ?ucum ?oneEqualsOfBase
+        WHERE {
+            ?unit wdt:P31/wdt:P279* wd:Q47574 . # units of measurement
+            #FILTER(NOT EXISTS { ?unit wdt:P31/wdt:P279* wd:Q8142 }) # without currencies
+            #FILTER(NOT EXISTS { ?unit wdt:P31/wdt:P279* wd:Q11639620 }) # without monetary subunits
+            {?unit rdfs:label ?label } UNION { ?unit skos:altLabel ?label }
+            OPTIONAL { ?unit wdt:P5061 ?symbol }
+            OPTIONAL { ?unit wdt:P111 ?quantityKind }
+            OPTIONAL { ?unit wdt:P7825 ?ucum }
+            OPTIONAL { ?unit p:P2442/psv:P2442/wikibase:quantityAmount ?oneEqualsOfBase }
+        }
+    """^^av:SparqlQuery ;
+    .
+
+<aspectQuantityKind> a av:Aspect ;
+    rdfs:label "Quantity Kind"@en;
+    av:keyVariableName "quantityKind" ;
+    .
+[]  a av:AspectPattern ;
+    av:ofAspect <aspectQuantityKind> ;
+    av:associatedDataset <http://www.ontology-of-units-of-measure.org/resource/om-2/> ;
+    av:definingQuery """
+        PREFIX om: <http://www.ontology-of-units-of-measure.org/resource/om-2/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        SELECT ?quantityKind ?label ?amountOfSubstanceDimensionExponent ?electricCurrentDimensionExponent ?lengthDimensionExponent ?luminousIntensityDimensionExponent ?massDimensionExponent ?temperatureDimensionExponent ?timeDimensionExponent
+        WHERE {
+            ?quantityKind
+                rdfs:subClassOf
+                    om:Quantity ;
+                rdfs:label
+                    ?label ;
+                om:symbol
+                    ?symbol .
+            OPTIONAL {
+                ?quantityKind
+                    rdfs:subClassOf [
+                        a owl:Restriction ;
+                        owl:onProperty om:hasDimension ;
+                        owl:hasValue [
+                            a om:Dimension ;
+                            om:hasSIAmountOfSubstanceDimensionExponent        ?amountOfSubstanceDimensionExponent ;
+                            om:hasSIElectricCurrentDimensionExponent          ?electricCurrentDimensionExponent ;
+                            om:hasSILengthDimensionExponent                   ?lengthDimensionExponent ;
+                            om:hasSILuminousIntensityDimensionExponent        ?luminousIntensityDimensionExponent ;
+                            om:hasSIMassDimensionExponent                     ?massDimensionExponent ;
+                            om:hasSIThermodynamicTemperatureDimensionExponent ?temperatureDimensionExponent ;
+                            om:hasSITimeDimensionExponent                     ?timeDimensionExponent
+                        ]
+                    ] .
+            }
+        }
+    """^^av:SparqlQuery ;
+    .
+[]  a av:AspectPattern ;
+    av:ofAspect <aspectQuantityKind> ;
+    av:associatedDataset <http://qudt.org/> ;
+    av:definingQuery """
+        PREFIX qudt: <http://qudt.org/schema/qudt/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT ?quantityKind ?label ?symbol ?amountOfSubstanceDimensionExponent ?electricCurrentDimensionExponent ?lengthDimensionExponent ?luminousIntensityDimensionExponent ?massDimensionExponent ?temperatureDimensionExponent ?timeDimensionExponent
+        WHERE {
+            ?quantityKind a qudt:QuantityKind ;
+                          rdfs:label ?label ;
+                          qudt:symbol ?symbol ;
+                          qudt:hasDimensionVector ?dimensionVector .
+            ?dimensionVector a/rdfs:subClassOf*                                qudt:QuantityKindDimensionVector ;
+                             qudt:dimensionExponentForAmountOfSubstance        ?amountOfSubstanceDimensionExponent ;
+                             qudt:dimensionExponentForElectricCurrent          ?electricCurrentDimensionExponent ;
+                             qudt:dimensionExponentForLength                   ?lengthDimensionExponent ;
+                             qudt:dimensionExponentForLuminousIntensity        ?luminousIntensityDimensionExponent ;
+                             qudt:dimensionExponentForMass                     ?massDimensionExponent ;
+                             qudt:dimensionExponentForThermodynamicTemperature ?temperatureDimensionExponent ;
+                             qudt:dimensionExponentForTime                     ?timeDimensionExponent ;
+                             qudt:dimensionlessExponent                        ?dimensionlessExponent .
+        }
+    """^^av:SparqlQuery ;
+    .
+[]  a av:AspectPattern ;
+    av:ofAspect <aspectQuantityKind> ;
+    av:associatedDataset <http://www.wikidata.org/> ;
+    av:definingQuery """
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+        PREFIX p: <http://www.wikidata.org/prop/>
+        PREFIX pq: <http://www.wikidata.org/prop/qualifier/>
+        PREFIX ps: <http://www.wikidata.org/prop/statement/>
+        SELECT ?quantityKind ?label ?symbol ?amountOfSubstanceDimensionExponent ?electricCurrentDimensionExponent ?lengthDimensionExponent ?luminousIntensityDimensionExponent ?massDimensionExponent ?temperatureDimensionExponent ?timeDimensionExponent
+        WHERE {
+            { ?quantityKind rdfs:label ?label } UNION { ?quantityKind skos:altLabel ?label }
+            OPTIONAL { ?quantityKind p:P7973/pq:P487 ?symbol }
+            ?quantityKind wdt:P4020 ?dimensionLabel .
+            BIND(STRBEFORE(STRAFTER(STR(?dimensionLabel),"<annotation encoding=\\"application/x-tex\\">{\\\\displaystyle {"),"}</annotation>") AS ?dimensionLabelTex)
+            BIND(REPLACE(?dimensionLabelTex,"\\\\\\\\mathsf \\\\{\\\\s*(\\\\S+)\\\\s*}}\\\\s*(\\\\{|$)","\\\\\\\\mathsf {$1}}^{1}$2") AS ?dimensionLabelTexWithOnes)
+            BIND(COALESCE(xsd:integer(STRBEFORE(STRAFTER(?dimensionLabelTexWithOnes,"{N}}^{"),"}")),0) AS ?amountOfSubstanceDimensionExponent)
+            BIND(COALESCE(xsd:integer(STRBEFORE(STRAFTER(?dimensionLabelTexWithOnes,"{I}}^{"),"}")),0) AS ?electricCurrentDimensionExponent)
+            BIND(COALESCE(xsd:integer(STRBEFORE(STRAFTER(?dimensionLabelTexWithOnes,"{L}}^{"),"}")),0) AS ?lengthDimensionExponent)
+            BIND(COALESCE(xsd:integer(STRBEFORE(STRAFTER(?dimensionLabelTexWithOnes,"{J}}^{"),"}")),0) AS ?luminousIntensityDimensionExponent)
+            BIND(COALESCE(xsd:integer(STRBEFORE(STRAFTER(?dimensionLabelTexWithOnes,"{M}}^{"),"}")),0) AS ?massDimensionExponent)
+            BIND(COALESCE(xsd:integer(STRBEFORE(STRAFTER(STRAFTER(?dimensionLabelTexWithOnes,"{\\\\Theta"),"{"),"}")),0) AS ?temperatureDimensionExponent)
+            BIND(COALESCE(xsd:integer(STRBEFORE(STRAFTER(?dimensionLabelTexWithOnes,"{T}}^{"),"}")),0) AS ?timeDimensionExponent)
+        }
+    """^^av:SparqlQuery ;
+    av:hasVariablePath
+        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>"^^av:SparqlPropertyPath ; av:variableName "amountOfSubstanceDimensionExponent" ] ,
+        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>"^^av:SparqlPropertyPath ; av:variableName "electricCurrentDimensionExponent" ] ,
+        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>"^^av:SparqlPropertyPath ; av:variableName "lengthDimensionExponent" ] ,
+        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>"^^av:SparqlPropertyPath ; av:variableName "luminousIntensityDimensionExponent" ] ,
+        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>"^^av:SparqlPropertyPath ; av:variableName "massDimensionExponent" ] ,
+        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>"^^av:SparqlPropertyPath ; av:variableName "temperatureDimensionExponent" ] ,
+        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>"^^av:SparqlPropertyPath ; av:variableName "timeDimensionExponent" ] ;
+    .
+
+
+<om2Source> a av:Step ;
+    rdfs:label "Load OM2"@en;
+    pplan:isStepOfPlan <plan> ;
+    av:processorClass abecto:UrlSourceProcessor ;
+    av:associatedDataset <http://www.ontology-of-units-of-measure.org/resource/om-2/> ;
+    av:hasParameter [av:key "url" ; av:value <https://raw.githubusercontent.com/HajoRijgersberg/OM/master/om-2.0.rdf>,
+                                             <https://raw.githubusercontent.com/HajoRijgersberg/OM/master/om-2-ucum.ttl> ] ;
+    .
+
+<qudt2Source> a av:Step ;
+    rdfs:label "Load QUDT2"@en;
+    pplan:isStepOfPlan <plan> ;
+    av:processorClass abecto:FileSourceProcessor ;
+    av:associatedDataset <http://qudt.org/> ;
+    av:hasParameter [av:key "path" ; av:value "schema/SCHEMA_QUDT-v2.1.ttl",
+                                              "schema/SCHEMA_QUDT-DATATYPE-v2.1.ttl",
+                                              "vocab/constants/VOCAB_QUDT-CONSTANTS-v2.1.ttl",
+                                              "vocab/dimensionvectors/VOCAB_QUDT-DIMENSION-VECTORS-v2.1.ttl",
+                                              "vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL-v2.1.ttl",
+                                              "vocab/systems/VOCAB_QUDT-SYSTEM-OF-UNITS-ALL-v2.1.ttl",
+                                              "vocab/unit/VOCAB_QUDT-UNITS-ALL-v2.1.ttl",
+                                              "vocab/prefixes/VOCAB_QUDT-PREFIXES-v2.1.ttl",
+                                              "vocab/systems/VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL-v2.1.ttl" ] ;
+    .
+
+<sweet3Source> a av:Step ;
+    rdfs:label "Load SWEET3"@en;
+    pplan:isStepOfPlan <plan> ;
+    av:processorClass abecto:UrlSourceProcessor ;
+    av:associatedDataset <http://sweetontology.net/> ;
+    av:hasParameter [av:key "url" ; av:value <http://sweetontology.net/reprSciUnits> ] ;
+    .
+
+<wikidataSource> a av:Step ;
+    rdfs:label "Load Wikidata"@en;
+    pplan:isStepOfPlan <plan> ;
+    av:processorClass abecto:SparqlSourceProcessor ;
+    av:associatedDataset <http://www.wikidata.org/> ;
+    av:hasParameter
+        [av:key "service" ; av:value <https://query.wikidata.org/sparql> ] ,
+        [av:key "query" ; av:value """
+                PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+                PREFIX wd: <http://www.wikidata.org/entity/>
+                SELECT *
+                WHERE {
+                    {
+                        # units of measurement
+                        ?item wdt:P31/wdt:P279* wd:Q47574 .
+                        FILTER(NOT EXISTS { ?item wdt:P31/wdt:P279* wd:Q8142 }) # without currencies
+                        FILTER(NOT EXISTS { ?item wdt:P31/wdt:P279* wd:Q11639620 }) # without monetary subunits
+                    }
+                    UNION
+                    {
+                        # quantity kind
+                        ?item wdt:P4020 [] .
+                    }
+                }
+            """^^av:SparqlQuery ] ,
+        [av:key "chunkSize" ; av:value 100 ] ,
+        [av:key "followUnlimited" ; av:value
+            <http://www.wikidata.org/prop/direct/P279> ,
+            <http://www.wikidata.org/prop/statement/value/P2442> ,
+            <http://www.wikidata.org/prop/P2442>,
+            <http://www.wikidata.org/prop/P7973> ] ,
+        [av:key "ignoreInverse" ; av:value
+            <http://wikiba.se/ontology#quantityUnit>,
+            <http://www.wikidata.org/prop/qualifier/P642>,
+            <http://www.wikidata.org/prop/direct/P921>,
+            <http://www.wikidata.org/prop/statement/P921>,
+            <http://www.wikidata.org/prop/qualifier/P1013>,
+            <http://www.wikidata.org/prop/direct/P111>,
+            <http://www.wikidata.org/prop/statement/P111>,
+            <http://www.wikidata.org/prop/statement/P31>,
+            <http://www.wikidata.org/prop/direct/P31>,
+            <http://www.wikidata.org/prop/statement/P971>,
+            <http://www.wikidata.org/prop/direct/P971>,
+            <http://www.wikidata.org/prop/statement/P2670>,
+            <http://www.wikidata.org/prop/direct/P2670>,
+            <http://www.wikidata.org/prop/statement/P360>,
+            <http://www.wikidata.org/prop/direct/P360>,
+            <http://www.wikidata.org/prop/statement/P4224>,
+            <http://www.wikidata.org/prop/direct/P4224>,
+            <http://schema.org/about> ]
+    .
+
+<om2conversions> a av:Step ;
+    rdfs:label "OM2 Conversions Closure"@en;
+    pplan:isStepOfPlan <plan> ;
+    av:processorClass abecto:SparqlConstructProcessor ;
+    pplan:isPrecededBy <om2Source> ;
+    av:associatedDataset <http://www.ontology-of-units-of-measure.org/resource/om-2/> ;
+    av:hasParameter
+        [av:key "query" ; av:value """
+            PREFIX om: <http://www.ontology-of-units-of-measure.org/resource/om-2/>
+            CONSTRUCT {
+                ?unit <tmp:oneEqualsOfBase> ?oneEquals
+            } WHERE {
+                {
+                    # baseUnits
+                    om:InternationalSystemOfUnits om:hasBaseUnit ?unit .
+                    BIND(1.0 AS ?oneEquals)
+                } UNION {
+                    # fractionUnits
+                    ?unit om:hasNumerator ?numerator .
+                    ?unit om:hasDenominator ?denominator .
+                    ?numerator <tmp:oneEqualsOfBase> ?oneEqualsNumerator .
+                    ?denominator <tmp:oneEqualsOfBase> ?oneEqualsDenominator .
+                    BIND(?oneEqualsNumerator / ?oneEqualsDenominator AS ?oneEquals)
+                } UNION {
+                    # prefixUnits
+                    ?unit om:hasUnit ?referenceUnit .
+                    ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
+                    ?unit om:hasPrefix ?prefix .
+                    ?prefix om:hasFactor ?prefixFactor .
+                    BIND(?oneEqualsOfReference * ?prefixFactor AS ?oneEquals)
+                } UNION {
+                    # squareUnits
+                    ?unit om:hasBase ?referenceUnit .
+                    ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
+                    ?unit om:hasExponent 2 .
+                    BIND(?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEquals)
+                } UNION {
+                    # cubicUnits
+                    ?unit om:hasBase ?referenceUnit .
+                    ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
+                    ?unit om:hasExponent 3 .
+                    BIND(?oneEqualsOfReference * ?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEquals)
+                } UNION {
+                    # reciprocalUnits
+                    ?unit om:hasBase ?referenceUnit .
+                    ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
+                    ?unit om:hasExponent -1 .
+                    BIND(1.0 / ?oneEqualsOfReference AS ?oneEquals)
+                } UNION {
+                    # reciprocalSquareUnits
+                    ?unit om:hasBase ?referenceUnit .
+                    ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
+                    ?unit om:hasExponent -2 .
+                    BIND(1.0 / ( ?oneEqualsOfReference * ?oneEqualsOfReference ) AS ?oneEquals)
+                } UNION {
+                    # reciprocalcubicUnits
+                    ?unit om:hasBase ?referenceUnit .
+                    ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
+                    ?unit om:hasExponent -3 .
+                    BIND(1.0 / ( ?oneEqualsOfReference * ?oneEqualsOfReference * ?oneEqualsOfReference ) AS ?oneEquals)
+                }
+            }
+        """^^av:SparqlQuery ] ,
+        [av:key "maxIterations" ; av:value 5 ] ;
+    .
+
+<sweet3conversions> a av:Step ;
+    rdfs:label "SWEET3 Conversions Closure"@en;
+    pplan:isStepOfPlan <plan> ;
+    av:processorClass abecto:SparqlConstructProcessor ;
+    pplan:isPrecededBy <sweet3Source> ;
+    av:associatedDataset <http://sweetontology.net/> ;
+    av:hasParameter
+        [av:key "query" ; av:value """
+            PREFIX sorelm: <http://sweetontology.net/relaMath/>
+            PREFIX sorelsc: <http://sweetontology.net/relaSci/>
+            PREFIX sorepsu: <http://sweetontology.net/reprSciUnits/>
+            CONSTRUCT {
+                ?unit <tmp:oneEqualsOfBase> ?oneEquals .
+                ?unit <tmp:zeroAtOfBase> ?zeroAtOfBase .
+            } WHERE {
+                {
+                    # baseUnits
+                    ?unit a sorepsu:BaseUnit .
+                    BIND(1.0 AS ?oneEquals)
+                    BIND(0.0 AS ?zeroAtOfBase)
+                } UNION {
+                    # scaledUnits
+                    ?unit a sorepsu:UnitDerivedByScaling .
+                    ?unit sorelm:hasScalingNumber ?scalingNumber .
+                    ?unit sorelsc:hasBaseUnit ?referenceUnit .
+                    ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsReference .
+                    ?referenceUnit <tmp:zeroAtOfBase> ?zeroAtOfBase .
+                    BIND(?scalingNumber * ?oneEqualsReference AS ?oneEqualsOfBase)
+                } UNION {
+                    # shiftedUnits
+                    ?unit a sorepsu:UnitDerivedByShifting .
+                    ?unit sorelm:hasScalingNumber ?scalingNumber .
+                    ?unit sorelm:hasShiftingNumber ?shiftingNumber .
+                    ?unit sorelsc:hasBaseUnit ?referenceUnit .
+                    ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsReference .
+                    ?referenceUnit <tmp:zeroAtOfBase> ?zeroAtReference .
+                    BIND(?scalingNumber * ?oneEqualsReference AS ?oneEqualsOfBase)
+                    BIND(?zeroAtReference + ?shiftingNumber / ?oneEqualsReference AS ?zeroAtOfBase)
+                } UNION {
+                    # shiftedUnitsWithoutScalingNumber
+                    ?unit a sorepsu:UnitDerivedByShifting .
+                    FILTER NOT EXISTS {?unit sorelm:hasScalingNumber ?scalingNumber}
+                    ?unit sorelm:hasShiftingNumber ?shiftingNumber .
+                    ?unit sorelsc:hasBaseUnit ?referenceUnit .
+                    ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfBase .
+                    ?referenceUnit <tmp:zeroAtOfBase> ?zeroAtReference .
+                    BIND(?zeroAtReference + ?shiftingNumber / ?oneEqualsReference AS ?zeroAtOfBase)
+                } UNION {
+                    # squareUnits
+                    ?unit a sorepsu:UnitDerivedByRaisingToPower .
+                    ?unit sorelsc:hasBaseUnit ?referenceUnit .
+                    ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
+                    ?unit sorelm:toThePower ?toThePower .
+                    FILTER(?toThePower = 2)
+                    BIND(?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEquals)
+                } UNION {
+                    # cubicUnits
+                    ?unit a sorepsu:UnitDerivedByRaisingToPower .
+                    ?unit sorelsc:hasBaseUnit ?referenceUnit .
+                    ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
+                    ?unit sorelm:toThePower ?toThePower .
+                    FILTER(?toThePower = 3)
+                    BIND(?oneEqualsOfReference * ?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEquals)
+                } UNION {
+                    # reciprocalUnits
+                    ?unit a sorepsu:UnitDerivedByRaisingToPower .
+                    ?unit sorelsc:hasBaseUnit ?referenceUnit .
+                    ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
+                    ?unit sorelm:toThePower ?toThePower .
+                    FILTER(?toThePower = -1)
+                    BIND(1 / ?oneEqualsOfReference AS ?oneEquals)
+                } UNION {
+                    # reciprocalSquareUnits
+                    ?unit a sorepsu:UnitDerivedByRaisingToPower .
+                    ?unit sorelsc:hasBaseUnit ?referenceUnit .
+                    ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
+                    ?unit sorelm:toThePower ?toThePower .
+                    FILTER(?toThePower = -2)
+                    BIND(1 / ?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEquals)
+                } UNION {
+                    # reciprocalcubicUnits
+                    ?unit a sorepsu:UnitDerivedByRaisingToPower .
+                    ?unit sorelsc:hasBaseUnit ?referenceUnit .
+                    ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
+                    ?unit sorelm:toThePower ?toThePower .
+                    FILTER(?toThePower = -3)
+                    BIND(1 / ?oneEqualsOfReference * ?oneEqualsOfReference * ?oneEqualsOfReference  AS ?oneEquals)
+                } UNION {
+                    # productOf2Units
+                    ?unit a sorepsu:UnitDefinedByProduct .
+                    ?unit sorelm:hasOperand ?referenceUnit1 .
+                    ?unit sorelm:hasOperand ?referenceUnit2 .
+                    FILTER(?referenceUnit1 != ?referenceUnit2)
+                    FILTER NOT EXISTS {
+                        ?unit sorelm:hasOperand ?referenceUnit3 .
+                        FILTER(?referenceUnit1 != ?referenceUnit3)
+                        FILTER(?referenceUnit2 != ?referenceUnit3)
+                    }
+                    ?referenceUnit1 <tmp:oneEqualsOfBase> ?oneEqualsOfReference1 .
+                    ?referenceUnit2 <tmp:oneEqualsOfBase> ?oneEqualsOfReference2 .
+                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 AS ?oneEquals)
+                } UNION {
+                    # productOf3Units
+                    ?unit a sorepsu:UnitDefinedByProduct .
+                    ?unit sorelm:hasOperand ?referenceUnit1 .
+                    ?unit sorelm:hasOperand ?referenceUnit2 .
+                    ?unit sorelm:hasOperand ?referenceUnit3 .
+                    FILTER(?referenceUnit1 != ?referenceUnit2)
+                    FILTER(?referenceUnit1 != ?referenceUnit3)
+                    FILTER(?referenceUnit2 != ?referenceUnit3)
+                    FILTER NOT EXISTS {
+                        ?unit sorelm:hasOperand ?referenceUnit4 .
+                        FILTER(?referenceUnit1 != ?referenceUnit4)
+                        FILTER(?referenceUnit2 != ?referenceUnit4)
+                        FILTER(?referenceUnit3 != ?referenceUnit4)
+                    }
+                    ?referenceUnit1 <tmp:oneEqualsOfBase> ?oneEqualsOfReference1 .
+                    ?referenceUnit2 <tmp:oneEqualsOfBase> ?oneEqualsOfReference2 .
+                    ?referenceUnit3 <tmp:oneEqualsOfBase> ?oneEqualsOfReference3 .
+                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 * ?oneEqualsOfReference3 AS ?oneEquals)
+                } UNION {
+                    # productOf4Units
+                    ?unit a sorepsu:UnitDefinedByProduct .
+                    ?unit sorelm:hasOperand ?referenceUnit1 .
+                    ?unit sorelm:hasOperand ?referenceUnit2 .
+                    ?unit sorelm:hasOperand ?referenceUnit3 .
+                    ?unit sorelm:hasOperand ?referenceUnit4 .
+                    FILTER(?referenceUnit1 != ?referenceUnit2)
+                    FILTER(?referenceUnit1 != ?referenceUnit3)
+                    FILTER(?referenceUnit1 != ?referenceUnit4)
+                    FILTER(?referenceUnit2 != ?referenceUnit3)
+                    FILTER(?referenceUnit2 != ?referenceUnit4)
+                    FILTER(?referenceUnit3 != ?referenceUnit4)
+                    FILTER NOT EXISTS {
+                        ?unit sorelm:hasOperand ?referenceUnit5 .
+                        FILTER(?referenceUnit1 != ?referenceUnit5)
+                        FILTER(?referenceUnit2 != ?referenceUnit5)
+                        FILTER(?referenceUnit3 != ?referenceUnit5)
+                        FILTER(?referenceUnit4 != ?referenceUnit5)
+                    }
+                    ?referenceUnit1 <tmp:oneEqualsOfBase> ?oneEqualsOfReference1 .
+                    ?referenceUnit2 <tmp:oneEqualsOfBase> ?oneEqualsOfReference2 .
+                    ?referenceUnit3 <tmp:oneEqualsOfBase> ?oneEqualsOfReference3 .
+                    ?referenceUnit4 <tmp:oneEqualsOfBase> ?oneEqualsOfReference4 .
+                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 * ?oneEqualsOfReference3 * ?oneEqualsOfReference4 AS ?oneEquals)
+                } UNION {
+                    # productOf5Units
+                    ?unit a sorepsu:UnitDefinedByProduct .
+                    ?unit sorelm:hasOperand ?referenceUnit1 .
+                    ?unit sorelm:hasOperand ?referenceUnit2 .
+                    ?unit sorelm:hasOperand ?referenceUnit3 .
+                    ?unit sorelm:hasOperand ?referenceUnit4 .
+                    ?unit sorelm:hasOperand ?referenceUnit5 .
+                    FILTER(?referenceUnit1 != ?referenceUnit2)
+                    FILTER(?referenceUnit1 != ?referenceUnit3)
+                    FILTER(?referenceUnit1 != ?referenceUnit4)
+                    FILTER(?referenceUnit1 != ?referenceUnit5)
+                    FILTER(?referenceUnit2 != ?referenceUnit3)
+                    FILTER(?referenceUnit2 != ?referenceUnit4)
+                    FILTER(?referenceUnit2 != ?referenceUnit5)
+                    FILTER(?referenceUnit3 != ?referenceUnit4)
+                    FILTER(?referenceUnit3 != ?referenceUnit5)
+                    FILTER(?referenceUnit4 != ?referenceUnit5)
+                    FILTER NOT EXISTS {
+                        ?unit sorelm:hasOperand ?referenceUnit6 .
+                        FILTER(?referenceUnit1 != ?referenceUnit6)
+                        FILTER(?referenceUnit2 != ?referenceUnit6)
+                        FILTER(?referenceUnit3 != ?referenceUnit6)
+                        FILTER(?referenceUnit4 != ?referenceUnit6)
+                        FILTER(?referenceUnit5 != ?referenceUnit6)
+                    }
+                    ?referenceUnit1 <tmp:oneEqualsOfBase> ?oneEqualsOfReference1 .
+                    ?referenceUnit2 <tmp:oneEqualsOfBase> ?oneEqualsOfReference2 .
+                    ?referenceUnit3 <tmp:oneEqualsOfBase> ?oneEqualsOfReference3 .
+                    ?referenceUnit4 <tmp:oneEqualsOfBase> ?oneEqualsOfReference4 .
+                    ?referenceUnit5 <tmp:oneEqualsOfBase> ?oneEqualsOfReference5 .
+                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 * ?oneEqualsOfReference3 * ?oneEqualsOfReference4 * ?oneEqualsOfReference5 AS ?oneEquals)
+                } UNION {
+                    # productOf6Units
+                    ?unit a sorepsu:UnitDefinedByProduct .
+                    ?unit sorelm:hasOperand ?referenceUnit1 .
+                    ?unit sorelm:hasOperand ?referenceUnit2 .
+                    ?unit sorelm:hasOperand ?referenceUnit3 .
+                    ?unit sorelm:hasOperand ?referenceUnit4 .
+                    ?unit sorelm:hasOperand ?referenceUnit5 .
+                    ?unit sorelm:hasOperand ?referenceUnit6 .
+                    FILTER(?referenceUnit1 != ?referenceUnit2)
+                    FILTER(?referenceUnit1 != ?referenceUnit3)
+                    FILTER(?referenceUnit1 != ?referenceUnit4)
+                    FILTER(?referenceUnit1 != ?referenceUnit5)
+                    FILTER(?referenceUnit1 != ?referenceUnit6)
+                    FILTER(?referenceUnit2 != ?referenceUnit3)
+                    FILTER(?referenceUnit2 != ?referenceUnit4)
+                    FILTER(?referenceUnit2 != ?referenceUnit5)
+                    FILTER(?referenceUnit2 != ?referenceUnit6)
+                    FILTER(?referenceUnit3 != ?referenceUnit4)
+                    FILTER(?referenceUnit3 != ?referenceUnit5)
+                    FILTER(?referenceUnit3 != ?referenceUnit6)
+                    FILTER(?referenceUnit4 != ?referenceUnit5)
+                    FILTER(?referenceUnit4 != ?referenceUnit6)
+                    FILTER(?referenceUnit5 != ?referenceUnit6)
+                    FILTER NOT EXISTS {
+                        ?unit sorelm:hasOperand ?referenceUnit7 .
+                        FILTER(?referenceUnit1 != ?referenceUnit7)
+                        FILTER(?referenceUnit2 != ?referenceUnit7)
+                        FILTER(?referenceUnit3 != ?referenceUnit7)
+                        FILTER(?referenceUnit4 != ?referenceUnit7)
+                        FILTER(?referenceUnit5 != ?referenceUnit7)
+                        FILTER(?referenceUnit6 != ?referenceUnit7)
+                    }
+                    ?referenceUnit1 <tmp:oneEqualsOfBase> ?oneEqualsOfReference1 .
+                    ?referenceUnit2 <tmp:oneEqualsOfBase> ?oneEqualsOfReference2 .
+                    ?referenceUnit3 <tmp:oneEqualsOfBase> ?oneEqualsOfReference3 .
+                    ?referenceUnit4 <tmp:oneEqualsOfBase> ?oneEqualsOfReference4 .
+                    ?referenceUnit5 <tmp:oneEqualsOfBase> ?oneEqualsOfReference5 .
+                    ?referenceUnit6 <tmp:oneEqualsOfBase> ?oneEqualsOfReference6 .
+                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 * ?oneEqualsOfReference3 * ?oneEqualsOfReference4 * ?oneEqualsOfReference5 * ?oneEqualsOfReference6 AS ?oneEquals)
+                }
+            }
+        """^^av:SparqlQuery ] ,
+        [av:key "maxIterations" ; av:value 5 ] ;
+    .
+
+GRAPH <manualCorrespondences>
+{
+    om:one av:correspondsToResource qudtUnit:UNITLESS, sorepsu:dimensionlessUnit .
+
+    om:wattSquareMetre av:correspondsToResource qudtUnit:W-M2 .
+
+    qudtUnit:DEG_C av:correspondsToResource sorepsu:degreeC .
+    qudtUnit:DEG_F av:correspondsToResource sorepsu:degreeF .
+    sorepsu:MYA av:correspondsToResource sorepsu:millenium .
+
+    om:attomolar av:correspondsNotToResource om:attomolePerLitre .
+    om:barye av:correspondsNotToResource om:decipascal .
+    om:centimolar av:correspondsNotToResource om:centimolePerLitre .
+    om:decamolar av:correspondsNotToResource om:decamolePerLitre .
+    om:decimolar av:correspondsNotToResource om:decimolePerLitre .
+    om:femtomolar av:correspondsNotToResource om:femtomolePerLitre .
+    om:gigamolar av:correspondsNotToResource om:gigamolePerLitre .
+    om:gray av:correspondsNotToResource om:microgray .
+    om:hectomolar av:correspondsNotToResource om:hectomolePerLitre .
+    om:kilofarad av:correspondsNotToResource om:kiloweber .
+    om:kilomolar av:correspondsNotToResource om:kilomolePerLitre .
+    om:megamolar av:correspondsNotToResource om:megamolePerLitre .
+    om:metreKilogram av:correspondsNotToResource om:reciprocalGram .
+    om:micrometre av:correspondsNotToResource om:micron .
+    om:micromolar av:correspondsNotToResource om:micromolePerLitre .
+    om:microsievert av:correspondsNotToResource om:sievert .
+    om:millimolar av:correspondsNotToResource om:millimolePerLitre .
+    om:molar av:correspondsNotToResource om:molePerLitre .
+    om:nanomolar av:correspondsNotToResource om:nanomolePerLitre .
+    om:petamolar av:correspondsNotToResource om:petamolePerLitre .
+    om:picomolar av:correspondsNotToResource om:picomolePerLitre .
+    om:teramolar av:correspondsNotToResource om:teramolePerLitre .
+    om:yoctomolar av:correspondsNotToResource om:yoctomolePerLitre .
+    om:yottamolar av:correspondsNotToResource om:yottamolePerLitre .
+    om:zeptomolar av:correspondsNotToResource om:zeptomolePerLitre .
+    om:zettamolar av:correspondsNotToResource om:zettamolePerLitre .
+
+    om:acre-International av:correspondsNotToResource qudtUnit:MI .
+    om:ampere av:correspondsNotToResource qudtUnit:A_Ab .
+    om:centiare av:correspondsNotToResource qudtUnit:CentiBAR .
+    om:centinewton av:correspondsNotToResource qudtUnit:CentiN-M .
+    om:decinewton av:correspondsNotToResource qudtUnit:DeciN-M .
+    om:decisiemens av:correspondsNotToResource qudtUnit:DeciS-PER-M .
+    om:decitesla av:correspondsNotToResource qudtUnit:DeciB .
+    om:dryPint-US av:correspondsNotToResource qudtUnit:PINT_UK .
+    om:dryQuart-US av:correspondsNotToResource qudtUnit:QT_UK .
+    om:exaampere av:correspondsNotToResource qudtUnit:MegaA .
+    om:fluidOunce-US av:correspondsNotToResource qudtUnit:OZ_VOL_UK .
+    om:gray av:correspondsNotToResource qudtUnit:MicroGRAY .
+    om:horsepower-Water av:correspondsNotToResource qudtUnit:HP_Brake .
+    om:kilofarad av:correspondsNotToResource qudtUnit:KiloBAR .
+    om:kilogramPerHectare av:correspondsNotToResource qudtUnit:KiloGM-PER-M .
+    om:kilotonne av:correspondsNotToResource qudtUnit:KiloP .
+    om:kiloweber av:correspondsNotToResource qudtUnit:KiloBAR .
+    om:megafarad av:correspondsNotToResource qudtUnit:MegaBAR .
+    om:megagramPerLitre av:correspondsNotToResource qudtUnit:MegaGM-PER-M3 .
+    om:micrometre av:correspondsNotToResource qudtUnit:MicroIN .
+    om:micron av:correspondsNotToResource qudtUnit:MicroIN .
+    om:micron av:correspondsNotToResource qudtUnit:MicroM .
+    om:peck-US av:correspondsNotToResource qudtUnit:PK_UK .
+    om:reciprocalSecond-Time av:correspondsNotToResource qudtUnit:HZ .
+    om:second-TimePerSquareMetre av:correspondsNotToResource qudtUnit:PER-SEC-M2 .
+    om:sievert av:correspondsNotToResource qudtUnit:MicroSV .
+    om:sievert av:correspondsNotToResource qudtUnit:MicroSV-PER-HR .
+    om:tonne av:correspondsNotToResource qudtUnit:TON_Metric .
+
+    om:reciprocalPascalSecond-Time av:correspondsNotToResource sorepsu:perPascal .
+    om:second-TimePerSquareMetre av:correspondsNotToResource sorepsu:perSecondSquared .
+
+    qudtUnit:CAL_IT av:correspondsNotToResource qudtUnit:CAL_IT-PER-GM .
+    qudtUnit:CAL_TH av:correspondsNotToResource qudtUnit:CAL_TH-PER-GM .
+    qudtUnit:DWT av:correspondsNotToResource qudtUnit:QT_UK, qudtUnit:QT_US_DRY .
+    qudtUnit:GAL_UK av:correspondsNotToResource qudtUnit:GAL_US .
+    qudtUnit:GRAY av:correspondsNotToResource qudtUnit:MicroGRAY .
+    qudtUnit:GON av:correspondsNotToResource qudtUnit:GR .
+    [rdf:subject qudtUnit:GON ; rdf:predicate av:correspondsNotToResource ; rdf:object qudtUnit:GR] rdfs:seeAlso "https://github.com/qudt/qudt-public-repo/issues/26#issuecomment-566769784"^^xsd:anyURI .
+    qudtUnit:HZ av:correspondsNotToResource qudtUnit:PER-SEC .
+    qudtUnit:K-PER-MIN av:correspondsNotToResource qudtUnit:K-PER-W .
+    qudtUnit:KiloGM-M-PER-SEC av:correspondsNotToResource qudtUnit:KiloGM-PER-SEC .
+    qudtUnit:M-K av:correspondsNotToResource qudtUnit:M-PER-K .
+    qudtUnit:M3-PER-DAY av:correspondsNotToResource qudtUnit:M3-PER-HR .
+    qudtUnit:MHO_Stat av:correspondsNotToResource qudtUnit:S_Stat .
+    qudtUnit:MI2 av:correspondsNotToResource qudtUnit:MilliM2 .
+    qudtUnit:MicroIN av:correspondsNotToResource qudtUnit:MicroM .
+    qudtUnit:MicroSV av:correspondsNotToResource qudtUnit:MicroSV-PER-HR, qudtUnit:SV .
+    qudtUnit:OZ-FT av:correspondsNotToResource qudtUnit:OZ-IN .
+    qudtUnit:OZ_VOL_UK av:correspondsNotToResource qudtUnit:OZ_VOL_US, qudtUnit:OZ_VOL_US-PER-DAY .
+    qudtUnit:PER-FT3 av:correspondsNotToResource qudtUnit:PER-M3, qudtUnit:PER-MilliM3 .
+    qudtUnit:PER-L av:correspondsNotToResource qudtUnit:PER-MIN, qudtUnit:PER-MO .
+    qudtUnit:PER-M av:correspondsNotToResource qudtUnit:PER-WK .
+    qudtUnit:PINT_UK av:correspondsNotToResource qudtUnit:PINT_US_DRY .
+    qudtUnit:PINT_US av:correspondsNotToResource qudtUnit:PINT_US-PER-DAY .
+    qudtUnit:PK_UK av:correspondsNotToResource qudtUnit:PK_US_DRY .
+    qudtUnit:QT_US av:correspondsNotToResource qudtUnit:QT_US-PER-DAY .
+    qudtUnit:W-M2 av:correspondsNotToResource qudtUnit:W-PER-FT2 .
+
+    qudtUnit:A_Ab av:correspondsNotToResource sorepsu:ampere .
+    qudtUnit:C_Ab av:correspondsNotToResource sorepsu:coulomb .
+    qudtUnit:MicroIN av:correspondsNotToResource sorepsu:micron .
+    qudtUnit:PER-SEC-SR av:correspondsNotToResource sorepsu:perSecondSquared .
+    qudtUnit:PER-SEC-M2 av:correspondsNotToResource sorepsu:perSecondSquared .
+
+    sorepsu:hertz av:correspondsNotToResource sorepsu:perSecond .
+    sorepsu:micrometer av:correspondsNotToResource sorepsu:micron .
+    sorepsu:million_km2 av:correspondsNotToResource sorepsu:million_km3 .
+
+    <aspectUnit> av:relevantResource
+        om:acre-International, om:ampere, om:attomolar, om:attomolePerLitre, om:barye, om:centiare, om:centimolar, om:centimolePerLitre, om:centinewton, om:decamolar, om:decamolePerLitre, om:decimolar, om:decimolePerLitre, om:decinewton, om:decipascal, om:decisiemens, om:decitesla, om:dryPint-US, om:dryQuart-US, om:exaampere, om:femtomolar, om:femtomolePerLitre, om:fluidOunce-US, om:gigamolar, om:gigamolePerLitre, om:gray, om:gray, om:gray, om:hectomolar, om:hectomolePerLitre, om:horsepower-Water, om:kilofarad, om:kilogramPerHectare, om:kilomolar, om:kilomolePerLitre, om:kilotonne, om:kiloweber, om:megafarad, om:megagramPerLitre, om:megamolar, om:megamolePerLitre, om:metreKilogram, om:microgray, om:micrometre, om:micromolar, om:micromolePerLitre, om:micron, om:microsievert, om:millimolar, om:millimolePerLitre, om:molar, om:molePerLitre, om:nanomolar, om:nanomolePerLitre, om:one, om:peck-US, om:petamolar, om:petamolePerLitre, om:picomolar, om:picomolePerLitre, om:reciprocalGram, om:reciprocalPascalSecond-Time, om:reciprocalSecond-Time, om:second-TimePerSquareMetre, om:sievert, om:teramolar, om:teramolePerLitre, om:tonne, om:wattSquareMetre, om:yoctomolar, om:yoctomolePerLitre, om:yottamolar, om:yottamolePerLitre, om:zeptomolar, om:zeptomolePerLitre, om:zettamolar, om:zettamolePerLitre, qudtUnit:A_Ab, qudtUnit:CAL_IT, qudtUnit:CAL_IT-PER-GM, qudtUnit:CAL_TH, qudtUnit:CAL_TH-PER-GM, qudtUnit:C_Ab, qudtUnit:CentiBAR, qudtUnit:CentiN-M, qudtUnit:DEG_C, qudtUnit:DEG_F, qudtUnit:DWT, qudtUnit:DeciB, qudtUnit:DeciN-M, qudtUnit:DeciS-PER-M, qudtUnit:GAL_UK, qudtUnit:GAL_US, qudtUnit:GON, qudtUnit:GR, qudtUnit:GRAY, qudtUnit:HP_Brake, qudtUnit:HZ, qudtUnit:HZ, qudtUnit:K-PER-MIN, qudtUnit:K-PER-W, qudtUnit:KiloBAR, qudtUnit:KiloGM-M-PER-SEC, qudtUnit:KiloGM-PER-M, qudtUnit:KiloGM-PER-SEC, qudtUnit:KiloP, qudtUnit:M-K, qudtUnit:M-PER-K, qudtUnit:M3-PER-DAY, qudtUnit:M3-PER-HR, qudtUnit:MHO_Stat, qudtUnit:MI, qudtUnit:MI2, qudtUnit:MegaA, qudtUnit:MegaBAR, qudtUnit:MegaGM-PER-M3, qudtUnit:MicroGRAY, qudtUnit:MicroIN, qudtUnit:MicroM, qudtUnit:MicroSV, qudtUnit:MicroSV-PER-HR, qudtUnit:MilliM2, qudtUnit:OZ-FT, qudtUnit:OZ-IN, qudtUnit:OZ_VOL_UK, qudtUnit:OZ_VOL_US, qudtUnit:OZ_VOL_US-PER-DAY, qudtUnit:PER-FT3, qudtUnit:PER-L, qudtUnit:PER-M, qudtUnit:PER-M3, qudtUnit:PER-MIN, qudtUnit:PER-MO, qudtUnit:PER-MilliM3, qudtUnit:PER-SEC, qudtUnit:PER-SEC-M2, qudtUnit:PER-SEC-SR, qudtUnit:PER-WK, qudtUnit:PINT_UK, qudtUnit:PINT_US, qudtUnit:PINT_US-PER-DAY, qudtUnit:PINT_US_DRY, qudtUnit:PK_UK, qudtUnit:PK_US_DRY, qudtUnit:QT_UK, qudtUnit:QT_US, qudtUnit:QT_US-PER-DAY, qudtUnit:QT_US_DRY, qudtUnit:SV, qudtUnit:S_Stat, qudtUnit:TON_Metric, qudtUnit:UNITLESS, qudtUnit:W-M2, qudtUnit:W-M2, qudtUnit:W-PER-FT2, sorepsu:MYA, sorepsu:ampere, sorepsu:coulomb, sorepsu:degreeC, sorepsu:degreeF, sorepsu:dimensionlessUnit, sorepsu:hertz, sorepsu:micrometer, sorepsu:micron, sorepsu:micron, sorepsu:millenium, sorepsu:million_km2, sorepsu:million_km3, sorepsu:perPascal, sorepsu:perSecond, sorepsu:perSecondSquared .
+
+    om:ThermalConductivity av:correspondsToResource qudtQuantityKind:ThermalConductivity .
+
+    om:Reluctance av:correspondsNotToResource qudtQuantityKind:Reflectance .
+    om:ThermalConductivity av:correspondsNotToResource qudtQuantityKind:ThermalConductance .
+    om:VolumeFraction av:correspondsNotToResource qudtQuantityKind:VolumeFlowRate .
+
+    wd:Q45003 av:correspondsToResource wd:Q5380792 .
+    wd:Q501267 av:correspondsToResource wd:Q83947659 .
+
+    wd:Q105404651 av:correspondsNotToResource om:MagneticField .
+    wd:Q214881 av:correspondsNotToResource om:CurvatureConstant .
+    wd:Q899249 av:correspondsNotToResource om:DensityParameter .
+
+    wd:Q1068172 av:correspondsNotToResource wd:Q14515278 .
+    wd:Q11376 av:correspondsNotToResource wd:Q109198760 .
+    wd:Q164399 av:correspondsNotToResource wd:Q622324 .
+    wd:Q192027 av:correspondsNotToResource wd:Q549389 .
+    wd:Q20989 av:correspondsNotToResource wd:Q501267 .
+    wd:Q20989 av:correspondsNotToResource wd:Q83947659 .
+    wd:Q317949 av:correspondsNotToResource wd:Q423220 .
+    wd:Q36253 av:correspondsNotToResource wd:Q2199864 .
+    wd:Q39297 av:correspondsNotToResource wd:Q164399 .
+    wd:Q39297 av:correspondsNotToResource wd:Q622324 .
+    wd:Q41273 av:correspondsNotToResource wd:Q48103 .
+    wd:Q45003 av:correspondsNotToResource wd:Q204570 .
+
+    wd:Q104946 av:correspondsNotToResource qudtQuantityKind:AmountOfSubstanceFractionOfB .
+    wd:Q105404651 av:correspondsNotToResource qudtQuantityKind:MagneticField .
+    wd:Q1068172 av:correspondsNotToResource qudtQuantityKind:SoundPressureLevel .
+    wd:Q108147201 av:correspondsNotToResource qudtQuantityKind:AmountOfSubstanceFractionOfB .
+    wd:Q109222374 av:correspondsNotToResource qudtQuantityKind:AbsorbedDose .
+    wd:Q1134348 av:correspondsNotToResource qudtQuantityKind:SoundVolumeVelocity .
+    wd:Q1253356 av:correspondsNotToResource qudtQuantityKind:RadiantFluence .
+    wd:Q181155 av:correspondsNotToResource qudtQuantityKind:NumberOfParticles .
+    wd:Q501267 av:correspondsNotToResource qudtQuantityKind:ElectricFieldStrength .
+    wd:Q56298294 av:correspondsNotToResource qudtQuantityKind:LinearVelocity .
+    wd:Q7964839 av:correspondsNotToResource qudtQuantityKind:Action .
+
+    <aspectQuantityKind> av:relevantResource
+        om:CurvatureConstant, om:DensityParameter, om:MagneticField, om:Reluctance, om:ThermalConductivity, om:VolumeFraction, qudtQuantityKind:AbsorbedDose, qudtQuantityKind:Action, qudtQuantityKind:AmountOfSubstanceFractionOfB, qudtQuantityKind:ElectricFieldStrength, qudtQuantityKind:LinearVelocity, qudtQuantityKind:MagneticField, qudtQuantityKind:NumberOfParticles, qudtQuantityKind:RadiantFluence, qudtQuantityKind:Reflectance, qudtQuantityKind:SoundPressureLevel, qudtQuantityKind:SoundVolumeVelocity, qudtQuantityKind:ThermalConductance, qudtQuantityKind:ThermalConductivity, qudtQuantityKind:VolumeFlowRate, wd:Q104946, wd:Q105404651, wd:Q1068172, wd:Q108147201, wd:Q109198760, wd:Q109222374, wd:Q1134348, wd:Q11376, wd:Q1253356, wd:Q14515278, wd:Q164399, wd:Q181155, wd:Q192027, wd:Q204570, wd:Q20989, wd:Q214881, wd:Q2199864, wd:Q317949, wd:Q36253, wd:Q39297, wd:Q41273, wd:Q423220, wd:Q45003, wd:Q48103, wd:Q501267, wd:Q5380792, wd:Q549389, wd:Q56298294, wd:Q622324, wd:Q7964839, wd:Q83947659, wd:Q899249 .
+}
+
+<presentCorrespondences> a av:Step ;
+    rdfs:label "Present Correspondences"@en;
+    pplan:isStepOfPlan <plan> ;
+    av:processorClass abecto:UsePresentMappingProcessor ;
+    pplan:isPrecededBy <om2conversions>, <qudt2Source>, <sweet3conversions>, <wikidataSource> ;
+    av:predefinedMetaDataGraph <manualCorrespondences> ;
+    av:hasParameter
+        [av:key "aspect" ; av:value <aspectUnit> ] ,
+        [av:key "variable" ; av:value "sameAs" ] ;
+    .
+
+<unitMappingUcum> a av:Step ;
+    rdfs:label "Unit Mapping using UCUM"@en;
+    pplan:isStepOfPlan <plan> ;
+    av:processorClass abecto:EquivalentValueMappingProcessor ;
+    pplan:isPrecededBy <presentCorrespondences> ;
+    av:hasParameter
+        [av:key "aspect" ; av:value <aspectUnit> ] ,
+        [av:key "variables" ; av:value "ucum" ] ;
+    .
+
+<unitComparison> a av:Step ;
+    rdfs:label "Unit Comparison"@en;
+    pplan:isStepOfPlan <plan> ;
+    av:processorClass abecto:LiteralValueComparisonProcessor ;
+    pplan:isPrecededBy <unitMappingUcum> ;
+    av:hasParameter
+        [av:key "aspect" ; av:value <aspectUnit> ] ,
+        [av:key "languageFilterPatterns" ; av:value "", "en" ] ,
+        [av:key "allowLangTagSkip" ; av:value true ] ,
+        [av:key "variables" ; av:value "quantityKind", "symbol", "oneEquals", "zeroAt" ] ;
+    .
+
+<quantityKindMappingLabel> a av:Step ;
+    rdfs:label "Quantity Kind Mapping using labels"@en;
+    pplan:isStepOfPlan <plan> ;
+    av:processorClass abecto:JaroWinklerMappingProcessor ;
+    pplan:isPrecededBy <presentCorrespondences> ;
+    av:hasParameter
+        [av:key "threshold" ; av:value 9e-1 ] ,
+        [av:key "caseSensitive" ; av:value false ] ,
+        [av:key "aspect" ; av:value <aspectQuantityKind> ] ,
+        [av:key "variables" ; av:value "label" ] ;
+    .
+
+<quantityKindComparison> a av:Step ;
+    rdfs:label "Quantity Kind Comparison"@en;
+    pplan:isStepOfPlan <plan> ;
+    av:processorClass abecto:LiteralValueComparisonProcessor ;
+    pplan:isPrecededBy <quantityKindMappingLabel> ;
+    av:hasParameter
+        [av:key "aspect" ; av:value <aspectQuantityKind> ] ,
+        [av:key "languageFilterPatterns" ; av:value "", "en" ] ,
+        [av:key "allowLangTagSkip" ; av:value true ] ,
+        [av:key "variables" ; av:value "symbol", "timeDimensionExponent", "luminousIntensityDimensionExponent", "dimensionlessExponent", "amountOfSubstanceDimensionExponent", "electricCurrentDimensionExponent", "temperatureDimensionExponent", "massDimensionExponent", "lengthDimensionExponent" ] ;
+    .
+
+<completeness> a av:Step;
+    rdfs:label "Assess Completeness"@en;
+    pplan:isStepOfPlan <plan> ;
+    av:processorClass abecto:CompletenessProcessor ;
+    pplan:isPrecededBy <unitMappingUcum>, <quantityKindMappingLabel> ;
+    av:hasParameter
+        [av:key "aspects" ; av:value <aspectUnit>, <aspectQuantityKind> ] ;
+    .

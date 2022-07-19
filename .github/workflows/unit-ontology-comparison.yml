@@ -1,0 +1,18 @@
+name: Unit Ontology Comparison
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    container: ghcr.io/fusion-jena/abecto:latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v2
+      - name: Run ABECTO Unit Ontology Comparison
+        run: abecto --reportOn "http://qudt.org/" --export deviations=unit-ontology-comparison-deviations-qudt.csv --failOnDeviation unit-ontology-comparison.trig
+      - name: Archive QUDT deviations report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: QUDT deviations report
+          path: unit-ontology-comparison-deviations-qudt.csv
