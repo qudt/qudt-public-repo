@@ -30,7 +30,7 @@
         PREFIX owl: <http://www.w3.org/2002/07/owl#>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-        SELECT ?unit ?label ?symbol ?definition ?quantityKind ?ucum ?sameAs ?zeroAt ?oneEqualsOfBase
+        SELECT ?unit ?label ?symbol ?definition ?quantityKind ?ucum ?sameAs ?zeroAtOfBase ?oneEqualsOfBase
         WHERE {
             ?unit a/rdfs:subClassOf* om:Unit .
             OPTIONAL { ?unit rdfs:label|om:alternativeLabel  ?label }
@@ -45,13 +45,13 @@
             OPTIONAL { ?unit <tmp:oneEqualsOfBase> ?oneEqualsOfBase }
             OPTIONAL {
                 ?unit ^om:hasUnit/om:hasOff-Set ?offset .
-                BIND(?offset*-1.0 AS ?zeroAt)
+                BIND(?offset*-1.0 AS ?zeroAtOfBase)
             }
         }
-    """^^av:SparqlQuery ;
+    """ ;
     av:hasVariablePath
-        [ a av:VariablePath ; av:propertyPath "<http://www.w3.org/2004/02/skos/core#notation>"^^av:SparqlPropertyPath ; av:variableName "ucum" ],
-        [ a av:VariablePath ; av:propertyPath "^<http://www.ontology-of-units-of-measure.org/resource/om-2/hasUnit>/<http://www.ontology-of-units-of-measure.org/resource/om-2/hasOff-Set>"^^av:SparqlPropertyPath ; av:variableName "offset" ] ;
+        [ a av:VariablePath ; av:propertyPath "<http://www.w3.org/2004/02/skos/core#notation>" ; av:variableName "ucum" ],
+        [ a av:VariablePath ; av:propertyPath "^<http://www.ontology-of-units-of-measure.org/resource/om-2/hasUnit>/<http://www.ontology-of-units-of-measure.org/resource/om-2/hasOff-Set>" ; av:variableName "offset" ] ;
     .
 []  a av:AspectPattern ;
     av:ofAspect <aspectUnit> ;
@@ -60,7 +60,7 @@
         PREFIX qudt: <http://qudt.org/schema/qudt/>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-        SELECT ?unit ?label ?symbol ?definition ?quantityKind ?ucum ?sameAs ?zeroAt ?oneEqualsOfBase
+        SELECT ?unit ?label ?symbol ?definition ?quantityKind ?ucum ?sameAs ?zeroAtOfBase ?oneEqualsOfBase
         WHERE {
             ?unit a/rdfs:subClassOf* qudt:Unit .
             OPTIONAL { ?unit qudt:description ?definition }
@@ -73,11 +73,11 @@
             }
             OPTIONAL { ?unit qudt:omUnit ?sameAs }
             OPTIONAL { ?unit qudt:conversionMultiplier ?oneEqualsOfBase }
-            OPTIONAL { ?unit qudt:conversionOffset ?zeroAt }
+            OPTIONAL { ?unit qudt:conversionOffset ?zeroAtOfBase }
         }
-    """^^av:SparqlQuery ;
+    """ ;
     av:hasVariablePath
-        [ a av:VariablePath ; av:propertyPath "<http://qudt.org/schema/qudt/ucumCode>"^^av:SparqlPropertyPath ; av:variableName "ucum" ] ;
+        [ a av:VariablePath ; av:propertyPath "<http://qudt.org/schema/qudt/ucumCode>" ; av:variableName "ucum" ] ;
     .
 []  a av:AspectPattern ;
     av:ofAspect <aspectUnit> ;
@@ -87,7 +87,7 @@
         PREFIX sorelsc: <http://sweetontology.net/relaSci/>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-        SELECT ?unit ?label ?symbol ?ucum ?zeroAt ?oneEqualsOfBase
+        SELECT ?unit ?label ?symbol ?ucum ?zeroAtOfBase ?oneEqualsOfBase
         WHERE {
             ?unit a/rdfs:subClassOf* sorepsu:Unit .
             OPTIONAL { ?unit rdfs:label ?label }
@@ -97,9 +97,9 @@
                 BIND(str(?ucumTmp) AS ?ucum)
             }
             OPTIONAL { ?unit <tmp:oneEqualsOfBase> ?oneEqualsOfBase }
-            OPTIONAL { ?unit <tmp:zeroAtOfBase> ?zeroAt }
+            OPTIONAL { ?unit <tmp:zeroAtOfBase> ?zeroAtOfBase }
         }
-    """^^av:SparqlQuery ;
+    """ ;
     .
 []  a av:AspectPattern ;
     av:ofAspect <aspectUnit> ;
@@ -121,9 +121,9 @@
             OPTIONAL { ?unit wdt:P5061 ?symbol }
             OPTIONAL { ?unit wdt:P111 ?quantityKind }
             OPTIONAL { ?unit wdt:P7825 ?ucum }
-            OPTIONAL { ?unit p:P2442/psv:P2442/wikibase:quantityAmount ?oneEqualsOfBase }
+            OPTIONAL { ?unit p:P2370/psv:P2370/wikibase:quantityAmount ?oneEqualsOfBase }
         }
-    """^^av:SparqlQuery ;
+    """ ;
     .
 
 <aspectQuantityKind> a av:Aspect ;
@@ -164,7 +164,7 @@
                     ] .
             }
         }
-    """^^av:SparqlQuery ;
+    """ ;
     .
 []  a av:AspectPattern ;
     av:ofAspect <aspectQuantityKind> ;
@@ -188,7 +188,7 @@
                              qudt:dimensionExponentForTime                     ?timeDimensionExponent ;
                              qudt:dimensionlessExponent                        ?dimensionlessExponent .
         }
-    """^^av:SparqlQuery ;
+    """ ;
     .
 []  a av:AspectPattern ;
     av:ofAspect <aspectQuantityKind> ;
@@ -216,15 +216,15 @@
             BIND(COALESCE(xsd:integer(STRBEFORE(STRAFTER(STRAFTER(?dimensionLabelTexWithOnes,"{\\\\Theta"),"{"),"}")),0) AS ?temperatureDimensionExponent)
             BIND(COALESCE(xsd:integer(STRBEFORE(STRAFTER(?dimensionLabelTexWithOnes,"{T}}^{"),"}")),0) AS ?timeDimensionExponent)
         }
-    """^^av:SparqlQuery ;
+    """ ;
     av:hasVariablePath
-        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>"^^av:SparqlPropertyPath ; av:variableName "amountOfSubstanceDimensionExponent" ] ,
-        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>"^^av:SparqlPropertyPath ; av:variableName "electricCurrentDimensionExponent" ] ,
-        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>"^^av:SparqlPropertyPath ; av:variableName "lengthDimensionExponent" ] ,
-        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>"^^av:SparqlPropertyPath ; av:variableName "luminousIntensityDimensionExponent" ] ,
-        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>"^^av:SparqlPropertyPath ; av:variableName "massDimensionExponent" ] ,
-        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>"^^av:SparqlPropertyPath ; av:variableName "temperatureDimensionExponent" ] ,
-        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>"^^av:SparqlPropertyPath ; av:variableName "timeDimensionExponent" ] ;
+        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>" ; av:variableName "amountOfSubstanceDimensionExponent" ] ,
+        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>" ; av:variableName "electricCurrentDimensionExponent" ] ,
+        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>" ; av:variableName "lengthDimensionExponent" ] ,
+        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>" ; av:variableName "luminousIntensityDimensionExponent" ] ,
+        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>" ; av:variableName "massDimensionExponent" ] ,
+        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>" ; av:variableName "temperatureDimensionExponent" ] ,
+        [ a av:VariablePath ; av:propertyPath "<http://www.wikidata.org/prop/direct/P4020>" ; av:variableName "timeDimensionExponent" ] ;
     .
 
 
@@ -285,12 +285,12 @@
                         ?item wdt:P4020 [] .
                     }
                 }
-            """^^av:SparqlQuery ] ,
+            """ ] ,
         [av:key "chunkSize" ; av:value 100 ] ,
         [av:key "followUnlimited" ; av:value
             <http://www.wikidata.org/prop/direct/P279> ,
-            <http://www.wikidata.org/prop/statement/value/P2442> ,
-            <http://www.wikidata.org/prop/P2442>,
+            <http://www.wikidata.org/prop/statement/value/P2370> ,
+            <http://www.wikidata.org/prop/P2370>,
             <http://www.wikidata.org/prop/P7973> ] ,
         [av:key "ignoreInverse" ; av:value
             <http://wikiba.se/ontology#quantityUnit>,
@@ -323,59 +323,59 @@
         [av:key "query" ; av:value """
             PREFIX om: <http://www.ontology-of-units-of-measure.org/resource/om-2/>
             CONSTRUCT {
-                ?unit <tmp:oneEqualsOfBase> ?oneEquals
+                ?unit <tmp:oneEqualsOfBase> ?oneEqualsOfBase
             } WHERE {
                 {
                     # baseUnits
                     om:InternationalSystemOfUnits om:hasBaseUnit ?unit .
-                    BIND(1.0 AS ?oneEquals)
+                    BIND(1.0 AS ?oneEqualsOfBase)
                 } UNION {
                     # fractionUnits
                     ?unit om:hasNumerator ?numerator .
                     ?unit om:hasDenominator ?denominator .
                     ?numerator <tmp:oneEqualsOfBase> ?oneEqualsNumerator .
                     ?denominator <tmp:oneEqualsOfBase> ?oneEqualsDenominator .
-                    BIND(?oneEqualsNumerator / ?oneEqualsDenominator AS ?oneEquals)
+                    BIND(?oneEqualsNumerator / ?oneEqualsDenominator AS ?oneEqualsOfBase)
                 } UNION {
                     # prefixUnits
                     ?unit om:hasUnit ?referenceUnit .
                     ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
                     ?unit om:hasPrefix ?prefix .
                     ?prefix om:hasFactor ?prefixFactor .
-                    BIND(?oneEqualsOfReference * ?prefixFactor AS ?oneEquals)
+                    BIND(?oneEqualsOfReference * ?prefixFactor AS ?oneEqualsOfBase)
                 } UNION {
                     # squareUnits
                     ?unit om:hasBase ?referenceUnit .
                     ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
                     ?unit om:hasExponent 2 .
-                    BIND(?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEquals)
+                    BIND(?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEqualsOfBase)
                 } UNION {
                     # cubicUnits
                     ?unit om:hasBase ?referenceUnit .
                     ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
                     ?unit om:hasExponent 3 .
-                    BIND(?oneEqualsOfReference * ?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEquals)
+                    BIND(?oneEqualsOfReference * ?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEqualsOfBase)
                 } UNION {
                     # reciprocalUnits
                     ?unit om:hasBase ?referenceUnit .
                     ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
                     ?unit om:hasExponent -1 .
-                    BIND(1.0 / ?oneEqualsOfReference AS ?oneEquals)
+                    BIND(1.0 / ?oneEqualsOfReference AS ?oneEqualsOfBase)
                 } UNION {
                     # reciprocalSquareUnits
                     ?unit om:hasBase ?referenceUnit .
                     ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
                     ?unit om:hasExponent -2 .
-                    BIND(1.0 / ( ?oneEqualsOfReference * ?oneEqualsOfReference ) AS ?oneEquals)
+                    BIND(1.0 / ( ?oneEqualsOfReference * ?oneEqualsOfReference ) AS ?oneEqualsOfBase)
                 } UNION {
                     # reciprocalcubicUnits
                     ?unit om:hasBase ?referenceUnit .
                     ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
                     ?unit om:hasExponent -3 .
-                    BIND(1.0 / ( ?oneEqualsOfReference * ?oneEqualsOfReference * ?oneEqualsOfReference ) AS ?oneEquals)
+                    BIND(1.0 / ( ?oneEqualsOfReference * ?oneEqualsOfReference * ?oneEqualsOfReference ) AS ?oneEqualsOfBase)
                 }
             }
-        """^^av:SparqlQuery ] ,
+        """ ] ,
         [av:key "maxIterations" ; av:value 5 ] ;
     .
 
@@ -391,13 +391,13 @@
             PREFIX sorelsc: <http://sweetontology.net/relaSci/>
             PREFIX sorepsu: <http://sweetontology.net/reprSciUnits/>
             CONSTRUCT {
-                ?unit <tmp:oneEqualsOfBase> ?oneEquals .
+                ?unit <tmp:oneEqualsOfBase> ?oneEqualsOfBase .
                 ?unit <tmp:zeroAtOfBase> ?zeroAtOfBase .
             } WHERE {
                 {
                     # baseUnits
                     ?unit a sorepsu:BaseUnit .
-                    BIND(1.0 AS ?oneEquals)
+                    BIND(1.0 AS ?oneEqualsOfBase)
                     BIND(0.0 AS ?zeroAtOfBase)
                 } UNION {
                     # scaledUnits
@@ -433,7 +433,7 @@
                     ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
                     ?unit sorelm:toThePower ?toThePower .
                     FILTER(?toThePower = 2)
-                    BIND(?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEquals)
+                    BIND(?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEqualsOfBase)
                 } UNION {
                     # cubicUnits
                     ?unit a sorepsu:UnitDerivedByRaisingToPower .
@@ -441,7 +441,7 @@
                     ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
                     ?unit sorelm:toThePower ?toThePower .
                     FILTER(?toThePower = 3)
-                    BIND(?oneEqualsOfReference * ?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEquals)
+                    BIND(?oneEqualsOfReference * ?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEqualsOfBase)
                 } UNION {
                     # reciprocalUnits
                     ?unit a sorepsu:UnitDerivedByRaisingToPower .
@@ -449,7 +449,7 @@
                     ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
                     ?unit sorelm:toThePower ?toThePower .
                     FILTER(?toThePower = -1)
-                    BIND(1 / ?oneEqualsOfReference AS ?oneEquals)
+                    BIND(1 / ?oneEqualsOfReference AS ?oneEqualsOfBase)
                 } UNION {
                     # reciprocalSquareUnits
                     ?unit a sorepsu:UnitDerivedByRaisingToPower .
@@ -457,7 +457,7 @@
                     ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
                     ?unit sorelm:toThePower ?toThePower .
                     FILTER(?toThePower = -2)
-                    BIND(1 / ?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEquals)
+                    BIND(1 / ?oneEqualsOfReference * ?oneEqualsOfReference AS ?oneEqualsOfBase)
                 } UNION {
                     # reciprocalcubicUnits
                     ?unit a sorepsu:UnitDerivedByRaisingToPower .
@@ -465,7 +465,7 @@
                     ?referenceUnit <tmp:oneEqualsOfBase> ?oneEqualsOfReference .
                     ?unit sorelm:toThePower ?toThePower .
                     FILTER(?toThePower = -3)
-                    BIND(1 / ?oneEqualsOfReference * ?oneEqualsOfReference * ?oneEqualsOfReference  AS ?oneEquals)
+                    BIND(1 / ?oneEqualsOfReference * ?oneEqualsOfReference * ?oneEqualsOfReference  AS ?oneEqualsOfBase)
                 } UNION {
                     # productOf2Units
                     ?unit a sorepsu:UnitDefinedByProduct .
@@ -479,7 +479,7 @@
                     }
                     ?referenceUnit1 <tmp:oneEqualsOfBase> ?oneEqualsOfReference1 .
                     ?referenceUnit2 <tmp:oneEqualsOfBase> ?oneEqualsOfReference2 .
-                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 AS ?oneEquals)
+                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 AS ?oneEqualsOfBase)
                 } UNION {
                     # productOf3Units
                     ?unit a sorepsu:UnitDefinedByProduct .
@@ -498,7 +498,7 @@
                     ?referenceUnit1 <tmp:oneEqualsOfBase> ?oneEqualsOfReference1 .
                     ?referenceUnit2 <tmp:oneEqualsOfBase> ?oneEqualsOfReference2 .
                     ?referenceUnit3 <tmp:oneEqualsOfBase> ?oneEqualsOfReference3 .
-                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 * ?oneEqualsOfReference3 AS ?oneEquals)
+                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 * ?oneEqualsOfReference3 AS ?oneEqualsOfBase)
                 } UNION {
                     # productOf4Units
                     ?unit a sorepsu:UnitDefinedByProduct .
@@ -523,7 +523,7 @@
                     ?referenceUnit2 <tmp:oneEqualsOfBase> ?oneEqualsOfReference2 .
                     ?referenceUnit3 <tmp:oneEqualsOfBase> ?oneEqualsOfReference3 .
                     ?referenceUnit4 <tmp:oneEqualsOfBase> ?oneEqualsOfReference4 .
-                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 * ?oneEqualsOfReference3 * ?oneEqualsOfReference4 AS ?oneEquals)
+                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 * ?oneEqualsOfReference3 * ?oneEqualsOfReference4 AS ?oneEqualsOfBase)
                 } UNION {
                     # productOf5Units
                     ?unit a sorepsu:UnitDefinedByProduct .
@@ -555,7 +555,7 @@
                     ?referenceUnit3 <tmp:oneEqualsOfBase> ?oneEqualsOfReference3 .
                     ?referenceUnit4 <tmp:oneEqualsOfBase> ?oneEqualsOfReference4 .
                     ?referenceUnit5 <tmp:oneEqualsOfBase> ?oneEqualsOfReference5 .
-                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 * ?oneEqualsOfReference3 * ?oneEqualsOfReference4 * ?oneEqualsOfReference5 AS ?oneEquals)
+                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 * ?oneEqualsOfReference3 * ?oneEqualsOfReference4 * ?oneEqualsOfReference5 AS ?oneEqualsOfBase)
                 } UNION {
                     # productOf6Units
                     ?unit a sorepsu:UnitDefinedByProduct .
@@ -595,10 +595,10 @@
                     ?referenceUnit4 <tmp:oneEqualsOfBase> ?oneEqualsOfReference4 .
                     ?referenceUnit5 <tmp:oneEqualsOfBase> ?oneEqualsOfReference5 .
                     ?referenceUnit6 <tmp:oneEqualsOfBase> ?oneEqualsOfReference6 .
-                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 * ?oneEqualsOfReference3 * ?oneEqualsOfReference4 * ?oneEqualsOfReference5 * ?oneEqualsOfReference6 AS ?oneEquals)
+                    BIND(?oneEqualsOfReference1 * ?oneEqualsOfReference2 * ?oneEqualsOfReference3 * ?oneEqualsOfReference4 * ?oneEqualsOfReference5 * ?oneEqualsOfReference6 AS ?oneEqualsOfBase)
                 }
             }
-        """^^av:SparqlQuery ] ,
+        """ ] ,
         [av:key "maxIterations" ; av:value 5 ] ;
     .
 
@@ -785,7 +785,7 @@ GRAPH <manualCorrespondences>
         [av:key "aspect" ; av:value <aspectUnit> ] ,
         [av:key "languageFilterPatterns" ; av:value "", "en" ] ,
         [av:key "allowLangTagSkip" ; av:value true ] ,
-        [av:key "variables" ; av:value "quantityKind", "symbol", "oneEquals", "zeroAt" ] ;
+        [av:key "variables" ; av:value "quantityKind", "symbol", "oneEqualsOfBase", "zeroAtOfBase" ] ;
     .
 
 <quantityKindMappingLabel> a av:Step ;
