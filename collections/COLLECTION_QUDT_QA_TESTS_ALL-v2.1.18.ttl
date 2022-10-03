@@ -42,4 +42,28 @@
   owl:imports <http://qudt.org/2.1/vocab/unit> ;
   rdfs:isDefinedBy <http://qudt.org/2.1/collection/all> ;
   rdfs:label "QUDT Collection - QA TESTS - ALL - v 2.1.20" ;
+    sh:declare [
+      sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+      sh:prefix "qudt" ;
+    ] ;
+.
+qudt:Unit
+  sh:property [
+      sh:path qudt:hasDimensionVector ;
+      rdfs:comment "Check for inconsistent dimensionvectors from units and quantitykinds" ;
+      sh:sparql [
+          a sh:SPARQLConstraint ;
+          sh:message "{$this} has a dimension vector that is inconsistent with its quantity kind, {?qk}" ;
+          sh:prefixes <http://data.ashrae.org/standard223/1.0/validation/model> ;
+          sh:select """
+SELECT $this ?qk
+WHERE {
+$this qudt:hasDimensionVector  ?udv .
+$this qudt:hasQuantityKind ?qk .
+?qk qudt:hasDimensionVector ?qdv .
+FILTER (?udv != ?qdv) .
+}
+""" ;
+        ] ;
+    ] ;
 .
