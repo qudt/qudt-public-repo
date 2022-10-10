@@ -72,4 +72,28 @@ FILTER (?udv != ?qdv) .
 """ ;
         ] ;
     ] ;
+  sh:property [
+      sh:path qudt:exactMatch ;
+      rdfs:comment "Check for non-reciprocal owl:sameAs and qudt:exactMatch triples" ;
+      sh:sparql [
+          a sh:SPARQLConstraint ;
+          sh:message "{$this} needs both owl:sameAs and qudt:exactMatch with {?y}" ;
+          sh:prefixes <http://data.ashrae.org/standard223/1.0/validation/model> ;
+          sh:select """
+SELECT $this ?y
+WHERE { GRAPH <http://qudt.org/2.1/vocab/unit> {
+{
+$this owl:sameAs ?y .
+FILTER NOT EXISTS {$this qudt:exactMatch ?y} .
+}
+UNION
+{
+$this qudt:exactMatch ?y .
+FILTER NOT EXISTS {$this owl:sameAs ?y} .
+}
+FILTER  ($this != ?y)
+}}
+""" ;
+        ] ;
+    ] ;
 .
