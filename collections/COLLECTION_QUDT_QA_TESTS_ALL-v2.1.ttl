@@ -1,6 +1,5 @@
 # baseURI: http://qudt.org/2.1/collection/qa/all
 # imports: http://qudt.org/2.1/vocab/constant
-# imports: http://qudt.org/2.1/vocab/datatype
 # imports: http://qudt.org/2.1/vocab/mathematics
 # imports: http://qudt.org/2.1/vocab/soqk
 
@@ -25,12 +24,19 @@
   rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
   rdfs:label "QUDT Collection - QA TESTS - ALL - v 2.1.20" ;
   owl:imports <http://qudt.org/2.1/vocab/constant> ;
-  owl:imports <http://qudt.org/2.1/vocab/datatype> ;
   owl:imports <http://qudt.org/2.1/vocab/mathematics> ;
   owl:imports <http://qudt.org/2.1/vocab/soqk> ;
   sh:declare [
       sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
       sh:prefix "qudt" ;
+    ] ;
+  sh:declare [
+      sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ;
+      sh:prefix "owl" ;
+    ] ;
+  sh:declare [
+      sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
+      sh:prefix "skos" ;
     ] ;
 .
 qudt:QuantityKind
@@ -40,9 +46,9 @@ qudt:QuantityKind
       sh:sparql [
           a sh:SPARQLConstraint ;
           sh:message "{$this} has a dimension vector that is inconsistent with {?qk} in its skos:broader hierarchy." ;
-          sh:prefixes <http://data.ashrae.org/standard223/1.0/validation/model> ;
+          sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
           sh:select """
-SELECT $this
+SELECT $this ?qk
 WHERE {
 $this qudt:hasDimensionVector  ?udv .
 $this skos:broader* ?qk .
@@ -55,30 +61,12 @@ FILTER (?udv != ?qdv) .
 .
 qudt:Unit
   sh:property [
-      sh:path qudt:hasDimensionVector ;
-      rdfs:comment "Check for inconsistent dimensionvectors from units and quantitykinds" ;
-      sh:sparql [
-          a sh:SPARQLConstraint ;
-          sh:message "{$this} has a dimension vector that is inconsistent with its quantity kind, {?qk}" ;
-          sh:prefixes <http://data.ashrae.org/standard223/1.0/validation/model> ;
-          sh:select """
-SELECT $this ?qk
-WHERE {
-$this qudt:hasDimensionVector  ?udv .
-$this qudt:hasQuantityKind ?qk .
-?qk qudt:hasDimensionVector ?qdv .
-FILTER (?udv != ?qdv) .
-}
-""" ;
-        ] ;
-    ] ;
-  sh:property [
       sh:path qudt:exactMatch ;
       rdfs:comment "Check for non-reciprocal owl:sameAs and qudt:exactMatch triples" ;
       sh:sparql [
           a sh:SPARQLConstraint ;
           sh:message "{$this} needs both owl:sameAs and qudt:exactMatch with {?y}" ;
-          sh:prefixes <http://data.ashrae.org/standard223/1.0/validation/model> ;
+          sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
           sh:select """
 SELECT $this ?y
 WHERE { GRAPH <http://qudt.org/2.1/vocab/unit> {
@@ -93,6 +81,24 @@ FILTER NOT EXISTS {$this owl:sameAs ?y} .
 }
 FILTER  ($this != ?y)
 }}
+""" ;
+        ] ;
+    ] ;
+  sh:property [
+      sh:path qudt:hasDimensionVector ;
+      rdfs:comment "Check for inconsistent dimensionvectors from units and quantitykinds" ;
+      sh:sparql [
+          a sh:SPARQLConstraint ;
+          sh:message "{$this} has a dimension vector that is inconsistent with its quantity kind, {?qk}" ;
+          sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
+          sh:select """
+SELECT $this ?qk
+WHERE {
+$this qudt:hasDimensionVector  ?udv .
+$this qudt:hasQuantityKind ?qk .
+?qk qudt:hasDimensionVector ?qdv .
+FILTER (?udv != ?qdv) .
+}
 """ ;
         ] ;
     ] ;
