@@ -1,0 +1,105 @@
+# baseURI: http://qudt.org/2.1/collection/qa/all
+# imports: http://qudt.org/2.1/vocab/constant
+# imports: http://qudt.org/2.1/vocab/mathematics
+# imports: http://qudt.org/2.1/vocab/soqk
+
+@prefix creativecommons: <http://creativecommons.org/ns#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qkdv: <http://qudt.org/vocab/dimensionvector/> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix vaem: <http://www.linkedmodel.org/schema/vaem#> .
+@prefix voag: <http://voag.linkedmodel.org/schema/voag#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://qudt.org/2.1/collection/qa/all>
+  a owl:Ontology ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  rdfs:label "QUDT Collection - QA TESTS - ALL - v 2.1.21" ;
+  owl:imports <http://qudt.org/2.1/vocab/constant> ;
+  owl:imports <http://qudt.org/2.1/vocab/mathematics> ;
+  owl:imports <http://qudt.org/2.1/vocab/soqk> ;
+  sh:declare [
+      sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+      sh:prefix "qudt" ;
+    ] ;
+  sh:declare [
+      sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ;
+      sh:prefix "owl" ;
+    ] ;
+  sh:declare [
+      sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
+      sh:prefix "skos" ;
+    ] ;
+.
+qudt:QuantityKind
+  sh:property [
+      sh:path qudt:hasDimensionVector ;
+      rdfs:comment "Check for inconsistent dimensionvectors in the skos:broader hierarchy" ;
+      sh:sparql [
+          a sh:SPARQLConstraint ;
+          sh:message "{$this} has a dimension vector that is inconsistent with {?qk} in its skos:broader hierarchy." ;
+          sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
+          sh:select """
+SELECT $this ?qk
+WHERE {
+$this qudt:hasDimensionVector  ?udv .
+$this skos:broader* ?qk .
+?qk qudt:hasDimensionVector ?qdv .
+FILTER (?udv != ?qdv) .
+}
+""" ;
+        ] ;
+    ] ;
+.
+qudt:Unit
+  sh:property [
+      sh:path qudt:exactMatch ;
+      rdfs:comment "Check for non-reciprocal owl:sameAs and qudt:exactMatch triples" ;
+      sh:sparql [
+          a sh:SPARQLConstraint ;
+          sh:message "{$this} needs both owl:sameAs and qudt:exactMatch with {?y}" ;
+          sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
+          sh:select """
+SELECT $this ?y
+WHERE { GRAPH <http://qudt.org/2.1/vocab/unit> {
+{
+$this owl:sameAs ?y .
+FILTER NOT EXISTS {$this qudt:exactMatch ?y} .
+}
+UNION
+{
+$this qudt:exactMatch ?y .
+FILTER NOT EXISTS {$this owl:sameAs ?y} .
+}
+FILTER  ($this != ?y)
+}}
+""" ;
+        ] ;
+    ] ;
+  sh:property [
+      sh:path qudt:hasDimensionVector ;
+      rdfs:comment "Check for inconsistent dimensionvectors from units and quantitykinds" ;
+      sh:sparql [
+          a sh:SPARQLConstraint ;
+          sh:message "{$this} has a dimension vector that is inconsistent with its quantity kind, {?qk}" ;
+          sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
+          sh:select """
+SELECT $this ?qk
+WHERE {
+$this qudt:hasDimensionVector  ?udv .
+$this qudt:hasQuantityKind ?qk .
+?qk qudt:hasDimensionVector ?qdv .
+FILTER (?udv != ?qdv) .
+}
+""" ;
+        ] ;
+    ] ;
+.

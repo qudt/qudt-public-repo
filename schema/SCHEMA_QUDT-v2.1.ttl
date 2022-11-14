@@ -28,7 +28,6 @@ dcterms:abstract
 dcterms:contributor
   a rdf:Property ;
   rdfs:label "contributor" ;
-  rdfs:range xsd:string ;
 .
 dcterms:created
   a rdf:Property ;
@@ -38,7 +37,6 @@ dcterms:created
 dcterms:creator
   a owl:AnnotationProperty ;
   rdfs:label "creator" ;
-  rdfs:range xsd:string ;
 .
 dcterms:description
   a owl:AnnotationProperty ;
@@ -78,7 +76,7 @@ dcterms:title
   a owl:Ontology ;
   vaem:hasGraphMetadata vaem:GMD_QUDT-SCHEMA ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "QUDT Schema - Version 2.1.19" ;
+  rdfs:label "QUDT Schema - Version 2.1.21" ;
   owl:imports <http://www.linkedmodel.org/schema/dtype> ;
   owl:imports <http://www.linkedmodel.org/schema/vaem> ;
   owl:imports <http://www.w3.org/2004/02/skos/core> ;
@@ -327,6 +325,11 @@ qudt:Concept
       a owl:Restriction ;
       owl:maxCardinality "1"^^xsd:int ;
       owl:onProperty qudt:plainTextDescription ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:maxCardinality "1"^^xsd:int ;
+      owl:onProperty qudt:supercededBy ;
     ] ;
 .
 qudt:ConstantValue
@@ -577,6 +580,21 @@ qudt:EndianType
       qudt.type:BigEndian
     ) ;
 .
+qudt:EnumeratedQuantity
+  a qudt:AspectClass ;
+  rdfs:label "Enumerated Quantity" ;
+  rdfs:subClassOf qudt:Concept ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:allValuesFrom qudt:EnumeratedValue ;
+      owl:onProperty qudt:enumeratedValue ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:allValuesFrom qudt:Enumeration ;
+      owl:onProperty qudt:enumeration ;
+    ] ;
+.
 qudt:EnumeratedValue
   a owl:Class ;
   dcterms:description """<p>This class is for all enumerated and/or coded values.  For example, it contains the dimension objects that are the basis elements in some abstract vector space associated with a quantity kind system. Another use is for the base dimensions for quantity systems. Each quantity kind system that defines a base set has a corresponding ordered enumeration whose elements are the dimension objects for the base quantity kinds. The order of the dimensions in the enumeration determines the canonical order of the basis elements in the corresponding abstract vector space.</p>
@@ -587,7 +605,7 @@ qudt:EnumeratedValue
   qudt:informativeReference "http://en.wikipedia.org/wiki/Enumeration"^^xsd:anyURI ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "Enumerated Value" ;
-  rdfs:subClassOf qudt:Datatype ;
+  rdfs:subClassOf qudt:Concept ;
   rdfs:subClassOf dtype:EnumeratedValue ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -985,14 +1003,13 @@ qudt:Quantity
   rdfs:subClassOf qudt:Quantifiable ;
   rdfs:subClassOf [
       a owl:Restriction ;
-      dcterms:description "a reference to the dimension that quantifies the property"^^rdf:HTML ;
-      owl:allValuesFrom qudt:QuantityValue ;
-      owl:onProperty qudt:quantityValue ;
+      owl:allValuesFrom qudt:QuantityKind ;
+      owl:onProperty qudt:hasQuantityKind ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
-      owl:allValuesFrom qudt:QuantityKind ;
-      owl:onProperty qudt:hasQuantityKind ;
+      owl:allValuesFrom qudt:QuantityValue ;
+      owl:onProperty qudt:quantityValue ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -2289,6 +2306,11 @@ qudt:enumeratedValue
   rdfs:label "enumerated value" ;
   rdfs:range qudt:EnumeratedValue ;
 .
+qudt:enumeration
+  a owl:ObjectProperty ;
+  rdfs:label "enumeration" ;
+  rdfs:range qudt:Enumeration ;
+.
 qudt:exactConstant
   a owl:DatatypeProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
@@ -2954,6 +2976,12 @@ qudt:standardUncertainty
   rdfs:label "standard uncertainty" ;
   rdfs:range xsd:double ;
 .
+qudt:supercededBy
+  a owl:ObjectProperty ;
+  dcterms:description "This property is used to refer to the most current definition of an entity, when needed."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "superceded by" ;
+.
 qudt:symbol
   a owl:DatatypeProperty ;
   dcterms:description "The symbol is a glyph that is used to represent some concept, typically a unit or a quantity, in a compact form. For example, the symbol for an Ohm is \\(ohm\\). This contrasts with 'unit:abbreviation', which gives a short alphanumeric abbreviation for the unit, 'ohm' for Ohm."^^qudt:LatexString ;
@@ -3137,7 +3165,7 @@ vaem:GMD_QUDT-SCHEMA
 <p class=\"lm-para\">Except for unit prefixes, all units are specified in separate vocabularies. Descriptions are provided in both HTML and LaTeX formats. A quantity is a measure of an observable phenomenon, that, when associated with something, becomes a property of that thing; a particular object, event, or physical system. </p>
 
 <p class=\"lm-para\">A quantity has meaning in the context of a measurement (i.e. the thing measured, the measured value, the accuracy of measurement, etc.) whereas the underlying quantity kind is independent of any particular measurement. Thus, length is a quantity kind while the height of a rocket is a specific quantity of length; its magnitude that may be expressed in meters, feet, inches, etc.  Or, as stated at Wikipedia, in the language of measurement, quantities are quantifiable aspects of the world, such as time, distance, velocity, mass, momentum, energy, and weight, and units are used to describe their measure. Many of these quantities are related to each other by various physical laws, and as a result the units of some of the quantities can be expressed as products (or ratios) of powers of other units (e.g., momentum is mass times velocity and velocity is measured in distance divided by time).</p>"""^^rdf:HTML ;
-  dcterms:modified "2022-08-02T09:39:48.263-04:00"^^xsd:dateTime ;
+  dcterms:modified "2022-10-25T17:23:02.471-04:00"^^xsd:dateTime ;
   dcterms:rights """
   This product includes all or a portion of the UCUM table, UCUM codes, and UCUM definitions or is derived from it, subject to a license from Regenstrief Institute, Inc. and The UCUM Organization. Your use of the UCUM table, UCUM codes, UCUM definitions also is subject to this license, a copy of which is available at ​http://unitsofmeasure.org. The current complete UCUM table, UCUM Specification are available for download at ​http://unitsofmeasure.org. The UCUM table and UCUM codes are copyright © 1995-2009, Regenstrief Institute, Inc. and the Unified Codes for Units of Measures (UCUM) Organization. All rights reserved.
 
@@ -3145,25 +3173,25 @@ THE UCUM TABLE (IN ALL FORMATS), UCUM DEFINITIONS, AND SPECIFICATION ARE PROVIDE
   """ ;
   dcterms:rights "The QUDT Ontologies are issued under a Creative Commons Attribution 4.0 International License (CC BY 4.0), available at https://creativecommons.org/licenses/by/4.0/. Attribution should be made to QUDT.org" ;
   dcterms:subject "QUDT" ;
-  dcterms:title "QUDT Schema - Version 2.1.19" ;
+  dcterms:title "QUDT Schema - Version 2.1.21" ;
   qudt:informativeReference "http://unitsofmeasure.org/trac"^^xsd:anyURI ;
   qudt:informativeReference "http://www.bipm.org/en/publications/si-brochure"^^xsd:anyURI ;
   qudt:informativeReference "http://www.bipm.org/utils/common/documents/jcgm/JCGM_200_2008.pdf"^^xsd:anyURI ;
   qudt:informativeReference "https://books.google.com/books?id=pIlCAAAAIAAJ&dq=dimensional+analysis&hl=en"^^xsd:anyURI ;
   qudt:informativeReference "https://www.nist.gov/physical-measurement-laboratory/special-publication-811"^^xsd:anyURI ;
   vaem:graphName "qudt" ;
-  vaem:graphTitle "Quantities, Units, Dimensions and Types (QUDT) Schema - Version 2.1.19" ;
+  vaem:graphTitle "Quantities, Units, Dimensions and Types (QUDT) Schema - Version 2.1.21" ;
   vaem:hasGraphRole vaem:SchemaGraph ;
   vaem:hasOwner vaem:QUDT ;
   vaem:hasSteward vaem:QUDT ;
   vaem:intent "Specifies the schema for quantities, units and dimensions. Types are defined in other schemas." ;
   vaem:isMetadataFor <http://qudt.org/2.1/schema/qudt> ;
-  vaem:latestPublishedVersion "https://qudt.org/doc/2022/08/DOC_SCHEMA-QUDT-v2.1.html"^^xsd:anyURI ;
+  vaem:latestPublishedVersion "https://qudt.org/doc/2022/10/DOC_SCHEMA-QUDT-v2.1.html"^^xsd:anyURI ;
   vaem:logo "https://qudt.org/linkedmodels.org/assets/lib/lm/images/logos/qudt_logo-300x110.png"^^xsd:anyURI ;
   vaem:namespace "http://qudt.org/schema/qudt/" ;
   vaem:namespacePrefix "qudt" ;
   vaem:owner "qudt.org" ;
-  vaem:previousPublishedVersion "https://qudt.org/doc/2022/06/DOC_SCHEMA-QUDT-v2.1.html"^^xsd:anyURI ;
+  vaem:previousPublishedVersion "https://qudt.org/doc/2022/09/DOC_SCHEMA-QUDT-v2.1.html"^^xsd:anyURI ;
   vaem:revision "2.1" ;
   vaem:turtleFileURL "http://qudt.org/2.1/schema/qudt"^^xsd:anyURI ;
   vaem:usesNonImportedResource dcterms:abstract ;
@@ -3178,7 +3206,7 @@ THE UCUM TABLE (IN ALL FORMATS), UCUM DEFINITIONS, AND SPECIFICATION ARE PROVIDE
   vaem:usesNonImportedResource voag:QUDT-Attribution ;
   vaem:withAttributionTo voag:QUDT-Attribution ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "QUDT Schema - Version 2.1.19" ;
+  rdfs:label "QUDT Schema - Version 2.1.21" ;
   owl:versionIRI <http://qudt.org/2.1/schema/qudt> ;
 .
 vaem:QUDT
