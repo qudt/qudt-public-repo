@@ -1,6 +1,16 @@
 # Community Submissions
-Community submissions go in this folder
+Community submissions go in this folder, organized in the following way:
 
-- [UCUM Essentials](./UCUM)
-- [UNECE CEFACT](./UNECE)
-- [UDUNITS](./UDUNITS)
+- applications
+- case studies
+- extensions
+  - loop3d
+- general
+  - NVS-P06
+  - UCUM
+  - UDUNITS
+  - UNECE
+- mappings
+  - SSSOM
+    - IFC
+  - SHACL
