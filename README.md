@@ -15,7 +15,9 @@ Here is the core design pattern of the QUDT ontology:
 
 Here is the imports closure graph, so you can see which files you need to explicitly import, depending on your application:
 
-![image](https://user-images.githubusercontent.com/1130189/173833010-8ec49490-9807-421f-aeb4-1bc77c96851a.png)
+![image](https://user-images.githubusercontent.com/1130189/213201003-c41c911b-c1b1-479f-a271-f5f19569dda1.png)
+
+Note that the default schema is expressed in SHACL. You can change this to use the OWL schema if you prefer, as documented [here](https://github.com/qudt/qudt-public-repo/wiki/Advanced-User-Guide#5-using-the-shacl-schema-instead-of-the-owl-schema).
 
 Our current plan is to deliver this material in even more powerful ways. The website now hosts an engine supporting SPARQL and GraphQL queries. Fully resolvable URIs at the graph and instance level are available online. Eventually we will also support resolvable class URIs as well. We are also creating a series of <a href="https://github.com/qudt/qudt-public-repo/wiki/User-Guide-for-QUDT"> User Guides</a> on the wiki for this repository.
 
