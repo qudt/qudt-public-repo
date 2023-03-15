@@ -362,6 +362,7 @@ qudt:Concept
   sh:property qudt:Concept-hasRule ;
   sh:property qudt:Concept-id ;
   sh:property qudt:Concept-plainTextDescription ;
+  sh:property qudt:Concept-isReplacedBy ;
 .
 qudt:Concept-abbreviation
   a sh:PropertyShape ;
@@ -407,9 +408,9 @@ qudt:Concept-plainTextDescription
   sh:datatype xsd:string ;
   sh:maxCount 1 ;
 .
-qudt:Concept-supercededBy
+qudt:Concept-isReplacedBy
   a sh:PropertyShape ;
-  sh:path qudt:supercededBy ;
+  sh:path dcterms:isReplacedBy ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   sh:maxCount 1 ;
 .
@@ -2043,7 +2044,7 @@ qudt:Unit
   rdfs:label "Unit" ;
   rdfs:subClassOf qudt:Concept ;
   rdfs:subClassOf qudt:Verifiable ;
-  sh:property qudt:Unit-allowedUnitOfSystem ;
+  sh:property qudt:Unit-applicableSystem ;
   sh:property qudt:Unit-conversionMultiplier ;
   sh:property qudt:Unit-conversionOffset ;
   sh:property qudt:Unit-expression ;
@@ -2057,16 +2058,15 @@ qudt:Unit
   sh:property qudt:Unit-qkdvDenominator ;
   sh:property qudt:Unit-qkdvNumerator ;
   sh:property qudt:Unit-siUnitsExpression ;
-  sh:property qudt:Unit-supercededBy ;
   sh:property qudt:Unit-symbol ;
   sh:property qudt:Unit-ucumCode ;
   sh:property qudt:Unit-udunitsCode ;
   sh:property qudt:Unit-uneceCommonCode ;
   sh:property qudt:Unit-unitOfSystem ;
 .
-qudt:Unit-allowedUnitOfSystem
+qudt:Unit-applicableSystem
   a sh:PropertyShape ;
-  sh:path qudt:allowedUnitOfSystem ;
+  sh:path qudt:applicableSystem ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   sh:class qudt:SystemOfUnits ;
 .
@@ -2301,9 +2301,17 @@ qudt:allowedPattern
 qudt:allowedUnitOfSystem
   a rdf:Property ;
   dcterms:description "This property relates a unit of measure with a unit system that does not define the unit, but allows its use within the system. An allowed unit must be convertible to some dimensionally eqiuvalent unit that is defined by the system."^^rdf:HTML ;
+  dcterms:isReplacedBy qudt:applicableSystem ;
+  owl:deprecated true ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "allowed unit of system" ;
   rdfs:subPropertyOf qudt:isUnitOfSystem ;
+.
+qudt:applicableSystem
+  a rdf:Property ;
+  dcterms:description "This property relates a unit of measure with a unit system that may or may not define the unit, but within which the unit is compatible."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "applicable system" ;
 .
 qudt:ansiSQLName
   a rdf:Property ;
@@ -3199,12 +3207,6 @@ qudt:standardUncertainty
   dcterms:description "The standard uncertainty of a quantity is the estimated standard deviation of the mean taken from a series of measurements."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "standard uncertainty" ;
-.
-qudt:supercededBy
-  a rdf:Property ;
-  dcterms:description "This property is used to refer to the most current definition of an entity, when needed."^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "superceded by" ;
 .
 qudt:symbol
   a rdf:Property ;
