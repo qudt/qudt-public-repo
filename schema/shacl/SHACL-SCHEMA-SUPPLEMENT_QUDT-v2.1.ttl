@@ -1,5 +1,4 @@
 # baseURI: http://qudt.org/2.1/schema/shacl/overlay/qudt
-# imports: http://datashapes.org/dash
 # imports: http://qudt.org/2.1/schema/shacl/qudt
 # imports: http://www.w3.org/ns/shacl#
 
@@ -24,9 +23,13 @@
   a owl:Ontology ;
   rdfs:comment "Supplements the generated SHACL Schema with constructs not expressible in the QUDT OWL Ontology" ;
   rdfs:label "QUDT SHACL Schema Supplement- Version 2.1.25" ;
-  owl:imports <http://datashapes.org/dash> ;
   owl:imports <http://qudt.org/2.1/schema/shacl/qudt> ;
   owl:imports sh: ;
+  sh:declare [
+      a sh:PrefixDeclaration ;
+      sh:namespace "http://purl.org/dc/terms/"^^xsd:anyURI ;
+      sh:prefix "dcterms" ;
+    ] ;
   sh:declare [
       a sh:PrefixDeclaration ;
       sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
@@ -41,6 +44,11 @@
       a sh:PrefixDeclaration ;
       sh:namespace "http://qudt.org/vocab/unit/"^^xsd:anyURI ;
       sh:prefix "unit" ;
+    ] ;
+  sh:declare [
+      a sh:PrefixDeclaration ;
+      sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ;
+      sh:prefix "owl" ;
     ] ;
   sh:declare [
       a sh:PrefixDeclaration ;
@@ -171,6 +179,26 @@ qudt:Concept-skos_altLabel
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   sh:group qudt:IdentifiersAndDescriptionsPropertyGroup ;
   sh:order "12"^^xsd:decimal ;
+.
+qudt:DeprecationConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+  rdfs:label "Warning about use of a deprecated QUDT resource" ;
+  sh:severity sh:Warning ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Warns if a deprecated QUDT resource is used" ;
+      sh:message "Resource, '{?s}' refers to '{$this}' which has been deprecated. Please refer to '{?newq}' instead." ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """SELECT ?s $this ?newq
+WHERE {
+$this qudt:deprecated true .
+?s ?p $this .
+FILTER (!STRSTARTS(STR(?s),'http://qudt.org')) .
+$this dcterms:isReplacedBy ?newq .
+}""" ;
+    ] ;
+  sh:targetClass qudt:Concept ;
 .
 qudt:EnumeratedValue-qudt_description
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
