@@ -76,7 +76,7 @@ dcterms:title
   a owl:Ontology ;
   vaem:hasGraphMetadata vaem:GMD_QUDT-SCHEMA ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "QUDT Schema - Version 2.1.21" ;
+  rdfs:label "QUDT Schema - Version 2.1.28" ;
   owl:imports <http://www.linkedmodel.org/schema/dtype> ;
   owl:imports <http://www.linkedmodel.org/schema/vaem> ;
   owl:imports <http://www.w3.org/2004/02/skos/core> ;
@@ -314,7 +314,17 @@ qudt:Concept
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:maxCardinality "1"^^xsd:int ;
+      owl:onProperty dcterms:isReplacedBy ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:maxCardinality "1"^^xsd:int ;
       owl:onProperty qudt:abbreviation ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:maxCardinality "1"^^xsd:int ;
+      owl:onProperty qudt:deprecated ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -325,11 +335,6 @@ qudt:Concept
       a owl:Restriction ;
       owl:maxCardinality "1"^^xsd:int ;
       owl:onProperty qudt:plainTextDescription ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:maxCardinality "1"^^xsd:int ;
-      owl:onProperty qudt:supercededBy ;
     ] ;
 .
 qudt:ConstantValue
@@ -945,6 +950,11 @@ qudt:Quantifiable
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:allValuesFrom qudt:Unit ;
+      owl:onProperty qudt:hasUnit ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:allValuesFrom qudt:Unit ;
       owl:onProperty qudt:unit ;
     ] ;
   rdfs:subClassOf [
@@ -976,6 +986,11 @@ qudt:Quantifiable
       a owl:Restriction ;
       owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
       owl:onProperty qudt:dataEncoding ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
+      owl:onProperty qudt:hasUnit ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -1097,11 +1112,6 @@ qudt:QuantityKind
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
-      owl:maxCardinality "4"^^xsd:nonNegativeInteger ;
-      owl:onProperty qudt:baseUnitDimensions ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
       owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
       owl:onClass qudt:QuantityKindDimensionVector ;
       owl:onProperty qudt:qkdvDenominator ;
@@ -1203,11 +1213,6 @@ qudt:QuantityKindDimensionVector
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
-      owl:onProperty qudt:baseUnitDimensions ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
       owl:onProperty qudt:latexDefinition ;
     ] ;
 .
@@ -1285,7 +1290,12 @@ qudt:QuantityValue
   rdfs:subClassOf qudt:Quantifiable ;
   rdfs:subClassOf [
       a owl:Restriction ;
-      owl:cardinality "1"^^xsd:nonNegativeInteger ;
+      owl:maxCardinality 1 ;
+      owl:onProperty qudt:hasUnit ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:maxCardinality 1 ;
       owl:onProperty qudt:unit ;
     ] ;
 .
@@ -1611,11 +1621,11 @@ qudt:TransformType
 .
 qudt:UCUMci
   a rdfs:Datatype ;
+  qudt:deprecated true ;
   rdfs:comment "Lexical pattern for the case-insensitive version of UCUM code" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "case-insensitive UCUM code" ;
   rdfs:subClassOf rdfs:Resource ;
-  owl:deprecated true ;
   owl:onDatatype xsd:string ;
   owl:withRestrictions (
       [
@@ -1625,11 +1635,11 @@ qudt:UCUMci
 .
 qudt:UCUMci-term
   a rdfs:Datatype ;
+  qudt:deprecated true ;
   rdfs:comment "Lexical pattern for the terminal symbols in the case-insensitive version of UCUM code" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "case-insensitive UCUM term" ;
   rdfs:subClassOf rdfs:Resource ;
-  owl:deprecated true ;
   owl:onDatatype xsd:string ;
   owl:withRestrictions (
       [
@@ -1716,12 +1726,7 @@ qudt:Unit
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:allValuesFrom qudt:SystemOfUnits ;
-      owl:onProperty qudt:allowedUnitOfSystem ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:allValuesFrom qudt:SystemOfUnits ;
-      owl:onProperty qudt:unitOfSystem ;
+      owl:onProperty qudt:applicableSystem ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -1891,9 +1896,11 @@ qudt:allowedPattern
 qudt:allowedUnitOfSystem
   a owl:ObjectProperty ;
   dcterms:description "This property relates a unit of measure with a unit system that does not define the unit, but allows its use within the system. An allowed unit must be convertible to some dimensionally eqiuvalent unit that is defined by the system."^^rdf:HTML ;
+  dcterms:isReplacedBy qudt:applicableSystem ;
+  qudt:deprecated true ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "allowed unit of system" ;
-  rdfs:subPropertyOf qudt:unitOfSystem ;
+  rdfs:subPropertyOf qudt:isUnitOfSystem ;
   owl:inverseOf qudt:hasAllowedUnit ;
 .
 qudt:ansiSQLName
@@ -1942,6 +1949,12 @@ qudt:applicableSIUnit
   rdfs:range qudt:Unit ;
   rdfs:subPropertyOf qudt:applicableUnit ;
 .
+qudt:applicableSystem
+  a owl:ObjectProperty ;
+  dcterms:description "This property relates a unit of measure with a unit system that may or may not define the unit, but within which the unit is compatible."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "applicable system" ;
+.
 qudt:applicableUSCustomaryUnit
   a owl:ObjectProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
@@ -1951,16 +1964,10 @@ qudt:applicableUSCustomaryUnit
 .
 qudt:applicableUnit
   a owl:ObjectProperty ;
+  dcterms:description "See https://github.com/qudt/qudt-public-repo/wiki/Advanced-User-Guide#4-computing-applicable-units-for-a-quantitykind on how `qudt:applicableUnit` is computed from `qudt:hasQuantityKind` and then materialized"^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "applicable unit" ;
   rdfs:range qudt:Unit ;
-.
-qudt:baseCGSUnitDimensions
-  a owl:DatatypeProperty ;
-  dcterms:description "<em>qudt:baseCGSUnitDimensions</em> is a string datatype property expressing the dimensions of a unit, or quantity, as a vector over the base units in the CGS System."^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "base CGS unit dimensions" ;
-  rdfs:subPropertyOf qudt:baseUnitDimensions ;
 .
 qudt:baseDimensionEnumeration
   a owl:FunctionalProperty ;
@@ -1969,40 +1976,6 @@ qudt:baseDimensionEnumeration
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "base dimension enumeration" ;
   rdfs:range qudt:Enumeration ;
-.
-qudt:baseISOUnitDimensions
-  a owl:DatatypeProperty ;
-  dcterms:description "<strong>qudt:baseISOUnitDimensions</strong> is a string datatype property expressing the dimensions of a unit, or quantity, as a vector over the base units in the ISO System."^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "base ISO unit dimensions" ;
-  rdfs:subPropertyOf qudt:baseUnitDimensions ;
-.
-qudt:baseImperialUnitDimensions
-  a owl:DatatypeProperty ;
-  dcterms:description "<strong>qudt:baseImperialUnitDimensions</strong> is a string datatype property expressing the dimensions of a unit, or quantity, as a vector over the base units in the Imperial System."^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "base Imperial unit dimensions" ;
-  rdfs:subPropertyOf qudt:baseUnitDimensions ;
-.
-qudt:baseSIUnitDimensions
-  a owl:DatatypeProperty ;
-  dcterms:description "<strong>qudt:baseSIUnitDimensions</strong> is a string datatype property expressing the dimensions of a unit, or quantity, as a vector over the base units. For example, in the SI system \\(capacitance\\) has the unit \\(Farad\\) and base unit dimensions of \\(C^2 \\cdot s^2 / (kg \\cdot m^2)\\)."^^qudt:LatexString ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "base SI unit dimensions" ;
-  rdfs:subPropertyOf qudt:baseUnitDimensions ;
-.
-qudt:baseUSCustomaryUnitDimensions
-  a owl:DatatypeProperty ;
-  dcterms:description "\"qudt:baseUSCustomaryUnitDimensions\" is a string datatype property expressing the dimensions of a unit, or quantity, as a vector over the base units in the US Customary System."^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "base US Customary unit dimensions" ;
-  rdfs:subPropertyOf qudt:baseUnitDimensions ;
-.
-qudt:baseUnitDimensions
-  a owl:DatatypeProperty ;
-  dcterms:description "\"qudt:baseUnitDimensions\" is a string datatype property expressing the dimensions of a unit, or quantity, as a vector over the base units."^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "base unit dimensions" ;
 .
 qudt:baseUnitOfSystem
   a owl:ObjectProperty ;
@@ -2082,15 +2055,15 @@ qudt:citation
 qudt:code
   a owl:DatatypeProperty ;
   dcterms:description "A code is a string that uniquely identifies a QUDT concept. The use of this property has been deprecated."^^rdf:HTML ;
+  qudt:deprecated true ;
   rdfs:domain qudt:Concept ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "code" ;
-  owl:deprecated true ;
 .
 qudt:coherentUnitOfSystem
-  a owl:DeprecatedProperty ;
   a owl:ObjectProperty ;
   dcterms:description "A coherent unit of measurement for a unit system is a defined unit that may be expressed as a product of powers of the system's base units with the proportionality factor of one. A system of units is coherent with respect to a system of quantities and equations if the system of units is chosen in such a way that the equations between numerical values have exactly the same form (including the numerical factors) as the corresponding equations between the quantities. For example, the 'newton' and the 'joule'. These two are, respectively, the force that causes one kilogram to be accelerated at 1 metre per second per  second, and the work done by 1 newton acting over 1 metre. Being coherent refers to this consistent use of 1. In the old c.g.s. system , with its base units the centimetre and the gram, the corresponding coherent units were the dyne and the erg, respectively the force that causes 1 gram to be accelerated at 1 centimetre per second per second, and the work done by 1 dyne acting over 1 centimetre. So \\(1 newton = 10^5\\,dyne\\), \\(1 joule = 10^7\\,erg\\), making each of the four compatible in a decimal sense within its respective other system, but not coherent therein."^^qudt:LatexString ;
+  qudt:deprecated true ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "is coherent unit of system" ;
   rdfs:range qudt:SystemOfUnits ;
@@ -2126,6 +2099,15 @@ qudt:conversionOffset
   rdfs:label "conversion offset" ;
   rdfs:range dtype:numericUnion ;
 .
+qudt:currencyCode
+  a owl:DatatypeProperty ;
+  a owl:FunctionalProperty ;
+  dcterms:description "Alphabetic Currency Code as defined by ISO 4217. For example, US Dollar has the code 'USD'."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "currency code" ;
+  rdfs:range xsd:string ;
+  rdfs:seeAlso "https://en.wikipedia.org/wiki/ISO_4217"^^xsd:anyURI ;
+.
 qudt:currencyExponent
   a owl:DatatypeProperty ;
   a owl:FunctionalProperty ;
@@ -2133,6 +2115,15 @@ qudt:currencyExponent
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "currency exponent" ;
   rdfs:range xsd:integer ;
+.
+qudt:currencyNumber
+  a owl:DatatypeProperty ;
+  a owl:FunctionalProperty ;
+  dcterms:description "Numeric currency Code as defined by ISO 4217. For example, US Dollar has the number 840."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "currency number" ;
+  rdfs:range xsd:positiveInteger ;
+  rdfs:seeAlso "https://en.wikipedia.org/wiki/ISO_4217"^^xsd:anyURI ;
 .
 qudt:dataEncoding
   a owl:ObjectProperty ;
@@ -2168,7 +2159,7 @@ qudt:definedUnitOfSystem
   dcterms:description "This property relates a unit of measure with the unit system that defines the unit."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "defined unit of system" ;
-  rdfs:subPropertyOf qudt:unitOfSystem ;
+  rdfs:subPropertyOf qudt:isUnitOfSystem ;
   owl:inverseOf qudt:hasDefinedUnit ;
 .
 qudt:denominatorDimensionVector
@@ -2176,6 +2167,12 @@ qudt:denominatorDimensionVector
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "denominator dimension vector" ;
   rdfs:range qudt:QuantityKindDimensionVector ;
+.
+qudt:deprecated
+  a owl:DatatypeProperty ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
+  rdfs:label "deprecated" ;
+  rdfs:range xsd:boolean ;
 .
 qudt:derivedCoherentUnitOfSystem
   a owl:ObjectProperty ;
@@ -2207,57 +2204,48 @@ qudt:derivedUnitOfSystem
   dcterms:description "This property relates a unit of measure to the system of units in which it is defined as a derived unit. That is, the derived unit is defined as a product of the base units for the system raised to some rational power."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "is derived unit of system" ;
-  rdfs:subPropertyOf qudt:unitOfSystem ;
+  rdfs:subPropertyOf qudt:isUnitOfSystem ;
   owl:inverseOf qudt:hasDerivedUnit ;
 .
 qudt:dimensionExponent
   a owl:DatatypeProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "dimension exponent" ;
-  rdfs:range dtype:numericUnion ;
 .
 qudt:dimensionExponentForAmountOfSubstance
   a owl:DatatypeProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "dimension exponent for amount of substance" ;
-  rdfs:subPropertyOf qudt:dimensionExponent ;
 .
 qudt:dimensionExponentForElectricCurrent
   a owl:DatatypeProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "dimension exponent for electric current" ;
-  rdfs:range xsd:integer ;
-  rdfs:subPropertyOf qudt:dimensionExponent ;
 .
 qudt:dimensionExponentForLength
   a owl:DatatypeProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "dimension exponent for length" ;
-  rdfs:subPropertyOf qudt:dimensionExponent ;
 .
 qudt:dimensionExponentForLuminousIntensity
   a owl:DatatypeProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "dimension exponent for luminous intensity" ;
-  rdfs:subPropertyOf qudt:dimensionExponent ;
 .
 qudt:dimensionExponentForMass
   a owl:DatatypeProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "dimension exponent for mass" ;
-  rdfs:subPropertyOf qudt:dimensionExponent ;
 .
 qudt:dimensionExponentForThermodynamicTemperature
   a owl:DatatypeProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "dimension exponent for thermodynamic temperature" ;
-  rdfs:subPropertyOf qudt:dimensionExponent ;
 .
 qudt:dimensionExponentForTime
   a owl:DatatypeProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "dimension exponent for time" ;
-  rdfs:subPropertyOf qudt:dimensionExponent ;
 .
 qudt:dimensionInverse
   a owl:FunctionalProperty ;
@@ -2278,7 +2266,6 @@ qudt:dimensionlessExponent
   a owl:DatatypeProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "dimensionless exponent" ;
-  rdfs:subPropertyOf qudt:dimensionExponent ;
 .
 qudt:element
   a owl:ObjectProperty ;
@@ -2321,7 +2308,6 @@ qudt:exactMatch
   a owl:ObjectProperty ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "exact match" ;
-  rdfs:range qudt:Unit ;
   rdfs:subPropertyOf owl:sameAs ;
 .
 qudt:example
@@ -2382,10 +2368,9 @@ qudt:floatPercentage
 .
 qudt:generalization
   a owl:ObjectProperty ;
-  dcterms:description """This property relates a quantity kind to its generalization. A quantity kind, PARENT, is a generalization of the quantity kind CHILD only if:
-
-1. PARENT and CHILD have the same dimensions in every system of quantities;
-2. Every unit that is a measure of quantities of kind CHILD is also a valid measure of quantities of kind PARENT."""^^rdf:HTML ;
+  dcterms:description """This deprecated property was intended to relate a quantity kind to its generalization."""^^rdf:HTML ;
+  dcterms:isReplacedBy skos:broader ;
+  qudt:deprecated true ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "generalization" ;
   owl:inverseOf qudt:specialization ;
@@ -2479,9 +2464,9 @@ qudt:hasDimensionVector
   rdfs:range qudt:QuantityKindDimensionVector ;
 .
 qudt:hasNonCoherentUnit
-  a owl:DeprecatedProperty ;
   a owl:ObjectProperty ;
   dcterms:description "A coherent unit of measurement for a unit system is a defined unit that may be expressed as a product of powers of the system's base units with the proportionality factor of one."^^rdf:HTML ;
+  qudt:deprecated true ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "has non-coherent unit" ;
   rdfs:subPropertyOf qudt:hasDefinedUnit ;
@@ -2526,7 +2511,6 @@ qudt:hasUnit
   dcterms:description "This property relates a system of units with a unit of measure that is either a) defined by the system, or b) accepted for use by the system and is convertible to a unit of equivalent dimension that is defined by the system. Systems of units may distinguish between base and derived units. Base units are the units which measure the base quantities for the corresponding system of quantities. The base units are used to define units for all other quantities as products of powers of the base units. Such units are called derived units for the system."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "has unit" ;
-  owl:inverseOf qudt:unitOfSystem ;
 .
 qudt:hasUnitSystem
   a owl:FunctionalProperty ;
@@ -2626,15 +2610,18 @@ qudt:isMetricUnit
 .
 qudt:isQuantityKindOf
   a owl:ObjectProperty ;
+  dcterms:description "`qudt:isQuantityKindOf` is a strict inverse of `qudt:hasQuantityKind`. However, it does not express all possible allowed pairs of `qudt:Unit` and `qudt:QuantityKind`. See `qudt:applicableUnit` for a property that expresses all such pairs."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "is quantity kind of" ;
   owl:inverseOf qudt:hasQuantityKind ;
 .
-qudt:isScalingOf
+qudt:isUnitOfSystem
   a owl:ObjectProperty ;
-  a owl:TransitiveProperty ;
+  dcterms:description "This property relates a unit of measure with a system of units that either a) defines the unit or b) allows the unit to be used within the system."^^rdf:HTML ;
+  rdfs:domain qudt:Unit ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "is scaling of" ;
+  rdfs:label "is unit of system" ;
+  rdfs:range qudt:SystemOfUnits ;
 .
 qudt:isoNormativeReference
   a owl:DatatypeProperty ;
@@ -2964,7 +2951,7 @@ qudt:siUnitsExpression
 .
 qudt:specialization
   a owl:ObjectProperty ;
-  dcterms:description "This property relates a quantity kind to its specialization(s). For example, linear velocity and angular velocity are both specializations of velocity."^^rdf:HTML ;
+  dcterms:description "This deprecated property originally related a quantity kind to its specialization(s). For example, linear velocity and angular velocity are both specializations of velocity."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "specialization" ;
   owl:inverseOf qudt:generalization ;
@@ -2975,12 +2962,6 @@ qudt:standardUncertainty
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "standard uncertainty" ;
   rdfs:range xsd:double ;
-.
-qudt:supercededBy
-  a owl:ObjectProperty ;
-  dcterms:description "This property is used to refer to the most current definition of an entity, when needed."^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "superceded by" ;
 .
 qudt:symbol
   a owl:DatatypeProperty ;
@@ -3010,18 +2991,18 @@ qudt:systemDimension
 qudt:ucumCaseInsensitiveCode
   a owl:AnnotationProperty ;
   dcterms:description "<em>ucumCode</em> associates a QUDT unit with a UCUM case-insensitive code."^^rdf:HTML ;
+  qudt:deprecated true ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "ucum case-insensitive code" ;
   rdfs:subPropertyOf qudt:ucumCode ;
-  owl:deprecated true ;
 .
 qudt:ucumCaseSensitiveCode
   a owl:AnnotationProperty ;
   dcterms:description "<em>ucumCode</em> associates a QUDT unit with with a UCUM case-sensitive code."^^rdf:HTML ;
+  qudt:deprecated true ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "ucum case-sensitive code" ;
   rdfs:subPropertyOf qudt:ucumCode ;
-  owl:deprecated true ;
 .
 qudt:ucumCode
   a owl:DatatypeProperty ;
@@ -3059,6 +3040,8 @@ qudt:uneceCommonCode
 qudt:unit
   a owl:ObjectProperty ;
   dcterms:description "A reference to the unit of measure of a quantity (variable or constant) of interest."^^rdf:HTML ;
+  dcterms:isReplacedBy qudt:hasUnit ;
+  qudt:deprecated true ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "unit" ;
   rdfs:range qudt:Unit ;
@@ -3069,15 +3052,6 @@ qudt:unitFor
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "unit for" ;
   owl:inverseOf qudt:unit ;
-.
-qudt:unitOfSystem
-  a owl:ObjectProperty ;
-  dcterms:description "This property relates a unit of measure with a system of units that either a) defines the unit or b) allows the unit to be used within the system."^^rdf:HTML ;
-  rdfs:domain qudt:Unit ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "is unit of system" ;
-  rdfs:range qudt:SystemOfUnits ;
-  owl:inverseOf qudt:hasUnit ;
 .
 qudt:upperBound
   a owl:DatatypeProperty ;
@@ -3165,7 +3139,7 @@ vaem:GMD_QUDT-SCHEMA
 <p class=\"lm-para\">Except for unit prefixes, all units are specified in separate vocabularies. Descriptions are provided in both HTML and LaTeX formats. A quantity is a measure of an observable phenomenon, that, when associated with something, becomes a property of that thing; a particular object, event, or physical system. </p>
 
 <p class=\"lm-para\">A quantity has meaning in the context of a measurement (i.e. the thing measured, the measured value, the accuracy of measurement, etc.) whereas the underlying quantity kind is independent of any particular measurement. Thus, length is a quantity kind while the height of a rocket is a specific quantity of length; its magnitude that may be expressed in meters, feet, inches, etc.  Or, as stated at Wikipedia, in the language of measurement, quantities are quantifiable aspects of the world, such as time, distance, velocity, mass, momentum, energy, and weight, and units are used to describe their measure. Many of these quantities are related to each other by various physical laws, and as a result the units of some of the quantities can be expressed as products (or ratios) of powers of other units (e.g., momentum is mass times velocity and velocity is measured in distance divided by time).</p>"""^^rdf:HTML ;
-  dcterms:modified "2022-10-25T17:23:02.471-04:00"^^xsd:dateTime ;
+  dcterms:modified "2023-06-27T14:38:33.074-04:00"^^xsd:dateTime ;
   dcterms:rights """
   This product includes all or a portion of the UCUM table, UCUM codes, and UCUM definitions or is derived from it, subject to a license from Regenstrief Institute, Inc. and The UCUM Organization. Your use of the UCUM table, UCUM codes, UCUM definitions also is subject to this license, a copy of which is available at ​http://unitsofmeasure.org. The current complete UCUM table, UCUM Specification are available for download at ​http://unitsofmeasure.org. The UCUM table and UCUM codes are copyright © 1995-2009, Regenstrief Institute, Inc. and the Unified Codes for Units of Measures (UCUM) Organization. All rights reserved.
 
@@ -3173,25 +3147,25 @@ THE UCUM TABLE (IN ALL FORMATS), UCUM DEFINITIONS, AND SPECIFICATION ARE PROVIDE
   """ ;
   dcterms:rights "The QUDT Ontologies are issued under a Creative Commons Attribution 4.0 International License (CC BY 4.0), available at https://creativecommons.org/licenses/by/4.0/. Attribution should be made to QUDT.org" ;
   dcterms:subject "QUDT" ;
-  dcterms:title "QUDT Schema - Version 2.1.21" ;
+  dcterms:title "QUDT Schema - Version 2.1.28" ;
   qudt:informativeReference "http://unitsofmeasure.org/trac"^^xsd:anyURI ;
   qudt:informativeReference "http://www.bipm.org/en/publications/si-brochure"^^xsd:anyURI ;
   qudt:informativeReference "http://www.bipm.org/utils/common/documents/jcgm/JCGM_200_2008.pdf"^^xsd:anyURI ;
   qudt:informativeReference "https://books.google.com/books?id=pIlCAAAAIAAJ&dq=dimensional+analysis&hl=en"^^xsd:anyURI ;
   qudt:informativeReference "https://www.nist.gov/physical-measurement-laboratory/special-publication-811"^^xsd:anyURI ;
   vaem:graphName "qudt" ;
-  vaem:graphTitle "Quantities, Units, Dimensions and Types (QUDT) Schema - Version 2.1.21" ;
+  vaem:graphTitle "Quantities, Units, Dimensions and Types (QUDT) Schema - Version 2.1.28" ;
   vaem:hasGraphRole vaem:SchemaGraph ;
   vaem:hasOwner vaem:QUDT ;
   vaem:hasSteward vaem:QUDT ;
   vaem:intent "Specifies the schema for quantities, units and dimensions. Types are defined in other schemas." ;
   vaem:isMetadataFor <http://qudt.org/2.1/schema/qudt> ;
-  vaem:latestPublishedVersion "https://qudt.org/doc/2022/10/DOC_SCHEMA-QUDT-v2.1.html"^^xsd:anyURI ;
+  vaem:latestPublishedVersion "https://qudt.org/doc/2023/06/DOC_SCHEMA-QUDT-v2.1.html"^^xsd:anyURI ;
   vaem:logo "https://qudt.org/linkedmodels.org/assets/lib/lm/images/logos/qudt_logo-300x110.png"^^xsd:anyURI ;
   vaem:namespace "http://qudt.org/schema/qudt/" ;
   vaem:namespacePrefix "qudt" ;
   vaem:owner "qudt.org" ;
-  vaem:previousPublishedVersion "https://qudt.org/doc/2022/09/DOC_SCHEMA-QUDT-v2.1.html"^^xsd:anyURI ;
+  vaem:previousPublishedVersion "https://qudt.org/doc/2023/05/DOC_SCHEMA-QUDT-v2.1.html"^^xsd:anyURI ;
   vaem:revision "2.1" ;
   vaem:turtleFileURL "http://qudt.org/2.1/schema/qudt"^^xsd:anyURI ;
   vaem:usesNonImportedResource dcterms:abstract ;
@@ -3206,7 +3180,7 @@ THE UCUM TABLE (IN ALL FORMATS), UCUM DEFINITIONS, AND SPECIFICATION ARE PROVIDE
   vaem:usesNonImportedResource voag:QUDT-Attribution ;
   vaem:withAttributionTo voag:QUDT-Attribution ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
-  rdfs:label "QUDT Schema - Version 2.1.21" ;
+  rdfs:label "QUDT Schema - Version 2.1.28" ;
   owl:versionIRI <http://qudt.org/2.1/schema/qudt> ;
 .
 vaem:QUDT
