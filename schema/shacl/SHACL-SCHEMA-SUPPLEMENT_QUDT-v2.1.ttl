@@ -235,6 +235,25 @@ qudt:EnumeratedValue-qudt_description
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
 .
+qudt:ExactMatchGoesBothWaysConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Ensure that if A qudt:exactMatch B then B qudt:exactMatch A" ;
+      sh:message "Missing triple: {$t} qudt:exactMatch {$this} ." ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """
+SELECT $this ?t
+WHERE {
+$this qudt:exactMatch ?t .
+FILTER NOT EXISTS {?t qudt:exactMatch $this }
+}
+""" ;
+    ] ;
+  sh:targetClass qudt:Concept ;
+.
 qudt:HTMLOrStringOrLangStringOrLatexString
   a rdf:List ;
   rdf:first [
@@ -260,6 +279,48 @@ qudt:IdentifiersAndDescriptionsPropertyGroup
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   rdfs:label "Identifiers and Descriptions" ;
   sh:order "10"^^xsd:decimal ;
+.
+qudt:InconsistentDimensionVectorInSKOSHierarchyConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Checks that a QuantityKind has the same dimension vector as any skos:broader QuantityKind" ;
+      sh:message "Unit {$this} has dimension vector {$udv} which is not the same as the dimension vector of its skos:broader, {$qk} with dimension vector {$qdv}" ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """
+SELECT $this ?udv ?qk ?qdv
+WHERE {
+$this qudt:hasDimensionVector  ?udv .
+$this skos:broader* ?qk .
+?qk qudt:hasDimensionVector ?qdv .
+FILTER (?udv != ?qdv) .
+}
+""" ;
+    ] ;
+  sh:targetClass qudt:QuantityKind ;
+.
+qudt:InconsistentUnitAndDimensionVectorConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Checks that a Unit and its QuantityKind have the same dimension vector" ;
+      sh:message "Unit {$this} has dimension vector {$udv} which is not the same as the dimension vector of its quantity kind {$qk} with dimension vector {$qdv}" ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """
+SELECT $this ?udv ?qk ?qdv
+WHERE {
+$this qudt:hasDimensionVector  ?udv .
+$this qudt:hasQuantityKind ?qk .
+?qk qudt:hasDimensionVector ?qdv .
+FILTER (?udv != ?qdv) .
+}
+""" ;
+    ] ;
+  sh:targetClass qudt:Unit ;
 .
 qudt:Narratable
   a qudt:AspectClass ;
@@ -601,6 +662,26 @@ qudt:UnitEquivalencePropertyGroup
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   rdfs:label "Equivalent Units" ;
   sh:order "50"^^xsd:decimal ;
+.
+qudt:UnitPointsToAllExactMatchQuantityKindsConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Ensure that if a Unit hasQuantityKind A, and A qudt:exactMatch B, then the Unit hasQuantityKind B " ;
+      sh:message "Missing triple: {$this} qudt:hasQuantityKind {?qk2}, because {?qk} qudt:exactMatch {?qk2}" ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """
+SELECT $this ?qk ?qk2
+WHERE {
+$this qudt:hasQuantityKind ?qk .
+?qk qudt:exactMatch ?qk2 .
+FILTER NOT EXISTS {$this qudt:hasQuantityKind ?qk2}
+}
+""" ;
+    ] ;
+  sh:targetClass qudt:Unit ;
 .
 qudt:UnitReferencesPropertyGroup
   a sh:PropertyGroup ;
