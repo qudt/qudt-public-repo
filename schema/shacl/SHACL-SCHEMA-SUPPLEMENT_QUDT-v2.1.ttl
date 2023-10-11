@@ -98,6 +98,35 @@ qudt:Citation-qudt_description
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   sh:or qudt:HTMLOrStringOrLangStringOrLatexString ;
 .
+qudt:ClosedWorldShape
+  a sh:NodeShape ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Ensure that all instances of a class use only the properties defined for that class." ;
+      sh:message "Predicate {?p} is not defined for instance {$this}." ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """
+SELECT $this ?p ?o
+WHERE {
+$this a/rdfs:subClassOf* qudt:Concept .
+$this ?p ?o .
+FILTER(STRSTARTS (str(?p), 'http://qudt.org/schema/qudt'))
+FILTER NOT EXISTS {$this a sh:NodeShape}
+FILTER NOT EXISTS {$this a/rdfs:subClassOf* ?class .
+			?class sh:property/sh:path ?p .
+}
+FILTER NOT EXISTS {$this a/rdfs:subClassOf* ?class .
+?class sh:xone/rdf:rest*/rdf:first/sh:property/sh:path ?p .
+}
+FILTER NOT EXISTS {$this a/rdfs:subClassOf* ?class .
+?class sh:or/rdf:rest*/rdf:first/sh:property/sh:path ?p .
+}
+}
+""" ;
+    ] ;
+  sh:targetClass s223:Concept ;
+.
 qudt:Concept
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   sh:property qudt:Concept-rdf_type ;
