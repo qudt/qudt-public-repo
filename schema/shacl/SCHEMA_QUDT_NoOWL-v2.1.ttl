@@ -265,6 +265,7 @@ qudt:CardinalityType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "Cardinality Type" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
+  sh:property qudt:CardinalityType-literal ;
   sh:property [
       a sh:PropertyShape ;
       sh:path [
@@ -274,8 +275,16 @@ qudt:CardinalityType
       sh:in (
           qudt:CT_COUNTABLY-INFINITE
           qudt:CT_FINITE
+          qudt:CT_UNCOUNTABLE
         ) ;
     ] ;
+.
+qudt:CardinalityType-literal
+  a sh:PropertyShape ;
+  sh:path qudt:literal ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:datatype xsd:string ;
+  sh:maxCount 1 ;
 .
 qudt:CharEncoding
   a qudt:BooleanEncodingType ;
@@ -786,6 +795,7 @@ qudt:EnumeratedValue
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "Enumerated Value" ;
   rdfs:subClassOf qudt:Concept ;
+  rdfs:subClassOf qudt:Verifiable ;
   rdfs:subClassOf dtype:EnumeratedValue ;
   sh:property qudt:EnumeratedValue-abbreviation ;
   sh:property qudt:EnumeratedValue-description ;
@@ -1058,6 +1068,7 @@ qudt:OrderedType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "Ordered type" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
+  sh:property qudt:OrderedType-literal ;
   sh:property [
       a sh:PropertyShape ;
       sh:path [
@@ -1070,6 +1081,13 @@ qudt:OrderedType
           qudt:TotallyOrdered
         ) ;
     ] ;
+.
+qudt:OrderedType-literal
+  a sh:PropertyShape ;
+  sh:path qudt:literal ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:datatype xsd:string ;
+  sh:maxCount 1 ;
 .
 qudt:OrdinalScale
   a rdfs:Class ;
@@ -1161,10 +1179,17 @@ qudt:Prefix
   rdfs:label "Prefix" ;
   rdfs:subClassOf qudt:Concept ;
   rdfs:subClassOf qudt:Verifiable ;
+  sh:property qudt:Prefix-exactMatch ;
   sh:property qudt:Prefix-latexSymbol ;
   sh:property qudt:Prefix-prefixMultiplier ;
   sh:property qudt:Prefix-symbol ;
   sh:property qudt:Prefix-ucumCode ;
+.
+qudt:Prefix-exactMatch
+  a sh:PropertyShape ;
+  sh:path qudt:exactMatch ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:class qudt:Prefix ;
 .
 qudt:Prefix-latexSymbol
   a sh:PropertyShape ;
@@ -1315,6 +1340,7 @@ qudt:QuantityKind
   sh:property qudt:QuantityKind-baseUSCustomaryUnitDimensions ;
   sh:property qudt:QuantityKind-belongsToSystemOfQuantities ;
   sh:property qudt:QuantityKind-dimensionVectorForSI ;
+  sh:property qudt:QuantityKind-exactMatch ;
   sh:property qudt:QuantityKind-expression ;
   sh:property qudt:QuantityKind-generalization ;
   sh:property qudt:QuantityKind-hasDimensionVector ;
@@ -1408,6 +1434,12 @@ qudt:QuantityKind-dimensionVectorForSI
   sh:class qudt:QuantityKindDimensionVector_SI ;
   sh:maxCount 1 ;
 .
+qudt:QuantityKind-exactMatch
+  a sh:PropertyShape ;
+  sh:path qudt:exactMatch ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:class qudt:QuantityKind ;
+.
 qudt:QuantityKind-expression
   a sh:PropertyShape ;
   sh:path qudt:expression ;
@@ -1479,7 +1511,9 @@ qudt:QuantityKindDimensionVector
   sh:property qudt:QuantityKindDimensionVector-dimensionExponentForThermodynamicTemperature ;
   sh:property qudt:QuantityKindDimensionVector-dimensionExponentForTime ;
   sh:property qudt:QuantityKindDimensionVector-dimensionlessExponent ;
+  sh:property qudt:QuantityKindDimensionVector-hasReferenceQuantityKind ;
   sh:property qudt:QuantityKindDimensionVector-latexDefinition ;
+  sh:property qudt:QuantityKindDimensionVector-latexSymbol ;
 .
 qudt:QuantityKindDimensionVector-dimensionExponentForAmountOfSubstance
   a sh:PropertyShape ;
@@ -1538,12 +1572,24 @@ qudt:QuantityKindDimensionVector-dimensionlessExponent
   sh:maxCount 1 ;
   sh:minCount 1 ;
 .
+qudt:QuantityKindDimensionVector-hasReferenceQuantityKind
+  a sh:PropertyShape ;
+  sh:path qudt:hasReferenceQuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:class qudt:QuantityKind ;
+.
 qudt:QuantityKindDimensionVector-latexDefinition
   a sh:PropertyShape ;
   sh:path qudt:latexDefinition ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   sh:datatype qudt:LatexString ;
   sh:maxCount 1 ;
+.
+qudt:QuantityKindDimensionVector-latexSymbol
+  a sh:PropertyShape ;
+  sh:path qudt:latexSymbol ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:datatype qudt:LatexString ;
 .
 qudt:QuantityKindDimensionVector_CGS
   a rdfs:Class ;
@@ -1968,6 +2014,7 @@ qudt:SystemOfUnits
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "System of Units" ;
   rdfs:subClassOf qudt:Concept ;
+  rdfs:subClassOf qudt:Verifiable ;
   sh:property qudt:SystemOfUnits-applicablePhysicalConstant ;
   sh:property qudt:SystemOfUnits-hasAllowedUnit ;
   sh:property qudt:SystemOfUnits-hasBaseUnit ;
@@ -1976,6 +2023,7 @@ qudt:SystemOfUnits
   sh:property qudt:SystemOfUnits-hasDerivedCoherentUnit ;
   sh:property qudt:SystemOfUnits-hasDerivedUnit ;
   sh:property qudt:SystemOfUnits-hasUnit ;
+  sh:property qudt:SystemOfUnits-prefix ;
 .
 qudt:SystemOfUnits-applicablePhysicalConstant
   a sh:PropertyShape ;
@@ -2024,6 +2072,12 @@ qudt:SystemOfUnits-hasUnit
   sh:path qudt:hasUnit ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   sh:class qudt:Unit ;
+.
+qudt:SystemOfUnits-prefix
+  a sh:PropertyShape ;
+  sh:path qudt:prefix ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:class qudt:Prefix ;
 .
 qudt:TotallyOrdered
   a qudt:OrderedType ;
@@ -2080,6 +2134,10 @@ qudt:Unit
   sh:property qudt:Unit-applicableSystem ;
   sh:property qudt:Unit-conversionMultiplier ;
   sh:property qudt:Unit-conversionOffset ;
+  sh:property qudt:Unit-definedUnitOfSystem ;
+  sh:property qudt:Unit-derivedCoherentUnitOfSystem ;
+  sh:property qudt:Unit-derivedUnitOfSystem ;
+  sh:property qudt:Unit-exactMatch ;
   sh:property qudt:Unit-expression ;
   sh:property qudt:Unit-hasDimensionVector ;
   sh:property qudt:Unit-hasQuantityKind ;
@@ -2088,6 +2146,7 @@ qudt:Unit
   sh:property qudt:Unit-latexSymbol ;
   sh:property qudt:Unit-mathMLdefinition ;
   sh:property qudt:Unit-omUnit ;
+  sh:property qudt:Unit-prefix ;
   sh:property qudt:Unit-qkdvDenominator ;
   sh:property qudt:Unit-qkdvNumerator ;
   sh:property qudt:Unit-siUnitsExpression ;
@@ -2136,6 +2195,30 @@ qudt:Unit-conversionOffset
         sh:datatype xsd:float ;
       ]
     ) ;
+.
+qudt:Unit-definedUnitOfSystem
+  a sh:PropertyShape ;
+  sh:path qudt:definedUnitOfSystem ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:class qudt:SystemOfUnits ;
+.
+qudt:Unit-derivedCoherentUnitOfSystem
+  a sh:PropertyShape ;
+  sh:path qudt:derivedCoherentUnitOfSystem ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:class qudt:SystemOfUnits ;
+.
+qudt:Unit-derivedUnitOfSystem
+  a sh:PropertyShape ;
+  sh:path qudt:derivedUnitOfSystem ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:class qudt:SystemOfUnits ;
+.
+qudt:Unit-exactMatch
+  a sh:PropertyShape ;
+  sh:path qudt:exactMatch ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:class qudt:Unit ;
 .
 qudt:Unit-expression
   a sh:PropertyShape ;
@@ -2190,6 +2273,13 @@ qudt:Unit-omUnit
   a sh:PropertyShape ;
   sh:path qudt:omUnit ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+.
+qudt:Unit-prefix
+  a sh:PropertyShape ;
+  sh:path qudt:prefix ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:class qudt:Prefix ;
+  sh:maxCount 1 ;
 .
 qudt:Unit-qkdvDenominator
   a sh:PropertyShape ;
