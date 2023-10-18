@@ -15,7 +15,9 @@ Here is the core design pattern of the QUDT ontology:
 
 Here is the imports closure graph, so you can see which files you need to explicitly import, depending on your application:
 
-![image](https://user-images.githubusercontent.com/1130189/173833010-8ec49490-9807-421f-aeb4-1bc77c96851a.png)
+![image](https://user-images.githubusercontent.com/1130189/236019440-163d10de-d725-4024-85d1-dcbba67cef38.png)
+
+Note that the default schema is expressed in SHACL. You can change this to use the OWL schema if you prefer, as documented [here](https://github.com/qudt/qudt-public-repo/wiki/Advanced-User-Guide#5-using-the-shacl-schema-instead-of-the-owl-schema).
 
 Our current plan is to deliver this material in even more powerful ways. The website now hosts an engine supporting SPARQL and GraphQL queries. Fully resolvable URIs at the graph and instance level are available online. Eventually we will also support resolvable class URIs as well. We are also creating a series of <a href="https://github.com/qudt/qudt-public-repo/wiki/User-Guide-for-QUDT"> User Guides</a> on the wiki for this repository.
 
@@ -24,22 +26,22 @@ We encourage you to get involved. If you have particular needs or see errors, pl
 Installation / Configuration instructions
 -----------------------------------------
 
-The QUDT ontology is provided in two forms: OWL and SHACL. By default, the vocabularies are configured to use the OWL schema. To configure it to use the SHACL schema instead, just make the following single change in the file schema/shacl/SHEMA-FACADE_QUDT-v2.1.\<release-number\>.ttl. You can see in the imports closure diagram above how all the vocabularies import this single "facade" file to make it easy to switch the ontology.
+The QUDT ontology is provided in two forms: OWL and SHACL. By default, the vocabularies are configured to use the SHACL schema. To configure it to use the OWL schema instead, just make the following single change in the file schema/shacl/SHEMA-FACADE_QUDT-v2.1.\<release-number\>.ttl. You can see in the imports closure diagram above how all the vocabularies import this single "facade" file to make it easy to switch the ontology.
 
 ```
 Change this line:
-  owl:imports <http://qudt.org/2.1/schema/qudt> ;  
+  owl:imports <http://qudt.org/2.1/schema/shacl/qudt> ;  
 To:
-  owl:imports <http://qudt.org/2.1/schema/shacl/qudt> ;
+  owl:imports <http://qudt.org/2.1/schema/qudt> ;
 ```
 
 If you are using the tools from TopQuadrant, you should also change the comment line at the top of the same file:
 
 ```
 Change this line:
-# imports: http://qudt.org/2.1/schema/qudt
-To:
 # imports: http://qudt.org/2.1/schema/shacl/qudt
+To:
+# imports: http://qudt.org/2.1/schema/qudt
 ```
 
 Status
