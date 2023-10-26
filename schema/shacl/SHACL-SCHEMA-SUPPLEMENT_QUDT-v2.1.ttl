@@ -364,6 +364,28 @@ FILTER (?udv != ?qdv) .
     ] ;
   sh:targetClass qudt:Unit ;
 .
+qudt:MultipleLabelsConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+  rdfs:label "Warning about use of multiple labels with the same language tag" ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Warning about use of multiple labels with the same language tag" ;
+      sh:message "'{$this}' has multiple labels: '{?lab1}' and '{?lab2}'. " ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """SELECT $this ?lab1 ?lab2
+WHERE {
+$this rdfs:label ?lab1 .
+BIND (lang(?lab1) AS ?lang1) .
+$this rdfs:label ?lab2 .
+BIND (lang(?lab2) AS ?lang2) .
+FILTER (?lang1 = ?lang2).
+FILTER (?lab1 != ?lab2).
+}""" ;
+    ] ;
+  sh:targetClass qudt:Concept ;
+.
 qudt:Narratable
   a qudt:AspectClass ;
   a sh:NodeShape ;
