@@ -371,18 +371,19 @@ qudt:MultipleLabelsConstraint
   sh:severity sh:Info ;
   sh:sparql [
       a sh:SPARQLConstraint ;
-      rdfs:comment "Warning about use of multiple labels with the same language tag" ;
-      sh:message "'{$this}' has multiple labels: '{?lab1}' and '{?lab2}'. " ;
+      rdfs:comment "Ensures each qudt:Concept instance doesn't have multiple rdfs:labels with the same language tag." ;
+      sh:message "{$this} has more than one rdfs:label for the same language tag." ;
       sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
-      sh:select """SELECT $this ?lab1 ?lab2
-WHERE {
-$this rdfs:label ?lab1 .
-BIND (lang(?lab1) AS ?lang1) .
-$this rdfs:label ?lab2 .
-BIND (lang(?lab2) AS ?lang2) .
-FILTER (?lang1 = ?lang2).
-FILTER (?lab1 != ?lab2).
-}""" ;
+      sh:select """
+            SELECT $this (COUNT(?label) AS ?count)
+            WHERE {
+                $this rdfs:label ?label .
+                FILTER(langMatches(lang(?label), ?langTag))
+                BIND(lang(?label) AS ?langTag)
+            }
+            GROUP BY $this ?langTag
+            HAVING(?count > 1)
+        """ ;
     ] ;
   sh:targetClass qudt:Concept ;
 .
