@@ -1,6 +1,5 @@
 # baseURI: http://qudt.org/2.1/schema/shacl/qudt
 # imports: http://qudt.org/2.1/schema/shacl/overlay/qudt
-# imports: http://www.linkedmodel.org/schema/dtype
 # imports: http://www.linkedmodel.org/schema/vaem
 # imports: http://www.w3.org/2004/02/skos/core
 # imports: http://www.w3.org/ns/shacl#
@@ -68,13 +67,65 @@ dcterms:title
   a rdf:Property ;
   rdfs:label "title" ;
 .
+dtype:code
+  a rdf:Property ;
+  vaem:comment "A property for expressing an encoded value. The range has been set to \"xsd:anySimpleType\" to allow for a variety of scalar datatypes."^^xsd:string ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/1.1/schema/dtype> ;
+  rdfs:label "code"^^xsd:string ;
+.
+dtype:literal
+  a rdf:Property ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
+  rdfs:label "literal" ;
+.
+dtype:order
+  a rdf:Property ;
+  dcterms:description "The property \"dtype:order\" provides a means to specify a precedence. One use of order is in specifying ordered enumerations such as \"voag:ConfidentialityLevel\".  A similar property, but with an important type difference, is \"vaem:orderIndex\". This is for use on property occurrences in class axioms where it can be placed on a restriction to specify how that property may be transformed into other representations where ordering has some importance, for example, in XML Schema sequences.  Whereas \"vaem:order\" is a datatype property, \"vaem:orderIndex\" is an annotation property." ;
+  rdfs:comment "The \"order\" property specifies a value that can establish precedence and ordinality. One use of order is in make an enumeration an ordinal type. For example \"RiskLevel\" might have the values \"very low\", \"low\", \"medium\", \"high\" and \"very high\". A query that asks for all risks that are greater than \"medium\" would use the ordinal values and return those resources that have “medium”, “high” and “very high” ordinality." ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
+  rdfs:label "order" ;
+.
+dtype:value
+  a rdf:Property ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
+  rdfs:label "value" ;
+.
+dtype:defaultValue
+  a rdf:Property ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
+  rdfs:label "default value" ;
+.
+dtype:numericUnion
+  a rdfs:Datatype ;
+  a rdfs:Class ;
+  a sh:NodeShape ;
+  dcterms:description "This is a placeholder for a datatype that is the union of a set of numeric datatypes. The union of numeric datatypes is not a datatype, but a class of datatypes." ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
+  rdfs:label "numeric union" ;
+  rdfs:subClassOf rdfs:Resource ;
+.
+dtype:EnumeratedValue
+  a rdfs:Class ;
+  a sh:NodeShape ;
+  dcterms:description "This is a placeholder class that is used to represent the values of an enumeration. It is not intended to be used directly." ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
+  rdfs:label "DTYPE Enumerated Value" ;
+  rdfs:subClassOf rdfs:Resource  ;
+.
+dtype:Enumeration
+  a rdfs:Class ;
+  a sh:NodeShape ;
+  dcterms:description "A placeholder." ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
+  rdfs:label "DTYPE Enumeration" ;
+  rdfs:subClassOf rdfs:Resource  ;
+.
 <http://qudt.org/2.1/schema/shacl/qudt>
   a owl:Ontology ;
   vaem:hasGraphMetadata vaem:GMD_SHACLQUDT-SCHEMA ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "QUDT SHACL Schema Version 2.1.32" ;
   owl:imports <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
-  owl:imports <http://www.linkedmodel.org/schema/dtype> ;
   owl:imports <http://www.linkedmodel.org/schema/vaem> ;
   owl:imports <http://www.w3.org/2004/02/skos/core> ;
   owl:imports sh: ;
@@ -108,6 +159,13 @@ qudt:AbstractQuantityKind-symbol
   sh:path qudt:symbol ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   sh:minCount 0 ;
+.
+qudt:NumericUnion
+  a rdfs:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Numeric union" ;
+  rdfs:subClassOf qudt:Concept ;
+  rdfs:subClassOf dtype:numericUnion ;
 .
 qudt:AngleUnit
   a rdfs:Class ;
@@ -3619,6 +3677,14 @@ THE UCUM TABLE (IN ALL FORMATS), UCUM DEFINITIONS, AND SPECIFICATION ARE PROVIDE
   vaem:usesNonImportedResource dcterms:source ;
   vaem:usesNonImportedResource dcterms:subject ;
   vaem:usesNonImportedResource dcterms:title ;
+  vaem:usesNonImportedResource dtype:literal ;
+  vaem:usesNonImportedResource dtype:code ;
+  vaem:usesNonImportedResource dtype:order ;
+  vaem:usesNonImportedResource dtype:value ;
+  vaem:usesNonImportedResource dtype:defaultValue ;
+  vaem:usesNonImportedResource dtype:numericUnion ;
+  vaem:usesNonImportedResource dtype:EnumeratedValue ;
+  vaem:usesNonImportedResource dtype:Enumeration ;
   vaem:usesNonImportedResource voag:QUDT-Attribution ;
   vaem:withAttributionTo voag:QUDT-Attribution ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
