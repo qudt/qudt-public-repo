@@ -71,101 +71,6 @@ dcterms:title
   rdfs:label "title" ;
   rdfs:range xsd:string ;
 .
-dtype:code
-  rdf:type owl:DatatypeProperty ;
-  vaem:comment "A property for expressing an encoded value. The range has been set to \"xsd:anySimpleType\" to allow for a variety of scalar datatypes."^^xsd:string ;
-  rdfs:isDefinedBy <http://www.linkedmodel.org/1.1/schema/dtype> ;
-  rdfs:label "code"^^xsd:string ;
-  rdfs:range xsd:anySimpleType ;
-.
-dtype:literal
-  a owl:DatatypeProperty ;
-  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
-  rdfs:label "literal" ;
-.
-dtype:order
-  a owl:DatatypeProperty ;
-  dcterms:description "The property \"dtype:order\" provides a means to specify a precedence. One use of order is in specifying ordered enumerations such as \"voag:ConfidentialityLevel\".  A similar property, but with an important type difference, is \"vaem:orderIndex\". This is for use on property occurrences in class axioms where it can be placed on a restriction to specify how that property may be transformed into other representations where ordering has some importance, for example, in XML Schema sequences.  Whereas \"vaem:order\" is a datatype property, \"vaem:orderIndex\" is an annotation property." ;
-  rdfs:comment "The \"order\" property specifies a value that can establish precedence and ordinality. One use of order is in make an enumeration an ordinal type. For example \"RiskLevel\" might have the values \"very low\", \"low\", \"medium\", \"high\" and \"very high\". A query that asks for all risks that are greater than \"medium\" would use the ordinal values and return those resources that have “medium”, “high” and “very high” ordinality." ;
-  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
-  rdfs:label "order" ;
-  rdfs:range xsd:nonNegativeInteger ;
-.
-dtype:value
-  a owl:ObjectProperty ;
-  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
-  rdfs:label "value" ;
-.
-dtype:defaultValue
-  a owl:ObjectProperty ;
-  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
-  rdfs:label "default value" ;
-.
-dtype:numericUnion
-  a rdfs:Datatype ;
-  dcterms:description "A datatype that is the union of numeric xsd data types. \"numericUnion\" is equivalent to the xsd specification that uses an xsd:union of memberTypes=\"xsd:decimal xsd:double xsd:float xsd:integer\"." ;
-  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
-  rdfs:label "numeric union" ;
-  rdfs:subClassOf rdfs:Resource ;
-  owl:equivalentClass [
-      a rdfs:Datatype ;
-      owl:unionOf (
-          xsd:float
-          xsd:decimal
-          xsd:integer
-          xsd:double
-        ) ;
-    ] ;
-.
-dtype:EnumeratedValue
-  a owl:Class ;
-  dcterms:description "The base class for datatypes that have values that are restriced to a set of literals or tokens. The members of the restriction may themselve be restriced by facets that apply to scalar data types." ;
-  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
-  rdfs:label "DTYPE Enumerated Value" ;
-  rdfs:subClassOf owl:Thing ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:maxCardinality 1 ;
-      owl:onProperty dtype:code ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:maxCardinality 1 ;
-      owl:onProperty dtype:literal ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:maxCardinality 1 ;
-      owl:onProperty dtype:order ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:maxCardinality 1 ;
-      owl:onProperty dtype:value ;
-    ] ;
-.
-dtype:Enumeration
-  a owl:Class ;
-  dcterms:description "A type that serves as a container for the enumerated values of an enumeration. This enables the enumeration itself to be referenceable. One need for this is in determing the default value of an enumeration , another need is in the management of sub-enumerations and composite enumerations." ;
-  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
-  rdfs:label "DTYPE Enumeration" ;
-  rdfs:subClassOf owl:Thing ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:allValuesFrom dtype:EnumeratedValue ;
-      owl:onProperty dtype:defaultValue ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:allValuesFrom dtype:EnumeratedValue ;
-      owl:onProperty dtype:value ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
-      owl:onProperty dtype:defaultValue ;
-    ] ;
-.
 <http://qudt.org/2.1/schema/qudt>
   a owl:Ontology ;
   vaem:hasGraphMetadata vaem:GMD_QUDT-SCHEMA ;
@@ -577,6 +482,11 @@ qudt:Datatype
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:maxCardinality 1 ;
+      owl:onProperty qudt:mySQLName ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:maxCardinality 1 ;
       owl:onProperty qudt:odbcName ;
     ] ;
   rdfs:subClassOf [
@@ -608,11 +518,6 @@ qudt:Datatype
       a owl:Restriction ;
       owl:maxCardinality 1 ;
       owl:onProperty qudt:vbName ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:maxCardinality 1 ;
-      owl:onProperty qudt:mySQLName ;
     ] ;
 .
 qudt:DateTimeStringEncodingType
@@ -995,26 +900,6 @@ qudt:PhysicalConstant
   rdfs:subClassOf qudt:Quantity ;
   rdfs:subClassOf [
       a owl:Restriction ;
-      owl:onProperty qudt:applicableSystem ;
-      owl:allValuesFrom qudt:SystemOfUnits ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:onProperty qudt:applicableUnit ;
-      owl:allValuesFrom qudt:Unit ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-      owl:onProperty qudt:dbpediaMatch ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
-      owl:allValuesFrom xsd:boolean ;
-      owl:onProperty qudt:exactConstant ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
       owl:allValuesFrom qudt:PhysicalConstant ;
       owl:onProperty qudt:exactMatch ;
     ] ;
@@ -1025,8 +910,18 @@ qudt:PhysicalConstant
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
-      owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-      owl:onProperty qudt:isoNormativeReference ;
+      owl:allValuesFrom qudt:SystemOfUnits ;
+      owl:onProperty qudt:applicableSystem ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:allValuesFrom qudt:Unit ;
+      owl:onProperty qudt:applicableUnit ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:allValuesFrom xsd:boolean ;
+      owl:onProperty qudt:exactConstant ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -1035,13 +930,23 @@ qudt:PhysicalConstant
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
-      owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-      owl:onProperty qudt:latexSymbol ;
+      owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
+      owl:onProperty qudt:mathMLdefinition ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
-      owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
-      owl:onProperty qudt:mathMLdefinition ;
+      owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+      owl:onProperty qudt:dbpediaMatch ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+      owl:onProperty qudt:isoNormativeReference ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+      owl:onProperty qudt:latexSymbol ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -3272,6 +3177,101 @@ voag:supersededBy
   vaem:namespace "http://www.linkedmodel.org/schema/dtype#"^^xsd:anyURI ;
   vaem:namespacePrefix "dtype" ;
 .
+dtype:EnumeratedValue
+  a owl:Class ;
+  dcterms:description "The base class for datatypes that have values that are restriced to a set of literals or tokens. The members of the restriction may themselve be restriced by facets that apply to scalar data types." ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
+  rdfs:label "DTYPE Enumerated Value" ;
+  rdfs:subClassOf owl:Thing ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:maxCardinality 1 ;
+      owl:onProperty dtype:code ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:maxCardinality 1 ;
+      owl:onProperty dtype:literal ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:maxCardinality 1 ;
+      owl:onProperty dtype:order ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:maxCardinality 1 ;
+      owl:onProperty dtype:value ;
+    ] ;
+.
+dtype:Enumeration
+  a owl:Class ;
+  dcterms:description "A type that serves as a container for the enumerated values of an enumeration. This enables the enumeration itself to be referenceable. One need for this is in determing the default value of an enumeration , another need is in the management of sub-enumerations and composite enumerations." ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
+  rdfs:label "DTYPE Enumeration" ;
+  rdfs:subClassOf owl:Thing ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:allValuesFrom dtype:EnumeratedValue ;
+      owl:onProperty dtype:defaultValue ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:allValuesFrom dtype:EnumeratedValue ;
+      owl:onProperty dtype:value ;
+    ] ;
+  rdfs:subClassOf [
+      a owl:Restriction ;
+      owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
+      owl:onProperty dtype:defaultValue ;
+    ] ;
+.
+dtype:code
+  a owl:DatatypeProperty ;
+  vaem:comment "A property for expressing an encoded value. The range has been set to \"xsd:anySimpleType\" to allow for a variety of scalar datatypes." ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/1.1/schema/dtype> ;
+  rdfs:label "code" ;
+  rdfs:range xsd:anySimpleType ;
+.
+dtype:defaultValue
+  a owl:ObjectProperty ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
+  rdfs:label "default value" ;
+.
+dtype:literal
+  a owl:DatatypeProperty ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
+  rdfs:label "literal" ;
+.
+dtype:numericUnion
+  a rdfs:Datatype ;
+  dcterms:description "A datatype that is the union of numeric xsd data types. \"numericUnion\" is equivalent to the xsd specification that uses an xsd:union of memberTypes=\"xsd:decimal xsd:double xsd:float xsd:integer\"." ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
+  rdfs:label "numeric union" ;
+  rdfs:subClassOf rdfs:Resource ;
+  owl:equivalentClass [
+      a rdfs:Datatype ;
+      owl:unionOf (
+          xsd:float
+          xsd:decimal
+          xsd:integer
+          xsd:double
+        ) ;
+    ] ;
+.
+dtype:order
+  a owl:DatatypeProperty ;
+  dcterms:description "The property \"dtype:order\" provides a means to specify a precedence. One use of order is in specifying ordered enumerations such as \"voag:ConfidentialityLevel\".  A similar property, but with an important type difference, is \"vaem:orderIndex\". This is for use on property occurrences in class axioms where it can be placed on a restriction to specify how that property may be transformed into other representations where ordering has some importance, for example, in XML Schema sequences.  Whereas \"vaem:order\" is a datatype property, \"vaem:orderIndex\" is an annotation property." ;
+  rdfs:comment "The \"order\" property specifies a value that can establish precedence and ordinality. One use of order is in make an enumeration an ordinal type. For example \"RiskLevel\" might have the values \"very low\", \"low\", \"medium\", \"high\" and \"very high\". A query that asks for all risks that are greater than \"medium\" would use the ordinal values and return those resources that have “medium”, “high” and “very high” ordinality." ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
+  rdfs:label "order" ;
+  rdfs:range xsd:nonNegativeInteger ;
+.
+dtype:value
+  a owl:ObjectProperty ;
+  rdfs:isDefinedBy <http://www.linkedmodel.org/schema/dtype> ;
+  rdfs:label "value" ;
+.
 vaem:GMD_QUDT-SCHEMA
   a vaem:GraphMetaData ;
   dcterms:contributor "Daniel Mekonnen" ;
@@ -3326,14 +3326,14 @@ THE UCUM TABLE (IN ALL FORMATS), UCUM DEFINITIONS, AND SPECIFICATION ARE PROVIDE
   vaem:usesNonImportedResource dcterms:subject ;
   vaem:usesNonImportedResource dcterms:title ;
   vaem:usesNonImportedResource voag:QUDT-Attribution ;
-  vaem:usesNonImportedResource dtype:literal ;
-  vaem:usesNonImportedResource dtype:code ;
-  vaem:usesNonImportedResource dtype:order ;
-  vaem:usesNonImportedResource dtype:value ;
-  vaem:usesNonImportedResource dtype:defaultValue ;
-  vaem:usesNonImportedResource dtype:numericUnion ;
   vaem:usesNonImportedResource dtype:EnumeratedValue ;
   vaem:usesNonImportedResource dtype:Enumeration ;
+  vaem:usesNonImportedResource dtype:code ;
+  vaem:usesNonImportedResource dtype:defaultValue ;
+  vaem:usesNonImportedResource dtype:literal ;
+  vaem:usesNonImportedResource dtype:numericUnion ;
+  vaem:usesNonImportedResource dtype:order ;
+  vaem:usesNonImportedResource dtype:value ;
   vaem:withAttributionTo voag:QUDT-Attribution ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/qudt> ;
   rdfs:label "QUDT Schema - Version 2.1.32" ;
