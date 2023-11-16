@@ -44,6 +44,14 @@ To:
 # imports: http://qudt.org/2.1/schema/qudt
 ```
 
+Protege Users
+-----------------------------
+Disclaimer: The QUDT ontologies have been tested to load without error only in Protege 5.5.0, but not later releases.
+
+To load QUDT into Protege, choose "Open from URI" from the file menu, and enter http://qudt.org/2.1/vocab/unit
+
+(The "facade" file that is resolvable on the web (http://qudt.org/2.1/schema/facade/qudt) is already configured to load the OWL schema rather than the SHACL schema, so Protege users will be in the OWL world using this method.)
+
 Status
 ------
 
