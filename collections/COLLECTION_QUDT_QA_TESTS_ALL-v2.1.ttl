@@ -38,6 +38,10 @@
       sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
       sh:prefix "skos" ;
     ] ;
+  sh:declare [
+      sh:namespace "http://www.w3.org/2001/XMLSchema#"^^xsd:anyURI ;
+      sh:prefix "xsd" ;
+    ] ;
 .
 qudt:QuantityKind
   sh:property [
@@ -59,7 +63,46 @@ FILTER (?udv != ?qdv) .
         ] ;
     ] ;
 .
-qudt:Unit
+qudt:UnitShape
+  sh:targetClass qudt:Unit;
+    rdfs:comment "qudt:conversionMultiplier must match qudt:conversionMultiplierInScientificNotation if present" ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:minCount 1;
+        sh:message "{$this} qudt:conversionMultiplier is {?actual}, which does not match {?expected}, m:{?m} e:{?e} mNoDot:{?mNoDot} mDigitCount:{?mDigitCount} exponent:{?exponent} startPos:{?startPos} high:{?highDigits} low:{?lowDigits} expected:{?expectedStringValue} result:{?result} " ;
+        sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
+        sh:select """
+            SELECT $this ?actual ?expected ?m ?e ?exponent ?mNoDot ?mDigitCount ?startPos ?highDigits ?lowDigits ?expectedStringValue ?tmp ?result
+            WHERE {
+                # select both values
+                $this
+                    qudt:conversionMultiplier ?actual ;
+                    qudt:conversionMultiplierInScientificNotation ?expected .
+                BIND(REPLACE(STR(?expected), "[eE]-?\\\\d+$", "") as ?m)               # extract the mantissa (string)
+                BIND(REPLACE(STR(?expected), "^\\\\d(\\\\.\\\\d+)?[eE]", "") as ?e)    # extract the exponent (string)
+                BIND(REPLACE(STR(?m),"\\\\.","") AS ?mNoDot)                           # remove the comma from the mantissa
+                BIND(STRLEN(?mNoDot) as ?mDigitCount)                                  # count the mantissa's characters
+                BIND(xsd:integer(?e) as  ?exponent)                                    # cast e to an integer, called exponent
+                # prepare a string with 200 zeros padding left and right, mantissa in the middle
+                BIND(CONCAT(
+                                    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                                    ?mNoDot,
+                                    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000") as ?baseStr)
+                BIND(IF(?exponent > 0, 201, 200 + ?exponent + 1) as ?startPos)         # determine the start position for clipping
+                BIND(IF(?exponent > 0, ?exponent + 1, 1) as ?highDigits)               # determine the number of digits before the comma
+                # determine the number of digits after the comma
+                BIND(IF(?exponent > 0, IF(?mDigitCount - ?exponent > 1, ?mDigitCount - ?exponent - 1, 1), ?mDigitCount - ?exponent - 1) as ?lowDigits)
+                # determine the expected string
+                BIND(CONCAT(SUBSTR(?baseStr, ?startPos, ?highDigits), ".", SUBSTR(?baseStr, ?startPos + ?highDigits, ?lowDigits)) as  ?expectedStringValue)
+                # compare with actual
+                BIND(IF(?expectedStringValue = STR(?actual), "match!", "no match!") as ?result)
+                # only generate message if no match (useful during development)
+                FILTER(?result != "match!")
+            }
+        """ ;
+      ] ;
+
+
   sh:property [
       sh:path qudt:exactMatch ;
       rdfs:comment "Check for non-reciprocal owl:sameAs and qudt:exactMatch triples" ;
