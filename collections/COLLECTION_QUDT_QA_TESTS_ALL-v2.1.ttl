@@ -39,7 +39,8 @@
       sh:prefix "skos" ;
     ] ;
 .
-qudt:QuantityKind
+qudt:QuantityKindShape
+  sh:targetClass qudt:QuantityKind ;
   sh:property [
       sh:path qudt:hasDimensionVector ;
       rdfs:comment "Check for inconsistent dimensionvectors in the skos:broader hierarchy" ;
@@ -48,18 +49,38 @@ qudt:QuantityKind
           sh:message "{$this} has a dimension vector that is inconsistent with {?qk} in its skos:broader hierarchy." ;
           sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
           sh:select """
-SELECT $this ?qk
-WHERE {
-$this qudt:hasDimensionVector  ?udv .
-$this skos:broader* ?qk .
-?qk qudt:hasDimensionVector ?qdv .
-FILTER (?udv != ?qdv) .
-}
-""" ;
-        ] ;
-    ] ;
-.
-qudt:Unit
+                SELECT $this ?qk
+                WHERE {
+                $this qudt:hasDimensionVector  ?udv .
+                $this skos:broader* ?qk .
+                ?qk qudt:hasDimensionVector ?qdv .
+                FILTER (?udv != ?qdv) .
+                }
+          """ ;
+      ] ;
+  ] ;
+  sh:property [
+      sh:path qudt:exactMatch ;
+      rdfs:comment "Check for inconsistent qudt:exactMatch vs skos:broader triples" ;
+      sh:sparql [
+              a sh:SPARQLConstraint ;
+              sh:message "{$this} is skos:broader and qudt:exactMatch with {?qk}." ;
+              sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
+              sh:select """
+                SELECT DISTINCT $this ?qk
+                WHERE {
+                $this
+                    skos:broader ?qk ;
+                    qudt:exactMatch ?qk .
+                }
+              """ ;
+      ] ;
+  ] .
+
+
+
+qudt:UnitShape
+  sh:targetClass qudt:Unit ;
   sh:property [
       sh:path qudt:exactMatch ;
       rdfs:comment "Check for non-reciprocal owl:sameAs and qudt:exactMatch triples" ;
