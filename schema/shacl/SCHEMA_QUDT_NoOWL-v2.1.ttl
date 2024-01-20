@@ -72,7 +72,7 @@ dcterms:title
   a owl:Ontology ;
   vaem:hasGraphMetadata vaem:GMD_SHACLQUDT-SCHEMA ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "QUDT SHACL Schema Version 2.1.33" ;
+  rdfs:label "QUDT SHACL Schema Version 2.1.35" ;
   owl:imports <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
   owl:imports <http://www.linkedmodel.org/schema/dtype> ;
   owl:imports <http://www.linkedmodel.org/schema/vaem> ;
@@ -1005,7 +1005,6 @@ qudt:IntervalScale
   qudt:informativeReference "https://en.wikipedia.org/wiki/Level_of_measurement"^^xsd:anyURI ;
   rdfs:comment """<p>The interval type allows for the degree of difference between items, but not the ratio between them. Examples include temperature with the Celsius scale, which has two defined points (the freezing and boiling point of water at specific conditions) and then separated into 100 intervals, date when measured from an arbitrary epoch (such as AD), percentage such as a percentage return on a stock,[16] location in Cartesian coordinates, and direction measured in degrees from true or magnetic north. Ratios are not meaningful since 20 °C cannot be said to be \"twice as hot\" as 10 °C, nor can multiplication/division be carried out between any two dates directly. However, ratios of differences can be expressed; for example, one difference can be twice another. Interval type variables are sometimes also called \"scaled variables\", but the formal mathematical term is an affine space (in this case an affine line).</p>
 <p>Characteristics: median, percentile &amp; Monotonic increasing (order (&lt;) &amp; totally ordered set</p>"""^^rdf:HTML ;
-  rdfs:comment "median, percentile & Monotonic increasing (order (<)) & totally ordered set"^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "Interval scale" ;
   rdfs:seeAlso qudt:NominalScale ;
@@ -1435,6 +1434,7 @@ qudt:QuantityKind
   sh:property qudt:QuantityKind-expression ;
   sh:property qudt:QuantityKind-generalization ;
   sh:property qudt:QuantityKind-hasDimensionVector ;
+  sh:property qudt:QuantityKind-iec61360Code ;
   sh:property qudt:QuantityKind-latexDefinition ;
   sh:property qudt:QuantityKind-mathMLdefinition ;
   sh:property qudt:QuantityKind-qkdvDenominator ;
@@ -1552,6 +1552,12 @@ qudt:QuantityKind-hasDimensionVector
   sh:maxCount 1 ;
   sh:minCount 1 ;
   sh:severity sh:Info ;
+.
+qudt:QuantityKind-iec61360Code
+  a sh:PropertyShape ;
+  sh:path qudt:iec61360Code ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:datatype xsd:string ;
 .
 qudt:QuantityKind-latexDefinition
   a sh:PropertyShape ;
@@ -2072,9 +2078,13 @@ qudt:SystemOfQuantityKinds
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "System of Quantity Kinds" ;
   rdfs:subClassOf qudt:Concept ;
+  rdfs:subClassOf qudt:Verifiable ;
   sh:property qudt:SystemOfQuantityKinds-baseDimensionEnumeration ;
+  sh:property qudt:SystemOfQuantityKinds-hasBaseQuantityKind ;
   sh:property qudt:SystemOfQuantityKinds-hasQuantityKind ;
   sh:property qudt:SystemOfQuantityKinds-hasUnitSystem ;
+  sh:property qudt:SystemOfQuantityKinds-systemDerivedQuantityKind ;
+  sh:property [] ;
 .
 qudt:SystemOfQuantityKinds-baseDimensionEnumeration
   a sh:PropertyShape ;
@@ -2082,6 +2092,13 @@ qudt:SystemOfQuantityKinds-baseDimensionEnumeration
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   sh:class qudt:Enumeration ;
   sh:maxCount 1 ;
+.
+qudt:SystemOfQuantityKinds-hasBaseQuantityKind
+  a sh:PropertyShape ;
+  sh:path qudt:hasBaseQuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:class qudt:QuantityKind ;
+  sh:minCount 0 ;
 .
 qudt:SystemOfQuantityKinds-hasQuantityKind
   a sh:PropertyShape ;
@@ -2096,6 +2113,13 @@ qudt:SystemOfQuantityKinds-hasUnitSystem
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   sh:class qudt:SystemOfUnits ;
   sh:maxCount 1 ;
+.
+qudt:SystemOfQuantityKinds-systemDerivedQuantityKind
+  a sh:PropertyShape ;
+  sh:path qudt:systemDerivedQuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:class qudt:QuantityKind ;
+  sh:minCount 0 ;
 .
 qudt:SystemOfUnits
   a rdfs:Class ;
@@ -3581,7 +3605,7 @@ vaem:GMD_SHACLQUDT-SCHEMA
 <p class=\"lm-para\">Except for unit prefixes, all units are specified in separate vocabularies. Descriptions are provided in both HTML and LaTeX formats. A quantity is a measure of an observable phenomenon, that, when associated with something, becomes a property of that thing; a particular object, event, or physical system. </p>
 
 <p class=\"lm-para\">A quantity has meaning in the context of a measurement (i.e. the thing measured, the measured value, the accuracy of measurement, etc.) whereas the underlying quantity kind is independent of any particular measurement. Thus, length is a quantity kind while the height of a rocket is a specific quantity of length; its magnitude that may be expressed in meters, feet, inches, etc.  Or, as stated at Wikipedia, in the language of measurement, quantities are quantifiable aspects of the world, such as time, distance, velocity, mass, momentum, energy, and weight, and units are used to describe their measure. Many of these quantities are related to each other by various physical laws, and as a result the units of some of the quantities can be expressed as products (or ratios) of powers of other units (e.g., momentum is mass times velocity and velocity is measured in distance divided by time).</p>"""^^rdf:HTML ;
-  dcterms:modified "2023-11-15T09:49:37.276-05:00"^^xsd:dateTime ;
+  dcterms:modified "2024-01-18T15:26:22.144-05:00"^^xsd:dateTime ;
   dcterms:rights """
   This product includes all or a portion of the UCUM table, UCUM codes, and UCUM definitions or is derived from it, subject to a license from Regenstrief Institute, Inc. and The UCUM Organization. Your use of the UCUM table, UCUM codes, UCUM definitions also is subject to this license, a copy of which is available at ​http://unitsofmeasure.org. The current complete UCUM table, UCUM Specification are available for download at ​http://unitsofmeasure.org. The UCUM table and UCUM codes are copyright © 1995-2009, Regenstrief Institute, Inc. and the Unified Codes for Units of Measures (UCUM) Organization. All rights reserved.
 
@@ -3589,25 +3613,25 @@ THE UCUM TABLE (IN ALL FORMATS), UCUM DEFINITIONS, AND SPECIFICATION ARE PROVIDE
   """ ;
   dcterms:rights "The QUDT Ontologies are issued under a Creative Commons Attribution 4.0 International License (CC BY 4.0), available at https://creativecommons.org/licenses/by/4.0/. Attribution should be made to QUDT.org" ;
   dcterms:subject "QUDT" ;
-  dcterms:title "QUDT SHACL Schema - Version 2.1.33" ;
+  dcterms:title "QUDT SHACL Schema - Version 2.1.35" ;
   qudt:informativeReference "http://unitsofmeasure.org/trac"^^xsd:anyURI ;
   qudt:informativeReference "http://www.bipm.org/en/publications/si-brochure"^^xsd:anyURI ;
   qudt:informativeReference "http://www.bipm.org/utils/common/documents/jcgm/JCGM_200_2008.pdf"^^xsd:anyURI ;
   qudt:informativeReference "https://books.google.com/books?id=pIlCAAAAIAAJ&dq=dimensional+analysis&hl=en"^^xsd:anyURI ;
   qudt:informativeReference "https://www.nist.gov/physical-measurement-laboratory/special-publication-811"^^xsd:anyURI ;
   vaem:graphName "qudt" ;
-  vaem:graphTitle "Quantities, Units, Dimensions and Types (QUDT) SHACL Schema - Version 2.1.33" ;
+  vaem:graphTitle "Quantities, Units, Dimensions and Types (QUDT) SHACL Schema - Version 2.1.35" ;
   vaem:hasGraphRole vaem:SHACLSchemaGraph ;
   vaem:hasOwner vaem:QUDT ;
   vaem:hasSteward vaem:QUDT ;
   vaem:intent "Specifies the schema for quantities, units and dimensions. Types are defined in other schemas." ;
   vaem:isMetadataFor <http://qudt.org/2.1/schema/shacl/qudt> ;
-  vaem:latestPublishedVersion "https://qudt.org/doc/2023/11/DOC_SCHEMA-SHACL-QUDT-v2.1.html"^^xsd:anyURI ;
+  vaem:latestPublishedVersion "https://qudt.org/doc/2024/01/DOC_SCHEMA-SHACL-QUDT-v2.1.html"^^xsd:anyURI ;
   vaem:logo "https://qudt.org/linkedmodels.org/assets/lib/lm/images/logos/qudt_logo-300x110.png"^^xsd:anyURI ;
   vaem:namespace "http://qudt.org/schema/qudt/" ;
   vaem:namespacePrefix "qudt" ;
   vaem:owner "qudt.org" ;
-  vaem:previousPublishedVersion "https://qudt.org/doc/2023/10/DOC_SCHEMA-SHACL-QUDT-v2.1.html"^^xsd:anyURI ;
+  vaem:previousPublishedVersion "https://qudt.org/doc/2023/12/DOC_SCHEMA-SHACL-QUDT-v2.1.html"^^xsd:anyURI ;
   vaem:revision "2.1" ;
   vaem:turtleFileURL "http://qudt.org/2.1/schema/shacl/qudt"^^xsd:anyURI ;
   vaem:usesNonImportedResource dcterms:abstract ;
@@ -3622,7 +3646,7 @@ THE UCUM TABLE (IN ALL FORMATS), UCUM DEFINITIONS, AND SPECIFICATION ARE PROVIDE
   vaem:usesNonImportedResource voag:QUDT-Attribution ;
   vaem:withAttributionTo voag:QUDT-Attribution ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "QUDT SHACL Schema Metadata Version 2.1.33" ;
+  rdfs:label "QUDT SHACL Schema Metadata Version 2.1.35" ;
   owl:versionIRI <http://qudt.org/2.1/schema/shacl/qudt> ;
 .
 vaem:QUDT

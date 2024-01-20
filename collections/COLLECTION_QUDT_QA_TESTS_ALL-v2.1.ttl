@@ -1,6 +1,5 @@
 # baseURI: http://qudt.org/2.1/collection/qa/all
 # imports: http://qudt.org/2.1/vocab/constant
-# imports: http://qudt.org/2.1/vocab/mathematics
 # imports: http://qudt.org/2.1/vocab/soqk
 
 @prefix creativecommons: <http://creativecommons.org/ns#> .
@@ -22,24 +21,223 @@
 <http://qudt.org/2.1/collection/qa/all>
   a owl:Ontology ;
   rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
-  rdfs:label "QUDT Collection - QA TESTS - ALL - v 2.1.33" ;
+  rdfs:label "QUDT Collection - QA TESTS - ALL - v 2.1.35" ;
   owl:imports <http://qudt.org/2.1/vocab/constant> ;
-  owl:imports <http://qudt.org/2.1/vocab/mathematics> ;
   owl:imports <http://qudt.org/2.1/vocab/soqk> ;
   sh:declare [
+      a sh:PrefixDeclaration ;
+      sh:namespace "http://purl.org/dc/terms/"^^xsd:anyURI ;
+      sh:prefix "dcterms" ;
+    ] ;
+  sh:declare [
+      a sh:PrefixDeclaration ;
       sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
       sh:prefix "qudt" ;
     ] ;
   sh:declare [
+      a sh:PrefixDeclaration ;
+      sh:namespace "http://qudt.org/vocab/dimensionvector/"^^xsd:anyURI ;
+      sh:prefix "qkdv" ;
+    ] ;
+  sh:declare [
+      a sh:PrefixDeclaration ;
+      sh:namespace "http://qudt.org/vocab/quantitykind/"^^xsd:anyURI ;
+      sh:prefix "quantitykind" ;
+    ] ;
+  sh:declare [
+      a sh:PrefixDeclaration ;
+      sh:namespace "http://qudt.org/vocab/unit/"^^xsd:anyURI ;
+      sh:prefix "unit" ;
+    ] ;
+  sh:declare [
+      a sh:PrefixDeclaration ;
+      sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ;
+      sh:prefix "rdf" ;
+    ] ;
+  sh:declare [
+      a sh:PrefixDeclaration ;
+      sh:namespace "http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI ;
+      sh:prefix "rdfs" ;
+    ] ;
+  sh:declare [
+      a sh:PrefixDeclaration ;
       sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ;
       sh:prefix "owl" ;
     ] ;
   sh:declare [
+      a sh:PrefixDeclaration ;
       sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
       sh:prefix "skos" ;
     ] ;
+  sh:declare [
+      a sh:PrefixDeclaration ;
+      sh:namespace "http://www.w3.org/ns/shacl#"^^xsd:anyURI ;
+      sh:prefix "sh" ;
+    ] ;
 .
-qudt:QuantityKind
+qudt:ClosedWorldShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Ensure that all instances of a class use only the properties defined for that class." ;
+      sh:message "Predicate {?p} is not defined for instance {$this}." ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """
+SELECT $this ?p ?o
+WHERE {
+$this a/rdfs:subClassOf* qudt:Concept .
+$this ?p ?o .
+FILTER(STRSTARTS (str(?p), 'http://qudt.org/schema/qudt'))
+FILTER NOT EXISTS {$this a sh:NodeShape}
+FILTER NOT EXISTS {$this a/rdfs:subClassOf* ?class .
+			?class sh:property/sh:path ?p .
+}
+FILTER NOT EXISTS {$this a/rdfs:subClassOf* ?class .
+?class sh:xone/rdf:rest*/rdf:first/sh:property/sh:path ?p .
+}
+FILTER NOT EXISTS {$this a/rdfs:subClassOf* ?class .
+?class sh:or/rdf:rest*/rdf:first/sh:property/sh:path ?p .
+}
+}
+""" ;
+    ] ;
+  sh:targetClass qudt:Concept ;
+.
+qudt:DeprecatedPropertyConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  rdfs:label "Warning about use of a deprecated QUDT property" ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Warns if a deprecated QUDT property is used" ;
+      sh:message "Resource, '{$this}' uses the property '{?oldpstr}' which will be deprecated. Please use '{?newpstr}' instead." ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """SELECT $this ?p ?oldpstr ?newpstr
+WHERE {
+?p qudt:deprecated true .
+?p a rdf:Property .
+$this ?p ?o .
+?p dcterms:isReplacedBy ?newp .
+BIND (STR(?newp) AS ?newpstr)
+BIND (STR(?p) AS ?oldpstr)
+}""" ;
+    ] ;
+  sh:targetClass qudt:Concept ;
+.
+qudt:DeprecationConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  rdfs:label "Warning about use of a deprecated QUDT resource" ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Warns if a deprecated QUDT resource is used" ;
+      sh:message "Resource, '{?s}' refers to '{?oldqstr}' which has been deprecated. Please refer to '{?newqstr}' instead." ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """SELECT ?s $this ?oldqstr ?newqstr
+WHERE {
+$this qudt:deprecated true .
+?s ?p $this .
+FILTER (!STRSTARTS(STR(?s),'http://qudt.org')) .
+$this dcterms:isReplacedBy ?newq .
+BIND (STR(?newq) AS ?newqstr)
+BIND (STR($this) AS ?oldqstr)
+}""" ;
+    ] ;
+  sh:targetClass qudt:Concept ;
+.
+qudt:ExactMatchGoesBothWaysConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Ensure that if A qudt:exactMatch B then B qudt:exactMatch A" ;
+      sh:message "Missing triple: {$t} qudt:exactMatch {$this} ." ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """
+SELECT $this ?t
+WHERE {
+$this qudt:exactMatch ?t .
+FILTER NOT EXISTS {?t qudt:exactMatch $this }
+}
+""" ;
+    ] ;
+  sh:targetClass qudt:Concept ;
+.
+qudt:InconsistentDimensionVectorInSKOSHierarchyConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Checks that a QuantityKind has the same dimension vector as any skos:broader QuantityKind" ;
+      sh:message "Unit {$this} has dimension vector {$udv} which is not the same as the dimension vector of its skos:broader, {$qk} with dimension vector {$qdv}" ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """
+SELECT $this ?udv ?qk ?qdv
+WHERE {
+$this qudt:hasDimensionVector  ?udv .
+$this skos:broader* ?qk .
+?qk qudt:hasDimensionVector ?qdv .
+FILTER (?udv != ?qdv) .
+}
+""" ;
+    ] ;
+  sh:targetClass qudt:QuantityKind ;
+.
+qudt:InconsistentUnitAndDimensionVectorConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Checks that a Unit and its QuantityKind have the same dimension vector" ;
+      sh:message "Unit {$this} has dimension vector {$udv} which is not the same as the dimension vector of its quantity kind {$qk} with dimension vector {$qdv}" ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """
+SELECT $this ?udv ?qk ?qdv
+WHERE {
+$this qudt:hasDimensionVector  ?udv .
+$this qudt:hasQuantityKind ?qk .
+?qk qudt:hasDimensionVector ?qdv .
+FILTER (?udv != qkdv:NotApplicable) .
+FILTER (?qdv != qkdv:NotApplicable) .
+FILTER (?udv != ?qdv) .
+}
+""" ;
+    ] ;
+  sh:targetClass qudt:Unit ;
+.
+qudt:MultipleLabelsConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  rdfs:label "Warning about use of multiple labels with the same language tag" ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Ensures each qudt:Concept instance doesn't have multiple rdfs:labels with the same language tag." ;
+      sh:message "{$this} has {?count} rdfs:label triples with language tag @{?langTag}." ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """
+            SELECT $this (COUNT(?label) AS ?count) ?langTag
+            WHERE {
+                $this rdfs:label ?label .
+                FILTER(langMatches(lang(?label), ?langTag))
+                BIND(lang(?label) AS ?langTag)
+            }
+            GROUP BY $this ?langTag
+            HAVING(?count > 1)
+        """ ;
+    ] ;
+  sh:targetClass qudt:Concept ;
+.
+qudt:QuantityKindShape
+  sh:targetClass qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
   sh:property [
       sh:path qudt:hasDimensionVector ;
       rdfs:comment "Check for inconsistent dimensionvectors in the skos:broader hierarchy" ;
@@ -48,42 +246,84 @@ qudt:QuantityKind
           sh:message "{$this} has a dimension vector that is inconsistent with {?qk} in its skos:broader hierarchy." ;
           sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
           sh:select """
-SELECT $this ?qk
-WHERE {
-$this qudt:hasDimensionVector  ?udv .
-$this skos:broader* ?qk .
-?qk qudt:hasDimensionVector ?qdv .
-FILTER (?udv != ?qdv) .
-}
-""" ;
-        ] ;
-    ] ;
-.
-qudt:Unit
+                SELECT $this ?qk
+                WHERE {
+                $this qudt:hasDimensionVector  ?udv .
+                $this skos:broader* ?qk .
+                ?qk qudt:hasDimensionVector ?qdv .
+                FILTER (?udv != ?qdv) .
+                }
+          """ ;
+      ] ;
+  ] ;
   sh:property [
       sh:path qudt:exactMatch ;
-      rdfs:comment "Check for non-reciprocal owl:sameAs and qudt:exactMatch triples" ;
+      rdfs:comment "Check for inconsistent qudt:exactMatch vs skos:broader triples" ;
       sh:sparql [
-          a sh:SPARQLConstraint ;
-          sh:message "{$this} needs both owl:sameAs and qudt:exactMatch with {?y}" ;
-          sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
-          sh:select """
-SELECT $this ?y
-WHERE { GRAPH <http://qudt.org/2.1/vocab/unit> {
-{
-$this owl:sameAs ?y .
-FILTER NOT EXISTS {$this qudt:exactMatch ?y} .
+              a sh:SPARQLConstraint ;
+              sh:message "{$this} is skos:broader and qudt:exactMatch with {?qk}." ;
+              sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
+              sh:select """
+                SELECT DISTINCT $this ?qk
+                WHERE {
+                $this
+                    skos:broader ?qk ;
+                    qudt:exactMatch ?qk .
+                }
+              """ ;
+      ] ;
+  ] .
+qudt:UnitPointsToAllExactMatchQuantityKindsConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Ensure that if a Unit hasQuantityKind A, and A qudt:exactMatch B, then the Unit hasQuantityKind B " ;
+      sh:message "Missing triple: {$this} qudt:hasQuantityKind {?qk2}, because {?qk} qudt:exactMatch {?qk2}" ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """
+SELECT $this ?qk ?qk2
+WHERE {
+$this qudt:hasQuantityKind ?qk .
+?qk qudt:exactMatch ?qk2 .
+FILTER NOT EXISTS {$this qudt:hasQuantityKind ?qk2}
 }
-UNION
-{
-$this qudt:exactMatch ?y .
-FILTER NOT EXISTS {$this owl:sameAs ?y} .
-}
-FILTER  ($this != ?y)
-}}
 """ ;
-        ] ;
     ] ;
+  sh:targetClass qudt:Unit ;
+.
+qudt:UniqueSymbolTypeRestrictedPropertyConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  rdfs:label "Unique symbol type restricted property constraint" ;
+  sh:deactivated true ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Checks that a resource has a unique symbol within its type hierarchy below qudt:Concept" ;
+      sh:message "Resource, '{$this}' of type '{?myType}', has non-unique symbol, '{?symbol}', that conflicts with '{?another}' of type '{?anotherType}'" ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """SELECT DISTINCT $this ?symbol ?another ?myType ?anotherType
+WHERE {{
+	$this qudt:symbol ?symbol .
+     ?another qudt:symbol ?symbol .
+    FILTER (?another != $this)
+   }
+    $this a ?myType .
+    ?myType <http://www.w3.org/2000/01/rdf-schema#subClassOf>+ qudt:Concept .
+    ?another a ?anotherType .
+    ?anotherType <http://www.w3.org/2000/01/rdf-schema#subClassOf>+ qudt:Concept .
+   FILTER (?myType = ?anotherType)
+}""" ;
+    ] ;
+  sh:targetClass qudt:Unit ;
+.
+
+
+qudt:UnitShape
+  sh:targetClass qudt:Unit ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
   sh:property [
       sh:path qudt:hasDimensionVector ;
       rdfs:comment "Check for inconsistent dimensionvectors from units and quantitykinds" ;
@@ -96,6 +336,7 @@ SELECT $this ?qk
 WHERE {
 $this qudt:hasDimensionVector  ?udv .
 $this qudt:hasQuantityKind ?qk .
+FILTER (?qk != quantitykind:Unknown) .
 ?qk qudt:hasDimensionVector ?qdv .
 FILTER (?udv != ?qdv) .
 }
