@@ -201,6 +201,7 @@ qudt:InconsistentUnitAndDimensionVectorConstraint
       sh:select """
 SELECT $this ?udv ?qk ?qdv
 WHERE {
+FILTER NOT EXISTS {$this qudt:deprecated true} .
 $this qudt:hasDimensionVector  ?udv .
 $this qudt:hasQuantityKind ?qk .
 ?qk qudt:hasDimensionVector ?qdv .
@@ -259,8 +260,24 @@ qudt:MultipleLabelsConstraint
   sh:targetClass qudt:Concept ;
 .
 qudt:QuantityKindShape
-  sh:targetClass qudt:QuantityKind ;
   rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  sh:property [
+      sh:path qudt:exactMatch ;
+      rdfs:comment "Check for inconsistent qudt:exactMatch vs skos:broader triples" ;
+      sh:sparql [
+          a sh:SPARQLConstraint ;
+          sh:message "{$this} is skos:broader and qudt:exactMatch with {?qk}." ;
+          sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
+          sh:select """
+                SELECT DISTINCT $this ?qk
+                WHERE {
+                $this
+                    skos:broader ?qk ;
+                    qudt:exactMatch ?qk .
+                }
+              """ ;
+        ] ;
+    ] ;
   sh:property [
       sh:path qudt:hasDimensionVector ;
       rdfs:comment "Check for inconsistent dimensionvectors in the skos:broader hierarchy" ;
@@ -277,44 +294,9 @@ qudt:QuantityKindShape
                 FILTER (?udv != ?qdv) .
                 }
           """ ;
-      ] ;
-  ] ;
-  sh:property [
-      sh:path qudt:exactMatch ;
-      rdfs:comment "Check for inconsistent qudt:exactMatch vs skos:broader triples" ;
-      sh:sparql [
-              a sh:SPARQLConstraint ;
-              sh:message "{$this} is skos:broader and qudt:exactMatch with {?qk}." ;
-              sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
-              sh:select """
-                SELECT DISTINCT $this ?qk
-                WHERE {
-                $this
-                    skos:broader ?qk ;
-                    qudt:exactMatch ?qk .
-                }
-              """ ;
-      ] ;
-  ] .
-qudt:UnitPointsToAllExactMatchQuantityKindsConstraint
-  a sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
-  sh:severity sh:Info ;
-  sh:sparql [
-      a sh:SPARQLConstraint ;
-      rdfs:comment "Ensure that if a Unit hasQuantityKind A, and A qudt:exactMatch B, then the Unit hasQuantityKind B " ;
-      sh:message "Missing triple: {$this} qudt:hasQuantityKind {?qk2}, because {?qk} qudt:exactMatch {?qk2}" ;
-      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
-      sh:select """
-SELECT $this ?qk ?qk2
-WHERE {
-$this qudt:hasQuantityKind ?qk .
-?qk qudt:exactMatch ?qk2 .
-FILTER NOT EXISTS {$this qudt:hasQuantityKind ?qk2}
-}
-""" ;
+        ] ;
     ] ;
-  sh:targetClass qudt:Unit ;
+  sh:targetClass qudt:QuantityKind ;
 .
 qudt:UniqueSymbolTypeRestrictedPropertyConstraint
   a sh:NodeShape ;
@@ -342,10 +324,27 @@ WHERE {{
     ] ;
   sh:targetClass qudt:Unit ;
 .
-
-
-qudt:UnitShape
+qudt:UnitPointsToAllExactMatchQuantityKindsConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Ensure that if a Unit hasQuantityKind A, and A qudt:exactMatch B, then the Unit hasQuantityKind B " ;
+      sh:message "Missing triple: {$this} qudt:hasQuantityKind {?qk2}, because {?qk} qudt:exactMatch {?qk2}" ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """
+SELECT $this ?qk ?qk2
+WHERE {
+$this qudt:hasQuantityKind ?qk .
+?qk qudt:exactMatch ?qk2 .
+FILTER NOT EXISTS {$this qudt:hasQuantityKind ?qk2}
+}
+""" ;
+    ] ;
   sh:targetClass qudt:Unit ;
+.
+qudt:UnitShape
   rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
   sh:property [
       sh:path qudt:hasDimensionVector ;
@@ -357,6 +356,7 @@ qudt:UnitShape
           sh:select """
 SELECT $this ?qk
 WHERE {
+FILTER NOT EXISTS {$this qudt:deprecated true} .
 $this qudt:hasDimensionVector  ?udv .
 $this qudt:hasQuantityKind ?qk .
 FILTER (?qk != quantitykind:Unknown) .
@@ -366,4 +366,5 @@ FILTER (?udv != ?qdv) .
 """ ;
         ] ;
     ] ;
+  sh:targetClass qudt:Unit ;
 .
