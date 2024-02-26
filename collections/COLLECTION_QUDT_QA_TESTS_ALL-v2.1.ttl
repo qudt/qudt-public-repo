@@ -213,6 +213,29 @@ FILTER (?udv != ?qdv) .
     ] ;
   sh:targetClass qudt:Unit ;
 .
+qudt:MultipleDescriptionsConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  rdfs:label "Warning about use of multiple descriptions with the same language tag" ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Ensures each qudt:Concept instance doesn't have multiple dcterms:description values with the same language tag." ;
+      sh:message "{$this} has {?count} dcterms:description triples with language tag @{?langTag}." ;
+      sh:prefixes <http://qudt.org/2.1/schema/shacl/overlay/qudt> ;
+      sh:select """
+            SELECT $this (COUNT(?label) AS ?count) ?langTag
+            WHERE {
+                $this dcterms:description ?label .
+                FILTER(langMatches(lang(?label), ?langTag))
+                BIND(lang(?label) AS ?langTag)
+            }
+            GROUP BY $this ?langTag
+            HAVING(?count > 1)
+        """ ;
+    ] ;
+  sh:targetClass qudt:Concept ;
+.
 qudt:MultipleLabelsConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
