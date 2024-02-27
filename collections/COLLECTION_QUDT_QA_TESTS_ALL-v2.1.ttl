@@ -105,6 +105,30 @@ FILTER NOT EXISTS {$this a/rdfs:subClassOf* ?class .
     ] ;
   sh:targetClass qudt:Concept ;
 .
+qudt:DefinedByConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  rdfs:label "Target class must be have a rdfs:isDefinedBy property" ;
+  sh:severity sh:Info ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Target class must be have a rdfs:isDefinedBy property" ;
+      sh:message "Resource '{$this}' lacks an rdfs:isDefinedBy property." ;
+      sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
+      sh:select """SELECT $this
+WHERE {
+FILTER NOT EXISTS {$this rdfs:isDefinedBy ?y}
+FILTER NOT EXISTS {$this qudt:deprecated true}
+}""" ;
+    ] ;
+  sh:targetClass qudt:Unit ;
+  sh:targetClass qudt:QuantityKind ;
+  sh:targetClass qudt:SystemOfUnits ;
+  sh:targetClass qudt:SystemOfQuantityKinds ;
+  sh:targetClass qudt:Prefix ;
+  sh:targetClass qudt:QuantityKindDimensionVector ;
+  sh:targetClass qudt:PhysicalConstant ;
+.
 qudt:DeprecatedPropertyConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
