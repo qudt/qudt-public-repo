@@ -74,7 +74,12 @@
       sh:namespace "http://www.w3.org/ns/shacl#"^^xsd:anyURI ;
       sh:prefix "sh" ;
     ] ;
-.
+  sh:declare [
+      a sh:PrefixDeclaration ;
+      sh:namespace "http://www.w3.org/2001/XMLSchema#"^^xsd:anyURI ;
+      sh:prefix "xsd" ;
+    ]
+  .
 qudt:ClosedWorldShape
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
@@ -392,3 +397,175 @@ FILTER (?udv != ?qdv) .
     ] ;
   sh:targetClass qudt:Unit ;
 .
+
+qudt:conversionMultiplierSnShape
+  sh:targetClass qudt:Unit;
+    rdfs:comment "qudt:conversionMultiplier must match qudt:conversionMultiplierSN if present" ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:minCount 1;
+        sh:message """{$this} qudt:conversionMultiplier is {?valueDecimalNoTrailingZeros}, which does not match the value of qudt:conversionMultiplierSN, {?valueSN}, converted to decimal notation, {?valueSNStringValue} .  """ ;
+        sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
+        sh:select """
+            SELECT $this ?valueDecimal ?valueDecimalNoTrailingZeros ?valueSN ?m ?e ?exponent ?mNoDot ?mDigitCount ?valueSNStringValue ?onePos ?lastMantissaDigit ?leftStart ?leftEnd ?rightStart ?rightEnd ?result
+                        WHERE {
+                            # select both values
+                            $this
+                                qudt:conversionMultiplier ?valueDecimal ;
+                                qudt:conversionMultiplierSN ?valueSN .
+                            BIND(REPLACE(STR(?valueDecimal), "(\\\\.\\\\d)(\\\\d*[1-9])?0*$", "$1$2") as ?valueDecimalNoTrailingZeros)      # remove trailing zeros from valueDecimal (string)
+                            BIND(REPLACE(STR(?valueSN), "[eE]-?\\\\d+$", "") as ?m)                                           # extract the mantissa (string)
+                            BIND(REPLACE(STR(?valueSN), "^\\\\d(\\\\.\\\\d+)?[eE]", "") as ?e)                                    # extract the exponent (string)
+                            BIND(REPLACE(STR(?m),"(\\\\.|0+$)","") AS ?mNoDot)                                                # remove the comma and trailing zeros from the mantissa
+                            BIND(STRLEN(?mNoDot) as ?mDigitCount)                                                           # count the mantissa's characters
+                            BIND(xsd:integer(?e) as  ?exponent)                                                             # cast e to an integer, called exponent
+                            # prepare a string with 200 zeros padding left and right, mantissa in the middle
+                            BIND(CONCAT(
+                                                "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                                                ?mNoDot,
+                                                "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000") as ?baseStr)
+                            # first char has index 1 !!!
+                            BIND(201 + ?exponent as ?onePos)
+                            BIND(200 + ?mDigitCount  as ?lastMantissaDigit)
+                            BIND(IF(?onePos > 201, 201, ?onePos) as ?leftStart)
+                            BIND(?onePos+1 as ?leftEnd)
+                            BIND(?onePos+1 as ?rightStart)
+                            BIND(IF(?lastMantissaDigit+1 > ?onePos+2, ?lastMantissaDigit+1, ?onePos+2)  as ?rightEnd)
+                            # determine the expected string
+                            BIND(CONCAT(SUBSTR(?baseStr, ?leftStart, ?leftEnd-?leftStart), ".", SUBSTR(?baseStr, ?rightStart, ?rightEnd - ?rightStart)) as  ?valueSNStringValue)
+                            # compare with actual decimal value
+                            BIND(IF(?valueSNStringValue = STR(?valueDecimalNoTrailingZeros), "match!", "no match!") as ?result)
+                            # only generate message if no match (useful during development)
+                            FILTER(?result != "match!")
+                        }
+        """ ;
+      ] .
+      
+qudt:conversionOffsetSnShape
+  sh:targetClass qudt:Unit;
+    rdfs:comment "qudt:conversionOffset must match qudt:conversionOffsetSN if present" ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:minCount 1;
+        sh:message """{$this} qudt:conversionOffset is {?valueDecimalNoTrailingZeros}, which does not match the value of qudt:conversionOffsetSN, {?valueSN}, converted to decimal notation, {?valueSNStringValue} .  """ ;
+        sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
+        sh:select """
+            SELECT $this ?valueDecimal ?valueDecimalNoTrailingZeros ?valueSN ?m ?e ?exponent ?mNoDot ?mDigitCount ?valueSNStringValue ?onePos ?lastMantissaDigit ?leftStart ?leftEnd ?rightStart ?rightEnd ?result
+                        WHERE {
+                            # select both values
+                            $this
+                                qudt:conversionOffset ?valueDecimal ;
+                                qudt:conversionOffsetSN ?valueSN .
+                            BIND(REPLACE(STR(?valueDecimal), "(\\\\.\\\\d)(\\\\d*[1-9])?0*$", "$1$2") as ?valueDecimalNoTrailingZeros)      # remove trailing zeros from valueDecimal (string)
+                            BIND(REPLACE(STR(?valueSN), "[eE]-?\\\\d+$", "") as ?m)                                           # extract the mantissa (string)
+                            BIND(REPLACE(STR(?valueSN), "^\\\\d(\\\\.\\\\d+)?[eE]", "") as ?e)                                    # extract the exponent (string)
+                            BIND(REPLACE(STR(?m),"(\\\\.|0+$)","") AS ?mNoDot)                                                # remove the comma and trailing zeros from the mantissa
+                            BIND(STRLEN(?mNoDot) as ?mDigitCount)                                                           # count the mantissa's characters
+                            BIND(xsd:integer(?e) as  ?exponent)                                                             # cast e to an integer, called exponent
+                            # prepare a string with 200 zeros padding left and right, mantissa in the middle
+                            BIND(CONCAT(
+                                                "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                                                ?mNoDot,
+                                                "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000") as ?baseStr)
+                            # first char has index 1 !!!
+                            BIND(201 + ?exponent as ?onePos)
+                            BIND(200 + ?mDigitCount  as ?lastMantissaDigit)
+                            BIND(IF(?onePos > 201, 201, ?onePos) as ?leftStart)
+                            BIND(?onePos+1 as ?leftEnd)
+                            BIND(?onePos+1 as ?rightStart)
+                            BIND(IF(?lastMantissaDigit+1 > ?onePos+2, ?lastMantissaDigit+1, ?onePos+2)  as ?rightEnd)
+                            # determine the expected string
+                            BIND(CONCAT(SUBSTR(?baseStr, ?leftStart, ?leftEnd-?leftStart), ".", SUBSTR(?baseStr, ?rightStart, ?rightEnd - ?rightStart)) as  ?valueSNStringValue)
+                            # compare with actual decimal value
+                            BIND(IF(?valueSNStringValue = STR(?valueDecimalNoTrailingZeros), "match!", "no match!") as ?result)
+                            # only generate message if no match (useful during development)
+                            FILTER(?result != "match!")
+                        }
+        """ ;
+      ] .
+
+qudt:standardUncertaintySnShape
+  sh:targetClass qudt:ConstantValue;
+    rdfs:comment "qudt:standardUncertainty must match qudt:standardUncertaintySN if present" ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:minCount 1;
+        sh:message """{$this} qudt:standardUncertainty is {?valueDecimalNoTrailingZeros}, which does not match the value of qudt:standardUncertaintySN, {?valueSN}, converted to decimal notation, {?valueSNStringValue} .  """ ;
+        sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
+        sh:select """
+            SELECT $this ?valueDecimal ?valueDecimalNoTrailingZeros ?valueSN ?m ?e ?exponent ?mNoDot ?mDigitCount ?valueSNStringValue ?onePos ?lastMantissaDigit ?leftStart ?leftEnd ?rightStart ?rightEnd ?result
+                        WHERE {
+                            # select both values
+                            $this
+                                qudt:standardUncertainty ?valueDecimal ;
+                                qudt:standardUncertaintySN ?valueSN .
+                            BIND(REPLACE(STR(?valueDecimal), "(\\\\.\\\\d)(\\\\d*[1-9])?0*$", "$1$2") as ?valueDecimalNoTrailingZeros)      # remove trailing zeros from valueDecimal (string)
+                            BIND(REPLACE(STR(?valueSN), "[eE]-?\\\\d+$", "") as ?m)                                           # extract the mantissa (string)
+                            BIND(REPLACE(STR(?valueSN), "^\\\\d(\\\\.\\\\d+)?[eE]", "") as ?e)                                    # extract the exponent (string)
+                            BIND(REPLACE(STR(?m),"(\\\\.|0+$)","") AS ?mNoDot)                                                # remove the comma and trailing zeros from the mantissa
+                            BIND(STRLEN(?mNoDot) as ?mDigitCount)                                                           # count the mantissa's characters
+                            BIND(xsd:integer(?e) as  ?exponent)                                                             # cast e to an integer, called exponent
+                            # prepare a string with 200 zeros padding left and right, mantissa in the middle
+                            BIND(CONCAT(
+                                                "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                                                ?mNoDot,
+                                                "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000") as ?baseStr)
+                            # first char has index 1 !!!
+                            BIND(201 + ?exponent as ?onePos)
+                            BIND(200 + ?mDigitCount  as ?lastMantissaDigit)
+                            BIND(IF(?onePos > 201, 201, ?onePos) as ?leftStart)
+                            BIND(?onePos+1 as ?leftEnd)
+                            BIND(?onePos+1 as ?rightStart)
+                            BIND(IF(?lastMantissaDigit+1 > ?onePos+2, ?lastMantissaDigit+1, ?onePos+2)  as ?rightEnd)
+                            # determine the expected string
+                            BIND(CONCAT(SUBSTR(?baseStr, ?leftStart, ?leftEnd-?leftStart), ".", SUBSTR(?baseStr, ?rightStart, ?rightEnd - ?rightStart)) as  ?valueSNStringValue)
+                            # compare with actual decimal value
+                            BIND(IF(?valueSNStringValue = STR(?valueDecimalNoTrailingZeros), "match!", "no match!") as ?result)
+                            # only generate message if no match (useful during development)
+                            FILTER(?result != "match!")
+                        }
+        """ ;
+      ] .
+
+qudt:valueSnShape
+  sh:targetClass qudt:ConstantValue;
+    rdfs:comment "qudt:value must match qudt:valueSN if present" ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:minCount 1;
+        sh:message """{$this} qudt:value is {?valueDecimalNoTrailingZeros}, which does not match the value of qudt:valueSN, {?valueSN}, converted to decimal notation, {?valueSNStringValue} .  """ ;
+        sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
+        sh:select """
+            SELECT $this ?valueDecimal ?valueDecimalNoTrailingZeros ?valueSN ?m ?e ?exponent ?mNoDot ?mDigitCount ?valueSNStringValue ?onePos ?lastMantissaDigit ?leftStart ?leftEnd ?rightStart ?rightEnd ?result
+                        WHERE {
+                            # select both values
+                            $this
+                                qudt:value ?valueDecimal ;
+                                qudt:valueSN ?valueSN .
+                            BIND(REPLACE(STR(?valueDecimal), "(\\\\.\\\\d)(\\\\d*[1-9])?0*$", "$1$2") as ?valueDecimalNoTrailingZeros)     # remove trailing zeros from valueDecimal (string)
+                            BIND(REPLACE(STR(?valueSN), "[eE]-?\\\\d+$", "") as ?m)                                           # extract the mantissa (string)
+                            BIND(REPLACE(STR(?valueSN), "^\\\\d(\\\\.\\\\d+)?[eE]", "") as ?e)                                    # extract the exponent (string)
+                            BIND(REPLACE(STR(?m),"(\\\\.|0+$)","") AS ?mNoDot)                                                # remove the comma and trailing zeros from the mantissa
+                            BIND(STRLEN(?mNoDot) as ?mDigitCount)                                                           # count the mantissa's characters
+                            BIND(xsd:integer(?e) as  ?exponent)                                                             # cast e to an integer, called exponent
+                            # prepare a string with 200 zeros padding left and right, mantissa in the middle
+                            BIND(CONCAT(
+                                                "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                                                ?mNoDot,
+                                                "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000") as ?baseStr)
+                            # first char has index 1 !!!
+                            BIND(201 + ?exponent as ?onePos)
+                            BIND(200 + ?mDigitCount  as ?lastMantissaDigit)
+                            BIND(IF(?onePos > 201, 201, ?onePos) as ?leftStart)
+                            BIND(?onePos+1 as ?leftEnd)
+                            BIND(?onePos+1 as ?rightStart)
+                            BIND(IF(?lastMantissaDigit+1 > ?onePos+2, ?lastMantissaDigit+1, ?onePos+2)  as ?rightEnd)
+                            # determine the expected string
+                            BIND(CONCAT(SUBSTR(?baseStr, ?leftStart, ?leftEnd-?leftStart), ".", SUBSTR(?baseStr, ?rightStart, ?rightEnd - ?rightStart)) as  ?valueSNStringValue)
+                            # compare with actual decimal value
+                            BIND(IF(?valueSNStringValue = STR(?valueDecimalNoTrailingZeros), "match!", "no match!") as ?result)
+                            # only generate message if no match (useful during development)
+                            FILTER(?result != "match!")
+                        }
+        """ ;
+      ] .
