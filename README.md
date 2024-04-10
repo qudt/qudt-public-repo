@@ -15,7 +15,7 @@ Here is the core design pattern of the QUDT ontology:
 
 Here is the imports closure graph, so you can see which files you need to explicitly import, depending on your application:
 
-![image](https://user-images.githubusercontent.com/1130189/236019440-163d10de-d725-4024-85d1-dcbba67cef38.png)
+![image](https://github.com/qudt/qudt-public-repo/assets/1130189/6f8fad08-995c-4dae-8350-4b1726b93dc7)
 
 Note that the default schema is expressed in SHACL. You can change this to use the OWL schema if you prefer, as documented [here](https://github.com/qudt/qudt-public-repo/wiki/Advanced-User-Guide#5-using-the-shacl-schema-instead-of-the-owl-schema).
 
@@ -26,7 +26,7 @@ We encourage you to get involved. If you have particular needs or see errors, pl
 Installation / Configuration instructions
 -----------------------------------------
 
-The QUDT ontology is provided in two forms: OWL and SHACL. By default, the vocabularies are configured to use the SHACL schema. To configure it to use the OWL schema instead, just make the following single change in the file schema/shacl/SHEMA-FACADE_QUDT-v2.1.\<release-number\>.ttl. You can see in the imports closure diagram above how all the vocabularies import this single "facade" file to make it easy to switch the ontology.
+The QUDT ontology is provided in two forms: OWL and SHACL. By default, the vocabularies are configured to use the SHACL schema. To configure it to use the OWL schema instead, just make the following single change in the file schema/SHEMA-FACADE_QUDT-v2.1.\<release-number\>.ttl. You can see in the imports closure diagram above how all the vocabularies import this single "facade" file to make it easy to switch the ontology.
 
 ```
 Change this line:
@@ -43,6 +43,28 @@ Change this line:
 To:
 # imports: http://qudt.org/2.1/schema/qudt
 ```
+
+Configuration for QUDT Users versus QUDT Developers
+---------------------------------------------------
+
+QUDT SHACL is supported by a set of validation rules that check the integrity and consistency of class, property and instance definitions of the QUDT collection. However, for someone who wishes to simply use the QUDT ontologies without modifying the schema or vocabularies, these validation rules impose an unnecessary computational load. For QUDT users, you can skip the validation of QUDT itself by making the following change in the FACADE file mentioned above:
+
+```
+Change this line:
+  owl:imports <http://qudt.org/2.1/collection/qa/all> ;
+To:
+  owl:imports <http://qudt.org/2.1/collection/usertest> ;
+```
+
+If you are using the tools from TopQuadrant, you should also change the comment line at the top of the same file:
+
+```
+Change this line:
+# imports: http://qudt.org/2.1/collection/qa/all
+To:
+# imports: http://qudt.org/2.1/collection/usertest
+```
+Currently, the tests in the usertest graph check for references to deprecated instances or properties and recommend the updated instance or property.
 
 Protege Users
 -----------------------------
