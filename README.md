@@ -15,7 +15,7 @@ Here is the core design pattern of the QUDT ontology:
 
 Here is the imports closure graph, so you can see which files you need to explicitly import, depending on your application:
 
-![image](https://github.com/qudt/qudt-public-repo/assets/1130189/6f8fad08-995c-4dae-8350-4b1726b93dc7)
+![image](https://github.com/qudt/qudt-public-repo/assets/1130189/3e452cd4-48dd-4b09-b927-d4b55f6016e2)
 
 Note that the default schema is expressed in SHACL. You can change this to use the OWL schema if you prefer, as documented [here](https://github.com/qudt/qudt-public-repo/wiki/Advanced-User-Guide#5-using-the-shacl-schema-instead-of-the-owl-schema).
 
