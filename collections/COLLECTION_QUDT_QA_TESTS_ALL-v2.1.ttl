@@ -95,6 +95,7 @@ qudt:ClosedWorldShape
 SELECT $this ?p ?o
 WHERE {
 $this a/rdfs:subClassOf* qudt:Concept .
+FILTER NOT EXISTS {$this qudt:deprecated true}
 $this ?p ?o .
 FILTER(STRSTARTS (str(?p), 'http://qudt.org/schema/qudt'))
 FILTER NOT EXISTS {$this a sh:NodeShape}
@@ -149,8 +150,8 @@ qudt:ExactMatchGoesBothWaysConstraint
 SELECT $this ?t
 WHERE {
 $this qudt:exactMatch ?t .
-FILTER NOT EXISTS {?t qudt:deprecated true}
-FILTER NOT EXISTS {?t qudt:exactMatch $this }
+FILTER NOT EXISTS {$this qudt:deprecated true} .
+FILTER NOT EXISTS {?t qudt:exactMatch $this } .
 }
 """ ;
     ] ;
@@ -168,6 +169,7 @@ qudt:InconsistentDimensionVectorInSKOSHierarchyConstraint
       sh:select """
 SELECT $this ?udv ?qk ?qdv
 WHERE {
+FILTER NOT EXISTS {$this qudt:deprecated true} .
 $this qudt:hasDimensionVector  ?udv .
 $this skos:broader* ?qk .
 ?qk qudt:hasDimensionVector ?qdv .
@@ -214,6 +216,7 @@ qudt:MultipleDescriptionsConstraint
       sh:select """
             SELECT $this (COUNT(?label) AS ?count) ?langTag
             WHERE {
+                FILTER NOT EXISTS {$this qudt:deprecated true} .
                 $this dcterms:description ?label .
                 FILTER(langMatches(lang(?label), ?langTag))
                 BIND(lang(?label) AS ?langTag)
@@ -237,6 +240,7 @@ qudt:MultipleLabelsConstraint
       sh:select """
             SELECT $this (COUNT(?label) AS ?count) ?langTag
             WHERE {
+                FILTER NOT EXISTS {$this qudt:deprecated true} .
                 $this rdfs:label ?label .
                 FILTER(langMatches(lang(?label), ?langTag))
                 BIND(lang(?label) AS ?langTag)
@@ -259,6 +263,7 @@ qudt:QuantityKindShape
           sh:select """
                 SELECT DISTINCT $this ?qk
                 WHERE {
+                FILTER NOT EXISTS {$this qudt:deprecated true} .
                 $this
                     skos:broader ?qk ;
                     qudt:exactMatch ?qk .
@@ -276,6 +281,7 @@ qudt:QuantityKindShape
           sh:select """
                 SELECT $this ?qk
                 WHERE {
+                FILTER NOT EXISTS {$this qudt:deprecated true} .
                 $this qudt:hasDimensionVector  ?udv .
                 $this skos:broader* ?qk .
                 ?qk qudt:hasDimensionVector ?qdv .
@@ -303,6 +309,7 @@ WHERE {{
      ?another qudt:symbol ?symbol .
     FILTER (?another != $this)
    }
+   FILTER NOT EXISTS {$this qudt:deprecated true} .
     $this a ?myType .
     ?myType <http://www.w3.org/2000/01/rdf-schema#subClassOf>+ qudt:Concept .
     ?another a ?anotherType .
@@ -324,6 +331,7 @@ qudt:UnitPointsToAllExactMatchQuantityKindsConstraint
       sh:select """
 SELECT $this ?qk ?qk2
 WHERE {
+FILTER NOT EXISTS {$this qudt:deprecated true} .
 $this qudt:hasQuantityKind ?qk .
 ?qk qudt:exactMatch ?qk2 .
 FILTER NOT EXISTS {$this qudt:hasQuantityKind ?qk2}
@@ -366,6 +374,7 @@ qudt:conversionMultiplierSnShape
       sh:select """
             SELECT $this ?valueDecimal ?valueDecimalNoTrailingZeros ?valueSN ?m ?e ?exponent ?mNoDot ?mDigitCount ?valueSNStringValue ?onePos ?lastMantissaDigit ?leftStart ?leftEnd ?rightStart ?rightEnd ?result
                         WHERE {
+                        FILTER NOT EXISTS {$this qudt:deprecated true} .
                             # select both values
                             $this
                                 qudt:conversionMultiplier ?valueDecimal ;
@@ -409,6 +418,7 @@ qudt:conversionOffsetSnShape
       sh:select """
             SELECT $this ?valueDecimal ?valueDecimalNoTrailingZeros ?valueSN ?m ?e ?exponent ?mNoDot ?mDigitCount ?valueSNStringValue ?onePos ?lastMantissaDigit ?leftStart ?leftEnd ?rightStart ?rightEnd ?result
                         WHERE {
+                        FILTER NOT EXISTS {$this qudt:deprecated true} .
                             # select both values
                             $this
                                 qudt:conversionOffset ?valueDecimal ;
@@ -452,6 +462,7 @@ qudt:standardUncertaintySnShape
       sh:select """
             SELECT $this ?valueDecimal ?valueDecimalNoTrailingZeros ?valueSN ?m ?e ?exponent ?mNoDot ?mDigitCount ?valueSNStringValue ?onePos ?lastMantissaDigit ?leftStart ?leftEnd ?rightStart ?rightEnd ?result
                         WHERE {
+                        FILTER NOT EXISTS {$this qudt:deprecated true} .
                             # select both values
                             $this
                                 qudt:standardUncertainty ?valueDecimal ;
@@ -495,6 +506,7 @@ qudt:valueSnShape
       sh:select """
             SELECT $this ?valueDecimal ?valueDecimalNoTrailingZeros ?valueSN ?m ?e ?exponent ?mNoDot ?mDigitCount ?valueSNStringValue ?onePos ?lastMantissaDigit ?leftStart ?leftEnd ?rightStart ?rightEnd ?result
                         WHERE {
+                        FILTER NOT EXISTS {$this qudt:deprecated true} .
                             # select both values
                             $this
                                 qudt:value ?valueDecimal ;
