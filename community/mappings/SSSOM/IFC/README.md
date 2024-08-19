@@ -7,7 +7,7 @@
 
 This mapping depends on
 
-* Subsequent version of [QUDT 2.1.38](https://github.com/qudt/qudt-public-repo/releases/tag/v2.1.38) 
+* Subsequent version of [QUDT 2.1.41](https://github.com/qudt/qudt-public-repo/releases/tag/v2.1.41) 
 * [IFC 4.0.2.1](https://standards.buildingsmart.org/IFC/DEV/IFC4/ADD2_TC1/OWL/ontology.ttl) (In case you need it: [overview of IFC version specs](https://technical.buildingsmart.org/standards/ifc/ifc-schema-specifications/)) 
 
 ## Contact

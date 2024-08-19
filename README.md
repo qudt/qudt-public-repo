@@ -26,7 +26,7 @@ We encourage you to get involved. If you have particular needs or see errors, pl
 Installation / Configuration instructions
 -----------------------------------------
 
-The QUDT ontology is provided in two forms: OWL and SHACL. By default, the vocabularies are configured to use the SHACL schema. To configure it to use the OWL schema instead, just make the following single change in the file schema/SHEMA-FACADE_QUDT-v2.1.\<release-number\>.ttl. You can see in the imports closure diagram above how all the vocabularies import this single "facade" file to make it easy to switch the ontology.
+The QUDT ontology is provided in two forms: OWL and SHACL. By default, the vocabularies are configured to use the SHACL schema. To configure it to use the OWL schema instead, just make the following single change in the file schema/SHEMA-FACADE_QUDT-v2.1.ttl. You can see in the imports closure diagram above how all the vocabularies import this single "facade" file to make it easy to switch the ontology.
 
 ```
 Change this line:
