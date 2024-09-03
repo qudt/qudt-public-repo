@@ -1,0 +1,150 @@
+# sets up java, maven and gpg
+# sets up settings.xml in such a way that the build/deploy works
+# releases the project with specified version
+# deploys it to the sonatype staging repo
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version (such as 2.3.13)'
+        required: true
+        type: string
+      next_snapshot_version:
+        description: 'Next SNAPSHOT version (such as 2.4-SNAPSHOT)'
+        required: true
+        type: string
+
+jobs:
+  build:
+    # setting the environment on the job is mandatory, otherwise it cannot access environment secrets.
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check write access to repo
+        run: |
+          token_login=$(curl -H "Authorization: Bearer ${token}" https://api.github.com/user | jq -r '.login')
+          echo token login is ${token_login}
+          echo $(curl  -H "Authorization: Bearer ${token}" https://api.github.com/repos/${repo}/collaborators/${token_login}/permission) > result
+          cat result | jq  '.permission == "admin" // .permission == "write"' > /dev/null || ( echo "Token does not have write access to ${repo}" >> ${GITHUB_STEP_SUMMARY}; exit 1)
+          curl -sS -f -I -H "Authorization: Bearer ${token}" https://api.github.com | grep 'x-oauth-scopes:' | grep 'repo' > /dev/null && exit 0 || echo "Token does not have repo scope on ${repo}" >> ${GITHUB_STEP_SUMMARY}
+        env:
+          repo: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # check if a tag already exists for the version we want to publish - in that case the workflow
+      # will fail later, so let us make it fail fast
+      - name: Check if tag v${{ inputs.release_version }} exists
+        uses: mukunku/tag-exists-action@v1.0.0
+        id: checkTag
+        with:
+          tag: v${{ inputs.release_version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Fail if tag v${{ inputs.release_version }} exists
+        if: steps.checkTag.outputs.exists == 'true'
+        run: |
+          echo Tag v${{ inputs.release_version }} already exists, release aborted >> $GITHUB_STEP_SUMMARY
+          exit 1
+
+      # Set up java with maven cache
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      # configure git
+      - name: setup git config
+        run: |
+          git config user.name ${{ github.actor }}
+          git config user.email "<>"
+
+      # because we protect the main branch, the action cannot push to the repository
+      # Therefore, we create a branch for the release, and if the release succeeds, we will
+      # submit a pull request
+      # Note: outputs the name of the new branch as ${{ steps.create_release_branch.outputs.branch_name }}
+      - name: create branch for this release
+        id: create_release_branch
+        run: |
+          BRANCH_NAME=release-$version-$(date +%s)
+          git checkout --track -b $BRANCH_NAME
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+        env:
+          version: ${{ inputs.release_version }}
+
+      # Push to the remote so we create the remote branch without any changes
+      # because the create-pull-request action (see below) will only include unpushed
+      # changes in the PR
+      - name: Push changes to repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: git push origin
+
+      # Update changelog unreleased section with new version
+      - name: Update changelog
+        uses: superfaceai/release-changelog-action@v1
+        with:
+          path-to-changelog: CHANGELOG.md
+          version: ${{ inputs.release_version }}
+          operation: release
+
+      # Apply formatting (changelog was touched)
+      - name: Apply format using spotless:apply
+        run: mvn spotless:apply -DspotlessFiles='.*CHANGELOG.md'
+
+      # Commit changes
+      - name: Commit CHANGELOG.md
+        run: |
+          git add "CHANGELOG.md"
+          git commit -m "Update CHANGELOG.md for release ${{ inputs.release_version }}"
+
+      # build release
+      - name: Build with Maven, deploying to sonatype staging repo
+        run: mvn -Pzip -B release:clean release:prepare release:perform -DtagNameFormat="v@{project.version}" -DreleaseVersion=${{ inputs.release_version }} -DdevelopmentVersion=${{ inputs.next_snapshot_version }}
+
+      # Make github release
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/qudt-public-repo-*.zip
+
+      # Read version changelog
+      - id: get-changelog
+        name: Get version changelog
+        uses: superfaceai/release-changelog-action@v1
+        with:
+          path-to-changelog: CHANGELOG.md
+          version: ${{ inputs.release_version }}
+          operation: read
+
+      # create the pull request
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: Release ${{ inputs.release_version }}
+          base: main
+          branch: ${{ steps.create_release_branch.outputs.branch_name }}
+          delete-branch: true
+          body: |
+            # Changes
+            
+            ${{ steps.get-changelog.outputs.changelog }}
+            
+            # Release info
+            
+            Automated release through workflow: '${{ github.workflow }}'
+            Triggered by: ${{ github.triggering_actor }}
+            Version: ${{ inputs.release_version }}
+            Next development version: ${{ inputs.next_snapshot_version }}
+            
+            # Next Steps
+            
+            Please rebase this PR on top of `main` after verifying the release is ok. 
+
+      # print the summary
+      - name: Print summary
+        run: echo "Release ${{ inputs.release_version }} deployed to sonatype staging repo. Please go there, close the repo and publish it." >> $GITHUB_STEP_SUMMARY
