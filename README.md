@@ -30,9 +30,9 @@ The QUDT ontology is provided in two forms: OWL and SHACL. By default, the vocab
 
 ```
 Change this line:
-  owl:imports <http://qudt.org/2.1/schema/shacl/qudt> ;  
+owl:imports <http://qudt.org/2.1/schema/shacl/qudt> ;
 To:
-  owl:imports <http://qudt.org/2.1/schema/qudt> ;
+owl:imports <http://qudt.org/2.1/schema/qudt> ;
 ```
 
 If you are using the tools from TopQuadrant, you should also change the comment line at the top of the same file:
@@ -51,9 +51,9 @@ QUDT SHACL is supported by a set of validation rules that check the integrity an
 
 ```
 Change this line:
-  owl:imports <http://qudt.org/2.1/collection/qa/all> ;
+owl:imports <http://qudt.org/2.1/collection/qa/all> ;
 To:
-  owl:imports <http://qudt.org/2.1/collection/usertest> ;
+owl:imports <http://qudt.org/2.1/collection/usertest> ;
 ```
 
 If you are using the tools from TopQuadrant, you should also change the comment line at the top of the same file:
