@@ -137,6 +137,23 @@ FILTER NOT EXISTS {$this qudt:deprecated true}
   sh:targetClass qudt:SystemOfUnits ;
   sh:targetClass qudt:Unit ;
 .
+qudt:DontReferToDeprecatedUnitsConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  rdfs:label "Don't refer to deprecated units" ;
+  sh:sparql [
+      a sh:SPARQLConstraint ;
+      rdfs:comment "Don't refer to deprecated units" ;
+      sh:message "Resource '{?s}' should not refer to deprecated unit '{$this}'." ;
+      sh:prefixes <http://qudt.org/2.1/collection/qa/all> ;
+      sh:select """SELECT $this ?s
+WHERE {
+$this qudt:deprecated true .
+?s ?p $this .
+}""" ;
+    ] ;
+  sh:targetClass qudt:Unit ;
+.
 qudt:ExactMatchGoesBothWaysConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
