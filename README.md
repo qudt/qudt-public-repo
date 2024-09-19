@@ -68,7 +68,7 @@ Currently, the tests in the usertest graph check for references to deprecated in
 
 Protege Users
 -----------------------------
-Disclaimer: The QUDT ontologies have been tested to load without error only in Protege 5.5.0, but not later releases.
+The QUDT ontologies (Release 2.1.42) have been tested to load without error in Protege 5.6.4.
 
 To load QUDT into Protege, choose "Open from URI" from the file menu, and enter http://qudt.org/2.1/vocab/unit
 
