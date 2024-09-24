@@ -7,7 +7,10 @@
     <artifactId>qudt</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
     <build>
         <pluginManagement>
             <plugins>
@@ -54,6 +57,70 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>io.github.qudtlib</groupId>
+                <artifactId>shacl-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <configuration>
+                    <validations>
+                        <validation>
+                            <!--skip>true</skip-->
+                            <shapes>
+                                <include>target/collections/COLLECTION_QUDT_QA_TESTS_ALL-v2.1.ttl</include>
+                                <!--include>target/schema/shacl/SCHEMA_QUDT_NoOWL-v2.1.ttl, target/collections/*.ttl</include-->
+                                <!--include>target/collections/SHACL-rules.ttl</include-->
+                            </shapes>
+                            <data>
+                                <include>
+                                    target/vocab/**/*.ttl,
+                                    target/schema/SCHEMA_QUDT-v2.1.ttl
+                                </include>
+                                <exclude>
+                                    target/**/to-be-deprecated*/**/*
+                                    target/vocab/scales/*
+                                    target/vocab/**/*DEPRECATED*
+                                </exclude>
+                            </data>
+                            <outputFile>target/validationReport.ttl</outputFile>
+                        </validation>
+                    </validations>
+                    <inferences>
+                        <inference>
+                            <shapes>
+                                <include>target/collections/SHACL-rules.ttl</include>
+                            </shapes>
+                            <data>
+                                <include>
+                                    target/vocab/**/*.ttl,
+                                    target/schema/SCHEMA_QUDT-v2.1.ttl
+                                </include>
+                                <exclude>
+                                    target/**/to-be-deprecated*/**/*
+                                    target/vocab/scales/*
+                                    target/vocab/**/*DEPRECATED*
+                                </exclude>
+                            </data>
+                            <outputFile>target/inferences.ttl</outputFile>
+                        </inference>
+                    </inferences>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>infer</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>infer</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>validate</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>validate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
                 <version>2.44.0.BETA2-SNAPSHOT</version>
@@ -62,12 +129,15 @@
                         <!-- you can define as many formats as you want, each is independent -->
                             <!-- define the files to apply to -->
                             <includes>
-                                <include>target/vocab/unit/*.ttl</include>
+                                <include>target/vocab/**/*.ttl</include>
                             </includes>
                         <format>
                             <failOnWarning>false</failOnWarning>
                             <verify>false</verify>
+                            <turtleFormatterVersion>1.2.13</turtleFormatterVersion>
                             <turtle>
+                                <predicateOrder>rdf:type,owl:imports</predicateOrder>
+                                <firstPredicateInNewLine>true</firstPredicateInNewLine>
                             </turtle>
                         </format>
                     </rdf>
