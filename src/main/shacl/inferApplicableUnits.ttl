@@ -1,44 +1,41 @@
-@prefix rdf: 	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: 	<http://www.w3.org/2000/01/rdf-schema#> .
-@prefix sh: 	<http://www.w3.org/ns/shacl#> .
-@prefix xsd: 	<http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix qk: <http://qudt.org/schema/quantitykind/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix sq: <http://qudt.org/2.1/shacl/infer/applicableUnits> .
-@prefix qudt: <http://qudt.org/schema/qudt/> .
-@prefix qk: <http://qudt.org/schema/quantitykind/> .
+
+qk:
+  sh:declare [
+    sh:namespace "http://qudt.org/schema/quantitykind/"^^xsd:anyURI ;
+    sh:prefix "qk" ;
+  ] .
 
 qudt:
-    sh:declare [
-                   sh:prefix "qudt" ;
-                   sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI 
-               ] .
+  sh:declare [
+    sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+    sh:prefix "qudt" ;
+  ] .
+
+rdfs:
+  sh:declare [
+    sh:namespace "http://www.w3.org/2000/01/rdf-schema#" ;
+    sh:prefix "rdfs" ;
+  ] .
 
 skos:
-    sh:declare [
-                   sh:prefix "skos" ;
-                   sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI 
-               ] .
-qk: 
-    sh:declare [
-                    sh:prefix "qk";
-                    sh:namespace "http://qudt.org/schema/quantitykind/"^^xsd:anyURI
-               ] .
-rdfs:
-    sh:declare [
-               sh:prefix "rdfs";
-               sh:namespace  "http://www.w3.org/2000/01/rdf-schema#" ;
-               ] .
+  sh:declare [
+    sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
+    sh:prefix "skos" ;
+  ] .
 
 sq:qkRule
-    a sh:NodeShape;
-    sh:targetClass qudt:QuantityKind;
-    sh:rule [
-        a sh:SPARQLRule ;
-        sh:prefixes qudt:;
-        sh:prefixes skos:;
-        sh:prefixes qk:;
-        sh:prefixes rdfs:;
-        sh:construct """
+  a sh:NodeShape ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:construct """
         CONSTRUCT {
             $this qudt:applicableUnit ?unit .
             $this rdfs:comment ?comment .
@@ -77,5 +74,12 @@ sq:qkRule
                 ?unit qudt:hasQuantityKind ?qk
             }
         }
-        """
-    ] .
+        """ ;
+    sh:prefixes qk: ;
+    sh:prefixes qudt: ;
+    sh:prefixes rdfs: ;
+    sh:prefixes skos: ;
+  ] ;
+  sh:targetClass qudt:QuantityKind .
+
+
