@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.qudt</groupId>
-    <artifactId>qudt</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>qudt-public-repo</artifactId>
+    <version>2.1.45-SNAPSHOT</version>
     <packaging>pom</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -31,7 +31,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target</outputDirectory>
+                            <outputDirectory>${basedir}/target/dist</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>/src/main/rdf</directory>
@@ -46,7 +46,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target/docs</outputDirectory>
+                            <outputDirectory>${basedir}/target/dist/docs</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>/src/main/resources/docs</directory>
@@ -59,43 +59,7 @@
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>shacl-maven-plugin</artifactId>
-                <version>1.0.0</version>
-                <configuration>
-                    <validations>
-                        <validation>
-                            <!--skip>true</skip-->
-                            <shapes>
-                                <include>target/collections/COLLECTION_QUDT_QA_TESTS_ALL-v2.1.ttl</include>
-                            </shapes>
-                            <data>
-                                <include>
-                                    target/vocab/**/*.ttl
-                                    target/applicableUnits.ttl,
-                                </include>
-                                <exclude>
-                                    target/**/to-be-deprecated*/**/*
-                                    target/vocab/scales/*
-                                    target/vocab/**/*DEPRECATED*
-                                </exclude>
-                            </data>
-                            <outputFile>target/validationReport.ttl</outputFile>
-                        </validation>
-                    </validations>
-                    <inferences>
-                        <inference>
-                            <shapes>
-                                <include>src/main/shacl/inferApplicableUnits.ttl</include>
-                            </shapes>
-                            <data>
-                                <include>
-                                    src/main/rdf/vocab/unit/*.ttl
-                                    src/main/rdf/vocab/quantitykinds/*.ttl
-                                </include>
-                            </data>
-                            <outputFile>target/applicableUnits.ttl</outputFile>
-                        </inference>
-                    </inferences>
-                </configuration>
+                <version>1.0.1</version>
                 <executions>
                     <execution>
                         <id>infer</id>
@@ -103,6 +67,22 @@
                         <goals>
                             <goal>infer</goal>
                         </goals>
+                        <configuration>
+                            <inferences>
+                                <inference>
+                                    <shapes>
+                                        <include>src/main/shacl/inferApplicableUnits.ttl</include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            src/main/rdf/vocab/unit/*.ttl
+                                            src/main/rdf/vocab/quantitykinds/*.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/inferred/applicableUnits.ttl</outputFile>
+                                </inference>
+                            </inferences>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>validate</id>
@@ -110,6 +90,28 @@
                         <goals>
                             <goal>validate</goal>
                         </goals>
+                        <configuration>
+                            <validations>
+                                <validation>
+                                    <!--skip>true</skip-->
+                                    <shapes>
+                                        <include>target/collections/COLLECTION_QUDT_QA_TESTS_ALL-v2.1.ttl</include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            target/vocab/**/*.ttl
+                                            target/inferred/**/*.ttl
+                                        </include>
+                                        <exclude>
+                                            target/**/to-be-deprecated*/**/*
+                                            target/vocab/scales/*
+                                            target/vocab/**/*DEPRECATED*
+                                        </exclude>
+                                    </data>
+                                    <outputFile>target/validation/validationReport.ttl</outputFile>
+                                </validation>
+                            </validations>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -127,7 +129,7 @@
                             </includes>
                         <format>
                             <failOnWarning>false</failOnWarning>
-                            <verify>false</verify>
+                            <verify>true</verify>
                             <turtleFormatterVersion>1.2.13</turtleFormatterVersion>
                             <turtle>
                                 <predicateOrder>rdf:type,owl:imports</predicateOrder>
@@ -136,18 +138,63 @@
                         </format>
                     </rdf>
                     <!-- define a language-specific format -->
-
                 </configuration>
                 <executions>
                     <execution>
-                        <id>check-code-format</id>
+                        <id>check-source-format</id>
                         <phase>process-sources</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>format-dist</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                        <configuration>
+                            <rdf>
+                                <!-- you can define as many formats as you want, each is independent -->
+                                <!-- define the files to apply to -->
+                                <includes>
+                                    <include>${project.build.directory}/dist/**/*.ttl</include>
+                                </includes>
+                                <format>
+                                    <failOnWarning>false</failOnWarning>
+                                    <verify>true</verify>
+                                    <turtleFormatterVersion>1.2.13</turtleFormatterVersion>
+                                    <turtle>
+                                        <predicateOrder>rdf:type,owl:imports</predicateOrder>
+                                        <firstPredicateInNewLine>true</firstPredicateInNewLine>
+                                    </turtle>
+                                </format>
+                            </rdf>
+                            <!-- define a language-specific format -->
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.7.1</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/resources/assembly/releaseZip.xml</descriptor>
+                    </descriptors>
+                    <finalName>${project.name}-${project.version}.zip</finalName>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>release-zip</id>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 </project>
