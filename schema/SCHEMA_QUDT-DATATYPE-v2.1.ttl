@@ -159,11 +159,6 @@ qudt:Array
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
-      owl:allValuesFrom qudt:DimensionVector ;
-      owl:onProperty qudt:dimensionVector ;
-    ] ;
-  rdfs:subClassOf [
-      a owl:Restriction ;
       owl:allValuesFrom <http://qudt.org/schema/type#TypeMatrix> ;
       owl:onProperty qudt:typeMatrix ;
     ] ;
@@ -180,7 +175,7 @@ qudt:Array
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:maxCardinality 1 ;
-      owl:onProperty qudt:dimensionVector ;
+      owl:onProperty qudt:dimensions ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -243,7 +238,7 @@ qudt:ArrayType
   rdfs:subClassOf qudt:CompositeDatatype ;
   sh:property qudt:ArrayType-byRow ;
   sh:property qudt:ArrayType-dataOrder ;
-  sh:property qudt:ArrayType-dimensionVector ;
+  sh:property qudt:ArrayType-dimensions ;
   sh:property qudt:ArrayType-dimensionality ;
   sh:property qudt:ArrayType-typeMatrix ;
 .
@@ -259,9 +254,9 @@ qudt:ArrayType-dataOrder
   sh:class qudt:ArrayDataOrderType ;
   sh:maxCount 1 ;
 .
-qudt:ArrayType-dimensionVector
+qudt:ArrayType-dimensions
   a sh:PropertyShape ;
-  sh:path qudt:dimensionVector ;
+  sh:path qudt:dimensions ;
   sh:class qudt:DimensionVector ;
   sh:maxCount 1 ;
 .
@@ -1543,22 +1538,6 @@ qudt:DECIMAL
   dtype:literal "numeric" ;
   rdfs:label "Decimal" ;
 .
-qudt:DV_2x4
-  a qudt:DimensionVector ;
-  rdf:first 2 ;
-  rdf:rest (
-      4
-    ) ;
-  rdfs:label "Dimension Vector 2x4" ;
-.
-qudt:DV_4x4
-  a qudt:DimensionVector ;
-  rdf:first 4 ;
-  rdf:rest (
-      4
-    ) ;
-  rdfs:label "Dimension Vector 4x4" ;
-.
 qudt:DataElement-type
   a sh:PropertyShape ;
   sh:path qudt:dataType ;
@@ -2611,7 +2590,7 @@ qudt:MATRIX-TYPE_2x4
   a qudt:MatrixType ;
   qudt:byRow true ;
   qudt:columns 4 ;
-  qudt:dimensionVector qudt:DV_2x4 ;
+  qudt:dimensions (2 4) ;
   qudt:dimensionality 2 ;
   qudt:rows 2 ;
   qudt:rows 4 ;
@@ -4411,7 +4390,7 @@ qudt:TABLE-TYPE_2x4
   a qudt:TableType ;
   qudt:byRow true ;
   qudt:columns 4 ;
-  qudt:dimensionVector qudt:DV_2x4 ;
+  qudt:dimensions (2 4) ;
   qudt:dimensionality 2 ;
   qudt:rows 2 ;
   rdfs:label "Table type  2x4" ;
@@ -4638,7 +4617,7 @@ qudt:TimeSeriesArray
   rdfs:subClassOf [
       a owl:Restriction ;
       owl:cardinality 1 ;
-      owl:onProperty qudt:dimensionVector ;
+      owl:onProperty qudt:dimensions ;
     ] ;
   rdfs:subClassOf [
       a owl:Restriction ;
@@ -4651,9 +4630,9 @@ qudt:TimeSeriesArray
       owl:onProperty <http://qudt.org/schema/type#vector> ;
     ] ;
 .
-qudt:TimeSeriesArray-dimensionVector
+qudt:TimeSeriesArray-dimensions
   a sh:PropertyShape ;
-  sh:path qudt:dimensionVector ;
+  sh:path qudt:dimensions ;
   sh:class qudt:IntegerList ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
@@ -4678,7 +4657,7 @@ qudt:TimeSeriesArrayType
   rdfs:comment "A Time Series Array Type is a data type that specifies the properties of arrays that hold time series data. A time series is a sequence of data points, measured at successive time intervals. The time intervals may be uniformly or non-uniformly spaced." ;
   rdfs:label "Time Series Array Type" ;
   rdfs:subClassOf qudt:ArrayType ;
-  sh:property qudt:TimeSeriesArray-dimensionVector ;
+  sh:property qudt:TimeSeriesArray-dimensions ;
   sh:property qudt:TimeSeriesArray-incrementDatatype ;
   sh:property qudt:TimeSeriesArray-vector ;
 .
@@ -5651,15 +5630,20 @@ qudt:dimension
   rdfs:label "dimension" ;
   rdfs:range xsd:integer ;
 .
-qudt:dimensionVector
+qudt:dimensions
   a owl:ObjectProperty ;
+  dcterms:description 
+  """The extent of each dimension making up a matrix or an array. 
+  For example a 4 by 4 array has dimensions (4 4),
+  whereas a vector or a string has dimensions (1).
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/datatype> ;
-  rdfs:label "dimension vector" ;
-  rdfs:range qudt:DimensionVector ;
+  rdfs:label "dimensions" ;
+  rdfs:range qudt:IntegerList ;
 .
 qudt:dimensionality
   a owl:DatatypeProperty ;
-  dcterms:description "The number of dimensions making up an array. For example a 4 by 4 array has a dimensionality of 2. Whereas a vector or a string has a dimensionality of 1." ;
+  dcterms:description "The number of dimensions making up a matrix or an array. For example a 4 by 4 array has a dimensionality of 2. Whereas a vector or a string has a dimensionality of 1." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/datatype> ;
   rdfs:label "dimensionality" ;
   rdfs:range xsd:integer ;
