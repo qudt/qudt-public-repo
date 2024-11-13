@@ -18,7 +18,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Changed the erroneously used 'qudt:hasDimensionVector' property in `vocab/types/VOCAB_QUDT_DATATYPES-v2.1.ttl`
   file with with a new property qudt:dimensions that denotes the dimensions of a matrix.
 - Introduced a maven based build process to automate the manual tasks required for merging PRs and making releases. 
-  This change does not affect the content of the ontologies.  
+  This change does not affect the content of the ontologies.
+- Replaced (hopefully) all occurrences of `hr` as a symbol for `unit:HR` with `h`.
 
 ## [2.1.44] - 2024-10-27
 
