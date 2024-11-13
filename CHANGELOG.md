@@ -7,12 +7,18 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Changed
+
+- Changed the name of the `collections` folder to `validation`.
+
 ### Fixed
 
 - Added `skos:broader` relations to a number of quantity kinds that had none. Note that it is ok for a 
   quantity kind to have no broader quantity kind, but these were missing.
 - Changed the erroneously used 'qudt:hasDimensionVector' property in `vocab/types/VOCAB_QUDT_DATATYPES-v2.1.ttl`
   file with with a new property qudt:dimensions that denotes the dimensions of a matrix.
+- Introduced a maven based build process to automate the manual tasks required for merging PRs and making releases. 
+  This change does not affect the content of the ontologies.  
 
 ## [2.1.44] - 2024-10-27
 
