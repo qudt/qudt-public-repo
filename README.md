@@ -1,6 +1,12 @@
 QUDT - Quantities, Units, Dimensions and dataTypes - public repository
 ======================================================================
 
+## Quick-Start Guide
+There are three ways to bring the QUDT ontology into your environment.
+1. Download the latest GitHub Release [here](https://github.com/qudt/qudt-public-repo/releases).
+2. Use the resolved graph and instance URIs available [here](https://www.qudt.org/2.1/catalog/qudt-catalog.html).
+3. Use GitHub pull to get the sources and build them using the instructions [here](https://github.com/qudt/qudt-public-repo#building).
+
 Overview
 --------
 
@@ -26,7 +32,7 @@ We encourage you to get involved. If you have particular needs or see errors, pl
 Installation / Configuration instructions
 -----------------------------------------
 
-The QUDT ontology is provided in two forms: OWL and SHACL. By default, the vocabularies are configured to use the SHACL schema. To configure it to use the OWL schema instead, just make the following single change in the file schema/SHEMA-FACADE_QUDT-v2.1.ttl. You can see in the imports closure diagram above how all the vocabularies import this single "facade" file to make it easy to switch the ontology.
+The QUDT ontology is provided in two forms: OWL and SHACL. By default, the vocabularies are configured to use the SHACL schema. To configure it to use the OWL schema instead, just make the following single change in the file schema/SDHEMA-FACADE_QUDT.ttl. You can see in the imports closure diagram above how all the vocabularies import this single "facade" file to make it easy to switch the ontology.
 
 ```
 Change this line:
@@ -139,4 +145,4 @@ QUDT.org is a member of the World Wide Web Consortium (W3C)
 
 Last updated by: Steve Ray (steve.ray@qudt.org)
 
-Last updated: August 4, 2022
+Last updated: November 14, 2024
