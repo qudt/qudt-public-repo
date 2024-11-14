@@ -25,7 +25,11 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -Pzip install
-      # Make github release
+    - name: change tag 'snapshot' to current commit
+      if: ${{ github.event.pull_request.base.ref == 'main' && github.event.action == 'closed' && github.event.pull_request.merged == true}} # only make snapshot release if it is a push to main
+      run: |
+            git tag -fa snapshot
+            git push -f origin --tags
     - name: Release
       uses: softprops/action-gh-release@v2
       if: ${{ github.event.pull_request.base.ref == 'main' && github.event.action == 'closed' && github.event.pull_request.merged == true}} # only make snapshot release if it is a push to main
