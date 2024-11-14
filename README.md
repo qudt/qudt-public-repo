@@ -1,6 +1,12 @@
 QUDT - Quantities, Units, Dimensions and dataTypes - public repository
 ======================================================================
 
+## Quick-Start Guide
+There are three ways to bring the QUDT ontology into your environment.
+1. Download the latest GitHub Release [here](https://github.com/qudt/qudt-public-repo/releases).
+2. Use the resolved graph and instance URIs available [here](https://www.qudt.org/2.1/catalog/qudt-catalog.html).
+3. Use GitHub pull to get the sources and build them using the instructions [here](https://github.com/qudt/qudt-public-repo#building).
+
 Overview
 --------
 
@@ -139,4 +145,4 @@ QUDT.org is a member of the World Wide Web Consortium (W3C)
 
 Last updated by: Steve Ray (steve.ray@qudt.org)
 
-Last updated: August 4, 2022
+Last updated: November 14, 2024
