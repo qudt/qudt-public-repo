@@ -111,7 +111,12 @@ jobs:
 
       # build release
       - name: Build with Maven, deploying to sonatype staging repo
-        run: mvn -DqudtPrevReleaseYear=${{ inputs.previous_release_year }} -DqudtPrevReleaseMonth=${{ inputs.previous_release_month }} -Pzip -B release:clean release:prepare release:perform -DtagNameFormat="v@{project.version}" -DreleaseVersion=${{ inputs.release_version }} -DdevelopmentVersion=${{ inputs.next_snapshot_version }}
+        run: | 
+          mvn -Pzip -B release:clean release:prepare release:perform \
+            -DtagNameFormat="v@{project.version}" \
+            -DreleaseVersion=${{ inputs.release_version }} \
+            -DdevelopmentVersion=${{ inputs.next_snapshot_version }} \
+            -Darguments="-DqudtPrevReleaseYear=${{ inputs.previous_release_year }} -DqudtPrevReleaseMonth=${{ inputs.previous_release_month }}"
         env:
           password: ${{ secrets.GITHUB_TOKEN }}
 
