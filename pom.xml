@@ -10,6 +10,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <qudtPrevReleaseYear>TODO-set-property-qudtPrevReleaseYear</qudtPrevReleaseYear>
+        <qudtPrevReleaseMonth>TODO-set-property-qudtPrevReleaseMonth</qudtPrevReleaseMonth>
     </properties>
     <scm>
         <connection>scm:git:https://github.com/qudt/qudt-public-repo.git</connection>
@@ -77,13 +79,20 @@
                         </goals>
                         <configuration>
                             <source>import java.time.OffsetDateTime
-                            import java.time.temporal.ChronoField
 
+                            import java.time.format.DateTimeFormatter
+                            import java.time.temporal.ChronoField
                             def majorMinorVersion = "${project.version}".replaceAll('^(\\w+.\\w+).*\$', '\$1')
                             project.properties.setProperty('project.version.majorminor', majorMinorVersion)
                             project.properties.setProperty('qudt.versioned.iri.prefix', "http://qudt.org/${majorMinorVersion}/")
                             def now = OffsetDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0)
                             project.properties.setProperty('qudt.build.date', "${now}")
+                            project.properties.setProperty('qudt.previous.version.iri.prefix', "https://qudt.org/doc/${qudtPrevReleaseYear}/${qudtPrevReleaseMonth}/")
+                            def currentMonth = now.format(DateTimeFormatter.ofPattern("MM"))
+                            def currentYear = now.format(DateTimeFormatter.ofPattern("YYYY"))
+                            project.properties.setProperty('qudt.current.month', currentMonth)
+                            project.properties.setProperty('qudt.current.year', currentYear)
+                            project.properties.setProperty('qudt.latest.version.iri.prefix', "https://qudt.org/doc/${currentYear}/${currentMonth}/")
                             </source>
                         </configuration>
                     </execution>
@@ -152,7 +161,7 @@
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>rdfio-maven-plugin</artifactId>
-                <version>1.1.2</version>
+                <version>1.2.0</version>
                 <executions>
                     <execution>
                         <id>delete-applicable-units</id>
@@ -195,6 +204,45 @@
                                     </input>
                                     <outputFile>target/dist/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</outputFile>
                                 </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>update-vaem-references</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <eachFile>
+                                    <replaceInputFiles>true</replaceInputFiles>
+                                    <input>
+                                        <include>
+                                            target/dist/vocab/**/*.ttl
+                                        </include>
+                                        <exclude>
+                                            target/dist/**/*QUANTITIES*.ttl
+                                        </exclude>
+                                    </input>
+                                    <filters>
+                                        <sparqlUpdate>
+                                            DELETE { ?graph
+                                                vaem:latestPublishedVersion ?oldLatest ;
+                                                vaem:previousPublishedVersion ?oldPrevious}
+                                            INSERT { ?graph
+                                                vaem:latestPublishedVersion ?newLatest ;
+                                                vaem:previousPublishedVersion ?newPrevious ;
+                                            }
+                                            WHERE { ?graph
+                                                vaem:latestPublishedVersion ?oldLatest ;
+                                                vaem:previousPublishedVersion ?oldPrevious ;
+                                                BIND(STRDT(REPLACE(STR(?oldLatest), "https://qudt.org/doc/[^/]+/[^/]+/", "${qudt.latest.version.iri.prefix}"),xsd:anyURI) as ?newLatest)
+                                                BIND(STRDT(REPLACE(STR(?oldPrevious), "https://qudt.org/doc/[^/]+/[^/]+/", "${qudt.previous.version.iri.prefix}"),xsd:anyURI) as ?newPrevious)
+                                            }
+                                        </sparqlUpdate>
+                                    </filters>
+                                </eachFile>
                             </products>
                         </configuration>
                     </execution>
