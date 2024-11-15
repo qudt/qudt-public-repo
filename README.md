@@ -103,6 +103,15 @@ mvn -Pzip install
 ```
 (This activates the maven profile called 'zip', which you find in the pom.xml near the end).
 
+To set the next/latest VAEM link properties (which otherwise default to a bogus value) - only relevant if you 
+build for a qudt release:
+
+```bash
+mvn -DqudtPrevReleaseYear=2024 -DqudtPrevReleaseMonth=10 install 
+```
+
+
+### Build Errors
 If you make changes to the project before building, you can expect these problems:
 
 #### Formatting and formatting problems
