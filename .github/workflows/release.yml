@@ -111,7 +111,12 @@ jobs:
 
       # build release
       - name: Build with Maven, deploying to sonatype staging repo
-        run: mvn -DqudtPrevReleaseYear=${{ inputs.previous_release_year }} -DqudtPrevReleaseMonth=${{ inputs.previous_release_month }} -Pzip -B release:clean release:prepare release:perform -DtagNameFormat="v@{project.version}" -DreleaseVersion=${{ inputs.release_version }} -DdevelopmentVersion=${{ inputs.next_snapshot_version }}
+        run: | 
+          mvn -Pzip -B release:clean release:prepare release:perform \
+            -DtagNameFormat="v@{project.version}" \
+            -DreleaseVersion=${{ inputs.release_version }} \
+            -DdevelopmentVersion=${{ inputs.next_snapshot_version }} \
+            -Darguments="-DqudtPrevReleaseYear=${{ inputs.previous_release_year }} -DqudtPrevReleaseMonth=${{ inputs.previous_release_month }}"
         env:
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -159,4 +164,4 @@ jobs:
 
       # print the summary
       - name: Print summary
-        run: echo "Release ${{ inputs.release_version }} deployed to sonatype staging repo. Please go there, close the repo and publish it." >> $GITHUB_STEP_SUMMARY
+        run: echo "Release ${{ inputs.release_version }} was built and published on GitHub." >> $GITHUB_STEP_SUMMARY
