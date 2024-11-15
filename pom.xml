@@ -77,11 +77,12 @@
                         </goals>
                         <configuration>
                             <source>import java.time.OffsetDateTime
+                            import java.time.temporal.ChronoField
 
                             def majorMinorVersion = "${project.version}".replaceAll('^(\\w+.\\w+).*\$', '\$1')
                             project.properties.setProperty('project.version.majorminor', majorMinorVersion)
                             project.properties.setProperty('qudt.versioned.iri.prefix', "http://qudt.org/${majorMinorVersion}/")
-                            def now = OffsetDateTime.now()
+                            def now = OffsetDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0)
                             project.properties.setProperty('qudt.build.date', "${now}")
                             </source>
                         </configuration>
@@ -204,66 +205,31 @@
                 <artifactId>spotless-maven-plugin</artifactId>
                 <version>2.44.0.BETA3</version>
                 <configuration>
-                    <rdf>
-                        <!-- you can define as many formats as you want, each is independent -->
-                        <!-- define the files to apply to -->
-                        <includes>
-                            <include>src/main/rdf/**/*.ttl</include>
-                            <include>src/build/inference/**/*.ttl</include>
-                        </includes>
-                        <format>
-                            <failOnWarning>false</failOnWarning>
-                            <verify>true</verify>
-                            <turtleFormatterVersion>1.2.14</turtleFormatterVersion>
-                            <turtle>
-                                <predicateOrder>rdf:type,owl:imports</predicateOrder>
-                                <firstPredicateInNewLine>true</firstPredicateInNewLine>
-                            </turtle>
-                        </format>
-                    </rdf>
-                    <rdf>
-                        <!-- you can define as many formats as you want, each is independent -->
-                        <!-- define the files to apply to -->
-                        <includes>
-                            <include>target/**/*.ttl</include>
-                        </includes>
-                        <format>
-                            <failOnWarning>false</failOnWarning>
-                            <verify>true</verify>
-                            <turtleFormatterVersion>1.2.14</turtleFormatterVersion>
-                            <turtle>
-                                <predicateOrder>rdf:type,owl:imports</predicateOrder>
-                                <firstPredicateInNewLine>true</firstPredicateInNewLine>
-                            </turtle>
-                        </format>
-                        <replaceRegex>
-                            <name>full version replacement</name>
-                            <searchRegex>\$\$QUDT_VERSION\$\$</searchRegex>
-                            <replacement>${project.version}</replacement>
-                        </replaceRegex>
-                        <replaceRegex>
-                            <name>major.minor version replacement</name>
-                            <searchRegex>\$\$QUDT_MAJOR_MINOR_VERSION\$\$</searchRegex>
-                            <replacement>${project.version.majorminor}</replacement>
-                        </replaceRegex>
-                        <replace>
-                            <name>publish date replacement</name>
-                            <search>1234-12-12T12:34:56Z</search>
-                            <replacement>${qudt.build.date}</replacement>
-                        </replace>
-                        <replaceRegex>
-                            <name>versioned IRI replacement</name>
-                            <searchRegex>http://qudt.org/\d+.\d+/</searchRegex>
-                            <replacement>${qudt.versioned.iri.prefix}</replacement>
-                        </replaceRegex>
-                    </rdf>
+                        <rdf>
+                            <!-- you can define as many formats as you want, each is independent -->
+                            <!-- define the files to apply to -->
+                            <includes>
+                                <include>src/main/rdf/**/*.ttl</include>
+                                <include>src/build/inference/**/*.ttl</include>
+                                <include>target/**/*.ttl</include>
+                            </includes>
+                            <format>
+                                <failOnWarning>false</failOnWarning>
+                                <verify>true</verify>
+                                <turtleFormatterVersion>1.2.14</turtleFormatterVersion>
+                                <turtle>
+                                    <predicateOrder>rdf:type,owl:imports</predicateOrder>
+                                    <firstPredicateInNewLine>true</firstPredicateInNewLine>
+                                </turtle>
+                            </format>
+                        </rdf>
+
                     <formats>
                         <format>
                             <includes>
                                 <include>target/dist/**/*.*</include>
                             </includes>
                             <excludes>
-                                <include>target/**/*.ttl</include>
                                 <include>target/**/*.xlsx</include>
                                 <include>target/**/*.xls</include>
                                 <include>target/**/*.gif</include>
@@ -307,10 +273,15 @@
                     </execution>
                     <execution>
                         <id>format-sources</id>
-                        <phase>initialize</phase>
+                        <phase>compile</phase>
                         <goals>
                             <goal>apply</goal>
                         </goals>
+                        <configuration>
+                            <upToDateChecking>
+                                <enabled>false</enabled>
+                            </upToDateChecking>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>format-dist</id>
@@ -318,6 +289,11 @@
                         <goals>
                             <goal>apply</goal>
                         </goals>
+                        <configuration>
+                            <upToDateChecking>
+                                <enabled>false</enabled>
+                            </upToDateChecking>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
