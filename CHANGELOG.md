@@ -11,6 +11,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Changed the name of the `collections` folder to `validation`.
 - Remove all version suffixes from all source files, i.e., `-v2.1.ttl` becomes `.ttl`
+- Add the qudt:altSymbol relation and enforce at most a single qudt:symbol for all instances.
 
 
 ### Fixed
