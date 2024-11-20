@@ -14,6 +14,14 @@ on:
         description: 'Next SNAPSHOT version (such as 2.4-SNAPSHOT)'
         required: true
         type: string
+      previous_release_year:
+        description: 'The Year (YYYY) the last release was published'
+        required: true
+        type: string
+      previous_release_month:
+        description: 'The Month (MM) the last release was published'
+        required: true
+        type: string
 
 jobs:
   build:
@@ -103,7 +111,12 @@ jobs:
 
       # build release
       - name: Build with Maven, deploying to sonatype staging repo
-        run: mvn -Pzip -B release:clean release:prepare release:perform -DtagNameFormat="v@{project.version}" -DreleaseVersion=${{ inputs.release_version }} -DdevelopmentVersion=${{ inputs.next_snapshot_version }}
+        run: | 
+          mvn -Pzip -B release:clean release:prepare release:perform \
+            -DtagNameFormat="v@{project.version}" \
+            -DreleaseVersion=${{ inputs.release_version }} \
+            -DdevelopmentVersion=${{ inputs.next_snapshot_version }} \
+            -Darguments="-DqudtPrevReleaseYear=${{ inputs.previous_release_year }} -DqudtPrevReleaseMonth=${{ inputs.previous_release_month }}"
         env:
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -111,8 +124,9 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ inputs.release_version }}
           body_path: src/build/release/release-body.md
-          files: target/qudt-public-repo-*.zip
+          files: target/checkout/target/qudt-public-repo-*.zip
 
       # Read version changelog
       - id: get-changelog
@@ -150,4 +164,4 @@ jobs:
 
       # print the summary
       - name: Print summary
-        run: echo "Release ${{ inputs.release_version }} deployed to sonatype staging repo. Please go there, close the repo and publish it." >> $GITHUB_STEP_SUMMARY
+        run: echo "Release ${{ inputs.release_version }} was built and published on GitHub." >> $GITHUB_STEP_SUMMARY
