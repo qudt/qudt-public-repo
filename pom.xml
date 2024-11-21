@@ -71,6 +71,12 @@
                 <version>2.1.1</version>
                 <executions>
                     <execution>
+                        <!-- we use placeholders in our files that are replaced with
+                        appropriate values during the build.
+
+                        This execution generates a number of new maven properties that
+                        are later used as the replacement values, e.g. ${project.version.majorminor}.
+                        -->
                         <id>defineAdditionalProperties</id>
                         <phase>validate</phase>
                         <goals>
@@ -98,6 +104,8 @@
                 </executions>
                 <dependencies>
                     <dependency>
+                        <!-- we replace this dependency of the groovy plugin because the version
+                        it uses has security issues -->
                         <groupId>com.google.guava</groupId>
                         <artifactId>guava</artifactId>
                         <version>33.1.0-jre</version>
@@ -110,6 +118,7 @@
                 <version>1.0.1</version>
                 <executions>
                     <execution>
+                        <!-- infers qudt:applicableUnits and writes them to target/inferred/applicableUnits.ttl -->
                         <id>shacl-infer</id>
                         <phase>compile</phase>
                         <goals>
@@ -133,6 +142,11 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <!--
+                        SHACL-validates the union of all ttl files in dist/vocab and the No-OWL schema
+                        against the union of QA-Tests and No-OWL schema
+                        writes the validation report target/validation/validationReport.ttl
+                        -->
                         <id>shacl-validate</id>
                         <phase>test</phase>
                         <goals>
@@ -165,6 +179,11 @@
                 <version>1.2.1</version>
                 <executions>
                     <execution>
+                        <!--
+                        deletes any qudt:applicableUnits triples from the quantitykinds **source** file.
+                        Note: this operation leaves the file unformatted (jena TTL Pretty output - nice, but
+                        not our format) Therefore, we need to format this file later using spotless.
+                        -->
                         <id>delete-applicable-units</id>
                         <phase>initialize</phase>
                         <goals>
@@ -189,6 +208,11 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <!--
+                        adds the qudt:applicableUnits triples we generated with SHACL to the quantitykinds **source** file.
+                        Note: this operation leaves the file unformatted (jena TTL Pretty output - nice, but
+                        not our format) Therefore, we need to format this file later using spotless.
+                        -->
                         <id>merge-applicable-units</id>
                         <phase>compile</phase>
                         <goals>
@@ -209,6 +233,11 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <!-- updates vaem:(latest|previous)PublishedVersion links in all target TTL files that have them
+                        Note: this operation leaves the files unformatted (jena TTL Pretty output - nice, but
+                        not our format) Therefore, we need to format these files later using spotless.
+                        -->
+
                         <id>update-vaem-references</id>
                         <phase>prepare-package</phase>
                         <goals>
@@ -254,9 +283,10 @@
                 <artifactId>spotless-maven-plugin</artifactId>
                 <version>2.44.0.BETA3</version>
                 <configuration>
+                        <!-- default configuration - this is the one that is used if the plugin is
+                        invoked directly using `mvn spotless:apply` or `mvn spotless:check`
+                        -->
                         <rdf>
-                            <!-- you can define as many formats as you want, each is independent -->
-                            <!-- define the files to apply to -->
                             <includes>
                                 <include>src/main/rdf/**/*.ttl</include>
                                 <include>src/build/inference/**/*.ttl</include>
@@ -274,6 +304,10 @@
                         </rdf>
 
                     <formats>
+                        <!--
+                        does our placeholder replacements using the maven properties
+                        that were set using the groovy plugin
+                        -->
                         <format>
                             <includes>
                                 <include>target/dist/**/*.*</include>
@@ -310,18 +344,35 @@
                         </format>
                     </formats>
 
-                    <!-- define a language-specific format -->
                 </configuration>
                 <executions>
                     <execution>
+                        <!--
+                            checks formats in all files we care about before anything else
+                            happens in the build.
+
+                            Note: The more comfortable alternative would be to
+                            start with formatting everything, but we cannot do it: it would allow
+                            for a commit to contain non-formatted files. Those files would be formatted
+                            during the server-side build but not updated in the repo. A subsequent
+                            merge/rebase to our main branch would lead to having unformatted files in
+                            the main branch.
+                        -->
                         <id>check-source-format</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
+                        <configuration>
+                            <upToDateChecking>
+                                <!-- we want to enforce the check. our build process may confuse the spotless index -->
+                                <enabled>false</enabled>
+                            </upToDateChecking>
+                        </configuration>
                     </execution>
                     <execution>
-                        <id>format-sources</id>
+                        <!-- formats source files that were generated during the build up to the compile phase -->
+                        <id>reformat-sources</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>apply</goal>
@@ -330,9 +381,17 @@
                             <upToDateChecking>
                                 <enabled>false</enabled>
                             </upToDateChecking>
+                            <rdf>
+                                <!-- redefine includes so we only format the sources that are allowed to change -->
+                                <includes>
+                                    <include>src/main/rdf/vocab/quantitykinds/*.ttl</include>
+                                </includes>
+                            </rdf>
                         </configuration>
+
                     </execution>
                     <execution>
+                        <!-- formats everything in the target/dist folder so we have a clean set of distribution files-->
                         <id>format-dist</id>
                         <phase>prepare-package</phase>
                         <goals>
@@ -342,12 +401,20 @@
                             <upToDateChecking>
                                 <enabled>false</enabled>
                             </upToDateChecking>
+                            <rdf>
+                                <!-- redefine rdf includes to only include target/dist -->
+                                <includes>
+                                    <include>target/**/*.ttl</include>
+                                </includes>
+                            </rdf>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <!-- copies all required files from src or root dir to the target folder -->
                 <executions>
                     <execution>
                         <id>copy-rdf</id>
@@ -403,6 +470,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
                 <version>3.1.2</version>
+                <!--
+                we want to suppress this plugin, which makes no sense unless we want to
+                allow people to use qudt as a maven dependency
+                -->
                 <executions>
                     <execution>
                         <phase>none</phase>
@@ -413,6 +484,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>3.1.2</version>
+                <!--
+                we want to suppress this plugin, which makes no sense unless we want to
+                allow people to use qudt as a maven dependency AND we want to publish it
+                to a maven registry
+                -->
                 <configuration>
                     <!-- we never want to deploy, our github actions take care of that -->
                     <skip>true</skip>
@@ -421,7 +497,12 @@
         </plugins>
     </build>
     <profiles>
+        <!--
+            profiles are activated using the -P[profileName] command line arg to the mvn command
+            if activated, the structure contained in the <profile> element is merged with the pom structure.
+        -->
         <profile>
+            <!-- profile that causes the zip file to be created -->
             <id>zip</id>
             <build>
                 <plugins>
