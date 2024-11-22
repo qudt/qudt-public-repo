@@ -7,13 +7,25 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
-## [2.1.45] - 2024-11-15
+### Added
+
+- Add the qudt:altSymbol relation
+- Add "mph" and "kph" as `qudt:altSymbol` 
+
 ### Changed
+
+- Enforce at most a single qudt:symbol for all instances.
+- Delete spurious qudt:symbol values in a number of quantity kinds
+
+## [2.1.45] - 2024-11-15
+
+### Changed
+
 - Changed the name of the `collections` folder to `validation`.
 - Remove all version suffixes from all source files, i.e., `-v2.1.ttl` becomes `.ttl`
-- Add the qudt:altSymbol relation and enforce at most a single qudt:symbol for all instances.
 
 ### Fixed
+
 - Added `skos:broader` relations to a number of quantity kinds that had none. Note that it is ok for a
   quantity kind to have no broader quantity kind, but these were missing.
 - Changed the erroneously used 'qudt:hasDimensionVector' property in `vocab/types/VOCAB_QUDT_DATATYPES-v2.1.ttl`
@@ -24,7 +36,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Add `unit:NUM-PER-MilliL`
 
 ## 2.1.44 - 2024-10-27
+
 ### Fixed
+
 - A new quantity kind, ElevationRelativeToNAP, has been added to support the Amsterdam Ordnance
   System (thanks @RiX012).
 - **Big housecleaning month!** Many of the unused graphs that have been lying around the repository
