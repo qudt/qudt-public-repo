@@ -120,14 +120,6 @@ jobs:
         env:
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Make github release
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ inputs.release_version }}
-          body_path: src/build/release/release-body.md
-          files: target/checkout/target/qudt-public-repo-*.zip
-
       # Read version changelog
       - id: get-changelog
         name: Get version changelog
@@ -136,6 +128,20 @@ jobs:
           path-to-changelog: CHANGELOG.md
           version: ${{ inputs.release_version }}
           operation: read
+
+      # Make github release
+      - name: Make Release Body
+        run: |
+          cat src/build/release/release-body-header.md > target/release-body.md
+          echo "# Changes" >> target/release-body.md 
+          echo "${{ steps.get-changelog.outputs.changelog }}" >> target/release-body.md
+          cat src/build/release/release-body-footer.md > target/release-body.md
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.release_version }}
+          body_path: target/release-body.md
+          files: target/checkout/target/qudt-public-repo-*.zip
 
       # create the pull request
       - name: Create Pull Request
@@ -161,6 +167,10 @@ jobs:
             # Next Steps
             
             Please rebase this PR on top of `main` after verifying the release is ok. 
+
+      # delete the snapshot release (so we do not accumulate snapshots of all versions over time)
+      - name: Delete Snapshot Release
+      - run: gh release delete snapshot --cleanup-tag --yes
 
       # print the summary
       - name: Print summary
