@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.qudt</groupId>
     <artifactId>qudt-public-repo</artifactId>
-    <version>2.1.45-SNAPSHOT</version>
+    <version>2.1.46-SNAPSHOT</version>
     <packaging>pom</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <qudtPrevReleaseYear>TODO-set-property-qudtPrevReleaseYear</qudtPrevReleaseYear>
+        <qudtPrevReleaseMonth>TODO-set-property-qudtPrevReleaseMonth</qudtPrevReleaseMonth>
     </properties>
+    <scm>
+        <connection>scm:git:https://github.com/qudt/qudt-public-repo.git</connection>
+        <developerConnection>scm:git:https://github.com/qudt/qudt-public-repo.git</developerConnection>
+        <url>https://github.com/qudt/qudt-public-repo/tree/master</url>
+      <tag>HEAD</tag>
+  </scm>
     <build>
         <!--
             project is built using
@@ -50,7 +56,7 @@
                   test-compile
                   process-test-classes
                   test                     shacl-validate
-                  prepare-package          format-dist
+                  prepare-package          update-vaem-references, format-dist
                   package
                   pre-integration-test
                   integration-test
@@ -65,6 +71,12 @@
                 <version>2.1.1</version>
                 <executions>
                     <execution>
+                        <!-- we use placeholders in our files that are replaced with
+                        appropriate values during the build.
+
+                        This execution generates a number of new maven properties that
+                        are later used as the replacement values, e.g. ${project.version.majorminor}.
+                        -->
                         <id>defineAdditionalProperties</id>
                         <phase>validate</phase>
                         <goals>
@@ -73,17 +85,27 @@
                         <configuration>
                             <source>import java.time.OffsetDateTime
 
+                            import java.time.format.DateTimeFormatter
+                            import java.time.temporal.ChronoField
                             def majorMinorVersion = "${project.version}".replaceAll('^(\\w+.\\w+).*\$', '\$1')
                             project.properties.setProperty('project.version.majorminor', majorMinorVersion)
                             project.properties.setProperty('qudt.versioned.iri.prefix', "http://qudt.org/${majorMinorVersion}/")
-                            def now = OffsetDateTime.now()
+                            def now = OffsetDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0)
                             project.properties.setProperty('qudt.build.date', "${now}")
+                            project.properties.setProperty('qudt.previous.version.iri.prefix', "https://qudt.org/doc/${qudtPrevReleaseYear}/${qudtPrevReleaseMonth}/")
+                            def currentMonth = now.format(DateTimeFormatter.ofPattern("MM"))
+                            def currentYear = now.format(DateTimeFormatter.ofPattern("YYYY"))
+                            project.properties.setProperty('qudt.current.month', currentMonth)
+                            project.properties.setProperty('qudt.current.year', currentYear)
+                            project.properties.setProperty('qudt.latest.version.iri.prefix', "https://qudt.org/doc/${currentYear}/${currentMonth}/")
                             </source>
                         </configuration>
                     </execution>
                 </executions>
                 <dependencies>
                     <dependency>
+                        <!-- we replace this dependency of the groovy plugin because the version
+                        it uses has security issues -->
                         <groupId>com.google.guava</groupId>
                         <artifactId>guava</artifactId>
                         <version>33.1.0-jre</version>
@@ -96,6 +118,7 @@
                 <version>1.0.1</version>
                 <executions>
                     <execution>
+                        <!-- infers qudt:applicableUnits and writes them to target/inferred/applicableUnits.ttl -->
                         <id>shacl-infer</id>
                         <phase>compile</phase>
                         <goals>
@@ -119,6 +142,11 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <!--
+                        SHACL-validates the union of all ttl files in dist/vocab and the No-OWL schema
+                        against the union of QA-Tests and No-OWL schema
+                        writes the validation report target/validation/validationReport.ttl
+                        -->
                         <id>shacl-validate</id>
                         <phase>test</phase>
                         <goals>
@@ -130,9 +158,11 @@
                                     <!--skip>true</skip-->
                                     <shapes>
                                         <include>target/dist/validation/COLLECTION_QUDT_QA_TESTS_ALL.ttl</include>
+                                        <include>target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl</include>
                                     </shapes>
                                     <data>
                                         <include>
+                                            target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
                                             target/dist/vocab/**/*.ttl
                                         </include>
                                     </data>
@@ -146,9 +176,14 @@
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>rdfio-maven-plugin</artifactId>
-                <version>1.1.2</version>
+                <version>1.2.1</version>
                 <executions>
                     <execution>
+                        <!--
+                        deletes any qudt:applicableUnits triples from the quantitykinds **source** file.
+                        Note: this operation leaves the file unformatted (jena TTL Pretty output - nice, but
+                        not our format) Therefore, we need to format this file later using spotless.
+                        -->
                         <id>delete-applicable-units</id>
                         <phase>initialize</phase>
                         <goals>
@@ -173,6 +208,9 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <!--
+                        adds the qudt:applicableUnits triples we generated with SHACL to the quantitykinds target file.
+                        -->
                         <id>merge-applicable-units</id>
                         <phase>compile</phase>
                         <goals>
@@ -192,6 +230,50 @@
                             </products>
                         </configuration>
                     </execution>
+                    <execution>
+                        <!-- updates vaem:(latest|previous)PublishedVersion links in all target TTL files that have them
+                        Note: this operation leaves the files unformatted (jena TTL Pretty output - nice, but
+                        not our format) Therefore, we need to format these files later using spotless.
+                        -->
+
+                        <id>update-vaem-references</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <eachFile>
+                                    <replaceInputFiles>true</replaceInputFiles>
+                                    <input>
+                                        <include>
+                                            target/dist/vocab/**/*.ttl
+                                        </include>
+                                        <exclude>
+                                            target/dist/**/*QUANTITIES*.ttl
+                                        </exclude>
+                                    </input>
+                                    <filters>
+                                        <sparqlUpdate>
+                                            DELETE { ?graph
+                                                vaem:latestPublishedVersion ?oldLatest ;
+                                                vaem:previousPublishedVersion ?oldPrevious}
+                                            INSERT { ?graph
+                                                vaem:latestPublishedVersion ?newLatest ;
+                                                vaem:previousPublishedVersion ?newPrevious ;
+                                            }
+                                            WHERE { ?graph
+                                                vaem:latestPublishedVersion ?oldLatest ;
+                                                vaem:previousPublishedVersion ?oldPrevious ;
+                                                BIND(STRDT(REPLACE(STR(?oldLatest), "https://qudt.org/doc/[^/]+/[^/]+/", "${qudt.latest.version.iri.prefix}"),xsd:anyURI) as ?newLatest)
+                                                BIND(STRDT(REPLACE(STR(?oldPrevious), "https://qudt.org/doc/[^/]+/[^/]+/", "${qudt.previous.version.iri.prefix}"),xsd:anyURI) as ?newPrevious)
+                                            }
+                                        </sparqlUpdate>
+                                    </filters>
+                                </eachFile>
+                            </products>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -199,66 +281,36 @@
                 <artifactId>spotless-maven-plugin</artifactId>
                 <version>2.44.0.BETA3</version>
                 <configuration>
-                    <rdf>
-                        <!-- you can define as many formats as you want, each is independent -->
-                        <!-- define the files to apply to -->
-                        <includes>
-                            <include>src/main/rdf/**/*.ttl</include>
-                            <include>src/build/inference/**/*.ttl</include>
-                        </includes>
-                        <format>
-                            <failOnWarning>false</failOnWarning>
-                            <verify>true</verify>
-                            <turtleFormatterVersion>1.2.14</turtleFormatterVersion>
-                            <turtle>
-                                <predicateOrder>rdf:type,owl:imports</predicateOrder>
-                                <firstPredicateInNewLine>true</firstPredicateInNewLine>
-                            </turtle>
-                        </format>
-                    </rdf>
-                    <rdf>
-                        <!-- you can define as many formats as you want, each is independent -->
-                        <!-- define the files to apply to -->
-                        <includes>
-                            <include>target/**/*.ttl</include>
-                        </includes>
-                        <format>
-                            <failOnWarning>false</failOnWarning>
-                            <verify>true</verify>
-                            <turtleFormatterVersion>1.2.14</turtleFormatterVersion>
-                            <turtle>
-                                <predicateOrder>rdf:type,owl:imports</predicateOrder>
-                                <firstPredicateInNewLine>true</firstPredicateInNewLine>
-                            </turtle>
-                        </format>
-                        <replaceRegex>
-                            <name>full version replacement</name>
-                            <searchRegex>\$\$QUDT_VERSION\$\$</searchRegex>
-                            <replacement>${project.version}</replacement>
-                        </replaceRegex>
-                        <replaceRegex>
-                            <name>major.minor version replacement</name>
-                            <searchRegex>\$\$QUDT_MAJOR_MINOR_VERSION\$\$</searchRegex>
-                            <replacement>${project.version.majorminor}</replacement>
-                        </replaceRegex>
-                        <replace>
-                            <name>publish date replacement</name>
-                            <search>1234-12-12T12:34:56Z</search>
-                            <replacement>${qudt.build.date}</replacement>
-                        </replace>
-                        <replaceRegex>
-                            <name>versioned IRI replacement</name>
-                            <searchRegex>http://qudt.org/\d+.\d+/</searchRegex>
-                            <replacement>${qudt.versioned.iri.prefix}</replacement>
-                        </replaceRegex>
-                    </rdf>
+                        <!-- default configuration - this is the one that is used if the plugin is
+                        invoked directly using `mvn spotless:apply` or `mvn spotless:check`
+                        -->
+                        <rdf>
+                            <includes>
+                                <include>src/main/rdf/**/*.ttl</include>
+                                <include>src/build/inference/**/*.ttl</include>
+                                <include>target/**/*.ttl</include>
+                            </includes>
+                            <format>
+                                <failOnWarning>false</failOnWarning>
+                                <verify>true</verify>
+                                <turtleFormatterVersion>1.2.14</turtleFormatterVersion>
+                                <turtle>
+                                    <predicateOrder>rdf:type,owl:imports</predicateOrder>
+                                    <firstPredicateInNewLine>true</firstPredicateInNewLine>
+                                </turtle>
+                            </format>
+                        </rdf>
+
                     <formats>
+                        <!--
+                        does our placeholder replacements using the maven properties
+                        that were set using the groovy plugin
+                        -->
                         <format>
                             <includes>
                                 <include>target/dist/**/*.*</include>
                             </includes>
                             <excludes>
-                                <include>target/**/*.ttl</include>
                                 <include>target/**/*.xlsx</include>
                                 <include>target/**/*.xls</include>
                                 <include>target/**/*.gif</include>
@@ -290,34 +342,77 @@
                         </format>
                     </formats>
 
-                    <!-- define a language-specific format -->
                 </configuration>
                 <executions>
                     <execution>
+                        <!--
+                            checks formats in all files we care about before anything else
+                            happens in the build.
+
+                            Note: The more comfortable alternative would be to
+                            start with formatting everything, but we cannot do it: it would allow
+                            for a commit to contain non-formatted files. Those files would be formatted
+                            during the server-side build but not updated in the repo. A subsequent
+                            merge/rebase to our main branch would lead to having unformatted files in
+                            the main branch.
+                        -->
                         <id>check-source-format</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
+                        <configuration>
+                            <upToDateChecking>
+                                <!-- we want to enforce the check. our build process may confuse the spotless index -->
+                                <enabled>false</enabled>
+                            </upToDateChecking>
+                        </configuration>
                     </execution>
                     <execution>
-                        <id>format-sources</id>
-                        <phase>initialize</phase>
+                        <!-- formats source files that were generated during the build up to the compile phase -->
+                        <id>reformat-sources</id>
+                        <phase>compile</phase>
                         <goals>
                             <goal>apply</goal>
                         </goals>
+                        <configuration>
+                            <upToDateChecking>
+                                <enabled>false</enabled>
+                            </upToDateChecking>
+                            <rdf>
+                                <!-- redefine includes so we only format the sources that are allowed to change -->
+                                <includes>
+                                    <include>src/main/rdf/vocab/quantitykinds/*.ttl</include>
+                                </includes>
+                            </rdf>
+                        </configuration>
+
                     </execution>
                     <execution>
+                        <!-- formats everything in the target/dist folder so we have a clean set of distribution files-->
                         <id>format-dist</id>
                         <phase>prepare-package</phase>
                         <goals>
                             <goal>apply</goal>
                         </goals>
+                        <configuration>
+                            <upToDateChecking>
+                                <enabled>false</enabled>
+                            </upToDateChecking>
+                            <rdf>
+                                <!-- redefine rdf includes to only include target/dist -->
+                                <includes>
+                                    <include>target/**/*.ttl</include>
+                                </includes>
+                            </rdf>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <!-- copies all required files from src or root dir to the target folder -->
                 <executions>
                     <execution>
                         <id>copy-rdf</id>
@@ -373,17 +468,39 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
                 <version>3.1.2</version>
+                <!--
+                we want to suppress this plugin, which makes no sense unless we want to
+                allow people to use qudt as a maven dependency
+                -->
                 <executions>
                     <execution>
                         <phase>none</phase>
                     </execution>
                 </executions>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.2</version>
+                <!--
+                we want to suppress this plugin, which makes no sense unless we want to
+                allow people to use qudt as a maven dependency AND we want to publish it
+                to a maven registry
+                -->
+                <configuration>
+                    <!-- we never want to deploy, our github actions take care of that -->
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <profiles>
+        <!--
+            profiles are activated using the -P[profileName] command line arg to the mvn command
+            if activated, the structure contained in the <profile> element is merged with the pom structure.
+        -->
         <profile>
+            <!-- profile that causes the zip file to be created -->
             <id>zip</id>
             <build>
                 <plugins>

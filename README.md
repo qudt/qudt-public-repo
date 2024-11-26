@@ -5,7 +5,7 @@ QUDT - Quantities, Units, Dimensions and dataTypes - public repository
 There are three ways to bring the QUDT ontology into your environment.
 1. Download the latest GitHub Release [here](https://github.com/qudt/qudt-public-repo/releases).
 2. Use the resolved graph and instance URIs available [here](https://www.qudt.org/2.1/catalog/qudt-catalog.html).
-3. Use GitHub pull to get the sources and build them using the instructions [here](https://github.com/qudt/qudt-public-repo#building).
+3. Use GitHub fork to get the sources and build them using the instructions [here](https://github.com/qudt/qudt-public-repo/wiki/Installing-QUDT-for-Contributors).
 
 Overview
 --------
@@ -29,7 +29,14 @@ Our current plan is to deliver this material in even more powerful ways. The web
 
 We encourage you to get involved. If you have particular needs or see errors, please create an Issue and/or make changes or additions yourself (please see our <a href="https://github.com/qudt/qudt-public-repo/wiki">   Wiki</a> for more detailed instructions, and specifically <a href="https://github.com/qudt/qudt-public-repo/wiki/Unit-Vocabulary-Submission-Guidelines"> the Units Submission Guide</a> if you would like to suggest additional units.) We are a volunteer-staffed effort, but we do have infrastructural expenses. Please consider making a [DONATION](https://github.com/sponsors/qudt).
 
-Installation / Configuration instructions
+Installation instructions
+-------------------------
+
+[Installing QUDT for Consumers](https://github.com/qudt/qudt-public-repo/wiki/Installing-QUDT-for-Consumers)
+
+[Installing QUDT for Contributors](https://github.com/qudt/qudt-public-repo/wiki/Installing-QUDT-for-Contributors)
+
+Configuration instructions
 -----------------------------------------
 
 The QUDT ontology is provided in two forms: OWL and SHACL. By default, the vocabularies are configured to use the SHACL schema. To configure it to use the OWL schema instead, just make the following single change in the file schema/SDHEMA-FACADE_QUDT.ttl. You can see in the imports closure diagram above how all the vocabularies import this single "facade" file to make it easy to switch the ontology.
@@ -74,7 +81,7 @@ Currently, the tests in the usertest graph check for references to deprecated in
 
 Protege Users
 -----------------------------
-The QUDT ontologies (Release $$QUDT_VERSION$$) have been tested to load without error in Protege 5.6.4.
+The QUDT ontologies have been tested to load without error in Protege 5.6.4.
 
 To load QUDT into Protege, choose "Open from URI" from the file menu, and enter http://qudt.org/2.1/vocab/unit
 
@@ -84,47 +91,6 @@ Ontology libraries
 -----------------------------
 
 Please note that various libraries exhibit different behaviors when importing the QUDT ontology, see this [discussion](https://github.com/qudt/qudt-public-repo/issues/842#issuecomment-1879114604).
-
-Building
---------
-
-The project uses [maven](https://maven.apache.org/), interpreting the file `pom.xml` to generate the QUDT release files in
-`target/dist` and the release zip in `target/qudt-public-repo-[VERSION].zip`
-
-To start the build use 
-```bash
-mvn clean install
-```
-(leave 'clean' out if you are not concerned about files from a previous build)
-
-To build the release zip file, run
-```bash
-mvn -Pzip install
-```
-(This activates the maven profile called 'zip', which you find in the pom.xml near the end).
-
-If you make changes to the project before building, you can expect these problems:
-
-#### Formatting and formatting problems
-
-If the spotless plugin complains about file formatting, run
-```
-mvn spotless:apply 
-mvn install 
-```
-
-#### SHACL validation and validation failures
-
-If the shacl-maven-plugin complains about a SHACL validation failure, have a look 
-at `target/validation/validationReport.ttl` to see why validation failed and fix the 
-respective problems in the TTL files, then run `mvn clean install`.
-
-To run the shacl validation (and any build steps required to do so), run
-
-```bash
-mvn test
-```
-####
 
 Status
 ------

@@ -23,14 +23,46 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+
+      # configure git
+    - name: setup git config
+      run: |
+        git config user.name ${{ github.actor }}
+        git config user.email "<>"
+
     - name: Build with Maven
       run: mvn -Pzip install
-      # Make github release
+
+    - name: change tag 'snapshot' to current commit
+      if: ${{ github.event.pull_request.base.ref == 'main' && github.event.action == 'closed' && github.event.pull_request.merged == true}} # only make snapshot release if it is a push to main
+      run: |
+        git tag -f snapshot
+        git push -f origin --tags
+
+    # Read version changelog
+    - id: get-changelog
+      name: Get version changelog
+      if: ${{ github.event.pull_request.base.ref == 'main' && github.event.action == 'closed' && github.event.pull_request.merged == true}} # only make snapshot release if it is a push to main
+      uses: superfaceai/release-changelog-action@v1
+      with:
+        path-to-changelog: CHANGELOG.md
+        version: ${{ inputs.release_version }}
+        operation: read
+
+    - name: Make Release Body
+      if: ${{ github.event.pull_request.base.ref == 'main' && github.event.action == 'closed' && github.event.pull_request.merged == true}} # only make snapshot release if it is a push to main
+      run: |
+        cat src/build/snapshot-release/release-body-header.md > target/release-body.md
+        echo "# Changes" >> target/release-body.md 
+        echo "${{ steps.get-changelog.outputs.changelog }}" >> target/release-body.md
+        cat src/build/snapshot-release/release-body-footer.md > target/release-body.md        
+
+    # Make github release
     - name: Release
       uses: softprops/action-gh-release@v2
       if: ${{ github.event.pull_request.base.ref == 'main' && github.event.action == 'closed' && github.event.pull_request.merged == true}} # only make snapshot release if it is a push to main
       with:
         name: Latest snapshot release
         tag_name: snapshot
-        body_path: src/build/release/release-body.md
+        body_path: target/release-body.md
         files: target/qudt-public-repo-*.zip
