@@ -16,6 +16,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Enforce at most a single qudt:symbol for all instances.
 - Delete spurious qudt:symbol values in a number of quantity kinds
+- Corrected the conversion offset for MilliDEG_C
 
 ## [2.1.45] - 2024-11-15
 
