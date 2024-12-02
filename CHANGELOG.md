@@ -22,6 +22,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ## Fixed
 
 - Renamed incorrectly named Unit `unit:CI-PER-KiloGM` to `unit:Ci-PER-KiloGM`
+- Renamed incorrectly named Unit `unit:Flight` to `unit:FLIGHT`
 
 ## [2.1.45] - 2024-11-15
 
