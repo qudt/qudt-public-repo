@@ -12,8 +12,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Add the qudt:altSymbol relation
 - Add "mph" and "kph" as `qudt:altSymbol`
 - Add quantitykinds `qk:CompoundPlaneAngle`, `qk:CountRate` and `qk:RotationalFrequency`
-- Add an altLabel and `qk:RotationalFrequency` to `unit:Hz`
-- Add units `unit:REV-PER-MIN` and `unit:CYC-PER-SEC`
+- Add an altLabel and `qk:RotationalFrequency` to `unit:Hz`, `unit:REV-PER-MIN`, `unit:REV-PER-HR`, `unit:REV-PER-SEC`
+- Add units `unit:CYC-PER-SEC`
 - Add `qk:VaporPermeability` to `unit:KiloGM-PER-PA-SEC-M`
 
 
