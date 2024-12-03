@@ -11,18 +11,22 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Add the qudt:altSymbol relation
 - Add "mph" and "kph" as `qudt:altSymbol`
-- Add quantitykinds `qk:CompoundPlaneAngle`, `qk:CountRate`
+- Add quantitykinds `qk:CompoundPlaneAngle`, `qk:CountRate` and `qk:RotationalFrequency`
+- Add an altLabel and `qk:RotationalFrequency` to `unit:Hz`
+- Add units `unit:REV-PER-MIN` and `unit:CYC-PER-SEC`
+- Add `qk:VaporPermeability` to `unit:KiloGM-PER-PA-SEC-M`
+
 
 ### Changed
 
 - Enforce at most a single qudt:symbol for all instances.
 - Delete spurious qudt:symbol values in a number of quantity kinds
-- Corrected the conversion offset for MilliDEG_C
+- Correct the conversion offset for MilliDEG_C
 
 ## Fixed
 
-- Renamed incorrectly named Unit `unit:Ci` to `unit:CI`
-- Renamed incorrectly named Unit `unit:Flight` to `unit:FLIGHT`
+- Rename incorrectly named Unit `unit:Ci` to `unit:CI`
+- Rename incorrectly named Unit `unit:Flight` to `unit:FLIGHT`
 
 ## [2.1.45] - 2024-11-15
 
