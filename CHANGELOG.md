@@ -24,7 +24,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Enforce at most a single qudt:symbol for all instances.
 - Delete spurious qudt:symbol values in a number of quantity kinds
 - Correct the conversion offset for MilliDEG_C
-- Rename `qk:VaporPermeability` to `qk:VaporPermeance` and change all unit associations accordingly.  
+- Rename `qk:VaporPermeability` to `qk:VaporPermeance` and change all unit associations accordingly.
+- Make `qk:IonConcentration` and `qk:IonDensity` skos:broader `qk:Concentration`, thereby fixing their 
+  applicable units to Molarity (`unit:MOL-PER-L` and commensurate units).
 
 ## Fixed
 
