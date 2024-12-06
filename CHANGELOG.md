@@ -21,7 +21,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Add quantitykind `qk:VaporPermeance`
 - Add quantitykind `qk:AmountOfSubstanceIonConcentration` as a narrower kind of `qk:Concentration`.
 
-
 ### Changed
 
 - Enforce at most a single qudt:symbol for all instances.
