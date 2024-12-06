@@ -10,7 +10,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - Add the qudt:altSymbol relation
-- Add "mph" and "kph" as `qudt:altSymbol` 
+- Add "mph" and "kph" as `qudt:altSymbol`
 - Added Coefficient of Performance to quantity kinds
 
 ### Changed
@@ -57,3 +57,4 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 [Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v2.1.45...HEAD
 [2.1.45]: https://github.com/qudt/qudt-public-repo/compare/v2.1.44...v2.1.45
+
