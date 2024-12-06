@@ -134,7 +134,9 @@ jobs:
         run: |
           cat src/build/release/release-body-header.md > target/release-body.md
           echo "# Changes" >> target/release-body.md 
-          echo "${{ steps.get-changelog.outputs.changelog }}" >> target/release-body.md
+          cat <<'EOF' >> target/release-body.md 
+          ${{ steps.get-changelog.outputs.changelog }}
+          EOF
           cat src/build/release/release-body-footer.md >> target/release-body.md
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -172,7 +174,7 @@ jobs:
       - name: Delete Snapshot Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release delete snapshot --cleanup-tag --yes
+        run: gh release delete snapshot --cleanup-tag --yes || echo "Error deleting snapshot release - continuing anyway"
 
       # print the summary
       - name: Print summary

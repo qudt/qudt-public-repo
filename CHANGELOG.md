@@ -33,7 +33,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Make `qk:RotationalFrequency` exactMatch of `qk:RotationalVelocity`, remove broader qk
 - Make `qk:AngularFrequency` exactMatch of `qk:AngularVelocity`, remove broader qk
 
-## Fixed
+### Fixed
 
 - Rename incorrectly named Unit `unit:Ci` to `unit:CI`
 - Rename incorrectly named Unit `unit:Flight` to `unit:FLIGHT`
