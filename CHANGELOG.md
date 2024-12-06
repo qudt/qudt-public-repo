@@ -37,6 +37,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Rename incorrectly named Unit `unit:Ci` to `unit:CI`
 - Rename incorrectly named Unit `unit:Flight` to `unit:FLIGHT`
+- Rename incorrectly named quantitykind `qk:CurrentOfTheAmountOfSubtance` to `qk:CurrentOfTheAmountOfSubstance`
 
 ## [2.1.45] - 2024-11-15
 
