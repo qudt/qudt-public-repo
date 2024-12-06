@@ -73,12 +73,12 @@ jobs:
 
     - name: Make Release Body
       if: ${{ env.MAKE_SNAPSHOT_RELEASE  == 'true' }}
+      env:
+        CHANGELOG_CONTENT=${{ steps.get-changelog.outputs.changelog }}
       run: |
         cat src/build/snapshot-release/release-body-header.md > target/release-body.md
         echo "# Changes" >> target/release-body.md
-        cat >> target/release-body.md <<- EOF
-        ${{ steps.get-changelog.outputs.changelog }}
-        EOF
+        echo "${CHANGELOG_CONTENT}" >> target/release-body.md 
         cat src/build/snapshot-release/release-body-footer.md >> target/release-body.md        
 
     # Make github release
