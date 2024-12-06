@@ -27,8 +27,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Delete spurious qudt:symbol values in a number of quantity kinds
 - Correct the conversion offset for MilliDEG_C
 - Rename `qk:VaporPermeability` to `qk:VaporPermeance` and change all unit associations accordingly.
-- Make `qk:IonConcentration` and `qk:IonDensity` skos:broader `qk:Concentration`, adapting their dimension
-  vectors and thereby fixing their applicable units to Molarity (`unit:MOL-PER-L` and commensurate units).
 - Unify `PER-X` symbols to the 15:1 majority pattern, `"/x"` where `"1/x"` is used
 - Unify `NUM-PER-X` symbols to always represent `NUM` as `#` (as has already been used in `unit:NUM`) 
 - Remove `qk:NumberDensity` from `unit:PER-M3`
