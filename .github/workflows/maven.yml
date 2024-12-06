@@ -35,7 +35,11 @@ jobs:
 
     - name: Check if a snapshot release should be made
       id: snapshot_release
-      run: echo "::set-output name=should_make::${{ inputs.force_snapshot_release || (github.event.pull_request.base.ref == 'main' && github.event.action == 'closed' && github.event.pull_request.merged == true) }}"
+      run: echo "MAKE_SNAPSHOT_RELEASE=${{ inputs.force_snapshot_release \
+        || (github.event.pull_request.base.ref == 'main' \
+        && github.event.action == 'closed' \
+        && github.event.pull_request.merged == true) }}" \
+        >> GITHUB_ENV
 
       # configure git
     - name: setup git config
@@ -47,7 +51,7 @@ jobs:
       run: mvn -Pzip install
 
     - name: change tag 'snapshot' to current commit
-      if: ${{ steps.snapshot_release.outputs.should_make == 'true' }}
+      if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'true' }}
       run: |
         git tag -f snapshot
         git push -f origin --tags
@@ -55,7 +59,7 @@ jobs:
     # Read version changelog
     - id: get-changelog
       name: Get version changelog
-      if: ${{ steps.snapshot_release.outputs.should_make == 'true' }}
+      if: ${{ env.MAKE_SNAPSHOT_RELEASE  == 'true' }}
       uses: superfaceai/release-changelog-action@v1
       with:
         path-to-changelog: CHANGELOG.md
@@ -63,7 +67,7 @@ jobs:
         operation: read
 
     - name: Make Release Body
-      if: ${{ steps.snapshot_release.outputs.should_make == 'true' }}
+      if: ${{ env.MAKE_SNAPSHOT_RELEASE  == 'true' }}
       run: |
         cat src/build/snapshot-release/release-body-header.md > target/release-body.md
         echo "# Changes" >> target/release-body.md 
@@ -73,7 +77,7 @@ jobs:
     # Make github release
     - name: Release
       uses: softprops/action-gh-release@v2
-      if: ${{ steps.snapshot_release.outputs.should_make == 'true' }}
+      if: ${{ env.MAKE_SNAPSHOT_RELEASE  == 'true' }}
       with:
         name: Latest snapshot release
         tag_name: snapshot
