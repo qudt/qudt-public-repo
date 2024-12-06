@@ -42,31 +42,34 @@ jobs:
         git config user.name ${{ github.actor }}
         git config user.email "<>"
 
+      # Read version changelog before anything else - if there is a formatting error
+      # in the changelog (which happens), we fail fast
+      # Do this even if we will not make the snapshot release, so the changelog is checked as part of a normal
+      # ci run.
+    - id: get-changelog
+      name: Get version changelog
+      uses: superfaceai/release-changelog-action@v1
+      with:
+        path-to-changelog: CHANGELOG.md
+        version: ${{ inputs.release_version }}
+        operation: read
+
     - name: Build with Maven
       run: mvn -Pzip install
 
-    # delete the snapshot release (the release action does not update the body, so we have to delete the whole thing)
+    # delete the snapshot release (the release action does not update the
+    # body, so we have to delete the whole thing)
     - name: Delete Snapshot Release
       if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'true' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: gh release delete snapshot --cleanup-tag --yes
+      run: gh release delete snapshot --cleanup-tag --yes || echo "Error deleting snapshot release - continuing anyway"
 
     - name: change tag 'snapshot' to current commit
       if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'true' }}
       run: |
         git tag -f snapshot
         git push -f origin --tags
-
-    # Read version changelog
-    - id: get-changelog
-      name: Get version changelog
-      if: ${{ env.MAKE_SNAPSHOT_RELEASE  == 'true' }}
-      uses: superfaceai/release-changelog-action@v1
-      with:
-        path-to-changelog: CHANGELOG.md
-        version: ${{ inputs.release_version }}
-        operation: read
 
     - name: Make Release Body
       if: ${{ env.MAKE_SNAPSHOT_RELEASE  == 'true' }}
