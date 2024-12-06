@@ -11,13 +11,33 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Add the qudt:altSymbol relation
 - Add "mph" and "kph" as `qudt:altSymbol`
-- Added Coefficient of Performance to quantity kinds
+- Add quantitykind `qk:CoefficientOfPerformance`
+- Add "mph" and "kph" as `qudt:altSymbol`
+- Add quantitykinds `qk:CompoundPlaneAngle`, `qk:CountRate` and `qk:RotationalFrequency`
+- Add quantitykind `qk:CountRate` to `unit:NUM-PER-SEC`, `unit:NUM-PER-HR`, `unit:NUM-PER-YR`
+- Add quantitykind  `qk:RotationalFrequency` to `unit:Hz`, `unit:REV-PER-MIN`, `unit:REV-PER-HR`, `unit:REV-PER-SEC`
+- Add units `unit:CYC-PER-SEC`, `unit:KiloLM`, `unit:CD-PER-KiloLM`
+- Add `qk:VaporPermeability` to `unit:KiloGM-PER-PA-SEC-M`
+- Add quantitykind `qk:VaporPermeance`
+- Add quantitykind `qk:AmountOfSubstanceIonConcentration` as a narrower kind of `qk:Concentration`.
 
 ### Changed
 
 - Enforce at most a single qudt:symbol for all instances.
 - Delete spurious qudt:symbol values in a number of quantity kinds
-- Corrected the conversion offset for MilliDEG_C
+- Correct the conversion offset for MilliDEG_C
+- Rename `qk:VaporPermeability` to `qk:VaporPermeance` and change all unit associations accordingly.
+- Unify `PER-X` symbols to the 15:1 majority pattern, `"/x"` where `"1/x"` is used
+- Unify `NUM-PER-X` symbols to always represent `NUM` as `#` (as has already been used in `unit:NUM`)
+- Remove `qk:NumberDensity` from `unit:PER-M3`
+- Make `qk:RotationalFrequency` exactMatch of `qk:RotationalVelocity`, remove broader qk
+- Make `qk:AngularFrequency` exactMatch of `qk:AngularVelocity`, remove broader qk
+
+## Fixed
+
+- Rename incorrectly named Unit `unit:Ci` to `unit:CI`
+- Rename incorrectly named Unit `unit:Flight` to `unit:FLIGHT`
+- Rename incorrectly named quantitykind `qk:CurrentOfTheAmountOfSubtance` to `qk:CurrentOfTheAmountOfSubstance`
 
 ## [2.1.45] - 2024-11-15
 
