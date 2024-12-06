@@ -31,8 +31,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Unify `PER-X` symbols to the 15:1 majority pattern, `"/x"` where `"1/x"` is used
 - Unify `NUM-PER-X` symbols to always represent `NUM` as `#` (as has already been used in `unit:NUM`) 
 - Remove `qk:NumberDensity` from `unit:PER-M3`
-- Make `qk:RotationalFrequency` exactMatch of `qk:RotationalVelocity`
-- Make `qk:AngularFrequency` exactMatch of `qk:AngularVelocity`
+- Make `qk:RotationalFrequency` exactMatch of `qk:RotationalVelocity`, remove broader qk 
+- Make `qk:AngularFrequency` exactMatch of `qk:AngularVelocity`, remove broader qk
 
 ## Fixed
 
