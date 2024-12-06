@@ -36,7 +36,13 @@ jobs:
 
       # Check formatting and exit early (with success) if format is ok
       - name: Check formatting
-        run: mvn spotless:check && ( echo "Source was already formatted, nothing was touched." >> $GITHUB_STEP_SUMMARY ; exit 0 )
+        run: |
+          if mvn spotless:check; then
+            echo "Source was already formatted, nothing was touched." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          else
+            echo "Sources need formatting, we'll do that now"
+          fi
 
       # Apply formatting (changelog was touched)
       - name: Apply formatting
