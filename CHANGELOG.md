@@ -19,6 +19,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Add units `unit:CYC-PER-SEC`, `unit:KiloLM`, `unit:CD-PER-KiloLM`
 - Add `qk:VaporPermeability` to `unit:KiloGM-PER-PA-SEC-M`
 - Add quantitykind `qk:VaporPermeance`
+- Add quantitykind `qk:AmountOfSubstanceIonConcentration` as a narrower kind of `qk:Concentration`.
 
 
 ### Changed
