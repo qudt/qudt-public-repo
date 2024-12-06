@@ -10,7 +10,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - Add the qudt:altSymbol relation
-- Add "mph" and "kph" as `qudt:altSymbol` 
+- Add "mph" and "kph" as `qudt:altSymbol`
 - Add quantitykind `qk:CoefficientOfPerformance`
 - Add "mph" and "kph" as `qudt:altSymbol`
 - Add quantitykinds `qk:CompoundPlaneAngle`, `qk:CountRate` and `qk:RotationalFrequency`
@@ -28,9 +28,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Correct the conversion offset for MilliDEG_C
 - Rename `qk:VaporPermeability` to `qk:VaporPermeance` and change all unit associations accordingly.
 - Unify `PER-X` symbols to the 15:1 majority pattern, `"/x"` where `"1/x"` is used
-- Unify `NUM-PER-X` symbols to always represent `NUM` as `#` (as has already been used in `unit:NUM`) 
+- Unify `NUM-PER-X` symbols to always represent `NUM` as `#` (as has already been used in `unit:NUM`)
 - Remove `qk:NumberDensity` from `unit:PER-M3`
-- Make `qk:RotationalFrequency` exactMatch of `qk:RotationalVelocity`, remove broader qk 
+- Make `qk:RotationalFrequency` exactMatch of `qk:RotationalVelocity`, remove broader qk
 - Make `qk:AngularFrequency` exactMatch of `qk:AngularVelocity`, remove broader qk
 
 ## Fixed
@@ -77,3 +77,4 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 [Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v2.1.45...HEAD
 [2.1.45]: https://github.com/qudt/qudt-public-repo/compare/v2.1.44...v2.1.45
+
