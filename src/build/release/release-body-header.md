@@ -1,5 +1,6 @@
 # Breaking Changes
-With this Release, we have migrated to an automated release mechanism. 
+
+With this Release, we have migrated to an automated release mechanism.
 This includes reorganizing our directory structure.
 Please read our updated README.md file (scroll to the bottom) for many of the details.
 
