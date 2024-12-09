@@ -43,7 +43,7 @@
             Here are the phases and the execution ids that are linked to them (executed in the order they appear in this file):
                   validate                 defineAdditionalProperties, check-source-format
                   initialize               delete-applicable-units, format-sources, copy-rdf, copy-docs, copy-root-files
-                  generate-sources
+                  generate-sources         validate-shacl-files
                   process-sources          replace-version-placeholder
                   generate-resources
                   process-resources
@@ -157,8 +157,10 @@
                                 <validation>
                                     <!--skip>true</skip-->
                                     <shapes>
-                                        <include>target/dist/validation/COLLECTION_QUDT_QA_TESTS_ALL.ttl</include>
-                                        <include>target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl</include>
+                                        <include>
+                                            target/dist/validation/COLLECTION_QUDT_QA_TESTS_ALL.ttl
+                                            target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
+                                        </include>
                                     </shapes>
                                     <data>
                                         <include>
@@ -176,8 +178,8 @@
                         SHACL-that the SHACL definition conform to SHACL
                         writes the validation report target/validation/validationReportShacl.ttl
                         -->
-                        <id>shacl-validate-shacl</id>
-                        <phase>test</phase>
+                        <id>validate-shacl-files</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>validate</goal>
                         </goals>
@@ -186,13 +188,13 @@
                                 <validation>
                                     <!--skip>true</skip-->
                                     <shapes>
-                                        <include>target/dist/validation/SHACL-SHACL.ttl</include>
+                                        <include>src/build/validation/SHACL-SHACL.ttl</include>
                                     </shapes>
                                     <data>
                                         <include>
-                                            target/dist/validation/COLLECTION_QUDT_QA_TESTS_ALL.ttl
-                                            target/dist/validation/COLLECTION_QUDT_USER_TESTS.ttl
-                                            target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
+                                            src/main/rdf/validation/COLLECTION_QUDT_QA_TESTS_ALL.ttl
+                                            src/main/rdf/validation/COLLECTION_QUDT_USER_TESTS.ttl
+                                            src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
                                         </include>
                                     </data>
                                     <outputFile>target/validation/validationReportShacl.ttl</outputFile>
@@ -329,6 +331,12 @@
                                 </turtle>
                             </format>
                         </rdf>
+                    <markdown>
+                        <includes>
+                            <include>**/*.md</include>
+                        </includes>
+                        <flexmark />
+                    </markdown>
 
                     <formats>
                         <!--
@@ -391,10 +399,11 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
-                            <upToDateChecking>
-                                <!-- we want to enforce the check. our build process may confuse the spotless index -->
-                                <enabled>false</enabled>
-                            </upToDateChecking>
+                            <rdf>
+                                <excludes>
+                                    <exclude>**/target/**/*.*</exclude>
+                                </excludes>
+                            </rdf>
                         </configuration>
                     </execution>
                     <execution>
