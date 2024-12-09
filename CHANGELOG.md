@@ -9,35 +9,28 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
-#### QUDT Schema
-
-- Add the `qudt:altSymbol` property to support using multiple symbols with a unit/quantitykind alongside
-  the primary one, which is`qudt:symbol`
-
-#### New QuantityKinds
-
-- `qk:AmountOfSubstanceIonConcentration` as a narrower kind of `qk:Concentration`.
-- `qk:CoefficientOfPerformance` by [lazlop](https://github.com/lazlop)
-- `qk:CompoundPlaneAngle`
-- `qk:CountRate` ( units: `unit:NUM-PER-SEC`, `unit:NUM-PER-HR`, `unit:NUM-PER-YR`)
-- `qk:CurrentOfTheAmountOfSubstance` (replaces`qk:CurrentOfTheAmountOfSubtance`)
-- `qk:RotationalFrequency` (units: `unit:Hz`, `unit:REV-PER-MIN`, `unit:REV-PER-HR`, `unit:REV-PER-SEC`)
-- `qk:VaporPermeability` (unit: `unit:KiloGM-PER-PA-SEC-M`)
-- `qk:VaporPermeance` (for what used to be `qk:VaporPermeability`, see 'Changed' )
-
-#### New Units
-
-- `unit:CYC-PER-SEC`
-- `unit:KiloLM`
-- `unit:CD-PER-KiloLM`
-- `unit:CI` (replaces `unit:Ci`)
-- `unit:FLIGHT` (replaces `unit:Flight`)
-
-#### Other Additions
-
-- Add "mph" as `qudt:altSymbol` of `unit:M-PER-HR` from [Toby Broom](https://github.com/Toby-Broom/)
-- Add "kph" as `qudt:altSymbol` of `unit:KiloM-PER-HR` from [Toby Broom](https://github.com/Toby-Broom/)
-- SHACL validation of SHACL shapes by [Dimitris Kontokostas](https://github.com/jimkont)
+* QUDT Schema
+  - Add the `qudt:altSymbol` property to support using multiple symbols with a unit/quantitykind alongside
+    the primary one, which is`qudt:symbol`
+* New QuantityKinds
+  - `qk:AmountOfSubstanceIonConcentration` as a narrower kind of `qk:Concentration`.
+  - `qk:CoefficientOfPerformance` by [lazlop](https://github.com/lazlop)
+  - `qk:CompoundPlaneAngle`
+  - `qk:CountRate` ( units: `unit:NUM-PER-SEC`, `unit:NUM-PER-HR`, `unit:NUM-PER-YR`)
+  - `qk:CurrentOfTheAmountOfSubstance` (replaces`qk:CurrentOfTheAmountOfSubtance`)
+  - `qk:RotationalFrequency` (units: `unit:Hz`, `unit:REV-PER-MIN`, `unit:REV-PER-HR`, `unit:REV-PER-SEC`)
+  - `qk:VaporPermeability` (unit: `unit:KiloGM-PER-PA-SEC-M`)
+  - `qk:VaporPermeance` (for what used to be `qk:VaporPermeability`, see 'Changed')
+- New Units
+  - `unit:CYC-PER-SEC`
+  - `unit:KiloLM`
+  - `unit:CD-PER-KiloLM`
+  - `unit:CI` (replaces `unit:Ci`)
+  - `unit:FLIGHT` (replaces `unit:Flight`)
+- Other Additions
+  - Add "mph" as `qudt:altSymbol` of `unit:M-PER-HR` from [Toby Broom](https://github.com/Toby-Broom/)
+  - Add "kph" as `qudt:altSymbol` of `unit:KiloM-PER-HR` from [Toby Broom](https://github.com/Toby-Broom/)
+  - SHACL validation of SHACL shapes by [Dimitris Kontokostas](https://github.com/jimkont)
 
 ### Changed
 
