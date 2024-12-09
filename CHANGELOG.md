@@ -9,17 +9,35 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
-- Add the qudt:altSymbol relation
-- Add "mph" and "kph" as `qudt:altSymbol`
-- Add quantitykind `qk:CoefficientOfPerformance`
-- Add "mph" and "kph" as `qudt:altSymbol`
-- Add quantitykinds `qk:CompoundPlaneAngle`, `qk:CountRate` and `qk:RotationalFrequency`
-- Add quantitykind `qk:CountRate` to `unit:NUM-PER-SEC`, `unit:NUM-PER-HR`, `unit:NUM-PER-YR`
-- Add quantitykind  `qk:RotationalFrequency` to `unit:Hz`, `unit:REV-PER-MIN`, `unit:REV-PER-HR`, `unit:REV-PER-SEC`
-- Add units `unit:CYC-PER-SEC`, `unit:KiloLM`, `unit:CD-PER-KiloLM`
-- Add `qk:VaporPermeability` to `unit:KiloGM-PER-PA-SEC-M`
-- Add quantitykind `qk:VaporPermeance`
-- Add quantitykind `qk:AmountOfSubstanceIonConcentration` as a narrower kind of `qk:Concentration`.
+#### QUDT Schema
+
+- Add the `qudt:altSymbol` property to support using multiple symbols with a unit/quantitykind alongside
+  the primary one, which is`qudt:symbol`
+
+#### New QuantityKinds
+
+- `qk:AmountOfSubstanceIonConcentration` as a narrower kind of `qk:Concentration`.
+- `qk:CoefficientOfPerformance` by [lazlop](https://github.com/lazlop)
+- `qk:CompoundPlaneAngle`
+- `qk:CountRate` ( units: `unit:NUM-PER-SEC`, `unit:NUM-PER-HR`, `unit:NUM-PER-YR`)
+- `qk:CurrentOfTheAmountOfSubstance` (replaces`qk:CurrentOfTheAmountOfSubtance`)
+- `qk:RotationalFrequency` (units: `unit:Hz`, `unit:REV-PER-MIN`, `unit:REV-PER-HR`, `unit:REV-PER-SEC`)
+- `qk:VaporPermeability` (unit: `unit:KiloGM-PER-PA-SEC-M`)
+- `qk:VaporPermeance` (for what used to be `qk:VaporPermeability`, see 'Changed' )
+
+#### New Units
+
+- `unit:CYC-PER-SEC`
+- `unit:KiloLM`
+- `unit:CD-PER-KiloLM`
+- `unit:CI` (replaces `unit:Ci`)
+- `unit:FLIGHT` (replaces `unit:Flight`)
+
+#### Other Additions
+
+- Add "mph" as `qudt:altSymbol` of `unit:M-PER-HR` from [Toby Broom](https://github.com/Toby-Broom/)
+- Add "kph" as `qudt:altSymbol` of `unit:KiloM-PER-HR` from [Toby Broom](https://github.com/Toby-Broom/)
+- SHACL validation of SHACL shapes by [Dimitris Kontokostas](https://github.com/jimkont)
 
 ### Changed
 
@@ -33,11 +51,13 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Make `qk:RotationalFrequency` exactMatch of `qk:RotationalVelocity`, remove broader qk
 - Make `qk:AngularFrequency` exactMatch of `qk:AngularVelocity`, remove broader qk
 
-### Fixed
+### Deprecated
 
-- Rename incorrectly named Unit `unit:Ci` to `unit:CI`
-- Rename incorrectly named Unit `unit:Flight` to `unit:FLIGHT`
-- Rename incorrectly named quantitykind `qk:CurrentOfTheAmountOfSubtance` to `qk:CurrentOfTheAmountOfSubstance`
+- `unit:Ci` (replaced by: `unit:CI`)
+- `unit:Flight` (replaced by: `unit:FLIGHT`)
+- `qk:CurrentOfTheAmountOfSubtance` (replaced by `qk:CurrentOfTheAmountOfSubstance`)
+- `unit:CFU` (replaced by: `unit:NUM`) - The CFU (colony forming unit) is a context-dependent unit that should
+  be part of an ontology with narrower scope than QUDT.
 
 ## [2.1.45] - 2024-11-15
 
