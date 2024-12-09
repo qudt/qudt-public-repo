@@ -7,12 +7,14 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [2.1.46] - 2024-12-09
+
 ### Added
 
-* QUDT Schema
+- QUDT Schema
   - Add the `qudt:altSymbol` property to support using multiple symbols with a unit/quantitykind alongside
     the primary one, which is`qudt:symbol`
-* New QuantityKinds
+- New QuantityKinds
   - `qk:AmountOfSubstanceIonConcentration` as a narrower kind of `qk:Concentration`.
   - `qk:CoefficientOfPerformance` by [lazlop](https://github.com/lazlop)
   - `qk:CompoundPlaneAngle`
@@ -88,6 +90,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen).  (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v2.1.45...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v2.1.46...HEAD
+[2.1.46]: https://github.com/qudt/qudt-public-repo/compare/v2.1.45...v2.1.46
 [2.1.45]: https://github.com/qudt/qudt-public-repo/compare/v2.1.44...v2.1.45
 
