@@ -2,6 +2,7 @@ QUDT - Quantities, Units, Dimensions and dataTypes - public repository
 ======================================================================
 
 ## Quick-Start Guide
+
 There are three ways to bring the QUDT ontology into your environment.
 1. Download the latest GitHub Release [here](https://github.com/qudt/qudt-public-repo/releases).
 2. Use the resolved graph and instance URIs available [here](https://www.qudt.org/2.1/catalog/qudt-catalog.html).
@@ -13,7 +14,6 @@ Overview
 This QUDT<sup>1</sup> public repository contains the schema and vocabulary source files for the graphs making up the QUDT collection. It is probably the most convenient way for software developers to include the QUDT ontologies in their work, and is the most up-to-date. However, for those who prefer the linked data world, each QUDT graph is also available in both a versioned and an unversioned form on the <a href="http://qudt.org">qudt.org</a> website.
 
 DOI reference for citations: https://doi.org/10.25504/FAIRsharing.d3pqw7
-
 
 Here is the core design pattern of the QUDT ontology:
 
@@ -37,7 +37,7 @@ Installation instructions
 [Installing QUDT for Contributors](https://github.com/qudt/qudt-public-repo/wiki/Installing-QUDT-for-Contributors)
 
 Configuration instructions
------------------------------------------
+--------------------------
 
 The QUDT ontology is provided in two forms: OWL and SHACL. By default, the vocabularies are configured to use the SHACL schema. To configure it to use the OWL schema instead, just make the following single change in the file schema/SDHEMA-FACADE_QUDT.ttl. You can see in the imports closure diagram above how all the vocabularies import this single "facade" file to make it easy to switch the ontology.
 
@@ -77,10 +77,12 @@ Change this line:
 To:
 # imports: http://qudt.org/2.1/collection/usertest
 ```
+
 Currently, the tests in the usertest graph check for references to deprecated instances or properties and recommend the updated instance or property.
 
 Protege Users
------------------------------
+-------------
+
 The QUDT ontologies have been tested to load without error in Protege 5.6.4.
 
 To load QUDT into Protege, choose "Open from URI" from the file menu, and enter http://qudt.org/2.1/vocab/unit
@@ -88,7 +90,7 @@ To load QUDT into Protege, choose "Open from URI" from the file menu, and enter 
 (The "facade" file that is resolvable on the web (http://qudt.org/2.1/schema/facade/qudt) is already configured to load the OWL schema rather than the SHACL schema, so Protege users will be in the OWL world using this method.)
 
 Ontology libraries
------------------------------
+------------------
 
 Please note that various libraries exhibit different behaviors when importing the QUDT ontology, see this [discussion](https://github.com/qudt/qudt-public-repo/issues/842#issuecomment-1879114604).
 
@@ -97,17 +99,12 @@ Status
 
 Please see the [New Features and Releases](https://github.com/qudt/qudt-public-repo/discussions/315) topic in the Discussions section for status updates.
 
-
-
 <hr/>
 <p style="font-size:xx-small;"><sup>1</sup> QUDT.org is a 501(c)(3) not-for-profit organization founded to provide semantic specifications for units of measure, quantity kind, dimensions and data types.   QUDT is an advocate for the development and implementation of standards to quantify data expressed in RDF and JSON.   Our mission is to improve interoperability of data and the specification of information structures through industry standards for Units of Measure, Quantity Kinds, Dimensions and Data Types. <a href="https://github.com/sponsors/qudt">Sponsorships</a> are greatly appreciated!
 
 QUDT.org is a member of the World Wide Web Consortium (W3C)
 
-
-
 <hr/>
-
 
 Last updated by: Steve Ray (steve.ray@qudt.org)
 

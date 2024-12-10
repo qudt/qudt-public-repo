@@ -1,14 +1,23 @@
 # This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: Java CI with Maven
+name: CI Build
 
 on:
-  push:
-    branches: [ "main" ]
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - closed
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
   workflow_dispatch:
+    inputs:
+      force_snapshot_release:
+        description: 'Update the snapshot release on github'
+        required: false
+        type: boolean
 
 jobs:
   build:
@@ -24,43 +33,58 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
+    - name: Check if a snapshot release should be made and set environment variable
+      run: echo "MAKE_SNAPSHOT_RELEASE=${{ inputs.force_snapshot_release || (github.event.pull_request.base.ref == 'main' && github.event.action == 'closed' && github.event.pull_request.merged == true) }}" >> $GITHUB_ENV
+
       # configure git
     - name: setup git config
       run: |
         git config user.name ${{ github.actor }}
         git config user.email "<>"
 
-    - name: Build with Maven
-      run: mvn -Pzip install
-
-    - name: change tag 'snapshot' to current commit
-      if: ${{ github.event.pull_request.base.ref == 'main' && github.event.action == 'closed' && github.event.pull_request.merged == true}} # only make snapshot release if it is a push to main
-      run: |
-        git tag -f snapshot
-        git push -f origin --tags
-
-    # Read version changelog
+      # Read version changelog before anything else - if there is a formatting error
+      # in the changelog (which happens), we fail fast
+      # Do this even if we will not make the snapshot release, so the changelog is checked as part of a normal
+      # ci run.
     - id: get-changelog
       name: Get version changelog
-      if: ${{ github.event.pull_request.base.ref == 'main' && github.event.action == 'closed' && github.event.pull_request.merged == true}} # only make snapshot release if it is a push to main
       uses: superfaceai/release-changelog-action@v1
       with:
         path-to-changelog: CHANGELOG.md
         version: ${{ inputs.release_version }}
         operation: read
 
+    - name: Build with Maven
+      run: mvn -Pzip install
+
+    # delete the snapshot release (the release action does not update the
+    # body, so we have to delete the whole thing)
+    - name: Delete Snapshot Release
+      if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'true' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: gh release delete snapshot --cleanup-tag --yes || echo "Error deleting snapshot release - continuing anyway"
+
+    - name: change tag 'snapshot' to current commit
+      if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'true' }}
+      run: |
+        git tag -f snapshot
+        git push -f origin --tags
+
     - name: Make Release Body
-      if: ${{ github.event.pull_request.base.ref == 'main' && github.event.action == 'closed' && github.event.pull_request.merged == true}} # only make snapshot release if it is a push to main
+      if: ${{ env.MAKE_SNAPSHOT_RELEASE  == 'true' }}
       run: |
         cat src/build/snapshot-release/release-body-header.md > target/release-body.md
-        echo "# Changes" >> target/release-body.md 
-        echo "${{ steps.get-changelog.outputs.changelog }}" >> target/release-body.md
+        echo "# Changes" >> target/release-body.md
+        cat <<'EOF' >> target/release-body.md 
+        ${{ steps.get-changelog.outputs.changelog }}
+        EOF
         cat src/build/snapshot-release/release-body-footer.md >> target/release-body.md        
 
     # Make github release
     - name: Release
       uses: softprops/action-gh-release@v2
-      if: ${{ github.event.pull_request.base.ref == 'main' && github.event.action == 'closed' && github.event.pull_request.merged == true}} # only make snapshot release if it is a push to main
+      if: ${{ env.MAKE_SNAPSHOT_RELEASE  == 'true' }}
       with:
         name: Latest snapshot release
         tag_name: snapshot
