@@ -92,12 +92,10 @@
                             project.properties.setProperty('qudt.versioned.iri.prefix', "http://qudt.org/${majorMinorVersion}/")
                             def now = OffsetDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0)
                             project.properties.setProperty('qudt.build.date', "${now}")
-                            project.properties.setProperty('qudt.previous.version.iri.prefix', "https://qudt.org/doc/${qudtPrevReleaseYear}/${qudtPrevReleaseMonth}/")
                             def currentMonth = now.format(DateTimeFormatter.ofPattern("MM"))
                             def currentYear = now.format(DateTimeFormatter.ofPattern("YYYY"))
                             project.properties.setProperty('qudt.current.month', currentMonth)
                             project.properties.setProperty('qudt.current.year', currentYear)
-                            project.properties.setProperty('qudt.latest.version.iri.prefix', "https://qudt.org/doc/${currentYear}/${currentMonth}/")
                             </source>
                         </configuration>
                     </execution>
@@ -261,50 +259,6 @@
                             </products>
                         </configuration>
                     </execution>
-                    <execution>
-                        <!-- updates vaem:(latest|previous)PublishedVersion links in all target TTL files that have them
-                        Note: this operation leaves the files unformatted (jena TTL Pretty output - nice, but
-                        not our format) Therefore, we need to format these files later using spotless.
-                        -->
-
-                        <id>update-vaem-references</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>make</goal>
-                        </goals>
-                        <configuration>
-                            <products>
-                                <eachFile>
-                                    <replaceInputFiles>true</replaceInputFiles>
-                                    <input>
-                                        <include>
-                                            target/dist/vocab/**/*.ttl
-                                        </include>
-                                        <exclude>
-                                            target/dist/**/*QUANTITIES*.ttl
-                                        </exclude>
-                                    </input>
-                                    <filters>
-                                        <sparqlUpdate>
-                                            DELETE { ?graph
-                                                vaem:latestPublishedVersion ?oldLatest ;
-                                                vaem:previousPublishedVersion ?oldPrevious}
-                                            INSERT { ?graph
-                                                vaem:latestPublishedVersion ?newLatest ;
-                                                vaem:previousPublishedVersion ?newPrevious ;
-                                            }
-                                            WHERE { ?graph
-                                                vaem:latestPublishedVersion ?oldLatest ;
-                                                vaem:previousPublishedVersion ?oldPrevious ;
-                                                BIND(STRDT(REPLACE(STR(?oldLatest), "https://qudt.org/doc/[^/]+/[^/]+/", "${qudt.latest.version.iri.prefix}"),xsd:anyURI) as ?newLatest)
-                                                BIND(STRDT(REPLACE(STR(?oldPrevious), "https://qudt.org/doc/[^/]+/[^/]+/", "${qudt.previous.version.iri.prefix}"),xsd:anyURI) as ?newPrevious)
-                                            }
-                                        </sparqlUpdate>
-                                    </filters>
-                                </eachFile>
-                            </products>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -376,6 +330,26 @@
                                 <searchRegex>http://qudt.org/\d+.\d+/</searchRegex>
                                 <replacement>${qudt.versioned.iri.prefix}</replacement>
                             </replaceRegex>
+                            <replace>
+                                <name>current year</name>
+                                <search>$$$$CURRENT_YEAR$$$$</search>
+                                <replacement>${qudt.current.year}</replacement>
+                            </replace>
+                            <replace>
+                                <name>current month</name>
+                                <search>$$$$CURRENT_MONTH$$$$</search>
+                                <replacement>${qudt.current.month}</replacement>
+                            </replace>
+                            <replace>
+                                <name>current year</name>
+                                <search>$$$$QUDT_PREV_RELEASE_YEAR$$$$</search>
+                                <replacement>${qudtPrevReleaseYear}</replacement>
+                            </replace>
+                            <replace>
+                                <name>current month</name>
+                                <search>$$$$QUDT_PREV_RELEASE_MONTH$$$$</search>
+                                <replacement>${qudtPrevReleaseMonth}</replacement>
+                            </replace>
                         </format>
                     </formats>
 
