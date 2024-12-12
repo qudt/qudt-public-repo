@@ -7,6 +7,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Changed
+
+- Removed the vaem:revision triples that were causing retention of v2.1 strings in the URIs
+
 ## [2.1.46] - 2024-12-09
 
 ### Added
