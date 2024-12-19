@@ -42,6 +42,15 @@ jobs:
         git config user.name ${{ github.actor }}
         git config user.email "<>"
 
+    - name: Fail if src/main changes without a CHANGELOG update
+      run: |
+        set -e
+        CHANGED_FILES=$(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }})
+        if echo "$CHANGED_FILES" | grep -q '^src/main' && ! echo "$CHANGED_FILES" | grep -q '^CHANGELOG.md$'; then
+          echo "src directory changed without updating CHANGELOG.md."
+          exit 1
+        fi
+
       # Read version changelog before anything else - if there is a formatting error
       # in the changelog (which happens), we fail fast
       # Do this even if we will not make the snapshot release, so the changelog is checked as part of a normal
