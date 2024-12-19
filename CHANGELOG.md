@@ -7,9 +7,18 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+- New Units
+  - `unit:MegaTONNE-PER-YR` by [Jurek Müller](https://github.com/JurekMueller)
+
 ### Changed
 
 - Removed the vaem:revision triples that were causing retention of v2.1 strings in the URIs
+
+### Fixed
+
+- Corrected the `qudt:ucumCode` of `unit:TeraW-HR-PER-YR` to "TW.h/a" by [Jurek Müller](https://github.com/JurekMueller)
 
 ## [2.1.46] - 2024-12-09
 
@@ -91,7 +100,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   integer. This makes sense because it is not used for computation - it is a code in the true
   sense. (Thanks for this fix, @fkleedorfer)
 - A number of units now point to quantitykind:MassConcentration in addition to MassDensity and Density.
-  (thanks @J-meirlaen).  (MassDensity and Density are already declared as qudt:exactMatch.
+  (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
 [Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v2.1.46...HEAD
