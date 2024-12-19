@@ -26,6 +26,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
@@ -43,8 +45,10 @@ jobs:
         git config user.name ${{ github.actor }}
         git config user.email "<>"
 
-    - name: Fetch base branch
-      run: git fetch origin "${{ github.base_ref }}:${{ github.base_ref }}"
+    - name: Fetch base and head branches
+      run: |
+        git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
+        git fetch origin ${{ github.head_ref }}:${{ github.head_ref }}
 
     - name: Fail if src/main changes without a CHANGELOG update
       run: |
