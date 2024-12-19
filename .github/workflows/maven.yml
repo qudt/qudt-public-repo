@@ -48,12 +48,12 @@ jobs:
         git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
         git fetch origin ${{ github.head_ref }}:${{ github.head_ref }}
 
-    - name: Fail if src/main changes without a CHANGELOG update
+    - name: Fail if src/main has changes but CHANGELOG.md does not
       run: |
         set -e
         CHANGED_FILES=$(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }})
         if echo "$CHANGED_FILES" | grep -q '^src/main' && ! echo "$CHANGED_FILES" | grep -q '^CHANGELOG.md$'; then
-          echo "src directory changed without updating CHANGELOG.md."
+          echo "Directory src/main changed without an update of CHANGELOG.md, this is not allowed. Please update CHANGELOG.md"
           exit 1
         fi
 
