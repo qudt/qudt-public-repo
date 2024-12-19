@@ -33,6 +33,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
+
     - name: Check if a snapshot release should be made and set environment variable
       run: echo "MAKE_SNAPSHOT_RELEASE=${{ inputs.force_snapshot_release || (github.event.pull_request.base.ref == 'main' && github.event.action == 'closed' && github.event.pull_request.merged == true) }}" >> $GITHUB_ENV
 
@@ -42,11 +43,25 @@ jobs:
         git config user.name ${{ github.actor }}
         git config user.email "<>"
 
+    - name: Fetch base and head branches
+      run: |
+        git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
+        git fetch origin ${{ github.head_ref }}:${{ github.head_ref }}
+
+    - name: Fail if src/main has changes but CHANGELOG.md does not
+      run: |
+        set -e
+        CHANGED_FILES=$(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }})
+        if echo "$CHANGED_FILES" | grep -q '^src/main' && ! echo "$CHANGED_FILES" | grep -q '^CHANGELOG.md$'; then
+          echo "Directory src/main changed without an update of CHANGELOG.md, this is not allowed. Please update CHANGELOG.md"
+          exit 1
+        fi
+
       # Read version changelog before anything else - if there is a formatting error
       # in the changelog (which happens), we fail fast
       # Do this even if we will not make the snapshot release, so the changelog is checked as part of a normal
       # ci run.
-    - id: get-changelog
+    - id: check changelog formatting
       name: Get version changelog
       uses: superfaceai/release-changelog-action@v1
       with:
