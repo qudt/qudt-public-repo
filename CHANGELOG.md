@@ -9,8 +9,13 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- New QuantityKinds
+  - `qk:OsmoticConcentration` by [Toby Broom](https://github.com/Toby-Broom/)
+
 - New Units
   - `unit:MegaTONNE-PER-YR` by [Jurek Müller](https://github.com/JurekMueller)
+  - `unit:OSM` by [Toby Broom](https://github.com/Toby-Broom/)
+  - `unit:MilliOSM-PER-KiloGM` by [Toby Broom](https://github.com/Toby-Broom/)
 
 ### Changed
 
