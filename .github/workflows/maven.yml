@@ -43,12 +43,19 @@ jobs:
         git config user.name ${{ github.actor }}
         git config user.email "<>"
 
-    - name: Fetch base and head branches
+    - name: Fetch branch (if PR was merged)
+      if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'true' }}
+      run: |
+        git fetch origin 
+
+    - name: Fetch base and head branches (unless PR was merged)
+      if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'false' }}
       run: |
         git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
         git fetch origin ${{ github.head_ref }}:${{ github.head_ref }}
 
-    - name: Fail if src/main has changes but CHANGELOG.md does not
+    - name: Fail if src/main has changes but CHANGELOG.md does not (unless PR was merged)
+      if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'false' }}
       run: |
         set -e
         CHANGED_FILES=$(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }})
