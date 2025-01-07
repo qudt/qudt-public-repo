@@ -23,6 +23,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Corrected the `qudt:ucumCode` of `unit:TeraW-HR-PER-YR` to "TW.h/a" by [Jurek Müller](https://github.com/JurekMueller)
+- Fixed non-working informativeReference links in units vocabulary [Phil Blackwood](https://github.com/philblackwood)
 
 ## [2.1.46] - 2024-12-09
 
