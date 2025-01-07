@@ -43,16 +43,24 @@ jobs:
         git config user.name ${{ github.actor }}
         git config user.email "<>"
 
-    - name: Fetch branch (if PR was merged)
-      if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'true' }}
-      run: |
-        git fetch origin 
 
-    - name: Fetch base and head branches (unless PR was merged)
+
+
+
+    - name: Fetch base branch
+      run: git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
+
+    - name: Fetch head branch (unless PR was merged)
       if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'false' }}
       run: |
-        git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
-        git fetch origin ${{ github.head_ref }}:${{ github.head_ref }}
+        if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+          # Fetch from contributor’s fork
+          git remote add fork ${{ github.event.pull_request.head.repo.clone_url }}
+          git fetch fork ${{ github.event.pull_request.head.ref }}:${{ github.head_ref }}
+        else
+          # Fetch from the same repo
+          git fetch origin ${{ github.head_ref }}:${{ github.head_ref }}
+        fi
 
     - name: Fail if src/main has changes but CHANGELOG.md does not (unless PR was merged)
       if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'false' }}
