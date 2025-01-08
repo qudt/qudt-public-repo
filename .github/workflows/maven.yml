@@ -43,16 +43,11 @@ jobs:
         git config user.name ${{ github.actor }}
         git config user.email "<>"
 
-
-
-
-
-    - name: Fetch base branch
-      run: git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
-
-    - name: Fetch head branch (unless PR was merged)
+    - name: Fetch branches (unless PR was merged)
       if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'false' }}
       run: |
+        # as we aren't building main, let's fetch it
+        git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
         if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
           # Fetch from contributor’s fork
           git remote add fork ${{ github.event.pull_request.head.repo.clone_url }}
@@ -76,7 +71,9 @@ jobs:
       # in the changelog (which happens), we fail fast
       # Do this even if we will not make the snapshot release, so the changelog is checked as part of a normal
       # ci run.
+
     - name: Check Changelog formatting
+      id: get-changelog
       uses: superfaceai/release-changelog-action@v1
       with:
         path-to-changelog: CHANGELOG.md
