@@ -19,7 +19,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Removed the vaem:revision triples that were causing retention of v2.1 strings in the URIs
 - `qudt:informativeReference` triples added/replaced by a link to IEC CDD generated based on `qudt:iec61360Code` triples by [Vladimir Alexiev](https://github.com/VladimirAlexiev)
-   
 
 ### Fixed
 
