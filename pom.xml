@@ -45,7 +45,7 @@
                   initialize               delete-applicable-units, format-sources, copy-rdf, copy-docs, copy-root-files
                   generate-sources         validate-shacl-files
                   process-sources          replace-version-placeholder
-                  generate-resources
+                  generate-resources       generate-iec-links
                   process-resources
                   compile                  shacl-infer, merge-applicable-units
                   process-classes
@@ -256,6 +256,45 @@
                                     </input>
                                     <outputFile>target/dist/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</outputFile>
                                 </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--
+                        generates links to IEC CDD
+                        -->
+                        <id>generate-iec-links</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <eachFile>
+                                    <replaceInputFiles>true</replaceInputFiles>
+                                    <input>
+                                        <include>target/dist/vocab/**/*.ttl</include>
+                                    </input>
+                                    <filters>
+                                        <sparqlUpdate>
+                                            prefix qudt:&lt;http://qudt.org/schema/qudt/&gt;
+                                            prefix xsd:&lt;http://www.w3.org/2001/XMLSchema#&gt;
+
+                                            delete {?x qudt:informativeReference ?old}
+                                            insert {?x qudt:informativeReference ?new}
+                                            where {
+                                                ?x a ?type; qudt:iec61360Code ?irdi.
+                                                values (?type ?prefix) {
+                                                    (qudt:Unit         "https://cdd.iec.ch/cdd/iec62720/iec62720.nsf/Units/")
+                                                    (qudt:QuantityKind "https://cdd.iec.ch/cdd/iec61987/iec61987.nsf/ListsOfUnitsAllVersions/")
+                                                }
+                                                optional {?x qudt:informativeReference ?old filter(strstarts(str(?old),"https://cdd.iec.ch"))}
+                                                bind(replace(replace(str(?irdi),"/","-"),"#","%23") as ?irdi_new)
+                                                bind(strdt(concat(?prefix,?irdi_new),xsd:anyURI) as ?new)
+                                            }
+                                        </sparqlUpdate>
+                                    </filters>
+                                </eachFile>
                             </products>
                         </configuration>
                     </execution>
