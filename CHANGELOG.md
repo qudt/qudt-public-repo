@@ -17,6 +17,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - `unit:OSM` by [Toby Broom](https://github.com/Toby-Broom/)
   - `unit:MilliOSM-PER-KiloGM` by [Toby Broom](https://github.com/Toby-Broom/)
   - `unit:OKTA` by [Jeffrey Vervoort](https://github.com/Jeffrey-Vervoort-KNMI)
+- New QA Tests
+  - Added SHACL shapes for checking content under `src/` only
 
 ### Changed
 
