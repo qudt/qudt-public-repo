@@ -41,8 +41,8 @@
             The build is executed as a series of 'lifecycle phases': https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html)
             Each plugin has an <execution> section that binds its execution to a lifecycle phase. (or it has a default lifecycle phase in which it runs)
             Here are the phases and the execution ids that are linked to them (executed in the order they appear in this file):
-                  validate                 defineAdditionalProperties, check-source-format
-                  initialize               delete-applicable-units, format-sources, copy-rdf, copy-docs, copy-root-files
+                  validate                 defineAdditionalProperties, check-source-format, shacl-validate-src
+                  initialize               format-sources, copy-rdf, copy-docs, copy-root-files
                   generate-sources         validate-shacl-files
                   process-sources          replace-version-placeholder
                   generate-resources
@@ -141,6 +141,37 @@
                     </execution>
                     <execution>
                         <!--
+                        SHACL-validates the union of all ttl files in src/vocab and the No-OWL schema
+                        against the union of QA-Tests and No-OWL schema
+                        writes the validation report target/validation/validationReportSrc.ttl
+                        -->
+                        <id>shacl-validate-src</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>validate</goal>
+                        </goals>
+                        <configuration>
+                            <validations>
+                                <validation>
+                                    <!--skip>true</skip-->
+                                    <shapes>
+                                        <include>
+                                            src/main/rdf/validation/QUDT_SRC_QA_TESTS.ttl
+                                        </include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
+                                            src/main/rdf/vocab/**/*.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/validation/validationReportSrc.ttl</outputFile>
+                                </validation>
+                            </validations>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--
                         SHACL-validates the union of all ttl files in dist/vocab and the No-OWL schema
                         against the union of QA-Tests and No-OWL schema
                         writes the validation report target/validation/validationReport.ttl
@@ -207,35 +238,6 @@
                 <artifactId>rdfio-maven-plugin</artifactId>
                 <version>1.2.1</version>
                 <executions>
-                    <execution>
-                        <!--
-                        deletes any qudt:applicableUnits triples from the quantitykinds **source** file.
-                        Note: this operation leaves the file unformatted (jena TTL Pretty output - nice, but
-                        not our format) Therefore, we need to format this file later using spotless.
-                        -->
-                        <id>delete-applicable-units</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>make</goal>
-                        </goals>
-                        <configuration>
-                            <products>
-                                <singleFile>
-                                    <input>
-                                        <include>
-                                            src/main/rdf/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl
-                                        </include>
-                                    </input>
-                                    <filters>
-                                        <exclude>
-                                            <predicate>qudt:applicableUnit</predicate>
-                                        </exclude>
-                                    </filters>
-                                    <outputFile>src/main/rdf/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</outputFile>
-                                </singleFile>
-                            </products>
-                        </configuration>
-                    </execution>
                     <execution>
                         <!--
                         adds the qudt:applicableUnits triples we generated with SHACL to the quantitykinds target file.
