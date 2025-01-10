@@ -14,6 +14,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - New Units
   - `unit:MegaTONNE-PER-YR` by [Jurek Müller](https://github.com/JurekMueller)
   - `unit:OKTA` by [Jeffrey Vervoort](https://github.com/Jeffrey-Vervoort-KNMI)
+- New QA Tests
+  - Added SHACL shapes for checking content under `src/` only
 
 ### Changed
 
