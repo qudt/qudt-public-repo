@@ -65,8 +65,12 @@ sq:qkRule
                             GROUP BY $this ?qk
                         }
                         FILTER EXISTS {
-                            ?unit qudt:hasQuantityKind ?qk ;
-                                  a qudt:Unit .
+                            ?unit qudt:hasQuantityKind ?qk .
+                            {
+                                  ?unit a qudt:Unit .
+                            } UNION {
+                                  ?unit a qudt:CurrencyUnit .
+                            }
                             FILTER NOT EXISTS {
                                 ?unit qudt:deprecated true
                             }
@@ -76,8 +80,12 @@ sq:qkRule
                     ORDER BY ASC(?steps)
                     LIMIT 1
                 }
-                ?unit qudt:hasQuantityKind ?qk ;
-                      a qudt:Unit .
+                ?unit qudt:hasQuantityKind ?qk .
+                {
+                    ?unit a qudt:Unit .
+                } UNION {
+                    ?unit a qudt:CurrencyUnit .
+                }
                 FILTER NOT EXISTS {
                     ?unit qudt:deprecated true
                 }

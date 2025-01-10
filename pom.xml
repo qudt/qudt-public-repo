@@ -47,7 +47,7 @@
                   process-sources          replace-version-placeholder
                   generate-resources
                   process-resources
-                  compile                  shacl-infer, merge-applicable-units
+                  compile                  shacl-infer-applicable-units, merge-applicable-units
                   process-classes
                   generate-test-sources
                   process-test-sources
@@ -117,7 +117,7 @@
                 <executions>
                     <execution>
                         <!-- infers qudt:applicableUnits and writes them to target/inferred/applicableUnits.ttl -->
-                        <id>shacl-infer</id>
+                        <id>shacl-infer-applicable-units</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>infer</goal>
@@ -135,6 +135,17 @@
                                         </include>
                                     </data>
                                     <outputFile>target/inferred/applicableUnits.ttl</outputFile>
+                                </inference>
+                                <inference>
+                                    <shapes>
+                                        <include>src/build/inference/inferApplicableUnits.ttl</include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            src/main/rdf/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/inferred/applicableUnits-currency.ttl</outputFile>
                                 </inference>
                             </inferences>
                         </configuration>
@@ -257,6 +268,15 @@
                                         </include>
                                     </input>
                                     <outputFile>target/dist/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</outputFile>
+                                </singleFile>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            target/inferred/applicableUnits-currency.ttl
+                                            target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl
+                                        </include>
+                                    </input>
+                                    <outputFile>target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl</outputFile>
                                 </singleFile>
                             </products>
                         </configuration>
