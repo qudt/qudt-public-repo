@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.qudt</groupId>
     <artifactId>qudt-public-repo</artifactId>
-    <version>2.1.46-SNAPSHOT</version>
+    <version>2.1.47-SNAPSHOT</version>
     <packaging>pom</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -41,13 +41,13 @@
             The build is executed as a series of 'lifecycle phases': https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html)
             Each plugin has an <execution> section that binds its execution to a lifecycle phase. (or it has a default lifecycle phase in which it runs)
             Here are the phases and the execution ids that are linked to them (executed in the order they appear in this file):
-                  validate                 defineAdditionalProperties, check-source-format
-                  initialize               delete-applicable-units, format-sources, copy-rdf, copy-docs, copy-root-files
-                  generate-sources
+                  validate                 defineAdditionalProperties, check-source-format, shacl-validate-src
+                  initialize               format-sources, copy-rdf, copy-docs, copy-root-files
+                  generate-sources         validate-shacl-files
                   process-sources          replace-version-placeholder
-                  generate-resources
+                  generate-resources       generate-iec-links
                   process-resources
-                  compile                  shacl-infer, merge-applicable-units
+                  compile                  shacl-infer-applicable-units, merge-applicable-units
                   process-classes
                   generate-test-sources
                   process-test-sources
@@ -92,12 +92,10 @@
                             project.properties.setProperty('qudt.versioned.iri.prefix', "http://qudt.org/${majorMinorVersion}/")
                             def now = OffsetDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0)
                             project.properties.setProperty('qudt.build.date', "${now}")
-                            project.properties.setProperty('qudt.previous.version.iri.prefix', "https://qudt.org/doc/${qudtPrevReleaseYear}/${qudtPrevReleaseMonth}/")
                             def currentMonth = now.format(DateTimeFormatter.ofPattern("MM"))
                             def currentYear = now.format(DateTimeFormatter.ofPattern("YYYY"))
                             project.properties.setProperty('qudt.current.month', currentMonth)
                             project.properties.setProperty('qudt.current.year', currentYear)
-                            project.properties.setProperty('qudt.latest.version.iri.prefix', "https://qudt.org/doc/${currentYear}/${currentMonth}/")
                             </source>
                         </configuration>
                     </execution>
@@ -119,7 +117,7 @@
                 <executions>
                     <execution>
                         <!-- infers qudt:applicableUnits and writes them to target/inferred/applicableUnits.ttl -->
-                        <id>shacl-infer</id>
+                        <id>shacl-infer-applicable-units</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>infer</goal>
@@ -138,7 +136,49 @@
                                     </data>
                                     <outputFile>target/inferred/applicableUnits.ttl</outputFile>
                                 </inference>
+                                <inference>
+                                    <shapes>
+                                        <include>src/build/inference/inferApplicableUnits.ttl</include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            src/main/rdf/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/inferred/applicableUnits-currency.ttl</outputFile>
+                                </inference>
                             </inferences>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--
+                        SHACL-validates the union of all ttl files in src/vocab and the No-OWL schema
+                        against the union of QA-Tests and No-OWL schema
+                        writes the validation report target/validation/validationReportSrc.ttl
+                        -->
+                        <id>shacl-validate-src</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>validate</goal>
+                        </goals>
+                        <configuration>
+                            <validations>
+                                <validation>
+                                    <!--skip>true</skip-->
+                                    <shapes>
+                                        <include>
+                                            src/main/rdf/validation/QUDT_SRC_QA_TESTS.ttl
+                                        </include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
+                                            src/main/rdf/vocab/**/*.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/validation/validationReportSrc.ttl</outputFile>
+                                </validation>
+                            </validations>
                         </configuration>
                     </execution>
                     <execution>
@@ -157,8 +197,10 @@
                                 <validation>
                                     <!--skip>true</skip-->
                                     <shapes>
-                                        <include>target/dist/validation/COLLECTION_QUDT_QA_TESTS_ALL.ttl</include>
-                                        <include>target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl</include>
+                                        <include>
+                                            target/dist/validation/COLLECTION_QUDT_QA_TESTS_ALL.ttl
+                                            target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
+                                        </include>
                                     </shapes>
                                     <data>
                                         <include>
@@ -171,6 +213,35 @@
                             </validations>
                         </configuration>
                     </execution>
+                    <execution>
+                        <!--
+                        SHACL-that the SHACL definition conform to SHACL
+                        writes the validation report target/validation/validationReportShacl.ttl
+                        -->
+                        <id>validate-shacl-files</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>validate</goal>
+                        </goals>
+                        <configuration>
+                            <validations>
+                                <validation>
+                                    <!--skip>true</skip-->
+                                    <shapes>
+                                        <include>src/build/validation/SHACL-SHACL.ttl</include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            src/main/rdf/validation/COLLECTION_QUDT_QA_TESTS_ALL.ttl
+                                            src/main/rdf/validation/COLLECTION_QUDT_USER_TESTS.ttl
+                                            src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/validation/validationReportShacl.ttl</outputFile>
+                                </validation>
+                            </validations>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -178,35 +249,6 @@
                 <artifactId>rdfio-maven-plugin</artifactId>
                 <version>1.2.1</version>
                 <executions>
-                    <execution>
-                        <!--
-                        deletes any qudt:applicableUnits triples from the quantitykinds **source** file.
-                        Note: this operation leaves the file unformatted (jena TTL Pretty output - nice, but
-                        not our format) Therefore, we need to format this file later using spotless.
-                        -->
-                        <id>delete-applicable-units</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>make</goal>
-                        </goals>
-                        <configuration>
-                            <products>
-                                <singleFile>
-                                    <input>
-                                        <include>
-                                            src/main/rdf/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl
-                                        </include>
-                                    </input>
-                                    <filters>
-                                        <exclude>
-                                            <predicate>qudt:applicableUnit</predicate>
-                                        </exclude>
-                                    </filters>
-                                    <outputFile>src/main/rdf/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</outputFile>
-                                </singleFile>
-                            </products>
-                        </configuration>
-                    </execution>
                     <execution>
                         <!--
                         adds the qudt:applicableUnits triples we generated with SHACL to the quantitykinds target file.
@@ -227,17 +269,24 @@
                                     </input>
                                     <outputFile>target/dist/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</outputFile>
                                 </singleFile>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            target/inferred/applicableUnits-currency.ttl
+                                            target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl
+                                        </include>
+                                    </input>
+                                    <outputFile>target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl</outputFile>
+                                </singleFile>
                             </products>
                         </configuration>
                     </execution>
                     <execution>
-                        <!-- updates vaem:(latest|previous)PublishedVersion links in all target TTL files that have them
-                        Note: this operation leaves the files unformatted (jena TTL Pretty output - nice, but
-                        not our format) Therefore, we need to format these files later using spotless.
+                        <!--
+                        generates links to IEC CDD
                         -->
-
-                        <id>update-vaem-references</id>
-                        <phase>prepare-package</phase>
+                        <id>generate-iec-links</id>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>make</goal>
                         </goals>
@@ -246,27 +295,24 @@
                                 <eachFile>
                                     <replaceInputFiles>true</replaceInputFiles>
                                     <input>
-                                        <include>
-                                            target/dist/vocab/**/*.ttl
-                                        </include>
-                                        <exclude>
-                                            target/dist/**/*QUANTITIES*.ttl
-                                        </exclude>
+                                        <include>target/dist/vocab/**/*.ttl</include>
                                     </input>
                                     <filters>
                                         <sparqlUpdate>
-                                            DELETE { ?graph
-                                                vaem:latestPublishedVersion ?oldLatest ;
-                                                vaem:previousPublishedVersion ?oldPrevious}
-                                            INSERT { ?graph
-                                                vaem:latestPublishedVersion ?newLatest ;
-                                                vaem:previousPublishedVersion ?newPrevious ;
-                                            }
-                                            WHERE { ?graph
-                                                vaem:latestPublishedVersion ?oldLatest ;
-                                                vaem:previousPublishedVersion ?oldPrevious ;
-                                                BIND(STRDT(REPLACE(STR(?oldLatest), "https://qudt.org/doc/[^/]+/[^/]+/", "${qudt.latest.version.iri.prefix}"),xsd:anyURI) as ?newLatest)
-                                                BIND(STRDT(REPLACE(STR(?oldPrevious), "https://qudt.org/doc/[^/]+/[^/]+/", "${qudt.previous.version.iri.prefix}"),xsd:anyURI) as ?newPrevious)
+                                            prefix qudt:&lt;http://qudt.org/schema/qudt/&gt;
+                                            prefix xsd:&lt;http://www.w3.org/2001/XMLSchema#&gt;
+
+                                            insert {?x qudt:informativeReference ?new}
+                                            where {
+                                                ?x a ?type; qudt:iec61360Code ?irdi.
+                                                values (?type ?prefix) {
+                                                    (qudt:Unit         "https://cdd.iec.ch/cdd/iec62720/iec62720.nsf/Units/")
+                                                    (qudt:QuantityKind "https://cdd.iec.ch/cdd/iec61987/iec61987.nsf/ListsOfUnitsAllVersions/")
+                                                    (qudt:PhysicalConstant "https://cdd.iec.ch/cdd/iec61987/iec61987.nsf/ListsOfUnitsAllVersions/")
+                                                }
+                                                optional {?x qudt:informativeReference ?old filter(strstarts(str(?old),"https://cdd.iec.ch"))}
+                                                bind(replace(replace(str(?irdi),"/","-"),"#","%23") as ?irdi_new)
+                                                bind(strdt(concat(?prefix,?irdi_new),xsd:anyURI) as ?new)
                                             }
                                         </sparqlUpdate>
                                     </filters>
@@ -300,6 +346,12 @@
                                 </turtle>
                             </format>
                         </rdf>
+                    <markdown>
+                        <includes>
+                            <include>**/*.md</include>
+                        </includes>
+                        <flexmark />
+                    </markdown>
 
                     <formats>
                         <!--
@@ -339,6 +391,26 @@
                                 <searchRegex>http://qudt.org/\d+.\d+/</searchRegex>
                                 <replacement>${qudt.versioned.iri.prefix}</replacement>
                             </replaceRegex>
+                            <replace>
+                                <name>current year</name>
+                                <search>$$$$CURRENT_YEAR$$$$</search>
+                                <replacement>${qudt.current.year}</replacement>
+                            </replace>
+                            <replace>
+                                <name>current month</name>
+                                <search>$$$$CURRENT_MONTH$$$$</search>
+                                <replacement>${qudt.current.month}</replacement>
+                            </replace>
+                            <replace>
+                                <name>current year</name>
+                                <search>$$$$QUDT_PREV_RELEASE_YEAR$$$$</search>
+                                <replacement>${qudtPrevReleaseYear}</replacement>
+                            </replace>
+                            <replace>
+                                <name>current month</name>
+                                <search>$$$$QUDT_PREV_RELEASE_MONTH$$$$</search>
+                                <replacement>${qudtPrevReleaseMonth}</replacement>
+                            </replace>
                         </format>
                     </formats>
 
@@ -362,10 +434,11 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
-                            <upToDateChecking>
-                                <!-- we want to enforce the check. our build process may confuse the spotless index -->
-                                <enabled>false</enabled>
-                            </upToDateChecking>
+                            <rdf>
+                                <excludes>
+                                    <exclude>**/target/**/*.*</exclude>
+                                </excludes>
+                            </rdf>
                         </configuration>
                     </execution>
                     <execution>
