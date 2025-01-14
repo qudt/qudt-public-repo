@@ -14,6 +14,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - New Units
   - `unit:MegaTONNE-PER-YR` by [Jurek Müller](https://github.com/JurekMueller)
   - `unit:OKTA` by [Jeffrey Vervoort](https://github.com/Jeffrey-Vervoort-KNMI)
+  - `unit:REV-PER-MIN-SEC` by [Vladimir Alexiev](https://github.com/VladimirAlexiev)
 
 ### Changed
 
@@ -35,7 +36,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - `qk:AmountOfSubstanceIonConcentration` as a narrower kind of `qk:Concentration`.
   - `qk:CoefficientOfPerformance` by [lazlop](https://github.com/lazlop)
   - `qk:CompoundPlaneAngle`
-  - `qk:CountRate` ( units: `unit:NUM-PER-SEC`, `unit:NUM-PER-HR`, `unit:NUM-PER-YR`)
+  - `qk:CountRate` (units: `unit:NUM-PER-SEC`, `unit:NUM-PER-HR`, `unit:NUM-PER-YR`)
   - `qk:CurrentOfTheAmountOfSubstance` (replaces`qk:CurrentOfTheAmountOfSubtance`)
   - `qk:RotationalFrequency` (units: `unit:Hz`, `unit:REV-PER-MIN`, `unit:REV-PER-HR`, `unit:REV-PER-SEC`)
   - `qk:VaporPermeability` (unit: `unit:KiloGM-PER-PA-SEC-M`)
