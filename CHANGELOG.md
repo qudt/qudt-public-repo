@@ -10,15 +10,21 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - New QuantityKinds
+  - `qk:OsmoticConcentration` by [Toby Broom](https://github.com/Toby-Broom/)
   - `qk:AmountOfCloudCover` by [Jeffrey Vervoort](https://github.com/Jeffrey-Vervoort-KNMI)
 - New Units
   - `unit:MegaTONNE-PER-YR` by [Jurek Müller](https://github.com/JurekMueller)
+  - `unit:OSM` by [Toby Broom](https://github.com/Toby-Broom/)
+  - `unit:MilliOSM-PER-KiloGM` by [Toby Broom](https://github.com/Toby-Broom/)
   - `unit:OKTA` by [Jeffrey Vervoort](https://github.com/Jeffrey-Vervoort-KNMI)
   - `unit:REV-PER-MIN-SEC` by [Vladimir Alexiev](https://github.com/VladimirAlexiev)
+- New QA Tests
+  - Added SHACL shapes for checking content under `src/` only
 
 ### Changed
 
 - Removed the vaem:revision triples that were causing retention of v2.1 strings in the URIs
+- `qudt:informativeReference` triples added/replaced by a link to IEC CDD generated based on `qudt:iec61360Code` triples by [Vladimir Alexiev](https://github.com/VladimirAlexiev)
 
 ### Fixed
 

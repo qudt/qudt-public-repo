@@ -41,13 +41,13 @@
             The build is executed as a series of 'lifecycle phases': https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html)
             Each plugin has an <execution> section that binds its execution to a lifecycle phase. (or it has a default lifecycle phase in which it runs)
             Here are the phases and the execution ids that are linked to them (executed in the order they appear in this file):
-                  validate                 defineAdditionalProperties, check-source-format
-                  initialize               delete-applicable-units, format-sources, copy-rdf, copy-docs, copy-root-files
+                  validate                 defineAdditionalProperties, check-source-format, shacl-validate-src
+                  initialize               format-sources, copy-rdf, copy-docs, copy-root-files
                   generate-sources         validate-shacl-files
                   process-sources          replace-version-placeholder
-                  generate-resources
+                  generate-resources       generate-iec-links
                   process-resources
-                  compile                  shacl-infer, merge-applicable-units
+                  compile                  shacl-infer-applicable-units, merge-applicable-units
                   process-classes
                   generate-test-sources
                   process-test-sources
@@ -117,7 +117,7 @@
                 <executions>
                     <execution>
                         <!-- infers qudt:applicableUnits and writes them to target/inferred/applicableUnits.ttl -->
-                        <id>shacl-infer</id>
+                        <id>shacl-infer-applicable-units</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>infer</goal>
@@ -136,7 +136,49 @@
                                     </data>
                                     <outputFile>target/inferred/applicableUnits.ttl</outputFile>
                                 </inference>
+                                <inference>
+                                    <shapes>
+                                        <include>src/build/inference/inferApplicableUnits.ttl</include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            src/main/rdf/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/inferred/applicableUnits-currency.ttl</outputFile>
+                                </inference>
                             </inferences>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--
+                        SHACL-validates the union of all ttl files in src/vocab and the No-OWL schema
+                        against the union of QA-Tests and No-OWL schema
+                        writes the validation report target/validation/validationReportSrc.ttl
+                        -->
+                        <id>shacl-validate-src</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>validate</goal>
+                        </goals>
+                        <configuration>
+                            <validations>
+                                <validation>
+                                    <!--skip>true</skip-->
+                                    <shapes>
+                                        <include>
+                                            src/main/rdf/validation/QUDT_SRC_QA_TESTS.ttl
+                                        </include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
+                                            src/main/rdf/vocab/**/*.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/validation/validationReportSrc.ttl</outputFile>
+                                </validation>
+                            </validations>
                         </configuration>
                     </execution>
                     <execution>
@@ -209,35 +251,6 @@
                 <executions>
                     <execution>
                         <!--
-                        deletes any qudt:applicableUnits triples from the quantitykinds **source** file.
-                        Note: this operation leaves the file unformatted (jena TTL Pretty output - nice, but
-                        not our format) Therefore, we need to format this file later using spotless.
-                        -->
-                        <id>delete-applicable-units</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>make</goal>
-                        </goals>
-                        <configuration>
-                            <products>
-                                <singleFile>
-                                    <input>
-                                        <include>
-                                            src/main/rdf/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl
-                                        </include>
-                                    </input>
-                                    <filters>
-                                        <exclude>
-                                            <predicate>qudt:applicableUnit</predicate>
-                                        </exclude>
-                                    </filters>
-                                    <outputFile>src/main/rdf/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</outputFile>
-                                </singleFile>
-                            </products>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!--
                         adds the qudt:applicableUnits triples we generated with SHACL to the quantitykinds target file.
                         -->
                         <id>merge-applicable-units</id>
@@ -256,6 +269,54 @@
                                     </input>
                                     <outputFile>target/dist/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</outputFile>
                                 </singleFile>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            target/inferred/applicableUnits-currency.ttl
+                                            target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl
+                                        </include>
+                                    </input>
+                                    <outputFile>target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl</outputFile>
+                                </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--
+                        generates links to IEC CDD
+                        -->
+                        <id>generate-iec-links</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <eachFile>
+                                    <replaceInputFiles>true</replaceInputFiles>
+                                    <input>
+                                        <include>target/dist/vocab/**/*.ttl</include>
+                                    </input>
+                                    <filters>
+                                        <sparqlUpdate>
+                                            prefix qudt:&lt;http://qudt.org/schema/qudt/&gt;
+                                            prefix xsd:&lt;http://www.w3.org/2001/XMLSchema#&gt;
+
+                                            insert {?x qudt:informativeReference ?new}
+                                            where {
+                                                ?x a ?type; qudt:iec61360Code ?irdi.
+                                                values (?type ?prefix) {
+                                                    (qudt:Unit         "https://cdd.iec.ch/cdd/iec62720/iec62720.nsf/Units/")
+                                                    (qudt:QuantityKind "https://cdd.iec.ch/cdd/iec61987/iec61987.nsf/ListsOfUnitsAllVersions/")
+                                                    (qudt:PhysicalConstant "https://cdd.iec.ch/cdd/iec61987/iec61987.nsf/ListsOfUnitsAllVersions/")
+                                                }
+                                                optional {?x qudt:informativeReference ?old filter(strstarts(str(?old),"https://cdd.iec.ch"))}
+                                                bind(replace(replace(str(?irdi),"/","-"),"#","%23") as ?irdi_new)
+                                                bind(strdt(concat(?prefix,?irdi_new),xsd:anyURI) as ?new)
+                                            }
+                                        </sparqlUpdate>
+                                    </filters>
+                                </eachFile>
                             </products>
                         </configuration>
                     </execution>
