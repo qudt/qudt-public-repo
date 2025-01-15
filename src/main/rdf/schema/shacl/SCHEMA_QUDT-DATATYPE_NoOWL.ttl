@@ -2,7 +2,6 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
@@ -325,7 +324,7 @@ qudt:CardinalityType
   prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Cardinality> ;
   rdfs:label "Cardinality Type" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
-  sh:in ( qudt:CT_COUNTABLY-INFINITE qudt:CT_FINITE ) .
+  sh:in ( qudt:CT_COUNTABLY-INFINITE qudt:CT_UNCOUNTABLE qudt:CT_FINITE ) .
 
 qudt:CartesianCoordinates
   a rdfs:Class, sh:NodeShape ;
@@ -454,17 +453,15 @@ qudt:Container
 
 qudt:CoordinateCenterType
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>An enumeration of coordinate centers for coordinate systems, such as:
+  dcterms:description """<p>An enumeration of coordinate centers for coordinate systems, such as:
    "Earth centered", "Mars centered", "Moon centered", "Sun centered",  and "Vehicle centered".
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Coordinate Center Type" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
   rdfs:subClassOf qudt:NominalScale ;
-  sh:in ( qudt.type:CC_MarsCentered qudt.type:CC_EarthCentered qudt.type:CC_MoonCentered
-    qudt.type:CC_VehicleCentered qudt.type:CC_SunCentered ) ;
-  skos:prefLabel "Coordinate center" ;
+  sh:in ( qudt:CCT_MarsCentered qudt:CCT_EarthCentered qudt:CCT_MoonCentered
+    qudt:CCT_VehicleCentered qudt:CCT_SunCentered ) ;
   skos:prefLabel "Coordinate center type" .
 
 qudt:CoordinateMember
@@ -1157,7 +1154,7 @@ qudt:MemoryOrderType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Memory order type" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
-  sh:in ( qudt.type:HighToLow qudt.type:LowToHigh ) .
+  sh:in ( qudt:HighToLow qudt:LowToHigh ) .
 
 qudt:ModalCue
   a rdfs:Class, sh:NodeShape ;
@@ -3107,7 +3104,7 @@ qudt:Array-dimensionality
 qudt:Array-dimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:DimensionVector ;
+  sh:class qudt:IntegerList ;
   sh:maxCount 1 ;
   sh:path qudt:dimensions .
 
@@ -3150,7 +3147,7 @@ qudt:ArrayType-dimensionality
 qudt:ArrayType-dimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:DimensionVector ;
+  sh:class qudt:IntegerList ;
   sh:maxCount 1 ;
   sh:path qudt:dimensions .
 
@@ -3265,6 +3262,12 @@ qudt:BitAligned
   dtype:literal "bit" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Bit Aligned" .
+
+qudt:BitEncoding
+  a qudt:BitEncodingType ;
+  qudt:bits 1 ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Bit Encoding" .
 
 qudt:BitField
   a rdfs:Datatype ;
@@ -3436,6 +3439,7 @@ qudt:Booklet
 
 qudt:BooleanEncoding
   a qudt:BooleanEncodingType ;
+  qudt:bits 1 ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Boolean Encoding" .
 
@@ -3540,9 +3544,31 @@ qudt:CRC32
   rdfs:label "CRC-32" ;
   rdfs:subClassOf xsd:integer .
 
+qudt:CT_COUNTABLY-INFINITE
+  a qudt:CardinalityType ;
+  dcterms:description "A set of numbers is called countably infinite if there is a way to enumerate them.  Formally this is done with a bijection function that associates each number in the set with exactly one of the positive integers.  The set of all fractions is also countably infinite.  In other words, any set $X$ that has the same cardinality as the set of the natural numbers, or $| X | \\; =  \\; | \\mathbb N | \\; = \\; \\aleph0$, is said to be a countably infinite set."^^qudt:LatexString ;
+  qudt:informativeReference "http://www.math.vanderbilt.edu/~schectex/courses/infinity.pdf"^^xsd:anyURI ;
+  qudt:literal "countable" ;
+  rdfs:isDefinedBy <file:///Users/ralphtq/git-qudt/qudt-public-repo/qudt> ;
+  rdfs:label "Countably Infinite Cardinality Type" .
+
+qudt:CT_FINITE
+  a qudt:CardinalityType ;
+  dcterms:description "Any set $X$ with cardinality less than that of the natural numbers, or $| X | \\\\; <  \\; | \\\\mathbb N | $, is said to be a finite set."^^qudt:LatexString ;
+  qudt:literal "finite" ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Finite Cardinality Type" .
+
+qudt:CT_UNCOUNTABLE
+  a qudt:CardinalityType ;
+  dcterms:description "Any set with cardinality greater than that of the natural numbers, or $| X | \\; >  \\; | \\mathbb N | $,  for example $| R| \\; =  \\;  c  \\; > |\\mathbb N |$, is said to be uncountable."^^qudt:LatexString ;
+  qudt:literal "uncountable" ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Uncountable Cardinality Type" .
+
 qudt:CharEncoding
   a qudt:BooleanEncodingType, qudt:CharEncodingType ;
-  dc:description "7 bits of 1 octet" ;
+  dcterms:description "7 bits of 1 octet" ;
   qudt:bytes 1 ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Char Encoding" .
@@ -4175,6 +4201,7 @@ qudt:ISO8601-UTCDateTime-BasicFormat
   a qudt:DateTimeStringEncodingType ;
   qudt:allowedPattern "[0-9]{4}[0-9]{2}[0-9]{2}T[0-9]{2}[0-9]{2}[0-9]{2}.[0-9]+Z" ;
   qudt:allowedPattern "[0-9]{4}[0-9]{2}[0-9]{2}T[0-9]{2}[0-9]{2}[0-9]{2}Z" ;
+  rdfs:isDefinedBy <file:///Users/ralphtq/git-qudt/qudt-public-repo/qudt> ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "ISO 8601 UTC Date Time - Basic Format" .
 
@@ -4263,6 +4290,7 @@ qudt:LIST
 qudt:LittleEndian
   a qudt:EndianType ;
   dtype:literal "little" ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Little Endian" .
 
 qudt:LongIntegerType-octets
@@ -4274,6 +4302,7 @@ qudt:LongIntegerType-octets
 qudt:LongUnsignedIntegerEncoding
   a qudt:IntegerEncodingType ;
   qudt:bytes 8 ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Long Unsigned Integer Encoding" .
 
 qudt:LowToHigh
@@ -4321,17 +4350,6 @@ qudt:MATRIX
   a qudt:MatrixType ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "MATRIX" .
-
-qudt:MATRIX-TYPE_2x4
-  a qudt:MatrixType ;
-  qudt:byRow true ;
-  qudt:columns 4 ;
-  qudt:dimensionality 2 ;
-  qudt:dimensions ( 2 4 ) ;
-  qudt:rows 2 ;
-  qudt:rows 4 ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Matrix type  2x4" .
 
 qudt:MULTi-DIMENSIONAL-ARRAY
   a qudt:MultiDimensionalArrayType ;
@@ -4572,6 +4590,13 @@ qudt:PARTIAL-ARRAY
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "PARTIAL ARRAY" .
 
+qudt:PartiallyOrdered
+  a qudt:OrderedType ;
+  qudt:literal "partial" ;
+  qudt:plainTextDescription "Partial ordered structure." ;
+  rdfs:isDefinedBy <file:///Users/ralphtq/git-qudt/qudt-public-repo/qudt> ;
+  rdfs:label "Partially Ordered" .
+
 qudt:Proceedings
   a qudt:PubEnumeratedType ;
   dtype:literal "proceedings" ;
@@ -4710,6 +4735,12 @@ qudt:ReferenceFrame-zCoordinateDefinition
   sh:maxCount 1 ;
   sh:path qudt:zCoordinateDefinition .
 
+qudt:SIGNED
+  a qudt:SignednessType ;
+  dtype:literal "signed" ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Signed" .
+
 qudt:STATE-SPACE-MATRIX
   a qudt:StateSpaceMatrixType ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -4841,11 +4872,13 @@ qudt:ScalarDatatype-rdfsDatatype
 qudt:ShortSignedIntegerEncoding
   a qudt:IntegerEncodingType ;
   qudt:bytes 2 ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Short Signed Integer Encoding" .
 
 qudt:ShortUnsignedIntegerEncoding
   a qudt:BooleanEncodingType, qudt:IntegerEncodingType ;
   qudt:bytes 2 ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Short Unsigned Integer Encoding" .
 
 qudt:SignedBigIntegerType-literal
@@ -4873,6 +4906,7 @@ qudt:SignedBigIntegerType-minInclusive
 qudt:SignedIntegerEncoding
   a qudt:IntegerEncodingType ;
   qudt:bytes 4 ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Signed Integer Encoding" .
 
 qudt:SignedLongIntegerType-abbreviation
@@ -4910,6 +4944,7 @@ qudt:SignedType-signedness
 qudt:SinglePrecisionRealEncoding
   a qudt:FloatingPointEncodingType ;
   qudt:bytes 32 ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Single Precision Real Encoding" .
 
 qudt:StandardsUnit
@@ -5013,18 +5048,9 @@ qudt:TABLE-COMPOSTION-SUBTREE-LIST-EXAMPLE_1
   qudt:element qudt:TABLE-COMPOSITION-SUBTREE-LIST-MEMBER_2 ;
   rdfs:label "TABLE-COMPOSTION-SUBTREES-EXAMPLE_1" .
 
-qudt:TABLE-TYPE_2x4
-  a qudt:TableType ;
-  qudt:byRow true ;
-  qudt:columns 4 ;
-  qudt:dimensionality 2 ;
-  qudt:dimensions ( 2 4 ) ;
-  qudt:rows 2 ;
-  rdfs:label "Table type  2x4" .
-
 qudt:TIME
   a qudt:TimeStringType ;
-  dc:description "Time in hh:mm:ss[Z|(+|-)hh:mm]format." ;
+  dcterms:description "Time in hh:mm:ss[Z|(+|-)hh:mm]format." ;
   dtype:literal "time" ;
   qudt:dimensionality 1 ;
   qudt:rdfsDatatype xsd:time ;
@@ -5117,6 +5143,13 @@ qudt:TimeSeriesArray-vector
   sh:minCount 1 ;
   sh:path qudt:vector .
 
+qudt:TotallyOrdered
+  a qudt:OrderedType ;
+  qudt:literal "total" ;
+  qudt:plainTextDescription "Totally ordered structure." ;
+  rdfs:isDefinedBy <file:///Users/ralphtq/git-qudt/qudt-public-repo/qudt> ;
+  rdfs:label "Totally Ordered" .
+
 qudt:True
   a qudt:BooleanStateType ;
   qudt:code "1" ;
@@ -5185,6 +5218,12 @@ qudt:UNARY-FUNCTION
   qudt:functionArity 1 ;
   rdfs:label "UNARY-FUNCTION" .
 
+qudt:UNSIGNED
+  a qudt:SignednessType ;
+  dtype:literal "unsigned" ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Unsigned" .
+
 qudt:UTC-DATETIME
   a qudt:DateStringType ;
   dcterms:description """
@@ -5213,45 +5252,17 @@ qudt:UTC-DAYTIME
 qudt:UTC-DayTime
   a rdfs:Datatype ;
   dcterms:description "YYYY-DDDThh:mm:ss.ddZ, where each character is an ASCII character using one octet with the following meanings: YYYY = Year in four-character subfield with values 0001-9999, DDD = Day of year in three-character subfield with values 001-365 or -366, T =  Calendar-Time separator, hh = Hour in two-character subfield with values 00-23,  mm = Minute in two-character subfield with values 00-59, ss = Second in two-character subfield with values 00-59 (-58 or -60 during leap seconds), dd = Decimal fraction of second in one- to n-character subfield, each d has values 0-9, and Z = time code terminator (optional)" ;
+  rdfs:comment "[0-9]{4}\\\\-[0-9]{3}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\\\.[0-9]{2}Z?" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "UTC Day time" ;
-  rdfs:seeAlso [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:string ;
-    owl:withRestrictions ( [
-      xsd:length 22 ;
-    ] [
-      xsd:pattern "[0-9]{4}\\\\-[0-9]{3}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\\\.[0-9]{2}Z?" ;
-    ] ) ;
-  ] ;
   rdfs:subClassOf xsd:string .
 
-qudt:UTF16-STRING
-  a qudt:StringUTF16 ;
-  dtype:literal "utf16" ;
-  qudt:dimensionality 1 ;
-  qudt:elementDatatype qudt:UTF16-CHAR ;
-  qudt:encoding qudt:UTF16-StringEncoding ;
-  rdfs:label "UTF16 String" .
-
-qudt:UTF16-StringEncoding
-  a qudt:StringEncodingType ;
-  rdfs:label "UTF-16 String" .
-
-qudt:UTF8-STRING
-  a qudt:StringUTF8 ;
-  dcterms:description "String consisting of UTF-8 characters"^^rdf:HTML ;
-  dtype:literal "utf8" ;
-  qudt:dimensionality 1 ;
-  qudt:elementDatatype qudt:UTF8-CHAR ;
-  qudt:encoding qudt:UTF8-StringEncoding ;
-  qudt:exactMatch qudt:STRING ;
-  rdfs:label "UTF8 String" .
-
-qudt:UTF8-StringEncoding
-  a qudt:StringEncodingType ;
-  qudt:bytes 8 ;
-  rdfs:label "UTF-8 Encoding" .
+qudt:Unordered
+  a qudt:OrderedType ;
+  qudt:literal "unordered" ;
+  qudt:plainTextDescription "Unordered structure." ;
+  rdfs:isDefinedBy <file:///Users/ralphtq/git-qudt/qudt-public-repo/qudt> ;
+  rdfs:label "Unordered" .
 
 qudt:Unpublished
   a qudt:PubEnumeratedType ;
@@ -5280,6 +5291,7 @@ qudt:UnsignedBigIntegerType-minInclusive
 qudt:UnsignedIntegerEncoding
   a qudt:IntegerEncodingType ;
   qudt:bytes 4 ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Unsigned Integer Encoding" .
 
 qudt:UnsignedLongIntegerType-maxInclusive
@@ -5491,7 +5503,6 @@ qudt:integerPercentage
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "integer percentage" ;
   rdfs:subClassOf xsd:integer .
-
 
 qudt:negative
   a qudt:Polarity ;
