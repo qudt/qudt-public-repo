@@ -6,7 +6,6 @@
 @prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
-@prefix qudt.type: <http://qudt.org/vocab/type/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix vaem: <http://www.linkedmodel.org/schema/vaem#> .
@@ -30,12 +29,13 @@
 qudt:AbstractDatatype
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p class="lm-para">An "Abstract Datatype" (ADT) is a specification of a set of data and the set of operations that can be performed on the data. 
+  <p>An "Abstract Datatype" (ADT) is a specification of a set of data and the set of operations that can be performed on the data. 
   Such a data type is abstract in the sense that it is independent of various concrete implementations. 
   The definition can be mathematical, or it can be programmed as an interface. 
   A first class ADT supports the creation of multiple instances of the ADT, and the interface normally provides a constructor,
-   which returns an abstract handle to new data, and several operations, 
-   which are functions accepting the abstract handle as an argument.</p>
+   which returns an abstract handle to new data, and several operations.
+  These are functions accepting the abstract handle as an argument.
+  </p>
   """^^rdf:HTML ;
   prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Abstract_data_type> ;
   prov:wasInfluencedBy <http://xlinux.nist.gov/dads/HTML/abstractDataType.html> ;
@@ -45,10 +45,7 @@ qudt:AbstractDatatype
 
 qudt:AerospaceCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  A sub-type of 'Coordinate system'. 
- 
-  """ ;
+  dcterms:description "A sub-type of 'Coordinate system'." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Aerospace Coordinate system" ;
   rdfs:subClassOf qudt:CoordinateSystem .
@@ -56,17 +53,17 @@ qudt:AerospaceCoordinateSystem
 qudt:AlgebraicDatatype
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-<p class="lm-para">An "Algebraic Datatype" is a datatype each of whose values are data from other data types wrapped in one of the constructors of the data type. 
+<p>An "Algebraic Datatype" is a datatype each of whose values are data from other data types wrapped in one of the constructors of the data type. 
 Any wrapped datum is an argument to the constructor. 
 In contrast to other data types, the constructor is not executed and the only way to operate on the data is to unwrap the constructor using pattern matching.
 </p>
-<p class="lm-para">The most common algebraic data type is a list with two constructors: Nil or [] for an empty list, and Cons (an abbreviation of constructor), 
+<p>The most common algebraic data type is a list with two constructors: Nil or [] for an empty list, and Cons (an abbreviation of constructor), 
  ::, or : for the combination of a new element with a shorter list (for example (Cons 1 '(2 3 4)) or 1:[2,3,4]).
 </p>
-<p class="lm-para">Special cases of algebraic types are product types i.e. records (only one constructor) and enumerated types (many constructors with no arguments). 
+<p>Special cases of algebraic types are product types i.e. records (only one constructor) and enumerated types (many constructors with no arguments). 
 Algebraic types are one kind of composite type (i.e. a type formed by combining other types).
 </p>
-<p class="lm-para">An algebraic data type may also be an abstract data type (ADT) if it is exported from a module without its constructors. 
+<p>An algebraic data type may also be an abstract data type (ADT) if it is exported from a module without its constructors. 
 Values of such a type can only be manipulated using functions defined in the same module as the type itself.
 </p>"""^^rdf:HTML ;
   prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Algebraic_data_type> ;
@@ -77,7 +74,10 @@ Values of such a type can only be manipulated using functions defined in the sam
 
 qudt:AlignmentType
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "Specifies how a physical data field is aligned. The alignment could be at a bit, byte or word boundary." ;
+  dcterms:description """
+  Specifies how a physical data field is aligned. 
+  The alignment could be at a bit, byte or word boundary.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Alignment type" ;
   sh:in ( qudt:BitAligned qudt:ByteAligned qudt:WordAligned ) .
@@ -85,10 +85,11 @@ qudt:AlignmentType
 qudt:Array
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>An array is represented as ordered entries of values arranged according to the dimensions given. 
+  <p>An <em>Array></em> is represented as ordered entries of values arranged according to the dimensions given. 
   The dimensions are given as a list of integers where each integer is the cardinality of each dimension. 
   The number of dimensions is specified in the attribute 'dimensionality'.
-  Optionally a reference can be made to a variable, whose values are the array entries. 
+  </p>
+  <p>Optionally a reference can be made to a variable, whose values are the array entries. 
   The data type of the array entries is an optional field, 'elementType', which points to a data type definition. 
   If the data type is given, then it applies to all elements.  
   If it is not given then the elements can be of different types for each position in the array.
@@ -97,10 +98,11 @@ qudt:Array
   The property 'type:typeMatrix' must refer to a matrix of types.  
   If a default value is given this can be used to place the appropriate value in a cell when an entry value is not known. 
   If no dimensionality or dimension vector is specified the array is under-specified but still legitimate as a place-holder for a data type.
-  </p>"""^^rdf:HTML ;
+  </p>
+  """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Array Type" ;
-  rdfs:subClassOf qudt:CompositeDatatype ;
+  rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:Array-byRow ;
   sh:property qudt:Array-dataOrder ;
   sh:property qudt:Array-dimensionality ;
@@ -114,26 +116,6 @@ qudt:ArrayDataOrderType
   rdfs:label "Array data order type" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
   sh:in ( qudt:ByColumn qudt:ByRow qudt:ByLeftMostIndex ) .
-
-qudt:ArrayIndex
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  An Array Index Type is a data type that specifies the properties of data structures that hold array indexes.
-  """ ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Array Index Type" ;
-  rdfs:subClassOf qudt:Vector ;
-  sh:property qudt:ArrayIndex-elementType .
-
-qudt:ArrayIndexType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>An <em>Array Index Type</em> is a data type that specifies the properties of data structures that hold array indexes.
-  </p>
-  """^^rdf:HTML ;
-  rdfs:label "Array Index Type" ;
-  rdfs:subClassOf qudt:VectorType ;
-  sh:property qudt:ArrayIndex-elementType .
 
 qudt:ArrayType
   a rdfs:Class, sh:NodeShape ;
@@ -151,6 +133,7 @@ qudt:ArrayType
   If a default value is given this can be used to place the appropriate value in a cell when an entry value is not known. 
   If no dimensionality or dimension vector is specified the array is under-specified but still legitimate as a place-holder for a data type.
   </p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Array Type" ;
   rdfs:subClassOf qudt:CompositeDatatype ;
   sh:property qudt:ArrayType-byRow ;
@@ -162,35 +145,24 @@ qudt:ArrayType
 qudt:AssociativeArray
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  An Associative Array (or Map) is an abstract data type composed of a collection of keys and a collection of values,
+  <p>An <em>Associative Array</em> (or <em>Map</em>) is an abstract data type composed of a collection of keys and a collection of values,
    where each key is associated with one value. 
   The operation of finding the value associated with a key is called a lookup or indexing,
    and this is the most important operation supported by an associative array.
   The relationship between a key and its value is sometimes called a mapping or binding.
-  """ ;
+  </p>
+  """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Associative Array" ;
   rdfs:seeAlso qudt:Map ;
   rdfs:subClassOf qudt:Collection .
-
-qudt:AssociativeArrayType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  An Associative Array (or Map) is an abstract data type composed of a collection of keys and a collection of values,
-   where each key is associated with one value. 
-  The operation of finding the value associated with a key is called a lookup or indexing,
-   and this is the most important operation supported by an associative array.
-  The relationship between a key and its value is sometimes called a mapping or binding.
-  """ ;
-  rdfs:label "Associative Array Type" ;
-  rdfs:seeAlso qudt:MapType ;
-  rdfs:subClassOf qudt:CollectionType .
 
 qudt:AuralCue
   a rdfs:Class, sh:NodeShape ;
   rdfs:comment """
   <p>An aural cue is a sound produced by a device or a system that is used to alert personnel of of an advisory, cautionary, warning, or emergency state.
   </p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Aural Cue" ;
   rdfs:subClassOf qudt:ModalCue ;
   sh:property qudt:AuralCue-sound .
@@ -201,8 +173,7 @@ qudt:AxialOrientationType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Axial Orientation Type" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
-  sh:in ( qudt.type:PositiveZ qudt.type:PositiveY qudt.type:NegativeY qudt.type:NegativeZ
-    qudt.type:PositiveX qudt.type:NegativeX ) .
+  sh:in ( qudt:PositiveZ qudt:PositiveY qudt:NegativeY qudt:NegativeZ qudt:PositiveX qudt:NegativeX ) .
 
 qudt:BalancedTree
   a rdfs:Class, sh:NodeShape ;
@@ -210,21 +181,11 @@ qudt:BalancedTree
   <p>A Balanced Tree Type is a data type that defines the properties of data structures that represent balanced trees. 
   A balanced tree is a tree where no leaf is much farther away from the root than any other leaf. 
   Different balancing schemes allow different definitions of "much farther" and different amounts of work to keep them balanced.
-  </p>"""^^rdf:HTML ;
+  </p>
+  """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Balanced Tree Type" ;
   rdfs:subClassOf qudt:Tree ;
-  sh:property qudt:BalancedTree-maxDepth .
-
-qudt:BalancedTreeType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A Balanced Tree Type is a data type that defines the properties of data structures that represent balanced trees. 
-  A balanced tree is a tree where no leaf is much farther away from the root than any other leaf. 
-  Different balancing schemes allow different definitions of "much farther" and different amounts of work to keep them balanced.
-  </p>"""^^rdf:HTML ;
-  rdfs:label "Balanced Tree Type" ;
-  rdfs:subClassOf qudt:TreeType ;
   sh:property qudt:BalancedTree-maxDepth .
 
 qudt:BigIntegerType
@@ -250,15 +211,6 @@ qudt:BinaryTree
   rdfs:label "Binary Tree Type" ;
   rdfs:subClassOf qudt:Tree .
 
-qudt:BinaryTreeType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A Binary Tree Type is a data type that defines the properties of data structures that represent binary trees. 
-  A binary tree is a tree in which each node has at most 2 children.
-  </p>"""^^rdf:HTML ;
-  rdfs:label "Binary Tree Type" ;
-  rdfs:subClassOf qudt:TreeType .
-
 qudt:BitEncodingType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
@@ -276,7 +228,9 @@ qudt:BitFieldType
   dcterms:description """
   <p>A bit field is a common idiom used in computer programming to store a set of Boolean datatype flags compactly, as a series of bits. 
   The bit field is stored in an integral type of known, fixed bit-width. 
-  Each Boolean flag is stored in a separate bit. Usually the source code will define a set of constants, each a power of two, that semantically associate each individual bit with its respective Boolean flag. 
+  Each Boolean flag is stored in a separate bit. 
+  Usually the source code will define a set of constants, each a power of two,
+   that semantically associate each individual bit with its respective Boolean flag. 
   The bitwise operators and, or, and not are used in combination to set, reset and test the flags.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -315,9 +269,9 @@ qudt:ByteEncodingType
 qudt:CardinalityType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p class="lm-para">In mathematics, the cardinality of a set is a measure of the number of elements of the set.  
+  <p>In mathematics, the cardinality of a set is a measure of the number of elements of the set.  
   For example, the set <em>A = {2, 4, 6}</em> contains 3 elements, and therefore <em>A</em> has a cardinality of 3. 
-  There are two approaches to cardinality – one which compares sets directly using bijections and injections,
+  There are two approaches to cardinality: one which compares sets directly using bijections and injections,
    and another which uses cardinal numbers.
   </p>"""^^rdf:HTML ;
   prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Cardinal_number> ;
@@ -367,9 +321,10 @@ qudt:CharacterType
 qudt:Collection
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A collection is a grouping of some variable number of zero or more data items that need to be operated upon together in some controlled fashion. 
+  <p>A <em>Collection</em> is a group of zero or more data items that need to be operated upon together in some controlled fashion. 
   Generally, the data items will all share the same data type or are derived from some common ancestor data type.
-  </p>"""^^rdf:HTML ;
+  </p>
+  """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Collection Type" ;
   rdfs:subClassOf qudt:AbstractDatatype ;
@@ -401,8 +356,7 @@ qudt:CompositeDataStructure
 qudt:CompositeDatatype
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>Composite types are datatypes which can be constructed in a programming language out of that language's basic primitive types and other composite types. 
-  The act of constructing a composite type is known as composition.
+  <p>A <em>Composite Datatype</em> is a datatype that is constructed from basic primitive types and other composite types. 
   </p>"""^^rdf:HTML ;
   prov:wasInfluencedBy <https://en.wikipedia.org/wiki/List_of_data_structures> ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -432,16 +386,10 @@ qudt:CompositionTreeType
   rdfs:subClassOf qudt:TreeType ;
   sh:property qudt:CompositionTreeType-compositionFunction .
 
-qudt:Concept
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "QUDT Concept" ;
-  rdfs:subClassOf rdfs:Resource .
-
 qudt:Container
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A container is a class, a data structure, or an abstract data type (ADT) whose instances are collections of other objects. 
+  <p>A <em>Container</em> is a data structure, or an abstract data type (ADT) whose instances are collections of other objects. 
   They are used to store objects in an organized way following specific access rules.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -1091,7 +1039,7 @@ qudt:MajorMinorType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Major minor type" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
-  sh:in ( qudt.type:Minor qudt.type:Major ) .
+  sh:in ( qudt:Minor qudt:Major ) .
 
 qudt:Map
   a rdfs:Class, sh:NodeShape ;
@@ -1100,13 +1048,6 @@ qudt:Map
   rdfs:label "Map Type" ;
   rdfs:seeAlso qudt:AssociativeArray ;
   rdfs:subClassOf qudt:Collection .
-
-qudt:MapType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A Map Type is an abstract data type that defines the properties of map data structures. A Map (or Associative Array) is an abstract data structure composed of a collection of keys and a collection of values, where each key is associated with one value. The operation of finding the value associated with a key is called a lookup or indexing, and this is the most important operation supported by an associative array. The relationship between a key and its value is sometimes called a mapping or binding." ;
-  rdfs:label "Map Type" ;
-  rdfs:seeAlso qudt:AssociativeArrayType ;
-  rdfs:subClassOf qudt:CollectionType .
 
 qudt:MarsCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
@@ -1140,7 +1081,7 @@ qudt:Matrix
   a rdfs:Class, sh:NodeShape ;
   dcterms:description "A Matrix Type is a data type that specifies the properties of data structures that hold matricies." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Matrix Type" ;
+  rdfs:label "Matrix" ;
   rdfs:subClassOf qudt:MultiDimensionalArray .
 
 qudt:MatrixType
@@ -1363,7 +1304,7 @@ qudt:PaddingType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Padding type" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
-  sh:in ( qudt.type:PadWithOnes qudt.type:PadWithZeros qudt.type:PadWithAny ) .
+  sh:in ( qudt:PadWithOnes qudt:PadWithZeros qudt:PadWithAny ) .
 
 qudt:ParameterModifiabilityType
   a rdfs:Class, sh:NodeShape ;
@@ -1403,33 +1344,29 @@ qudt:PolarCoordinatesType
   <p>A set of  variables which fix a geometric object. 
   If the coordinates of a point P are determined by the distance from P to the origin and the angle subtended by the radial vector at P and a fixed axis, they are known as polar coordinates. 
   Typically, the angle is measured with respect to the x-axis." ;
-  </p>"""^^rdf:HTML ;
+  </p>
+  """^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Polar Coordinate System Type" ;
   rdfs:subClassOf qudt:CoordinateSystemType .
 
 qudt:Polarity
   a rdfs:Class, sh:NodeShape ;
-  rdfs:comment """
+  dcterms:description """
   A "Tagged Enumeration" with the following instance(s): "negative", "positive".
   """ ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Polarity" ;
   rdfs:subClassOf qudt:EnumeratedValue .
 
 qudt:PositiveIntegerType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description "Positive Integers are integers that are either non-zero and non-negative." ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Positive Integer Type" ;
   rdfs:subClassOf qudt:IntegerDatatype ;
   rdfs:subClassOf qudt:UnsignedType ;
   sh:disjoint qudt:SignedIntegerType .
-
-qudt:PubEnumeratedType
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Pub enumerated type" ;
-  rdfs:subClassOf qudt:EnumeratedValue ;
-  sh:in ( qudt:Article qudt:Book qudt:InBook qudt:InProceedings qudt:Proceedings qudt:Unpublished
-    qudt:TechReport qudt:Manual qudt:InCollection qudt:Conference qudt:Booklet qudt:Misc ) .
 
 qudt:QuantityValueType
   a rdfs:Class, sh:NodeShape ;
@@ -1451,6 +1388,7 @@ qudt:RawValueTupleMember
 
 qudt:RawValueTupleMemberType
   a rdfs:Class, sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Raw value tuple member type" ;
   rdfs:subClassOf qudt:TupleMemberType ;
   sh:property qudt:RawValueTupleMember-elementType .
@@ -1462,7 +1400,8 @@ qudt:RealDatatype
   Different bases yield different approximations to real numbers, and conversion between them is limited in accuracy.
   Four floating-point types are defined in 'IEEE-754 Standard for Binary Floating-Point'. 
   These types are 'single', 'extended single', 'double', and 'extended double'.
-  </p>"""^^rdf:HTML ;
+  </p>
+  """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Real Datatype" ;
   rdfs:subClassOf qudt:NumericType ;
@@ -1473,7 +1412,8 @@ qudt:RealDatatype
 qudt:RealDoublePrecisionType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A real double precision data type specifies how a real number, or an approximation of a real number is stored in memory that occupies two words in computer memory, where the byte length of a word depends on machine address size of the computer processor. 
+  <p>A real double precision data type specifies how a real number, or an approximation of a real number is stored in memory.
+  Typically this occupies two words in computer memory, where the byte length of a word depends on machine address size of the computer processor. 
   For example, on 32-bit machine architectures, a word is four bytes.
   An example of a real double precision data type specification is the IEEE 754 standard for encoding binary or decimal floating point numbers in 8 bytes for storage on 32-bit machine architectures.
   </p>"""^^rdf:HTML ;
@@ -1485,11 +1425,13 @@ qudt:RealDoublePrecisionType
 qudt:RealNumberType
   a rdfs:Class, sh:NodeShape ;
   rdfs:comment """
-  <p>"Real Number Type" is the class of data values that approximate real numbers in finite precision. 
+  <p>A <em>Real Number Type</em> is the class of data values that approximate real numbers in finite precision. 
   Often, such values are expressed in "mantissa, base, exponent" form. 
   Any rational number can be expressed in the form m*b^<sup>e</sup>, where m (the mantissa), b (the base), and e (the exponent) are integers. 
   Typically, b is chosen to be either 2 or 10, and then the values of m and e are determined given the choice of base.
-  </p>"""^^rdf:HTML ;
+  </p>
+  """^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Real number type" ;
   rdfs:subClassOf qudt:RealDatatype .
 
@@ -1504,7 +1446,8 @@ qudt:RealSinglePrecisionType
   For example, on 32-bit machine architectures, a word is four bytes. 
   An example of a real single precision data type specification is the IEEE 754 standard for encoding binary
    or decimal floating point numbers in 4 bytes for storage on 32-bit machine architectures.
-  </p>"""^^rdf:HTML ;
+  </p>
+  """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Real Single Precision Type" ;
   rdfs:subClassOf qudt:RealDatatype ;
@@ -1535,11 +1478,12 @@ qudt:ReferenceDatatype
 qudt:ReferenceFrame
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  A reference frame (or frame of reference) in physics, may refer to a coordinate system or set of axes.
+  <p> A <em>Reference Frame</em> (or "frame of reference") in physics, may refer to a coordinate system or set of axes.
 The frame serves as the datum to measure the position, orientation, and other properties of objects in it.
 Reference frame may refer to an observational reference frame tied to the state of motion of an observer. 
 Reference frame may also refer to both an observational reference frame and an attached coordinate system as a unit.
-""" ;
+</p>
+"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Reference Frame" ;
   rdfs:subClassOf qudt:Concept ;
@@ -1580,13 +1524,6 @@ qudt:ScalarDatatype
 
 qudt:Sequence
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A Sequence is a \"Structured Datatype\"." ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Sequence" ;
-  rdfs:subClassOf qudt:Collection .
-
-qudt:SequenceType
-  a rdfs:Class, sh:NodeShape ;
   dcterms:description """
   <p>A <em>Sequence</em> is an enumerated collection of objects in which repetitions are allowed. 
   Like a set, it contains members (also called elements, or terms). 
@@ -1614,17 +1551,6 @@ qudt:Set
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Set Type" ;
   rdfs:subClassOf qudt:Collection .
-
-qudt:SetType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Set Type</em> is an abstract data type that defines the properties of sets. 
-  A set is a collection (container) of certain values, without any particular order, and no repeated values. 
-  It corresponds with a finite set in mathematics.
-  </p>
-  """^^rdf:HTML ;
-  rdfs:label "Set Type" ;
-  rdfs:subClassOf qudt:CollectionType .
 
 qudt:ShortIntegerType
   a rdfs:Class, sh:NodeShape ;
@@ -1843,13 +1769,9 @@ qudt:StringUTF8
 
 qudt:StructuredDatatype
   a rdfs:Class, sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Structured Datatype" ;
   sh:property qudt:StructuredDatatype-elementType .
-
-qudt:SubjectArea
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:comment "A \"Enumeration Literal\"." ;
-  rdfs:label "Subject Area" ;
-  rdfs:subClassOf owl:Thing .
 
 qudt:Table
   a rdfs:Class, sh:NodeShape ;
@@ -1875,6 +1797,7 @@ qudt:TableType
   The precise conventions and terminology for describing tables varies depending on the context. 
   Moreover, tables differ significantly in variety, structure, flexibility, notation, representation and use.
   """ ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Table Type" ;
   rdfs:subClassOf qudt:ArrayType ;
   sh:property qudt:Table-byRow ;
@@ -1887,27 +1810,33 @@ qudt:TaggedEnumeration
   dcterms:description "An enumeration where each literal  has a tag that is a non-negative integer. These enumerations are likely to have their literals encoded - hence the need for the tag." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Tagged Enumeration" ;
-  rdfs:seeAlso [
-    a rdfs:Class, sh:NodeShape ;
-    owl:intersectionOf ( qudt:Enumeration [
-      a owl:Restriction ;
-      owl:cardinality 1 ;
-      owl:onProperty dtype:code ;
-    ] ) ;
-  ] ;
   rdfs:subClassOf qudt:Enumeration ;
   sh:property qudt:TaggedEnumeration-code .
 
 qudt:TextStringType
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A text string. Encodings can be specified as subclass or in connection to character arrays in Structured Datatypes." ;
+  dcterms:description """
+  A text string. Encodings can be specified as subclass or in connection to character arrays in Structured Datatypes.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Text String Type" ;
   rdfs:subClassOf qudt:StringType .
 
 qudt:ThreeBodyRotatingCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "The lunar coordinate systems are primarily used when operating in close proximity to the Moon. There are, however, a few additional coordinate systems that are also useful when analyzing (and depicting) trajectories in the vicinity of the Earth-Moon system. They are rotating coordinate systems associated with two different three-body systems: the Sun-Earth-spacecraft system and the Earth-Moon-spacecraft system. The Sun-Earth and Earth-Moon rotating coordinate frames are defined as follows. The pole vector or Z-axis of the coordinate frame is set equal to the instantaneous orbit normal of the secondary (smaller) body about the primary (larger) body and the X-axis is set equal to the vector from the primary body center of mass (CM) to the secondary body CM. The X-axis rotates at a rate equal to the instantaneous rotation rate of the secondary body about the primary body." ;
+  dcterms:description """
+  <p>A <em>Three Body Rotating Coordinate System</em> is one that is associated with two different three-body systems.
+  For example, the Sun-Earth-spacecraft system and the Earth-Moon-spacecraft system.
+  </p>
+  <p>The lunar coordinate systems are primarily used when operating in close proximity to the Moon. 
+  There are, however, a few additional coordinate systems that are also useful when analyzing (and depicting) trajectories in the vicinity of the Earth-Moon system.  
+  The Sun-Earth and Earth-Moon rotating coordinate frames are defined as follows: 
+  </p>
+  <p>The pole vector or Z-axis of the coordinate frame is set equal to the instantaneous orbit normal of the secondary (smaller) body about the primary (larger) body.
+  The X-axis is set equal to the vector from the primary body center of mass (CM) to the secondary body CM. 
+  The X-axis rotates at a rate equal to the instantaneous rotation rate of the secondary body about the primary body.
+  </p>
+  """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Three Body Rotating Coordinate System Type" ;
   rdfs:subClassOf qudt:AerospaceCoordinateSystem .
@@ -3115,14 +3044,6 @@ qudt:Array-typeMatrix
   sh:maxCount 1 ;
   sh:path qudt:typeMatrix .
 
-qudt:ArrayIndex-elementType
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:datatype xsd:nonNegativeInteger ;
-  sh:hasValue qudt.type:UNSIGNED-INTEGER ;
-  sh:hasValue qudt:UNSIGNED-INTEGER ;
-  sh:path qudt:elementDatatype .
-
 qudt:ArrayType-byRow
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -3158,12 +3079,6 @@ qudt:ArrayType-typeMatrix
   sh:maxCount 1 ;
   sh:path qudt:typeMatrix .
 
-qudt:Article
-  a qudt:PubEnumeratedType ;
-  dtype:literal "article" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Pub article type" .
-
 qudt:AuralCue-sound
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -3177,57 +3092,6 @@ qudt:AuralCueEnumeration-defaultValue
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:AuralCue ;
   sh:path qudt:defaultValue .
-
-qudt:BOOLEAN
-  a qudt:BooleanType ;
-  dcterms:description """
-  <p>In computer science, the Boolean or logical data type is a data type,
-   having two values (usually denoted true and false), intended to represent the truth values of logic and Boolean algebra. 
-  The Boolean data type is the primary result of conditional statements,
-   which allow different actions and change control flow depending on whether a programmer-specified boolean condition evaluates to true or false.
-  </p>
-  """^^rdf:HTML ;
-  dtype:literal "boolean" ;
-  prov:wasInfluencedBy "http://en.wikipedia.org/wiki/Boolean%5Fdata%5Ftype"^^xsd:anyURI ;
-  prov:wasInfluencedBy "http://msdn.microsoft.com/en-us/library/aa275635(v=sql.80).aspx"^^xsd:anyURI ;
-  qudt:ansiSQLName "BOOLEAN" ;
-  qudt:encoding qudt:BooleanEncoding ;
-  qudt:javaName "boolean" ;
-  qudt:jsName "Boolean()" ;
-  qudt:microsoftSQLServerName "bit" ;
-  qudt:mySQLName "BOOL" ;
-  qudt:mySQLName "BOOLEAN" ;
-  qudt:mySQLName "TINYINT(1)" ;
-  qudt:odbcName "SQL_BIT" ;
-  qudt:oleDBName "DBTYPE_BOOL" ;
-  qudt:oracleSQLName "RAW(1)" ;
-  qudt:protocolBuffersName "bool" ;
-  qudt:pythonName "bool" ;
-  qudt:rdfsDatatype xsd:boolean ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "BOOLEAN" .
-
-qudt:BYTE
-  a qudt:SignedShortIntegerType ;
-  dcterms:description """
-  <p>The byte data type is an 8-bit signed two's complement integer. 
-  It has a minimum value of -128 and a maximum value of 127 (inclusive). 
-  The byte data type can be useful for saving memory in large arrays, where the memory savings actually matters. 
-  They can also be used in place of int where their limits help to clarify your code; the fact that a variable's range is limited can serve as a form of documentation.
-  </p>
-  """^^rdf:HTML ;
-  dtype:literal "byte" ;
-  prov:wasInfluencedBy "http://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html"^^xsd:anyURI ;
-  qudt:abbreviation "SI8" ;
-  qudt:cName "Byte" ;
-  qudt:encoding qudt:OctetEncoding ;
-  qudt:maxInclusive 127 ;
-  qudt:minInclusive -128 ;
-  qudt:octets 1 ;
-  qudt:rdfsDatatype xsd:byte ;
-  qudt:signedness qudt:SIGNED ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Byte" .
 
 qudt:BalancedTree-maxDepth
   a sh:PropertyShape ;
@@ -3275,148 +3139,6 @@ qudt:BitField
   rdfs:label "bitfield" ;
   rdfs:subClassOf xsd:string .
 
-qudt:BitField01
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B1" ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf1" ;
-  qudt:bits 1 ;
-  qudt:mySQLName "BIT(1)" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Bit Field of 1 bit" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField02
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B2" ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf2" ;
-  qudt:bits 2 ;
-  qudt:mySQLName "BIT(2)" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Bit Field of 2 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField03
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B3" ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf3" ;
-  qudt:bits 3 ;
-  qudt:mySQLName "BIT(3)" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Bit Field of 3 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField04
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B4" ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf4" ;
-  qudt:bits 4 ;
-  qudt:mySQLName "BIT(4)" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Bit Field of 4 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField05
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B5" ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf5" ;
-  qudt:bits 5 ;
-  qudt:mySQLName "BIT(5)" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Bit Field of 5 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField06
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B6" ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf6" ;
-  qudt:bits 6 ;
-  qudt:mySQLName "BIT(6)" ;
-  qudt:rdfsDatatype qudt:BitField06 ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Bit Field of 6 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField07
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B7" ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf7" ;
-  qudt:bits 7 ;
-  qudt:mySQLName "BIT(7)" ;
-  qudt:rdfsDatatype qudt:BitField07 ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Bit Field of 7 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField08
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B8" ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf8" ;
-  qudt:bits 8 ;
-  qudt:mySQLName "BIT(8)" ;
-  qudt:rdfsDatatype qudt:BitField08 ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Bit Field of 8 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField09
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B9" ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf9" ;
-  qudt:bits 9 ;
-  qudt:mySQLName "BIT(9)" ;
-  qudt:rdfsDatatype qudt:BitField09 ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Bit Field of 9 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField10
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B10" ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf10" ;
-  qudt:bitOrder qudt:BigEndian ;
-  qudt:bits 10 ;
-  qudt:byteOrder qudt:BigEndian ;
-  qudt:mySQLName "BIT(10)" ;
-  qudt:rdfsDatatype qudt:BitField10 ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Bit Field Of 10 Bits" ;
-  rdfs:subClassOf qudt:BitField ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField11
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B11" ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf11" ;
-  qudt:bits 11 ;
-  qudt:mySQLName "BIT(11)" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Bit Field Of 11 Bits" ;
-  rdfs:subClassOf qudt:BitField ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField12
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B12" ;
-  qudt:abbreviation "bf12" ;
-  qudt:bits 12 ;
-  qudt:mySQLName "BIT(12)" ;
-  qudt:rdfsDatatype qudt:BitField12 ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Bit Field of 12 bits" ;
-  rdfs:subClassOf qudt:BitField ;
-  rdfs:subClassOf rdfs:Literal .
-
 qudt:BitFieldType-encodedValue
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -3424,18 +3146,6 @@ qudt:BitFieldType-encodedValue
   sh:maxCount 1 ;
   sh:minCount 0 ;
   sh:path qudt:encodedValue .
-
-qudt:Book
-  a qudt:PubEnumeratedType ;
-  dtype:literal "book" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Pub book type" .
-
-qudt:Booklet
-  a qudt:PubEnumeratedType ;
-  dtype:literal "booklet" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Pub booklet type" .
 
 qudt:BooleanEncoding
   a qudt:BooleanEncodingType ;
@@ -3561,7 +3271,11 @@ qudt:CT_FINITE
 
 qudt:CT_UNCOUNTABLE
   a qudt:CardinalityType ;
-  dcterms:description "Any set with cardinality greater than that of the natural numbers, or $| X | \\; >  \\; | \\mathbb N | $,  for example $| R| \\; =  \\;  c  \\; > |\\mathbb N |$, is said to be uncountable."^^qudt:LatexString ;
+  dcterms:description """
+  Any set with cardinality greater than that of the natural numbers,
+   or $| X | \\; >  \\; | \\mathbb N | $,
+   for example $| R| \\; =  \\;  c  \\; > |\\mathbb N |$, is said to be uncountable.
+  """^^qudt:LatexString ;
   qudt:literal "uncountable" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Uncountable Cardinality Type" .
@@ -3644,12 +3358,6 @@ qudt:CompositionTreeType-compositionFunction
   sh:maxCount 1 ;
   sh:minCount 1 ;
   sh:path qudt:function .
-
-qudt:Conference
-  a qudt:PubEnumeratedType ;
-  dtype:literal "conference" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Pub techreport type" .
 
 qudt:Container-elementTypeCount
   a sh:PropertyShape ;
@@ -3791,36 +3499,6 @@ qudt:Coordinates-elementType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:CoordinateMember ;
   sh:path qudt:elementDatatype .
-
-qudt:DATE
-  a qudt:DateStringType ;
-  dcterms:description "Provides the date expressed in year, month and day."^^rdf:HTML ;
-  dtype:literal "date" ;
-  qudt:dimensionality 1 ;
-  qudt:encodingDescription "YYYY:MM:DD, where YYYY is a 4 digit year, MM is a 2 digit month and DD is a 2 digit day." ;
-  qudt:rdfsDatatype xsd:date ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Date" .
-
-qudt:DATETIME
-  a qudt:DateStringType ;
-  dcterms:description "A time stamp encoded as a string 'YYYY-MM-DDThh:mm:ss[.dd]' or 'YYYY-DDDThh:mm:ss[.dd]', where 'YYYY' is the year, 'MM' is the two-digit month, 'DD' is the two-digit day, 'DDD' is the three digit day of year, 'T' is constant, 'hh:mm:ss[.dd]' is the UTC time in hours, minutes, seconds, and optional fractional seconds. As many 'd' characters to the right of the period as required may be used to obtain the required precision. All fields require leading zeros."^^rdf:HTML ;
-  dtype:literal "datetime" ;
-  qudt:dimensionality 1 ;
-  qudt:exactMatch qudt:UTC-DATETIME ;
-  qudt:rdfsDatatype xsd:dateTime ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Date Time" .
-
-qudt:DECIMAL
-  a qudt:NumericType ;
-  dtype:literal "numeric" ;
-  qudt:ansiSQLName "DECIMAL(p,s)" ;
-  qudt:odbcName "SQL_DECIMAL(p,s)" ;
-  qudt:oracleSQLName "NUMBER(p,s)" ;
-  qudt:rdfsDatatype xsd:decimal ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Decimal" .
 
 qudt:DataElement-type
   a sh:PropertyShape ;
@@ -4002,7 +3680,7 @@ qudt:EarthCoordinateSystem-coordinateCenter
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:CoordinateCenterType ;
-  sh:hasValue qudt.type:CC_EarthCentered ;
+  sh:hasValue qudt:CC_EarthCentered ;
   sh:path qudt:coordinateCenter .
 
 qudt:Encoding-bits
@@ -4049,19 +3727,6 @@ qudt:Enumeration-value
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:EnumeratedValue ;
   sh:path dtype:value .
-
-qudt:FALSE
-  a qudt:BooleanTypeEnumeratedValue ;
-  dtype:literal "false" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "False" .
-
-qudt:FLAG
-  a qudt:BooleanType ;
-  dtype:literal "flag" ;
-  qudt:rdfsDatatype xsd:boolean ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "FLAG" .
 
 qudt:FT_INERTIAL
   a qudt:FrameType ;
@@ -4137,19 +3802,6 @@ qudt:FunctionDatatype-returnType
   sh:minCount 0 ;
   sh:path qudt:returnType .
 
-qudt:HEAP
-  a qudt:HeapType ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "HEAP" .
-
-qudt:HEXBINARY
-  a qudt:HexBinaryType ;
-  dtype:literal "hexbinary" ;
-  qudt:dimensionality 1 ;
-  qudt:rdfsDatatype qudt:hexbinary ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "HEXBINARY" .
-
 qudt:HexBinaryType-length
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -4190,13 +3842,6 @@ qudt:IEEE754_1985RealEncoding
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "IEEE 754 1985 Real Encoding" .
 
-qudt:IERS-TN-32-2004
-  a qudt:Citation ;
-  dcterms:description "IERS Conventions (2003), D. D. McCarthy and Gérard Petit (eds.), IERS Technical Note No. 32, 2004; http://www.iers.org/iers/publications/tn/tn32."^^rdf:HTML ;
-  qudt:url "http://www.iers.org/iers/publications/tn/tn32."^^xsd:anyURI ;
-  rdfs:label "IERS-TN-32-2004" ;
-  skos:prefLabel "IERS-TN-32-2004" .
-
 qudt:ISO8601-UTCDateTime-BasicFormat
   a qudt:DateTimeStringEncodingType ;
   qudt:allowedPattern "[0-9]{4}[0-9]{2}[0-9]{2}T[0-9]{2}[0-9]{2}[0-9]{2}.[0-9]+Z" ;
@@ -4218,28 +3863,10 @@ qudt:IconicCueEnumeration-defaultValue
   sh:class qudt:IconicCue ;
   sh:path qudt:defaultValue .
 
-qudt:InBook
-  a qudt:PubEnumeratedType ;
-  dtype:literal "inbook" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Pub inbook type" .
-
-qudt:InCollection
-  a qudt:PubEnumeratedType ;
-  dtype:literal "incollection" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Pub incollection type" .
-
-qudt:InProceedings
-  a qudt:PubEnumeratedType ;
-  dtype:literal "inproceedings" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Pub inproceedings type" .
-
 qudt:InertialCoordinateFrame-frameType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:hasValue qudt.type:FT_NON-ROTATING ;
+  sh:hasValue qudt:FT_NON-ROTATING ;
   sh:path qudt:frameType .
 
 qudt:IntegerList
@@ -4282,11 +3909,6 @@ qudt:KinestheticCueEnumeration-defaultValue
   sh:class qudt:KinestheticCue ;
   sh:path qudt:defaultValue .
 
-qudt:LIST
-  a qudt:List ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "LIST" .
-
 qudt:LittleEndian
   a qudt:EndianType ;
   dtype:literal "little" ;
@@ -4313,7 +3935,7 @@ qudt:LowToHigh
 qudt:LunarCoordinateSystem-coordinateCenter
   a sh:PropertyShape ;
   sh:class qudt:CoordinateCenterType ;
-  sh:hasValue qudt.type:CC_MoonCentered ;
+  sh:hasValue qudt:CC_MoonCentered ;
   sh:path qudt:coordinateCenter .
 
 qudt:LunarCoordinateSystem-realization
@@ -4341,36 +3963,12 @@ qudt:LunarCoordinateSystem-zAxisDefinition
   sh:maxCount 1 ;
   sh:path qudt:zAxisDefinition .
 
-qudt:MASS-PROPERTIES-ARRAY
-  a qudt:MassPropertiesArrayType ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "MASS PROPERTIES ARRAY" .
-
-qudt:MATRIX
-  a qudt:MatrixType ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "MATRIX" .
-
-qudt:MULTi-DIMENSIONAL-ARRAY
-  a qudt:MultiDimensionalArrayType ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "MULTI-DIMENSIONAL ARRAY" .
-
-qudt:Manual
-  a qudt:PubEnumeratedType ;
-  dtype:literal "manual" ;
-  rdfs:label "Pub manual type" .
-
 qudt:MarsCoordinateSystem-coordinateCenter
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:CoordinateCenterType ;
-  sh:hasValue qudt.type:CC_MarsCentered ;
+  sh:hasValue qudt:CC_MarsCentered ;
   sh:path qudt:coordinateCenter .
-
-qudt:Misc
-  a qudt:PubEnumeratedType ;
-  dtype:literal "misc" ;
-  rdfs:label "Pub misc type" .
 
 qudt:ModalCue-duration
   a sh:PropertyShape ;
@@ -4455,15 +4053,6 @@ qudt:N-Tuple-elementType
   sh:minCount 0 ;
   sh:path qudt:elementDatatype .
 
-qudt:NUMERIC
-  a qudt:NumericType ;
-  dtype:literal "numeric" ;
-  qudt:ansiSQLName "DECIMAL(p,s)" ;
-  qudt:odbcName "SQL_DECIMAL(p,s)" ;
-  qudt:oracleSQLName "NUMBER(p,s)" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Numeric" .
-
 qudt:No
   a qudt:YesNoType ;
   qudt:literal "N" ;
@@ -4492,7 +4081,7 @@ qudt:NonNegativeIntegerUnionList
 qudt:NonRotatingInertialFrame-frameType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:hasValue qudt.type:FT_NON-ROTATING ;
+  sh:hasValue qudt:FT_NON-ROTATING ;
   sh:path qudt:frameType .
 
 qudt:NumericType-accuracy
@@ -4585,23 +4174,12 @@ qudt:OrderedCollection-orderingRelation
   sh:maxCount 1 ;
   sh:path qudt:orderingRelation .
 
-qudt:PARTIAL-ARRAY
-  a qudt:ArrayType ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "PARTIAL ARRAY" .
-
 qudt:PartiallyOrdered
   a qudt:OrderedType ;
   qudt:literal "partial" ;
   qudt:plainTextDescription "Partial ordered structure." ;
   rdfs:isDefinedBy <file:///Users/ralphtq/git-qudt/qudt-public-repo/qudt> ;
   rdfs:label "Partially Ordered" .
-
-qudt:Proceedings
-  a qudt:PubEnumeratedType ;
-  dtype:literal "proceedings" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Pub proceedings type" .
 
 qudt:QuantityValueType-basis
   a sh:PropertyShape ;
@@ -4621,27 +4199,6 @@ qudt:QuantityValueType-elementUnit
   sh:class qudt:Unit ;
   sh:maxCount 1 ;
   sh:path qudt:elementUnit .
-
-qudt:RELATIVE-DATETIME
-  a qudt:DateStringType ;
-  dcterms:description "Days and time relative to some Epoch"^^rdf:HTML ;
-  dtype:literal "reldate" ;
-  qudt:dimensionality 1 ;
-  qudt:encodingDescription "TBD" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Relative Date And Time" .
-
-qudt:RN_BINARY-BASE
-  a qudt:RealNumberType ;
-  rdfs:comment "A rational number can be expressed in the form m*b^e, where m (the mantissa), b (the base), and e (the exponent) are integers. In this case b is chosen to be 2, and then the values of m and e are determined given this choice of base." ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Real number binary base" .
-
-qudt:RN_DECIMAL-BASE
-  a qudt:RealNumberType ;
-  rdfs:comment "A rational number can be expressed in the form m*b^e, where m (the mantissa), b (the base), and e (the exponent) are integers. In this case b is chosen to be 10, and then the values of m and e are determined given this choice of base." ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Real number decminal base" .
 
 qudt:RawValueTupleMember-elementType
   a sh:PropertyShape ;
@@ -4740,58 +4297,6 @@ qudt:SIGNED
   dtype:literal "signed" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Signed" .
-
-qudt:STATE-SPACE-MATRIX
-  a qudt:StateSpaceMatrixType ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "STATE SPACE MATRIX" .
-
-qudt:STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES-ELEMENT-1
-  a qudt:IndexedCollectionMember ;
-  qudt:index 1 ;
-  qudt:next qudt:STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES-ELEMENT-2 ;
-  qudt:order 1 ;
-  qudt:previous ( ) ;
-  qudt:type qudt:FLOAT-DP ;
-  rdfs:label "STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES" .
-
-qudt:STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES-ELEMENT-2
-  a qudt:IndexedCollectionMember ;
-  qudt:next qudt:STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES-ELEMENT-3 ;
-  qudt:order "2"^^xsd:int ;
-  qudt:type qudt:FLOAT-DP ;
-  rdfs:label "STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES" .
-
-qudt:STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES-ELEMENT-3
-  a qudt:IndexedCollectionMember ;
-  qudt:next qudt:STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES-ELEMENT-4 ;
-  qudt:order "3"^^xsd:int ;
-  qudt:type qudt:FLOAT-DP ;
-  rdfs:label "STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES" .
-
-qudt:STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES-ELEMENT-4
-  a qudt:IndexedCollectionMember ;
-  qudt:next ( ) ;
-  qudt:order "4"^^xsd:int ;
-  qudt:type qudt:FLOAT-DP ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES" .
-
-qudt:STATE-VECTOR-TYPE-LIST_MASS-PROPERTIES
-  a qudt:IndexedList ;
-  qudt:element qudt:STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES-ELEMENT-1 ;
-  qudt:element qudt:STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES-ELEMENT-2 ;
-  qudt:element qudt:STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES-ELEMENT-3 ;
-  qudt:element qudt:STATE-VECTOR-TYPE-LIST-MEMBER_MASS-PROPERTIES-ELEMENT-4 ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "STATE-VECTOR-TYPE-LIST_MASS-PROPERTIES" .
-
-qudt:STATE-VECTOR_MASS-PROPERTIES
-  a qudt:StateSpaceVectorType ;
-  qudt:objectValue qudt:STATE-VECTOR-TYPE-LIST_MASS-PROPERTIES ;
-  qudt:type qudt:StateSpaceVectorType ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "STATE-VECTOR-MASS-PROPERTIES" .
 
 qudt:ScalarDatatype-bitOrder
   a sh:PropertyShape ;
@@ -5020,48 +4525,6 @@ qudt:SystemModifiableParameter
   rdfs:comment "Parameter is modifiable by a (computer) system." ;
   rdfs:label "System modifiable parameter" .
 
-qudt:TABLE-COMPOSITION-EXAMPLE-SUBTREE_1
-  a qudt:Tree ;
-  qudt:node qudt:TIME-SERIES-TABLE-A-2x4 ;
-  rdfs:label "TABLE-COMPOSITION-EXAMPLE-SUBTREE_1" .
-
-qudt:TABLE-COMPOSITION-EXAMPLE-SUBTREE_2
-  a qudt:Tree ;
-  qudt:node qudt:TIME-SERIES-TABLE-B-2x4 ;
-  rdfs:label "TABLE-COMPOSITION-EXAMPLE-SUBTREE_2" .
-
-qudt:TABLE-COMPOSITION-SUBTREE-LIST-MEMBER_1
-  a qudt:TreeListMember ;
-  qudt:order "1"^^xsd:int ;
-  qudt:value qudt:TABLE-COMPOSITION-EXAMPLE-SUBTREE_1 ;
-  rdfs:label "TABLE-COMPOSITION-SUBTREE-1" .
-
-qudt:TABLE-COMPOSITION-SUBTREE-LIST-MEMBER_2
-  a qudt:IndexedCollectionMember ;
-  qudt:order "2"^^xsd:int ;
-  qudt:value qudt:TABLE-COMPOSITION-EXAMPLE-SUBTREE_2 ;
-  rdfs:label "TABLE-COMPOSITION-SUBTREE_2" .
-
-qudt:TABLE-COMPOSTION-SUBTREE-LIST-EXAMPLE_1
-  a qudt:TreeListMember ;
-  qudt:element qudt:TABLE-COMPOSITION-SUBTREE-LIST-MEMBER_1 ;
-  qudt:element qudt:TABLE-COMPOSITION-SUBTREE-LIST-MEMBER_2 ;
-  rdfs:label "TABLE-COMPOSTION-SUBTREES-EXAMPLE_1" .
-
-qudt:TIME
-  a qudt:TimeStringType ;
-  dcterms:description "Time in hh:mm:ss[Z|(+|-)hh:mm]format." ;
-  dtype:literal "time" ;
-  qudt:dimensionality 1 ;
-  qudt:rdfsDatatype xsd:time ;
-  rdfs:label "TIME" .
-
-qudt:TRUE
-  a qudt:BooleanTypeEnumeratedValue ;
-  dtype:literal "true" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "True" .
-
 qudt:Table-byRow
   a sh:PropertyShape ;
   sh:datatype xsd:boolean ;
@@ -5091,14 +4554,6 @@ qudt:TaggedEnumeration-code
   sh:maxCount 1 ;
   sh:minCount 1 ;
   sh:path dtype:code .
-
-qudt:TechReport
-  a qudt:PubEnumeratedType ;
-  dtype:literal "techreport" ;
-  rdfs:label "Pub techreport type" .
-
-qudt:Term
-  rdfs:subClassOf qudt:Concept .
 
 qudt:Three-Tuple-elementType
   a sh:PropertyShape ;
@@ -5224,39 +4679,6 @@ qudt:UNSIGNED
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Unsigned" .
 
-qudt:UTC-DATETIME
-  a qudt:DateStringType ;
-  dcterms:description """
-  <p>UTC is the time-scale maintained by the BIPM, with assistance from the IERS, which forms the basis of a coordinated dissemination of standard frequencies and time signals. 
-  It corresponds exactly in rate with  the international reference scale of atomic time (TAI) but differs from it by an integer number of seconds.  
-  TAI, based on the second (SI), as realized on the rotating geoid, is formed by the BIPM on the basis of clock data supplied by cooperating establishments. 
-  It is in the form of a continuous scale, e.g. in days, hours, minutes and seconds from the origin 1 January, 1958 (adopted by the CGPM 1971).
-  """^^rdf:HTML ;
-  dtype:literal "utc-date" ;
-  qudt:dimensionality 1 ;
-  qudt:encodingDescription "YYYY-MM-DDThh:mm:ss[.dd] or YYYY-DDDThh:mm:ss[.dd], where 'YYYY' is the year, 'MM' is the two-digit month, 'DD' is the two-digit day, 'DDD' is the three digit day of year, 'T' is constant, 'hh:mm:ss[.dd]' is the UTC time in hours, minutes, seconds, and optional fractional seconds. As many 'd' characters to the right of the period as required may be used to obtain the required precision. All fields require leading zeros." ;
-  qudt:exactMatch qudt:DATETIME ;
-  qudt:rdfsDatatype xsd:dateTime ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "UTC Date Time" .
-
-qudt:UTC-DAYTIME
-  a qudt:DateStringType ;
-  dtype:literal "utc-dayTime" ;
-  qudt:dimensionality 1 ;
-  qudt:encodingDescription "YYYY-DDDThh:mm:ss.ddZ, where each character is an ASCII character using one octet with the following meanings: YYYY = Year in four-character subfield with values 0001-9999, DDD = Day of year in three-character subfield with values 001-365 or -366, T =  Calendar-Time separator, hh = Hour in two-character subfield with values 00-23,  mm = Minute in two-character subfield with values 00-59, ss = Second in two-character subfield with values 00-59 (-58 or -60 during leap seconds), dd = Decimal fraction of second in one- to n-character subfield, each d has values 0-9, and Z = time code terminator (optional)" ;
-  qudt:rdfsDatatype qudt:UTC-DayTime ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "UTC DAY TIME" .
-
-qudt:UTC-DayTime
-  a rdfs:Datatype ;
-  dcterms:description "YYYY-DDDThh:mm:ss.ddZ, where each character is an ASCII character using one octet with the following meanings: YYYY = Year in four-character subfield with values 0001-9999, DDD = Day of year in three-character subfield with values 001-365 or -366, T =  Calendar-Time separator, hh = Hour in two-character subfield with values 00-23,  mm = Minute in two-character subfield with values 00-59, ss = Second in two-character subfield with values 00-59 (-58 or -60 during leap seconds), dd = Decimal fraction of second in one- to n-character subfield, each d has values 0-9, and Z = time code terminator (optional)" ;
-  rdfs:comment "[0-9]{4}\\\\-[0-9]{3}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\\\.[0-9]{2}Z?" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "UTC Day time" ;
-  rdfs:subClassOf xsd:string .
-
 qudt:Unordered
   a qudt:OrderedType ;
   qudt:literal "unordered" ;
@@ -5264,13 +4686,9 @@ qudt:Unordered
   rdfs:isDefinedBy <file:///Users/ralphtq/git-qudt/qudt-public-repo/qudt> ;
   rdfs:label "Unordered" .
 
-qudt:Unpublished
-  a qudt:PubEnumeratedType ;
-  dtype:literal "unpublished" ;
-  rdfs:label "Pub unpublished type" .
-
 qudt:UnsignedBigIntegerType-abbreviation
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <file:///Users/ralphtq/git-qudt/qudt-public-repo/qudt> ;
   sh:hasValue "UI64" ;
   sh:path qudt:abbreviation .
 
@@ -5336,18 +4754,6 @@ qudt:UserModifiableParameter
   qudt:literal "user" ;
   rdfs:comment "Parameter is modifiable by a user." ;
   rdfs:label "User modifiable parameter" .
-
-qudt:VECTOR
-  a qudt:VectorType ;
-  qudt:dimensionality 1 ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "VECTOR" .
-
-qudt:VECTOR_3D
-  a qudt:VectorType ;
-  qudt:dimensionality 1 ;
-  qudt:protocolBuffersName "Vector3D" ;
-  rdfs:label "VECTOR 3D" .
 
 qudt:VariableLengthIntegerType-maxBits
   a sh:PropertyShape ;
@@ -5433,35 +4839,11 @@ qudt:WordAligned
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Word Aligned" .
 
-qudt:YDT
-  a qudt:DateStringType ;
-  dtype:literal "YDT" ;
-  qudt:dimensionality 1 ;
-  qudt:encodingDescription "TBD" ;
-  qudt:rdfsDatatype xsd:string ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Year Day Time" .
-
 qudt:Yes
   a qudt:YesNoType ;
   qudt:literal "Y" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Yes" .
-
-qudt:floatPercentage
-  a rdfs:Datatype, sh:NodeShape ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:float ;
-    owl:withRestrictions ( [
-      xsd:minInclusive "0.00"^^xsd:float ;
-    ] [
-      xsd:maxInclusive "100.00"^^xsd:float ;
-    ] ) ;
-  ] ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "float percentage" ;
-  rdfs:subClassOf xsd:float .
 
 qudt:hexbinary
   a rdfs:Datatype, sh:NodeShape ;
@@ -5470,39 +4852,6 @@ qudt:hexbinary
   rdfs:subClassOf xsd:string ;
   sh:datatype xsd:string ;
   sh:pattern "[0-9A-F]*" .
-
-qudt:integer1to12
-  a rdfs:Datatype, sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "integer 1..12" ;
-  rdfs:subClassOf xsd:int ;
-  sh:datatype xsd:int ;
-  sh:maxInclusive 12 ;
-  sh:minInclusive 1 .
-
-qudt:integer1to31
-  a rdfs:Datatype ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "integer 1..31" ;
-  rdfs:subClassOf xsd:int ;
-  sh:datatype xsd:int ;
-  sh:maxInclusive 31 ;
-  sh:minInclusive 1 .
-
-qudt:integerPercentage
-  a rdfs:Datatype, sh:NodeShape ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:integer ;
-    owl:withRestrictions ( [
-      xsd:minInclusive 0 ;
-    ] [
-      xsd:maxInclusive 100 ;
-    ] ) ;
-  ] ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "integer percentage" ;
-  rdfs:subClassOf xsd:integer .
 
 qudt:negative
   a qudt:Polarity ;
