@@ -110,8 +110,7 @@ qudt:Array
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Array" ;
   rdfs:subClassOf qudt:StructuredDatatype ;
-  sh:property qudt:StructuredData-element ;
-  sh:property qudt:StructuredData-elementType .
+  sh:property qudt:StructuredData-element .
 
 qudt:AssociativeArray
   a rdfs:Class, sh:NodeShape ;
@@ -365,7 +364,6 @@ qudt:CompositeDatatype
   rdfs:label "Composite Data Type" ;
   rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:CompositeDatatype-alignment ;
-  sh:property qudt:CompositeDatatype-elementType ;
   sh:property qudt:CompositeDatatype-padding .
 
 qudt:CompositeTable
@@ -526,8 +524,8 @@ qudt:Coordinates-2D-SinglePrecision
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Cartesian Coordinates 2D Single Precision" ;
   rdfs:subClassOf qudt:Coordinates-2D ;
-  sh:property qudt:Coordinates-2D-DoublePrecision-float_X ;
-  sh:property qudt:Coordinates-2D-DoublePrecision-float_Y .
+  sh:property qudt:Coordinates-2D-DoublePrecision-double_X ;
+  sh:property qudt:Coordinates-2D-DoublePrecision-double_Y .
 
 qudt:Coordinates-3D
   a rdfs:Class, sh:NodeShape ;
@@ -776,16 +774,7 @@ qudt:FloatingPointEncodingType
   dcterms:description "A \"Encoding\" with the following instance(s): \"Double Precision Encoding\", \"Single Precision Real Encoding\"." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Floating Point Encoding" ;
-  rdfs:subClassOf qudt:Encoding ;
-  sh:property [
-    a sh:PropertyShape ;
-    rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-    sh:in ( qudt:DoublePrecisionEncoding qudt:IEEE754_1985RealEncoding
-      qudt:SinglePrecisionRealEncoding ) ;
-    sh:path [
-      sh:inversePath rdf:type ;
-    ] ;
-  ] .
+  rdfs:subClassOf qudt:Encoding .
 
 qudt:FrameType
   a rdfs:Class, sh:NodeShape ;
@@ -999,13 +988,6 @@ qudt:List
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "List" ;
   rdfs:subClassOf qudt:Collection .
-
-qudt:ListType
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:label "List type" ;
-  rdfs:subClassOf qudt:CollectionType ;
-  sh:property qudt:List-first ;
-  sh:property qudt:List-rest .
 
 qudt:LocalCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
@@ -1613,12 +1595,7 @@ qudt:SignedMediumIntegerType
   dcterms:description "A \"Signed Medium Integers\" is an integer of 24 bits that can take on both positive and negative values." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Signed Integer Type" ;
-  rdfs:subClassOf qudt:SignedIntegerType ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:hasValue 3 ;
-    owl:onProperty qudt:bytes ;
-  ] .
+  rdfs:subClassOf qudt:SignedIntegerType .
 
 qudt:SignedShortIntegerType
   a rdfs:Class, sh:NodeShape ;
@@ -1747,14 +1724,6 @@ qudt:StringEncodingType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "String Encoding Type" ;
   rdfs:subClassOf qudt:Encoding .
-
-qudt:StringList
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "String list" ;
-  rdfs:subClassOf qudt:List ;
-  sh:property qudt:StringList-first ;
-  sh:property qudt:StringList-rest .
 
 qudt:StringType
   a rdfs:Class, sh:NodeShape ;
@@ -2109,7 +2078,7 @@ qudt:Vector
   and abstract representations for things such as colors, features, or embeddings in computational contexts.
   </p>
   <p>As a one-dimensional mathematical object it can represent a quantity with both magnitude and direction in space.
-\tOne-dimensional vectors can be thought of as a special case of a 1D array.
+  One-dimensional vectors can be thought of as a special case of a 1D array.
   For example a 3D vector can be expressed as a list of coordinates: [x,y,z].
   </p>
   <p>
@@ -2404,7 +2373,6 @@ qudt:elementDatatype
   This property is used to relate a structured data type with the data type the structured type's elements. 
   It is used for structured data types with elements that are all of the same type.
   """ ;
-  rdfs:comment "This property is used to relate a structured data type with the data type of the structured type's elements. It is used for homogeneous structured data types, that is, those whose elements that are all of the same type." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "element datatype" .
 
@@ -3040,15 +3008,10 @@ qudt:zCoordinateDefinition
 qudt:Array-elementType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:Datatype ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
-  sh:or ( [
-    sh:node qudt:QuantityKind ;
-    sh:path qudt:hasQuantityKind ;
-  ] [
-    sh:node qudt:Datatype ;
-    sh:path qudt:dataType ;
-  ] ) .
+  sh:path qudt:datatype .
 
 qudt:AuralCue-sound
   a sh:PropertyShape ;
@@ -3067,7 +3030,6 @@ qudt:AuralCueEnumeration-defaultValue
 qudt:BalancedTree-maxDepth
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:datatype xsd:int ;
   sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:path qudt:maxDepth .
@@ -3199,7 +3161,7 @@ qudt:CardinalityType-literal
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:string ;
   sh:maxCount 1 ;
-  sh:path qudt:literal .
+  sh:path dtype:literal .
 
 qudt:CharEncoding
   a qudt:BooleanEncodingType, qudt:CharEncodingType ;
@@ -3211,26 +3173,16 @@ qudt:CharEncoding
 qudt:Collection-member
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:or ( [
-    sh:node qudt:QuantityValue ;
-    sh:path qudt:value ;
-  ] [
-    sh:node xsd:anySimpleType ;
-    sh:path qudt:value ;
-  ] ) .
+  sh:class qudt:QuantityValue ;
+  sh:path qudt:value .
 
 qudt:Collection-memberType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:Datatype ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
-  sh:or ( [
-    sh:node qudt:QuantityKind ;
-    sh:path qudt:hasQuantityKind ;
-  ] [
-    sh:node qudt:Datatype ;
-    sh:path qudt:dataType ;
-  ] ) .
+  sh:path qudt:dataType .
 
 qudt:ColorCue-rgbCode
   a sh:PropertyShape ;
@@ -3255,15 +3207,10 @@ qudt:CompositeDatatype-alignment
 qudt:CompositeDatatype-elementType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:QuantityKind ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
-  sh:or ( [
-    sh:node qudt:QuantityKind ;
-    sh:path qudt:hasQuantityKind ;
-  ] [
-    sh:node qudt:Datatype ;
-    sh:path qudt:dataType ;
-  ] ) .
+  sh:path qudt:hasQuantityKind .
 
 qudt:CompositeDatatype-padding
   a sh:PropertyShape ;
@@ -3618,10 +3565,6 @@ qudt:DateTimeStringType-encoding
   sh:class qudt:DateTimeStringEncodingType ;
   sh:maxCount 1 ;
   sh:path qudt:encoding .
-
-qudt:DoublePrecisionEncoding
-  a qudt:FloatingPointEncodingType ;
-  qudt:bytes 64 .
 
 qudt:EarthCoordinateSystem-coordinateCenter
   a sh:PropertyShape ;
@@ -4056,6 +3999,30 @@ qudt:NumericType-signedness
   sh:maxCount 1 ;
   sh:path qudt:signedness .
 
+qudt:NumericUnionList
+  a rdf:List ;
+  rdf:first [
+    sh:datatype xsd:string ;
+  ] ;
+  rdf:rest ( [
+    sh:datatype xsd:nonNegativeInteger ;
+  ] [
+    sh:datatype xsd:positiveInteger ;
+  ] [
+    sh:datatype xsd:integer ;
+  ] [
+    sh:datatype xsd:int ;
+  ] [
+    sh:datatype xsd:float ;
+  ] [
+    sh:datatype xsd:double ;
+  ] [
+    sh:datatype xsd:decimal ;
+  ] ) ;
+  rdfs:comment "An rdf:List that can be used in property constraints as value for sh:or to indicate that all values of a property must be either xsd:integer, xsd:float, xsd:double or xsd:decimal." ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Numeric Union List" .
+
 qudt:OOST_OFF
   a qudt:OnOffStateType ;
   qudt:code "0" ;
@@ -4346,6 +4313,8 @@ qudt:ShortUnsignedIntegerEncoding
 
 qudt:SignedBigIntegerType-literal
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:datatype xsd:string ;
   sh:path dtype:literal .
 
 qudt:SignedBigIntegerType-maxInclusive
@@ -4424,51 +4393,48 @@ qudt:StateSpaceVector-coordinateSystem
   sh:maxCount 1 ;
   sh:path qudt:coordinateSystem .
 
-qudt:StringList-first
-  a sh:PropertyShape ;
-  sh:datatype xsd:string ;
-  sh:path rdf:first .
-
-qudt:StringList-rest
-  a sh:PropertyShape ;
-  sh:class qudt:StringList ;
-  sh:path rdf:rest .
-
 qudt:StringType-dimensionality
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
   sh:path qudt:dimensionality .
 
 qudt:StringType-elementType
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:CharacterType ;
   sh:path qudt:elementDatatype .
 
 qudt:StringType-isByteString
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class xsd:boolean ;
   sh:maxCount 1 ;
   sh:path qudt:isByteString .
 
 qudt:StringType-maxLength
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:path qudt:maxLength .
 
 qudt:StringType-typeMatrix
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:maxCount 0 ;
   sh:minCount 0 ;
   sh:path qudt:typeMatrix .
 
 qudt:StringUTF16-elementType
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:CharacterType ;
   sh:path qudt:elementDatatype .
 
 qudt:StringUTF8-elementType
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:CharacterType ;
   sh:path qudt:elementDatatype .
 
@@ -4494,86 +4460,89 @@ qudt:StructuredData-element
 qudt:StructuredData-elementType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:Datatype ;
   sh:maxCount 1 ;
-  sh:or ( [
-    sh:class qudt:QuantityKind ;
-    sh:minCount 1 ;
-    sh:path qudt:hasQuantityKind ;
-  ] [
-    sh:class qudt:Datatype ;
-    sh:path qudt:datatype ;
-  ] ) .
+  sh:path qudt:datatype .
 
 qudt:StructuredDatatype-elementType
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:Datatype ;
   sh:maxCount 1 ;
   sh:path qudt:elementDatatype .
-
-qudt:Symbol
-  dcterms:description "A sub-type of 'QUDT Concept'." .
 
 qudt:SystemModifiableParameter
   a qudt:ParameterModifiabilityType ;
   qudt:code "1" ;
   qudt:literal "system" ;
   rdfs:comment "Parameter is modifiable by a (computer) system." ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "System modifiable parameter" .
 
 qudt:Table-byRow
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:boolean ;
   sh:maxCount 1 ;
   sh:path qudt:byRow .
 
 qudt:Table-columns
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:path qudt:columns .
 
 qudt:Table-dimensionality
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:path qudt:dimensionality .
 
 qudt:Table-rows
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:path qudt:rows .
 
 qudt:TaggedEnumeration-code
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
   sh:path dtype:code .
 
 qudt:Three-Tuple-elementType
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:TupleMemberType ;
   sh:minCount 0 ;
   sh:path qudt:elementDatatype .
 
 qudt:Three-Tuple-elementTypeCount
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
   sh:hasValue 3 ;
   sh:path qudt:elementTypeCount .
 
 qudt:Time-type
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:TimeStringType ;
   sh:path qudt:type .
 
 qudt:TimeInterval-type
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:TimeStringType ;
   sh:path qudt:type .
 
 qudt:TimeSeriesArray-dimensions
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:IntegerList ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
@@ -4581,6 +4550,7 @@ qudt:TimeSeriesArray-dimensions
 
 qudt:TimeSeriesArray-incrementDatatype
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:TimeStringType ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
@@ -4588,6 +4558,7 @@ qudt:TimeSeriesArray-incrementDatatype
 
 qudt:TimeSeriesArray-vector
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:StateSpaceVectorType ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
@@ -4604,21 +4575,25 @@ qudt:True
   a qudt:BooleanStateType ;
   qudt:code "1" ;
   qudt:literal "true" ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "true" .
 
 qudt:Tuple-elementType
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:TupleMemberType ;
   sh:path qudt:elementDatatype .
 
 qudt:Tuple-elementTypeCount
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
   sh:minCount 0 ;
   sh:path qudt:elementTypeCount .
 
 qudt:Tuple-length
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:minCount 0 ;
@@ -4626,38 +4601,45 @@ qudt:Tuple-length
 
 qudt:TupleMember-elementType
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:ScalarDatatype ;
   sh:path qudt:elementDatatype .
 
 qudt:TupleMember-orderInStructure
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
   sh:path qudt:orderInStructure .
 
 qudt:Two-Tuple-elementType
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:minCount 0 ;
   sh:path qudt:elementDatatype .
 
 qudt:Two-Tuple-elementTypeCount
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
   sh:hasValue 2 ;
   sh:path qudt:elementTypeCount .
 
 qudt:TypeVector-objectValue
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:IndexedList ;
   sh:path qudt:objectValue .
 
 qudt:TypeVector-type
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:TypeVector ;
   sh:path qudt:type .
 
 qudt:TypeVector-typeVector
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:Datatype ;
   sh:maxCount 1 ;
   sh:path qudt:typeVector .
@@ -4666,6 +4648,7 @@ qudt:UNARY-FUNCTION
   a qudt:FunctionDatatype ;
   dcterms:description "This type identifies functions that have exactly one argument."^^rdf:HTML ;
   qudt:functionArity 1 ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "UNARY-FUNCTION" .
 
 qudt:UNSIGNED
@@ -4706,6 +4689,12 @@ qudt:UnsignedIntegerEncoding
   qudt:bytes 4 ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Unsigned Integer Encoding" .
+
+qudt:UnsignedLongIntegerType-literal
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:datatype xsd:string ;
+  sh:path dtype:literal .
 
 qudt:UnsignedLongIntegerType-maxInclusive
   a sh:PropertyShape ;
