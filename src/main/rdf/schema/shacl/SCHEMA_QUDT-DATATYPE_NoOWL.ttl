@@ -19,6 +19,10 @@
   owl:imports <http://www.w3.org/2004/02/skos/core> ;
   owl:imports sh: ;
   rdfs:label "QUDT SHACL SCHEMA Datatypes Version $$QUDT_VERSION$$" ;
+  sh:declare [
+    sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+    sh:prefix "qudt" ;
+  ] ;
   vaem:hasCatalogEntry voag:QUDT-SchemaCatalogEntry ;
   vaem:hasGraphMetadata <http://qudt.org/schema/shacl/datatype/GMD_datatype> ;
   vaem:hasGraphRole vaem:SchemaGraph ;
@@ -337,16 +341,13 @@ qudt:Collection
   sh:property qudt:Collection-memberType ;
   sh:sparql [
     sh:message "All members of the collection must have the same type." ;
-    sh:prefixes ( [
-      sh:namespace "http://qudt.org/schema/qudt/" ;
-      sh:prefix "qudt" ;
-    ] ) ;
+    sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
     sh:select """
         SELECT $this
         WHERE {
             $this qudt:member ?member1, ?member2 .
-            ?member1 qudt:memberType ?type1 .
-            ?member2 qudt:memberType ?type2 .
+            ?member1 qudt:memberDatatype ?type1 .
+            ?member2 qudt:memberDatatype ?type2 .
             FILTER (?type1 != ?type2)
         }
         """ ;
@@ -1158,8 +1159,7 @@ qudt:MemoryOrderType
   dcterms:description "A sub-type of 'Enumerated Value'." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Memory order type" ;
-  rdfs:subClassOf qudt:EnumeratedValue ;
-  sh:in ( qudt:HighToLow qudt:LowToHigh ) .
+  rdfs:subClassOf qudt:EnumeratedValue .
 
 qudt:ModalCue
   a rdfs:Class, sh:NodeShape ;
@@ -1601,7 +1601,6 @@ Reference frame may also refer to both an observational reference frame and an a
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Reference Frame" ;
   rdfs:subClassOf qudt:Concept ;
-  rdfs:subClassOf skos:Concept ;
   sh:property qudt:ReferenceFrame-comment ;
   sh:property qudt:ReferenceFrame-description ;
   sh:property qudt:ReferenceFrame-frameType ;
@@ -2520,8 +2519,7 @@ qudt:elementTypeCount
 qudt:elementTypeList
   a rdf:Property ;
   dcterms:description """
-  This property is used to relate a structured data type with a list of data types. 
-  The list members determine the types of structured type's elements. 
+  This property is used to define the data type of the elements of a structured data type. 
   It is used for structured data types with elements that are of different types.
   """ ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -2719,6 +2717,23 @@ qudt:maxMantissa
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "max mantissa" .
+
+qudt:member
+  a rdf:Property ;
+  dcterms:description """
+  This property is used to define a collection's elements. 
+  """ ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "member" .
+
+qudt:memberDatatype
+  a rdf:Property ;
+  dcterms:description """
+  This property is used to define the data type of a collection's elements. 
+  It is used for collections with elements that are all of the same type.
+  """ ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "member datatype" .
 
 qudt:microsoftSQLServerName
   a rdf:Property ;
@@ -3295,7 +3310,7 @@ qudt:Collection-memberType
   ] [
     sh:class qudt:Datatype ;
   ] ) ;
-  sh:path qudt:memberType .
+  sh:path qudt:memberDatatype .
 
 qudt:ColorCue-rgbCode
   a sh:PropertyShape ;
@@ -3825,12 +3840,6 @@ qudt:HexBinaryType-pattern
   sh:maxCount 1 ;
   sh:path qudt:pattern .
 
-qudt:HighToLow
-  a qudt:MemoryOrderType ;
-  dtype:literal "high" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "High To Low" .
-
 qudt:IEEE754_1985RealEncoding
   a qudt:FloatingPointEncodingType ;
   qudt:bytes 32 ;
@@ -3915,11 +3924,6 @@ qudt:LongUnsignedIntegerEncoding
   qudt:bytes 8 ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Long Unsigned Integer Encoding" .
-
-qudt:LowToHigh
-  a qudt:MemoryOrderType ;
-  dtype:literal "low" ;
-  rdfs:label "Low To High" .
 
 qudt:LunarCoordinateSystem-coordinateCenter
   a sh:PropertyShape ;
@@ -4123,34 +4127,6 @@ qudt:NumericUnionList
   rdfs:comment "An rdf:List that can be used in property constraints as value for sh:or to indicate that all values of a property must be either xsd:integer, xsd:float, xsd:double or xsd:decimal." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Numeric Union List" .
-
-qudt:OOST_OFF
-  a qudt:OnOffStateType ;
-  dtype:literal "off" ;
-  qudt:code "0" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Off" .
-
-qudt:OOST_ON
-  a qudt:OnOffStateType ;
-  dtype:literal "on" ;
-  qudt:code "0" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "On" .
-
-qudt:OOST_ZERO-MEANS-OFF
-  a qudt:OnOffStateType ;
-  dtype:literal "zero-means-off" ;
-  qudt:inverted true ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Zero means off" .
-
-qudt:OOST_ZERO-MEANS-ON
-  a qudt:OnOffStateType ;
-  dtype:literal "zero-means-on" ;
-  qudt:inverted true ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Zero means on" .
 
 qudt:OctetEncoding
   a qudt:BooleanEncodingType, qudt:ByteEncodingType ;
