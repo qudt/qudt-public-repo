@@ -113,7 +113,9 @@ qudt:Array
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Array" ;
-  rdfs:subClassOf qudt:Collection .
+  rdfs:subClassOf qudt:Collection ;
+  sh:property qudt:Array-dimensionality ;
+  sh:property qudt:Array-dimensions .
 
 qudt:AssociativeArray
   a rdfs:Class, sh:NodeShape ;
@@ -264,12 +266,11 @@ qudt:ByteEncodingType
 qudt:CardinalityType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>In mathematics, the cardinality of a set is a measure of the number of elements of the set.  
-  For example, the set <em>A = {2, 4, 6}</em> contains 3 elements, and therefore <em>A</em> has a cardinality of 3. 
+  In mathematics, the cardinality of a set is a measure of the number of elements of the set.
+  For example, the set $A = {2, 4, 6}$ contains 3 elements, and therefore $A$ has a cardinality of 3. 
   There are two approaches to cardinality: one which compares sets directly using bijections and injections,
    and another which uses cardinal numbers.
-  </p>"""^^rdf:HTML ;
-  dcterms:description "In mathematics, the cardinality of a set is a measure of the number of elements of the set.  For example, the set $A = {2, 4, 6}$ contains 3 elements, and therefore $A$ has a cardinality of 3. There are two approaches to cardinality – one which compares sets directly using bijections and injections, and another which uses cardinal numbers."^^qudt:LatexString ;
+  """^^qudt:LatexString ;
   prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Cardinal_number> ;
   prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Cardinality> ;
   qudt:informativeReference "http://en.wikipedia.org/wiki/Cardinal_number"^^xsd:anyURI ;
@@ -336,7 +337,7 @@ qudt:Collection
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Collection" ;
-  rdfs:subClassOf qudt:AbstractDatatype ;
+  rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:Collection-member ;
   sh:property qudt:Collection-memberType ;
   sh:sparql [
@@ -1010,6 +1011,19 @@ qudt:IntegerEncodingType
     sh:path [
       sh:inversePath rdf:type ;
     ] ;
+  ] .
+
+qudt:IntegerList
+  a rdfs:Class, sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Integer list" ;
+  sh:property [
+    sh:datatype xsd:integer ;
+    sh:path rdf:first ;
+  ] ;
+  sh:property [
+    sh:node qudt:IntegerList ;
+    sh:path rdf:rest ;
   ] .
 
 qudt:IntegerVector
@@ -2540,11 +2554,6 @@ qudt:encoding
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "encoding" .
 
-qudt:encodingDescription
-  a rdf:Property ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "encoding description" .
-
 qudt:enumeration
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -3144,13 +3153,21 @@ qudt:zCoordinateDefinition
   vaem:usesNonImportedResource <http://voag.linkedmodel.org/voag#QUDT-Attribution> ;
   vaem:withAttributionTo <http://voag.linkedmodel.org/voag#QUDT-Attribution> .
 
-qudt:Array-elementType
+qudt:Array-dimensionality
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:Datatype ;
+  sh:class qudt:IntegerList ;
   sh:maxCount 1 ;
-  sh:minCount 1 ;
-  sh:path qudt:dataType .
+  sh:minCount 0 ;
+  sh:path qudt:dimensionality .
+
+qudt:Array-dimensions
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:datatype xsd:int ;
+  sh:maxCount 1 ;
+  sh:minCount 0 ;
+  sh:path qudt:dimensions .
 
 qudt:AuralCue-sound
   a sh:PropertyShape ;
@@ -3873,18 +3890,6 @@ qudt:InertialCoordinateFrame-frameType
   sh:hasValue qudt:FT_NON-ROTATING ;
   sh:path qudt:frameType .
 
-qudt:IntegerList
-  a rdf:List ;
-  rdf:first [
-    sh:datatype xsd:int ;
-  ] ;
-  rdf:rest ( [
-    sh:datatype xsd:int ;
-  ] ) ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Integer list" ;
-  rdfs:subClassOf qudt:List .
-
 qudt:IntegerUnionList
   a rdf:List ;
   rdf:first [
@@ -4604,7 +4609,7 @@ qudt:TimeInterval-type
 qudt:TimeSeriesArray-dimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:IntegerList ;
+  sh:datatype xsd:int ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
   sh:path qudt:dimensions .
