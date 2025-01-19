@@ -108,7 +108,7 @@ qudt:Array
   <p>
   The data type of the array entries is an optional field, 'elementType', which points to a data type definition. 
   If the data type is given, then it applies to all elements. 
-  The property 'qudt:elementType' refers to the datatype of the elements.  
+  The property 'qudt:datatype' refers to the datatype of the elements.  
   </p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -417,7 +417,6 @@ qudt:Container
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Container" ;
   rdfs:seeAlso qudt:Collection ;
-  rdfs:seeAlso qudt:CollectionType ;
   rdfs:subClassOf qudt:AbstractDatatype ;
   sh:property qudt:Container-elementTypeCount .
 
@@ -1133,16 +1132,14 @@ qudt:MarsCoordinateSystem
 
 qudt:MassPropertiesArray
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "The Mass Properties of an object are its: Center of Gravity, Mass, Moment of Inertia, and Product of Inertia. A mass properties array is an array whose elements contain these measured quantities for some object. A mass properties array data type provides the type specification for a class of arrays in which the data types of the elements are constrained to be one of these four properties." ;
+  dcterms:description """
+  The Mass Properties of an object are its: Center of Gravity, Mass, Moment of Inertia, and Product of Inertia. 
+  Its elements contain these measured quantities for some object. 
+  The mass properties array data type provides the type specification for a class of arrays.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Mass Properties Array Type" ;
   rdfs:subClassOf qudt:Array .
-
-qudt:MassPropertiesArrayType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description "The Mass Properties of an object are its: Center of Gravity, Mass, Moment of Inertia, and Product of Inertia. A mass properties array is an array whose elements contain these measured quantities for some object. A mass properties array data type provides the type specification for a class of arrays in which the data types of the elements are constrained to be one of these four properties." ;
-  rdfs:label "Mass Properties Array Type" ;
-  rdfs:subClassOf qudt:ArrayType .
 
 qudt:MathsFunctionType
   a rdfs:Class, sh:NodeShape ;
@@ -1348,9 +1345,9 @@ qudt:OrderedCollection
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Ordered Collection Type" ;
   rdfs:subClassOf qudt:Collection ;
-  sh:property qudt:OrderedCollection-orderingRelation ;
-  sh:property qudt:StructuredData-element ;
-  sh:property qudt:StructuredData-elementType .
+  sh:property qudt:DataElement-dataType ;
+  sh:property qudt:DataElement-value ;
+  sh:property qudt:OrderedCollection-orderingRelation .
 
 qudt:OrderedTree
   a rdfs:Class, sh:NodeShape ;
@@ -1539,6 +1536,8 @@ qudt:RealDatatype
   rdfs:subClassOf qudt:NumericType ;
   sh:property qudt:RealDatatype-base ;
   sh:property qudt:RealDatatype-maxExponent ;
+  sh:property qudt:RealDatatype-maxMantissa ;
+  sh:property qudt:RealDatatype-minMantissa ;
   sh:property qudt:RealDatatype-precision .
 
 qudt:RealDoublePrecisionType
@@ -1758,8 +1757,10 @@ qudt:SignedVariableLengthIntegerType
   rdfs:subClassOf qudt:VariableLengthIntegerType .
 
 qudt:SignednessType
-  a rdfs:Class, sh:NodeShape ;
+  a owl:Class, rdfs:Class, sh:NodeShape ;
   dcterms:description "Specifics whether a value should be signed or unsigned." ;
+  owl:oneOf ( qudt:SIGNED qudt:UNSIGNED ) ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/datatype> ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Signedness type" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
@@ -1866,14 +1867,17 @@ qudt:StringEncodingType
 
 qudt:StringType
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A String Type is a data type that specifies the properties of data structures that hold strings. " ;
+  dcterms:description """
+  <p>A <em>String Datatype</em> is a data type that specifies the properties of a list structure that holds characters.
+  </p>
+  """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "String Type" ;
   rdfs:subClassOf qudt:ScalarDatatype ;
   sh:property qudt:StringType-dimensionality ;
-  sh:property qudt:StringType-elementType ;
   sh:property qudt:StringType-isByteString ;
   sh:property qudt:StringType-maxLength ;
+  sh:property qudt:StringType-memberDatatype ;
   sh:property qudt:StringType-typeMatrix .
 
 qudt:StringUTF16
@@ -1894,16 +1898,21 @@ qudt:StringUTF16
   rdfs:label "String UTF16 Type" ;
   rdfs:subClassOf qudt:StringType ;
   rdfs:subClassOf qudt:TextStringType ;
-  sh:property qudt:StringUTF16-elementType .
+  sh:property qudt:StringUTF16-memberDatatype .
 
 qudt:StringUTF8
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "String UTF-8 Type is a string data type that specifies the properties of string data structures which encode strings using the UTF-8 encoding. UTF-8 includes ASCII, otherwise referred to as IA-5 (International Alphabet 5, as standardized by International Organization for Standardization [ISO]) as the first 128 values. The Internet Engineering Task Force (IETF) requires all Internet protocols to identify the encoding used for character data with UTF-8 as at least one supported encoding. The Internet Mail Consortium (IMC) recommends that all e-mail programs must be able to display and create mail using UTF-8." ;
+  dcterms:description """
+  String UTF-8 Type is a string data type that specifies the properties of string data structures which encode strings using the UTF-8 encoding. 
+  UTF-8 includes ASCII, otherwise referred to as IA-5 (International Alphabet 5, as standardized by International Organization for Standardization [ISO]) as the first 128 values. 
+  The Internet Engineering Task Force (IETF) requires all Internet protocols to identify the encoding used for character data with UTF-8 as at least one supported encoding. 
+  The Internet Mail Consortium (IMC) recommends that all e-mail programs must be able to display and create mail using UTF-8.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "String UTF8 Type" ;
   rdfs:subClassOf qudt:StringType ;
   rdfs:subClassOf qudt:TextStringType ;
-  sh:property qudt:StringUTF8-elementType ;
+  sh:property qudt:StringUTF8-memberDatatype ;
   vaem:isElaboratedIn <http://qudt.org/2.1/schema/shacl/datatype> .
 
 qudt:Table
@@ -1989,15 +1998,15 @@ qudt:TimeInterval
   rdfs:subClassOf qudt:Parameter ;
   sh:property qudt:TimeInterval-type .
 
-qudt:TimeSeriesArrayType
+qudt:TimeSeriesArray
   a rdfs:Class, sh:NodeShape ;
   rdfs:comment """
-  A Time Series Array Type is a data type that specifies the properties of arrays that hold time series data. 
+  A Time Series Array is a data type that specifies the properties of arrays that hold time series data. 
   A time series is a sequence of data points, measured at successive time intervals. 
   The time intervals may be uniformly or non-uniformly spaced.
   """ ;
-  rdfs:label "Time Series Array Type" ;
-  rdfs:subClassOf qudt:ArrayType ;
+  rdfs:label "Time Series Array" ;
+  rdfs:subClassOf qudt:Array ;
   sh:property qudt:TimeSeriesArray-dimensions ;
   sh:property qudt:TimeSeriesArray-incrementDatatype ;
   sh:property qudt:TimeSeriesArray-vector .
@@ -2465,7 +2474,7 @@ qudt:dataOrder
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "data order" .
 
-qudt:dataType
+qudt:datatype
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "datatype" .
@@ -2635,9 +2644,6 @@ qudt:isByteString
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "is byte string" .
-
-qudt:isComprisedOf
-  a rdf:Property .
 
 qudt:javaName
   a rdf:Property ;
@@ -3507,7 +3513,7 @@ qudt:DataElement-type
   sh:class qudt:Datatype ;
   sh:maxCount 1 ;
   sh:minCount 0 ;
-  sh:path qudt:dataType .
+  sh:path qudt:datatype .
 
 qudt:DataEncoding-bitOrder
   a sh:PropertyShape ;
@@ -3963,6 +3969,14 @@ qudt:LunarCoordinateSystem-zAxisDefinition
   sh:maxCount 1 ;
   sh:path qudt:zAxisDefinition .
 
+qudt:Major
+  a qudt:MajorMinorType ;
+  dtype:literal "major" ;
+  dtype:order "2"^^xsd:int ;
+  qudt:code 2 ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/shacl/datatype> ;
+  rdfs:label "Major" .
+
 qudt:MarsCoordinateSystem-coordinateCenter
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -3983,6 +3997,14 @@ qudt:MatrixElementOrder-dataOrder
   sh:class qudt:MatrixElementOrder ;
   sh:maxCount 1 ;
   sh:path qudt:dataOrder .
+
+qudt:Minor
+  a qudt:MajorMinorType ;
+  dtype:literal "minor" ;
+  dtype:order "1"^^xsd:int ;
+  qudt:code 1 ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/shacl/datatype> ;
+  rdfs:label "Minor" .
 
 qudt:ModalCue-duration
   a sh:PropertyShape ;
@@ -4217,12 +4239,28 @@ qudt:RealDatatype-base
 
 qudt:RealDatatype-maxExponent
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:path qudt:maxExponent .
 
+qudt:RealDatatype-maxMantissa
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:maxCount 1 ;
+  sh:or qudt:NumericUnionList ;
+  sh:path qudt:maxMantissa .
+
+qudt:RealDatatype-minMantissa
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:maxCount 1 ;
+  sh:or qudt:NumericUnionList ;
+  sh:path qudt:minMantissa .
+
 qudt:RealDatatype-precision
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:path qudt:precision .
@@ -4425,17 +4463,20 @@ qudt:SignedIntegerEncoding
 
 qudt:SignedLongIntegerType-abbreviation
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:string ;
   sh:hasValue "SI32" ;
   sh:path qudt:abbreviation .
 
 qudt:SignedLongIntegerType-maxInclusive
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:or qudt:NumericUnionList ;
   sh:path qudt:maxInclusive .
 
 qudt:SignedLongIntegerType-minInclusive
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:or ( [
     sh:datatype xsd:string ;
   ] [
@@ -4449,10 +4490,12 @@ qudt:SignedLongIntegerType-minInclusive
 
 qudt:SignedShortIntegerType-abbreviation
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:path qudt:abbreviation .
 
 qudt:SignedType-signedness
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:path qudt:signedness .
 
 qudt:SinglePrecisionRealEncoding
@@ -4494,6 +4537,12 @@ qudt:StringType-maxLength
   sh:maxCount 1 ;
   sh:path qudt:maxLength .
 
+qudt:StringType-memberDatatype
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:CharacterType ;
+  sh:path qudt:memberDatatype .
+
 qudt:StringType-typeMatrix
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -4501,17 +4550,19 @@ qudt:StringType-typeMatrix
   sh:minCount 0 ;
   sh:path qudt:typeMatrix .
 
-qudt:StringUTF16-elementType
+qudt:StringUTF16-memberDatatype
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:CharacterType ;
-  sh:path qudt:elementDatatype .
+  sh:hasValue qudt:UTF16-CHAR ;
+  sh:path qudt:memberDatatype .
 
-qudt:StringUTF8-elementType
+qudt:StringUTF8-memberDatatype
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:CharacterType ;
-  sh:path qudt:elementDatatype .
+  sh:hasValue qudt:UTF8-CHAR ;
+  sh:path qudt:memberDatatype .
 
 qudt:StructuredData-dimensionality
   a sh:PropertyShape ;
@@ -4519,25 +4570,6 @@ qudt:StructuredData-dimensionality
   sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:path qudt:dimensionality .
-
-qudt:StructuredData-element
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:Quantity ;
-  sh:maxCount 1 ;
-  sh:or ( [
-    sh:class qudt:Quantity ;
-  ] [
-    sh:class qudt:Datatype ;
-  ] ) ;
-  sh:path qudt:element .
-
-qudt:StructuredData-elementType
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:Datatype ;
-  sh:maxCount 1 ;
-  sh:path qudt:elementType .
 
 qudt:SystemModifiableParameter
   a qudt:ParameterModifiabilityType ;
@@ -4796,6 +4828,7 @@ qudt:UnsignedShortIntegerType-minInclusive
 
 qudt:UnsignedType-signedness
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:SignednessType ;
   sh:hasValue qudt:UNSIGNED ;
   sh:path qudt:signedness .
@@ -4805,6 +4838,7 @@ qudt:UserModifiableParameter
   dtype:literal "user" ;
   qudt:code "2" ;
   rdfs:comment "Parameter is modifiable by a user." ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "User modifiable parameter" .
 
 qudt:VariableLengthIntegerType-maxBits

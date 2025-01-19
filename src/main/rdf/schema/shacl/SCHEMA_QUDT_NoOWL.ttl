@@ -120,7 +120,7 @@ qudt:CountingUnit
 
 qudt:CurrencyUnit
   a rdfs:Class, sh:NodeShape ;
-  rdfs:comment "Currency Units have their own subclass of unit because: (a) they have additonal properites such as 'country' and (b) their URIs do not conform to the same rules as other units."^^rdf:HTML ;
+  dcterms:description "Currency Units have their own subclass of unit because: (a) they have additonal properites such as 'country' and (b) their URIs do not conform to the same rules as other units."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "Currency Unit" ;
   rdfs:subClassOf qudt:DimensionlessUnit ;
@@ -128,21 +128,31 @@ qudt:CurrencyUnit
   sh:property qudt:CurrencyUnit-currencyExponent ;
   sh:property qudt:CurrencyUnit-currencyNumber .
 
+qudt:DataElement
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>A <em>Data Element</em> holds values that are compliant with a specified <em>Datatype</em>.
+  </p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  rdfs:label "Data Element" ;
+  sh:property qudt:DataElement-dataType ;
+  sh:property qudt:DataElement-value .
+
 qudt:Datatype
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  A data type is a definition of a set of values (for example, "all integers between 0 and 10"),
+  <p>A <em>Datatype</em> is a definition of a set of values (for example, "all integers between 0 and 10"),
    and the allowable operations on those values; the meaning of the data; and the way values of that type can be stored. 
   Some types are primitive - built-in to the language, with no visible internal structure.
   For example "Boolean"; others are composite - constructed from one or more other types (of either kind).
   For example lists, arrays, structures, unions. 
   Some languages provide strong typing, others allow implicit type conversion and/or explicit type conversion.
-  """ ;
+  </p>"""^^rdf:HTML ;
   qudt:informativeReference "http://en.wikipedia.org/wiki/Data_type"^^xsd:anyURI ;
   qudt:informativeReference "http://foldoc.org/data+type"^^xsd:anyURI ;
   qudt:informativeReference "http://www.princeton.edu/~achaney/tmve/wiki100k/docs/Data_type.html"^^xsd:anyURI ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "QUDT Datatype" ;
+  rdfs:label "Datatype" ;
   rdfs:subClassOf qudt:Concept .
 
 qudt:DecimalPrefix
@@ -637,7 +647,7 @@ qudt:StructuredDatatype
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
   A "Structured Datatype", in contrast to a scalar data type, is used to characterize classes of more complex data structures.
-  Examples are linked or indexed lists, trees, ordered trees, and multi-dimensional file formats.
+  Examples are collections, linked and indexed lists, trees, ordered trees, and multi-dimensional file formats.
   """ ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "Structured Data Type" ;
@@ -1023,7 +1033,7 @@ qudt:dataStructure
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "data structure" .
 
-qudt:dataType
+qudt:datatype
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "datatype" .
@@ -1149,11 +1159,6 @@ qudt:elementKind
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "element kind" .
-
-qudt:elementType
-  a rdf:Property ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "element type" .
 
 qudt:encoding
   a rdf:Property ;
@@ -1918,6 +1923,24 @@ qudt:CurrencyUnit-currencyNumber
   sh:path qudt:currencyNumber ;
   sh:pattern "^\\d{3}$" .
 
+qudt:DataElement-dataType
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:class qudt:Datatype ;
+  sh:maxCount 1 ;
+  sh:path qudt:datatype .
+
+qudt:DataElement-value
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qydt> ;
+  sh:maxCount 1 ;
+  sh:or ( [
+    sh:class qudt:QuantityValue ;
+  ] [
+    sh:class qudt:Datatype ;
+  ] ) ;
+  sh:path qudt:value .
+
 qudt:EnumeratedQuantity-enumeratedValue
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
@@ -2200,7 +2223,7 @@ qudt:Quantifiable-dataType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   sh:class qudt:Datatype ;
   sh:maxCount 1 ;
-  sh:path qudt:dataType .
+  sh:path qudt:datatype .
 
 qudt:Quantifiable-hasUnit
   a sh:PropertyShape ;
@@ -2680,12 +2703,6 @@ qudt:UCUMcs
   rdfs:label "case-sensitive UCUM code" ;
   rdfs:seeAlso <https://ucum.org/ucum.html> ;
   rdfs:subClassOf xsd:string .
-
-qudt:UNSIGNED
-  a qudt:SignednessType ;
-  dtype:literal "unsigned" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "Unsigned" .
 
 qudt:Unit-altSymbol
   a sh:PropertyShape ;
