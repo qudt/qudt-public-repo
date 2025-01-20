@@ -17,6 +17,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - `unit:OSM` by [Toby Broom](https://github.com/Toby-Broom/)
   - `unit:MilliOSM-PER-KiloGM` by [Toby Broom](https://github.com/Toby-Broom/)
   - `unit:OKTA` by [Jeffrey Vervoort](https://github.com/Jeffrey-Vervoort-KNMI)
+  - `unit:REV-PER-MIN-SEC` by [Vladimir Alexiev](https://github.com/VladimirAlexiev)
 - New QA Tests
   - Added SHACL shapes for checking content under `src/` only
 
@@ -41,7 +42,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - `qk:AmountOfSubstanceIonConcentration` as a narrower kind of `qk:Concentration`.
   - `qk:CoefficientOfPerformance` by [lazlop](https://github.com/lazlop)
   - `qk:CompoundPlaneAngle`
-  - `qk:CountRate` ( units: `unit:NUM-PER-SEC`, `unit:NUM-PER-HR`, `unit:NUM-PER-YR`)
+  - `qk:CountRate` (units: `unit:NUM-PER-SEC`, `unit:NUM-PER-HR`, `unit:NUM-PER-YR`)
   - `qk:CurrentOfTheAmountOfSubstance` (replaces`qk:CurrentOfTheAmountOfSubtance`)
   - `qk:RotationalFrequency` (units: `unit:Hz`, `unit:REV-PER-MIN`, `unit:REV-PER-HR`, `unit:REV-PER-SEC`)
   - `qk:VaporPermeability` (unit: `unit:KiloGM-PER-PA-SEC-M`)
