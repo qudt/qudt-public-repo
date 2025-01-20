@@ -23,6 +23,10 @@
     sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
     sh:prefix "qudt" ;
   ] ;
+  sh:declare [
+    sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ;
+    sh:prefix "rdf" ;
+  ] ;
   vaem:hasCatalogEntry voag:QUDT-SchemaCatalogEntry ;
   vaem:hasGraphMetadata <http://qudt.org/schema/shacl/datatype/GMD_datatype> ;
   vaem:hasGraphRole vaem:SchemaGraph ;
@@ -113,7 +117,7 @@ qudt:Array
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Array" ;
-  rdfs:subClassOf qudt:Collection ;
+  rdfs:subClassOf qudt:CollectionKind ;
   sh:property qudt:Array-dimensionality ;
   sh:property qudt:Array-dimensions .
 
@@ -130,7 +134,7 @@ qudt:AssociativeArray
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Associative Array" ;
   rdfs:seeAlso qudt:Map ;
-  rdfs:subClassOf qudt:Collection .
+  rdfs:subClassOf qudt:CollectionKind .
 
 qudt:AuralCue
   a rdfs:Class, sh:NodeShape ;
@@ -336,10 +340,10 @@ qudt:Collection
   </p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Collection" ;
-  rdfs:subClassOf qudt:StructuredDatatype ;
-  sh:property qudt:Collection-member ;
-  sh:property qudt:Collection-memberType ;
+  rdfs:label "Collection Kind" ;
+  rdfs:subClassOf qudt:AbstractDataItem ;
+  sh:property qudt:CollectionKind-datatype ;
+  sh:property qudt:CollectionKind-member ;
   sh:sparql [
     sh:message "All members of the collection must have the same type." ;
     sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -353,6 +357,17 @@ qudt:Collection
         }
         """ ;
   ] .
+
+qudt:CollectionKind
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>A <em>Collection Kind</em> is a group of zero or more data items that need to be operated upon together in some controlled fashion. 
+  The data items (members) will all share the same data type or are derived from some common ancestor data type.
+  </p>
+  """^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Collection Kind" ;
+  rdfs:subClassOf qudt:StructuredDatatype .
 
 qudt:ColorCue
   a rdfs:Class, sh:NodeShape ;
@@ -416,7 +431,7 @@ qudt:Container
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Container" ;
-  rdfs:seeAlso qudt:Collection ;
+  rdfs:seeAlso qudt:CollectionKind ;
   rdfs:subClassOf qudt:AbstractDatatype ;
   sh:property qudt:Container-elementTypeCount .
 
@@ -611,7 +626,7 @@ qudt:DataSetElement
   a rdfs:Class, sh:NodeShape ;
   rdfs:comment "A field is a tuple that carries a name, a type and optionally other properties that characterize a member element of a composite data strucuture." ;
   rdfs:label "QUDT DataSet Element" ;
-  rdfs:subClassOf qudt:DataItem ;
+  rdfs:subClassOf qudt:AbstractDataItem ;
   rdfs:subClassOf qudt:Tuple ;
   sh:property qudt:DataSetElement-elementLabel ;
   sh:property qudt:DataSetElement-optional ;
@@ -889,7 +904,7 @@ qudt:Graph
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Graph Type" ;
-  rdfs:subClassOf qudt:Collection .
+  rdfs:subClassOf qudt:CollectionKind .
 
 qudt:GraphType
   a rdfs:Class, sh:NodeShape ;
@@ -1078,7 +1093,7 @@ qudt:List
   dcterms:description "A sub-type of 'Collection Type'." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "List" ;
-  rdfs:subClassOf qudt:Collection .
+  rdfs:subClassOf qudt:CollectionKind .
 
 qudt:LocalCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
@@ -1120,7 +1135,7 @@ qudt:Map
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Map Type" ;
   rdfs:seeAlso qudt:AssociativeArray ;
-  rdfs:subClassOf qudt:Collection .
+  rdfs:subClassOf qudt:CollectionKind .
 
 qudt:MarsCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
@@ -1253,7 +1268,7 @@ qudt:MultiSet
   dcterms:description "A bag is a set in which elements may be repeated." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Bag" ;
-  rdfs:subClassOf qudt:Collection .
+  rdfs:subClassOf qudt:CollectionKind .
 
 qudt:N-Tuple
   a rdfs:Class, sh:NodeShape ;
@@ -1310,7 +1325,10 @@ qudt:OctetType
 
 qudt:OffOnStateTypeEnumeration
   a rdfs:Class, sh:NodeShape ;
-  rdfs:comment "A discrete state enumeration whose values are 'off' and 'on'. The 'off' value is encoded as a zero (0) and the 'on' value as a one (1)." ;
+  dcterms:description """
+  A discrete state enumeration whose values are 'off' and 'on'. 
+  The 'off' value is encoded as a zero (0) and the 'on' value as a one (1).
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:subClassOf qudt:Enumeration .
 
@@ -1336,16 +1354,16 @@ qudt:OpenCloseStateType
   rdfs:label "Open Close State Type" ;
   rdfs:subClassOf qudt:DiscreteState .
 
-qudt:OrderedCollection
+qudt:OrderedCollectionKind
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>An Ordered Collection Type is an abstract data type that defines the properties of collection data structures whose members can be linearly ordered. 
+  <p>An <em>Ordered Collection Kind</em> is an abstract data type that defines the properties of collection data structures whose members can be linearly ordered. 
   An ordered collection is a collection together with an ordering relation (such as greater than) that linearly orders the collection elements.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Ordered Collection Type" ;
-  rdfs:subClassOf qudt:Collection ;
-  sh:property qudt:OrderedCollection-orderingRelation .
+  rdfs:label "Ordered Collection Kind" ;
+  rdfs:subClassOf qudt:CollectionKind ;
+  sh:property qudt:OrderedCollectionKind-orderingRelation .
 
 qudt:OrderedTree
   a rdfs:Class, sh:NodeShape ;
@@ -1356,7 +1374,7 @@ qudt:OrderedTree
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Ordered Tree Type" ;
-  rdfs:subClassOf qudt:OrderedCollection ;
+  rdfs:subClassOf qudt:OrderedCollectionKind ;
   rdfs:subClassOf qudt:Tree .
 
 qudt:OrderedType
@@ -1634,6 +1652,30 @@ qudt:RotatingReferenceFrame
   rdfs:label "Rotating reference frame" ;
   rdfs:subClassOf qudt:ReferenceFrame .
 
+qudt:ScalarCollection
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>A <em>Scalar Collection</em> holds values that have the same <em>Scalar Datatype</em>.
+  </p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  rdfs:label "Scalar Collection" ;
+  rdfs:subClassOf qudt:AbstractDataItem ;
+  sh:property qudt:Collection-datatype ;
+  sh:property qudt:Collection-value ;
+  sh:sparql [
+    sh:message "All members of the collection must have the same type." ;
+    sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
+    sh:select """
+        SELECT $this
+        WHERE {
+            $this qudt:datatype/qudt:datatype ?datatype .
+            $this qudt:value ?valueList.
+            ?valueList rdf:rest*/rdf:first ?value .
+            FILTER(datatype(?value) != ?datatype)
+        }
+        """ ;
+  ] .
+
 qudt:ScalarDatatype
   a rdfs:Class, sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -1667,7 +1709,7 @@ qudt:Sequence
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Sequence" ;
-  rdfs:subClassOf qudt:Collection .
+  rdfs:subClassOf qudt:CollectionKind .
 
 qudt:Set
   a rdfs:Class, sh:NodeShape ;
@@ -1679,7 +1721,7 @@ qudt:Set
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Set Type" ;
-  rdfs:subClassOf qudt:Collection .
+  rdfs:subClassOf qudt:CollectionKind .
 
 qudt:ShortIntegerType
   a rdfs:Class, sh:NodeShape ;
@@ -3160,6 +3202,18 @@ qudt:zCoordinateDefinition
   vaem:usesNonImportedResource <http://voag.linkedmodel.org/voag#QUDT-Attribution> ;
   vaem:withAttributionTo <http://voag.linkedmodel.org/voag#QUDT-Attribution> .
 
+qudt:AbstractDataItem
+  sh:property qudt:AbstractDataItem-kind ;
+  vaem:isElaboratedIn <http://qudt.org/2.1/schema/shacl/datatype> .
+
+qudt:AbstractDataItem-kind
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:Datatype ;
+  sh:maxCount 1 ;
+  sh:minCount 0 ;
+  sh:path qudt:datatype .
+
 qudt:Array-dimensionality
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -3312,18 +3366,7 @@ qudt:CharEncoding
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Char Encoding" .
 
-qudt:Collection-member
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:minCount 0 ;
-  sh:or ( [
-    sh:class qudt:QuantityValue ;
-  ] [
-    sh:node qudt:NumericUnionList ;
-  ] ) ;
-  sh:path qudt:member .
-
-qudt:Collection-memberType
+qudt:CollectionKind-datatype
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:Datatype ;
@@ -3333,7 +3376,18 @@ qudt:Collection-memberType
   ] [
     sh:class qudt:Datatype ;
   ] ) ;
-  sh:path qudt:memberDatatype .
+  sh:path qudt:datatype .
+
+qudt:CollectionKind-member
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:minCount 0 ;
+  sh:or ( [
+    sh:class qudt:QuantityValue ;
+  ] [
+    sh:node qudt:NumericTypeUnion ;
+  ] ) ;
+  sh:path qudt:member .
 
 qudt:ColorCue-rgbCode
   a sh:PropertyShape ;
@@ -3526,14 +3580,6 @@ qudt:DataEncoding-encoding
   sh:maxCount 1 ;
   sh:path qudt:encoding .
 
-qudt:DataItem-type
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:Datatype ;
-  sh:maxCount 1 ;
-  sh:minCount 0 ;
-  sh:path qudt:datatype .
-
 qudt:DataSetElement-elementLabel
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -3716,6 +3762,25 @@ qudt:DateTimeStringType-encoding
   sh:class qudt:DateTimeStringEncodingType ;
   sh:maxCount 1 ;
   sh:path qudt:encoding .
+
+qudt:DateTypeUnion
+  a rdf:List ;
+  dcterms:description """
+  An rdf:List that can be used in property constraints as the type in an sh:or to indicate
+   that all values of a property must be an xsd date type.
+  """ ;
+  rdf:first [
+    sh:datatype xsd:date ;
+  ] ;
+  rdf:rest ( [
+    sh:datatype xsd:dateTime ;
+  ] [
+    sh:datatype xsd:gYear ;
+  ] [
+    sh:datatype xsd:gMonth ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Date Type Union" .
 
 qudt:DiscreteState-inverted
   a sh:PropertyShape ;
@@ -4131,11 +4196,11 @@ qudt:NumericType-signedness
   sh:maxCount 1 ;
   sh:path qudt:signedness .
 
-qudt:NumericUnionList
+qudt:NumericTypeUnion
   a rdf:List ;
   dcterms:description """
-  An rdf:List that can be used in property constraints as value for sh:or to indicate that all values of a property must be a string,
-   an integer, a float, a double or a decimal.
+  An rdf:List that can be used in property constraints as value for sh:or to indicate that all values
+   of a property must be a string, an integer, a float, a double or a decimal.
   """ ;
   rdf:first [
     sh:datatype xsd:string ;
@@ -4156,7 +4221,7 @@ qudt:NumericUnionList
     sh:datatype xsd:decimal ;
   ] ) ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Numeric Union List" .
+  rdfs:label "Numeric Type Union" .
 
 qudt:OctetEncoding
   a qudt:BooleanEncodingType, qudt:ByteEncodingType ;
@@ -4164,7 +4229,7 @@ qudt:OctetEncoding
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "OCTET Encoding" .
 
-qudt:On
+qudt:OnState
   a qudt:OnOffStateType ;
   dtype:literal "on" ;
   qudt:code "1" ;
@@ -4185,7 +4250,7 @@ qudt:Open
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Open" .
 
-qudt:OrderedCollection-orderingRelation
+qudt:OrderedCollectionKind-orderingRelation
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class dtype:ComparisonOperator ;
@@ -4249,14 +4314,14 @@ qudt:RealDatatype-maxMantissa
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:maxCount 1 ;
-  sh:or qudt:NumericUnionList ;
+  sh:or qudt:NumericTypeUnion ;
   sh:path qudt:maxMantissa .
 
 qudt:RealDatatype-minMantissa
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:maxCount 1 ;
-  sh:or qudt:NumericUnionList ;
+  sh:or qudt:NumericTypeUnion ;
   sh:path qudt:minMantissa .
 
 qudt:RealDatatype-precision
@@ -4389,7 +4454,7 @@ qudt:ScalarDatatype-maxExclusive
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:datatype xsd:string ;
   sh:maxCount 1 ;
-  sh:or qudt:NumericUnionList ;
+  sh:or qudt:NumericTypeUnion ;
   sh:path qudt:maxExclusive .
 
 qudt:ScalarDatatype-maxInclusive
@@ -4397,21 +4462,21 @@ qudt:ScalarDatatype-maxInclusive
   rdfs:isDefinedBy <http://edg.topbraid.solutions/1.0/schema/qudt> ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:maxCount 1 ;
-  sh:or qudt:NumericUnionList ;
+  sh:or qudt:NumericTypeUnion ;
   sh:path qudt:maxInclusive .
 
 qudt:ScalarDatatype-minExclusive
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:maxCount 1 ;
-  sh:or qudt:NumericUnionList ;
+  sh:or qudt:NumericTypeUnion ;
   sh:path qudt:minExclusive .
 
 qudt:ScalarDatatype-minInclusive
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:maxCount 1 ;
-  sh:or qudt:NumericUnionList ;
+  sh:or qudt:NumericTypeUnion ;
   sh:path qudt:minInclusive .
 
 qudt:ScalarDatatype-rdfsDatatype
@@ -4440,7 +4505,7 @@ qudt:SignedBigIntegerType-literal
 
 qudt:SignedBigIntegerType-maxInclusive
   a sh:PropertyShape ;
-  sh:or qudt:NumericUnionList ;
+  sh:or qudt:NumericTypeUnion ;
   sh:path qudt:maxInclusive .
 
 qudt:SignedBigIntegerType-minInclusive
@@ -4472,7 +4537,7 @@ qudt:SignedLongIntegerType-abbreviation
 qudt:SignedLongIntegerType-maxInclusive
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:or qudt:NumericUnionList ;
+  sh:or qudt:NumericTypeUnion ;
   sh:path qudt:maxInclusive .
 
 qudt:SignedLongIntegerType-minInclusive
@@ -4614,6 +4679,23 @@ qudt:TaggedEnumeration-code
   sh:maxCount 1 ;
   sh:minCount 1 ;
   sh:path dtype:code .
+
+qudt:TextTypeUnion
+  a rdf:List ;
+  dcterms:description """
+  An rdf:List that can be used in property constraints as value for sh:or to indicate that all values of a property
+   must be a plain string, a string with HTML markup, or a string with LaTeX markup.
+  """ ;
+  rdf:first [
+    sh:datatype xsd:string ;
+  ] ;
+  rdf:rest ( [
+    sh:datatype rdf:HTML ;
+  ] [
+    sh:datatype qudt:LatexString ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Text Type Union" .
 
 qudt:Three-Tuple-elementType
   a sh:PropertyShape ;
@@ -4775,14 +4857,14 @@ qudt:UnsignedBigIntegerType-maxInclusive
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:hasValue "2^{64}-1" ;
-  sh:or qudt:NumericUnionList ;
+  sh:or qudt:NumericTypeUnion ;
   sh:path qudt:maxInclusive .
 
 qudt:UnsignedBigIntegerType-minInclusive
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:hasValue "0" ;
-  sh:or qudt:NumericUnionList ;
+  sh:or qudt:NumericTypeUnion ;
   sh:path qudt:minInclusive .
 
 qudt:UnsignedIntegerEncoding
@@ -4800,13 +4882,13 @@ qudt:UnsignedLongIntegerType-literal
 qudt:UnsignedLongIntegerType-maxInclusive
   a sh:PropertyShape ;
   sh:hasValue "2^{32}-1" ;
-  sh:or qudt:NumericUnionList ;
+  sh:or qudt:NumericTypeUnion ;
   sh:path qudt:maxInclusive .
 
 qudt:UnsignedLongIntegerType-minInclusive
   a sh:PropertyShape ;
   sh:hasValue "0" ;
-  sh:or qudt:NumericUnionList ;
+  sh:or qudt:NumericTypeUnion ;
   sh:path qudt:minInclusive .
 
 qudt:UnsignedShortIntegerType-abbreviation

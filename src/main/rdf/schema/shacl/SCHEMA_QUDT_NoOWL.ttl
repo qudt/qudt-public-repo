@@ -86,16 +86,29 @@ qudt:Citation
   sh:property qudt:Citation-description ;
   sh:property qudt:Citation-url .
 
-qudt:CollectionDataItem
+qudt:Collection
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A <em>Data Item</em> holds a value that is compliant with a specified <em>Datatype</em>.
+  <p>A <em>Collection</em> is ... .
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "Collection Data Item" ;
-  rdfs:subClassOf qudt:DataItem ;
-  sh:property qudt:CollectionDataItem-dataType ;
-  sh:property qudt:CollectionDataItem-value .
+  rdfs:label "Collection" ;
+  rdfs:subClassOf qudt:AbstractDataItem ;
+  sh:property qudt:Collection-datatype ;
+  sh:property qudt:Collection-value ;
+  sh:sparql [
+    sh:message "All members of the collection must have the same type." ;
+    sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
+    sh:select """
+        SELECT $this
+        WHERE {
+            $this qudt:member ?member1, ?member2 .
+            ?member1 qudt:datatype ?type1 .
+            ?member2 qudt:datatype ?type2 .
+            FILTER (?type1 != ?type2)
+        }
+        """ ;
+  ] .
 
 qudt:Comment
   a rdfs:Class, sh:NodeShape ;
@@ -401,7 +414,7 @@ qudt:Quantifiable
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "Quantifiable" ;
   rdfs:subClassOf qudt:Aspect ;
-  sh:property qudt:Quantifiable-dataType ;
+  sh:property qudt:Quantifiable-datatype ;
   sh:property qudt:Quantifiable-hasUnit ;
   sh:property qudt:Quantifiable-relativeStandardUncertainty ;
   sh:property qudt:Quantifiable-standardUncertainty ;
@@ -606,7 +619,7 @@ qudt:ScalarDataItem
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "Scalar Data Item" ;
   rdfs:subClassOf qudt:Concept ;
-  sh:property qudt:ScalarDataItem-dataType ;
+  sh:property qudt:ScalarDataItem-datatype ;
   sh:property qudt:ScalarDataItem-value .
 
 qudt:ScalarDatatype
@@ -1839,18 +1852,18 @@ qudt:Citation-url
   sh:maxCount 1 ;
   sh:path qudt:url .
 
-qudt:CollectionDataItem-dataType
+qudt:Collection-datatype
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  sh:class qudt:Collection ;
+  sh:class qudt:CollectionKind ;
   sh:maxCount 1 ;
   sh:path qudt:datatype .
 
-qudt:CollectionDataItem-value
+qudt:Collection-value
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qydt> ;
   sh:maxCount 1 ;
-  sh:node qudt:IntegerList ;
+  sh:node qudt:NumericTypeUnion ;
   sh:path qudt:value .
 
 qudt:Comment-description
@@ -2235,7 +2248,7 @@ qudt:Prefix-ucumCode
   sh:path qudt:ucumCode ;
   sh:pattern "[\\x21,\\x23-\\x27,\\x2a,\\x2c,\\x30-\\x3c,\\x3e-\\x5a,\\x5c,\\x5e-\\x7a,\\x7c,\\x7e]+" .
 
-qudt:Quantifiable-dataType
+qudt:Quantifiable-datatype
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   sh:class qudt:Datatype ;
@@ -2557,7 +2570,7 @@ qudt:Rule-ruleType
   sh:class qudt:RuleType ;
   sh:path qudt:ruleType .
 
-qudt:ScalarDataItem-dataType
+qudt:ScalarDataItem-datatype
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   sh:class qudt:ScalarDatatype ;
@@ -2571,7 +2584,7 @@ qudt:ScalarDataItem-value
   sh:or ( [
     sh:class qudt:QuantityValue ;
   ] [
-    sh:or qudt:NumericUnionList ;
+    sh:or qudt:NumericTypeUnion ;
   ] ) ;
   sh:path qudt:value .
 
