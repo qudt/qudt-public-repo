@@ -397,6 +397,36 @@ qudt:CollectionKind
   rdfs:label "Collection Kind" ;
   rdfs:subClassOf qudt:StructuredDatatype .
 
+qudt:CollectionV2
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>A <em>Collection</em> is a group of zero or more data items that need to be operated upon together in some controlled fashion. 
+  The data items (members) will all share the same data type or are derived from some common ancestor data type.
+  An optional property can be specified to specify a quantified value for the data items.
+  This property is defined as a <em>qudt:Quantity</em>.</p>
+  """^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  rdfs:label "Collection V2" ;
+  rdfs:subClassOf qudt:AbstractDataItem ;
+  sh:node qudt:MaybeQuantifiableShape ;
+  sh:property qudt:Collection-datatype ;
+  sh:property qudt:Collection-memberUnit ;
+  sh:property qudt:Collection-value ;
+  sh:sparql [
+    sh:message "All members of the collection must have the same type." ;
+    sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
+    sh:select """
+        SELECT $this
+        WHERE {
+              $this qudt:quantity ?quantity .
+              $this qudt:datatype/qudt:rdfsDatatype ?datatype .
+              $this qudt:value ?valueList.
+              ?valueList rdf:rest*/rdf:first ?value .
+              FILTER(datatype(?value) != ?datatype)
+        }
+        """ ;
+  ] .
+
 qudt:ColorCue
   a rdfs:Class, sh:NodeShape ;
   rdfs:comment """
@@ -4070,6 +4100,34 @@ qudt:MatrixElementOrder-dataOrder
   sh:class qudt:MatrixElementOrder ;
   sh:maxCount 1 ;
   sh:path qudt:dataOrder .
+
+qudt:MaybeQuantifiable
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:Quantity ;
+  sh:maxCount 1 ;
+  sh:path qudt:quantify .
+
+qudt:MaybeQuantifiableShape
+  a sh:NodeShape ;
+  dcterms:description """
+  <p>A <em>Maybe Quantifiable Shape</em> specifies and checks an optional property for a quantified value.
+  This property is defined as a <em>qudt:Quantity</em>.</p>
+  """^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  rdfs:label "Maybe Quantifiable" ;
+  sh:property qudt:MaybeQuantifiable ;
+  sh:sparql [
+    sh:message "A quantifiable value must refer to a quantity that has a unit." ;
+    sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
+    sh:select """
+        SELECT $this
+        WHERE {
+             $this qudt:quantity ?quantity .
+              FILTER NOT EXISTS {?quantity qudt:hasUnit ?unit} 
+             }
+        """ ;
+  ] .
 
 qudt:Minor
   a qudt:MajorMinorType ;
