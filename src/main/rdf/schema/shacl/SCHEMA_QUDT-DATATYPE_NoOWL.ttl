@@ -24,6 +24,14 @@
     sh:prefix "qudt" ;
   ] ;
   sh:declare [
+    sh:namespace "http://qudt.org/vocab/quantitykind/"^^xsd:anyURI ;
+    sh:prefix "quantitykind" ;
+  ] ;
+  sh:declare [
+    sh:namespace "http://qudt.org/vocab/unit/"^^xsd:anyURI ;
+    sh:prefix "unit" ;
+  ] ;
+  sh:declare [
     sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ;
     sh:prefix "rdf" ;
   ] ;
@@ -337,24 +345,44 @@ qudt:Collection
   dcterms:description """
   <p>A <em>Collection</em> is a group of zero or more data items that need to be operated upon together in some controlled fashion. 
   The data items (members) will all share the same data type or are derived from some common ancestor data type.
-  </p>
+  An optional property can be specified to specify a quantified value for the data items.
+  This property is defined as a <em>qudt:Quantity</em>.</p>
   """^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Collection Kind" ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  rdfs:label "Collection" ;
   rdfs:subClassOf qudt:AbstractDataItem ;
-  sh:property qudt:CollectionKind-datatype ;
-  sh:property qudt:CollectionKind-member ;
+  sh:property qudt:Collection-datatype ;
+  sh:property qudt:Collection-memberQuantity ;
+  sh:property qudt:Collection-memberUnit ;
+  sh:property qudt:Collection-value ;
   sh:sparql [
-    sh:message "All members of the collection must have the same type." ;
+    sh:message "All members of the collection must have the same type. TODO: complete logic for quantifiable members" ;
     sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
     sh:select """
         SELECT $this
         WHERE {
-            $this qudt:member ?member1, ?member2 .
-            ?member1 qudt:memberDatatype ?type1 .
-            ?member2 qudt:memberDatatype ?type2 .
-            FILTER (?type1 != ?type2)
+            {FILTER NOT EXISTS {$this qudt:quantity ?quantity} .
+              $this qudt:datatype/qudt:rdfsDatatype ?datatype .
+              $this qudt:value ?valueList.
+              ?valueList rdf:rest*/rdf:first ?value .
+              FILTER(datatype(?value) != ?datatype)
+            }
+            UNION
+            {FILTER EXISTS {$this qudt:quantity ?quantity}
+               FILTER (FALSE)
+            }
         }
+        """ ;
+  ] ;
+  sh:sparql [
+    sh:message "A collection of quantifiable values must refer to a quantity that has a unit." ;
+    sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
+    sh:select """
+        SELECT $this
+        WHERE {
+             $this qudt:quantity ?quantity .
+              FILTER NOT EXISTS {?quantity qudt:hasUnit ?unit} 
+             }
         """ ;
   ] .
 
@@ -1651,30 +1679,6 @@ qudt:RotatingReferenceFrame
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Rotating reference frame" ;
   rdfs:subClassOf qudt:ReferenceFrame .
-
-qudt:ScalarCollection
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Scalar Collection</em> holds values that have the same <em>Scalar Datatype</em>.
-  </p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "Scalar Collection" ;
-  rdfs:subClassOf qudt:AbstractDataItem ;
-  sh:property qudt:Collection-datatype ;
-  sh:property qudt:Collection-value ;
-  sh:sparql [
-    sh:message "All members of the collection must have the same type." ;
-    sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
-    sh:select """
-        SELECT $this
-        WHERE {
-            $this qudt:datatype/qudt:datatype ?datatype .
-            $this qudt:value ?valueList.
-            ?valueList rdf:rest*/rdf:first ?value .
-            FILTER(datatype(?value) != ?datatype)
-        }
-        """ ;
-  ] .
 
 qudt:ScalarDatatype
   a rdfs:Class, sh:NodeShape ;
@@ -3366,28 +3370,34 @@ qudt:CharEncoding
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Char Encoding" .
 
-qudt:CollectionKind-datatype
+qudt:Collection-datatype
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:Datatype ;
   sh:maxCount 1 ;
-  sh:or ( [
-    sh:class qudt:QuantityKind ;
-  ] [
-    sh:class qudt:Datatype ;
-  ] ) ;
+  sh:minCount 1 ;
   sh:path qudt:datatype .
 
-qudt:CollectionKind-member
+qudt:Collection-memberQuantity
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:minCount 0 ;
-  sh:or ( [
-    sh:class qudt:QuantityValue ;
-  ] [
-    sh:node qudt:NumericTypeUnion ;
-  ] ) ;
-  sh:path qudt:member .
+  sh:class qudt:Quantity ;
+  sh:maxCount 1 ;
+  sh:path qudt:quantify .
+
+qudt:Collection-memberUnit
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:Unit ;
+  sh:maxCount 1 ;
+  sh:path qudt:hasUnit .
+
+qudt:Collection-value
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:maxCount 1 ;
+  sh:node qudt:NumericTypeUnion ;
+  sh:path qudt:value .
 
 qudt:ColorCue-rgbCode
   a sh:PropertyShape ;
