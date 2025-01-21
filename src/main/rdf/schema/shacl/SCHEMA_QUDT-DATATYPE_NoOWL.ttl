@@ -115,19 +115,21 @@ qudt:Array
   <p>An Array is represented as ordered entries of values arranged according to its dimensionality.
   The number of dimensions is specified in the attribute 'dimensionality'.
   </p>
-  <p>Optionally a reference can be made to a variable, whose values are the array entries.
+  <p>The property 'qudt:datatype' refers to the datatype of the elements.  
   </p>
-  <p>
-  The data type of the array entries is an optional field, 'elementType', which points to a data type definition. 
-  If the data type is given, then it applies to all elements. 
-  The property 'qudt:datatype' refers to the datatype of the elements.  
+  <p>An array can be multi-dimensional.
+  Multiple indices are used but they are treated as extensions of the same structure.
+  For Example: for a 2D array arr[2][3], indices refer to the row and column positions.
+  A 2D array is still represented as a list, where each member of the list is a list.
   </p>
-  """^^rdf:HTML ;
+  <p>Higher dimensional arrays can be represented as nested lists.
+  For each dimension a new nested list is defined.
+  </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Array" ;
-  rdfs:subClassOf qudt:CollectionKind ;
-  sh:property qudt:Array-dimensionality ;
-  sh:property qudt:Array-dimensions .
+  rdfs:subClassOf qudt:AbstractDataItem ;
+  sh:node qudt:Array-value ;
+  sh:node qudt:DimensionalityShape .
 
 qudt:AssociativeArray
   a rdfs:Class, sh:NodeShape ;
@@ -142,7 +144,7 @@ qudt:AssociativeArray
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Associative Array" ;
   rdfs:seeAlso qudt:Map ;
-  rdfs:subClassOf qudt:CollectionKind .
+  rdfs:subClassOf qudt:Array .
 
 qudt:AuralCue
   a rdfs:Class, sh:NodeShape ;
@@ -350,41 +352,7 @@ qudt:Collection
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "Collection" ;
-  rdfs:subClassOf qudt:AbstractDataItem ;
-  sh:property qudt:Collection-datatype ;
-  sh:property qudt:Collection-memberQuantity ;
-  sh:property qudt:Collection-memberUnit ;
-  sh:property qudt:Collection-value ;
-  sh:sparql [
-    sh:message "All members of the collection must have the same type. TODO: complete logic for quantifiable members" ;
-    sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
-    sh:select """
-        SELECT $this
-        WHERE {
-            {FILTER NOT EXISTS {$this qudt:quantity ?quantity} .
-              $this qudt:datatype/qudt:rdfsDatatype ?datatype .
-              $this qudt:value ?valueList.
-              ?valueList rdf:rest*/rdf:first ?value .
-              FILTER(datatype(?value) != ?datatype)
-            }
-            UNION
-            {FILTER EXISTS {$this qudt:quantity ?quantity}
-               FILTER (FALSE)
-            }
-        }
-        """ ;
-  ] ;
-  sh:sparql [
-    sh:message "A collection of quantifiable values must refer to a quantity that has a unit." ;
-    sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
-    sh:select """
-        SELECT $this
-        WHERE {
-             $this qudt:quantity ?quantity .
-              FILTER NOT EXISTS {?quantity qudt:hasUnit ?unit} 
-             }
-        """ ;
-  ] .
+  rdfs:subClassOf qudt:List .
 
 qudt:CollectionKind
   a rdfs:Class, sh:NodeShape ;
@@ -396,36 +364,6 @@ qudt:CollectionKind
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Collection Kind" ;
   rdfs:subClassOf qudt:StructuredDatatype .
-
-qudt:CollectionV2
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Collection</em> is a group of zero or more data items that need to be operated upon together in some controlled fashion. 
-  The data items (members) will all share the same data type or are derived from some common ancestor data type.
-  An optional property can be specified to specify a quantified value for the data items.
-  This property is defined as a <em>qudt:Quantity</em>.</p>
-  """^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "Collection V2" ;
-  rdfs:subClassOf qudt:AbstractDataItem ;
-  sh:node qudt:MaybeQuantifiableShape ;
-  sh:property qudt:Collection-datatype ;
-  sh:property qudt:Collection-memberUnit ;
-  sh:property qudt:Collection-value ;
-  sh:sparql [
-    sh:message "All members of the collection must have the same type." ;
-    sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
-    sh:select """
-        SELECT $this
-        WHERE {
-              $this qudt:quantity ?quantity .
-              $this qudt:datatype/qudt:rdfsDatatype ?datatype .
-              $this qudt:value ?valueList.
-              ?valueList rdf:rest*/rdf:first ?value .
-              FILTER(datatype(?value) != ?datatype)
-        }
-        """ ;
-  ] .
 
 qudt:ColorCue
   a rdfs:Class, sh:NodeShape ;
@@ -442,7 +380,7 @@ qudt:CompositeDataStructure
   prov:wasInfluencedBy <https://en.wikipedia.org/wiki/List_of_data_structures> ;
   prov:wasInfluencedBy <https://en.wikipedia.org/wiki/Record_(computer_science)> ;
   rdfs:comment """
-  <p><em>Composite Data Structure</em>, also referred to as <em>Data Record</em> is a datatype that aggregates element of possibly different types. 
+  <p>A <em>Composite Data Structure</em>, also referred to as <em>Data Record</em> is a datatype that aggregates element of possibly different types. 
   The aggregated items are called fields or members and are usually identified or indexed by field labels.
   </p>"""^^rdf:HTML ;
   rdfs:label "Composite Data Structure" ;
@@ -495,7 +433,8 @@ qudt:Container
 
 qudt:CoordinateCenterType
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description """<p>An enumeration of coordinate centers for coordinate systems, such as:
+  dcterms:description """
+  <p>An enumeration of coordinate centers for coordinate systems, such as:
    "Earth centered", "Mars centered", "Moon centered", "Sun centered",  and "Vehicle centered".
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -509,7 +448,7 @@ qudt:CoordinateCenterType
 qudt:CoordinateMember
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A Coordinate Member Type is a data type that defines the properties of a coordinate in a coordinate system.
+  <p>A <em>Coordinate Member</em> is a data type that defines the properties of a coordinate in a coordinate system.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Coordinate Member Type" ;
@@ -519,8 +458,10 @@ qudt:CoordinateMember
 qudt:CoordinateSystem
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>
-  In geometry, a coordinate system is a system which uses one or more numbers, or coordinates,
+  <p>A <em>Coordinate System</em> is a mathematical structure for assigning a unique n-tuple of numbers or scalars to each point in an n-dimensional space. 
+  A Coordinate System Type is a data type that defines the properties of data structures that represent coordinate systems.
+  </p>
+  <p>In geometry, a coordinate system is a system which uses one or more numbers, or coordinates,
    to uniquely determine the position of a point or other geometric element on a manifold such as Euclidean space. 
   The order of the coordinates is significant.
   They are sometimes identified by their position in an ordered tuple and sometimes by a letter, as in 'the x-coordinate'. 
@@ -962,16 +903,7 @@ qudt:Graph
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Graph Type" ;
-  rdfs:subClassOf qudt:CollectionKind .
-
-qudt:GraphType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Graph Type</em> is a kind of abstract data type, that consists of a set of nodes (also called vertices) and a set of edges that establish relationships (connections) between the nodes. 
-  A Graph Type is a data type that defines the properties of data structures that represent graphs and their members (nodes and edges).
-  </p>"""^^rdf:HTML ;
-  rdfs:label "Graph Type" ;
-  rdfs:subClassOf qudt:CollectionType .
+  rdfs:subClassOf qudt:AbstractDataItem .
 
 qudt:GroundCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
@@ -990,17 +922,7 @@ qudt:HashTable
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Hash Table Type" ;
   rdfs:subClassOf qudt:Map ;
-  rdfs:subClassOf qudt:TableType .
-
-qudt:HashTableType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A hash table is a kind of map that utilizes a hash function to perform efficient lookup: given a key (e.g., a person's name), find the corresponding value (e.g., that person's telephone number). 
-  Hash tables support the efficient lookup, insertion and deletion of elements in constant time on average. 
-  A Hash Table Type is a data type that defines the types of a hash table's key-value pairs.
-  </p>"""^^rdf:HTML ;
-  rdfs:label "Hash Table Type" ;
-  rdfs:subClassOf qudt:MapType .
+  rdfs:subClassOf qudt:Table .
 
 qudt:Heap
   a rdfs:Class, sh:NodeShape ;
@@ -1148,10 +1070,13 @@ qudt:LimitType
 
 qudt:List
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A sub-type of 'Collection Type'." ;
+  dcterms:description "A sub-type of 'AbstractDataItem'." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "List" ;
-  rdfs:subClassOf qudt:CollectionKind .
+  rdfs:subClassOf qudt:AbstractDataItem ;
+  sh:node qudt:AllValuesMustHaveSameDataTypeShape ;
+  sh:node qudt:MaybeQuantifiableShape ;
+  sh:property qudt:List-value .
 
 qudt:LocalCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
@@ -1867,24 +1792,12 @@ qudt:SplineCalibrator
   rdfs:label "Spline calibrator" ;
   rdfs:subClassOf qudt:Map .
 
-qudt:SplineCalibratorType
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Spline calibrator type" ;
-  rdfs:subClassOf qudt:MapType .
-
 qudt:SplinePoint
   a rdfs:Class, sh:NodeShape ;
   dcterms:description "A sub-type of 'Tuple Type'." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Spline point" ;
   rdfs:subClassOf qudt:Tuple .
-
-qudt:SplinePointType
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Spline point type" ;
-  rdfs:subClassOf qudt:TupleType .
 
 qudt:StateSpaceMatrix
   a rdfs:Class, sh:NodeShape ;
@@ -1908,25 +1821,6 @@ qudt:StateSpaceVector
   rdfs:label "State Space Vector Type" ;
   rdfs:subClassOf qudt:Vector ;
   sh:property qudt:StateSpaceVector-coordinateSystem .
-
-qudt:StateSpaceVectorType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  A state vector in general control systems describes the observed states of an object in state space.
-  For example in variables of the degrees of freedom for motion. 
-  As data types, state vector types are used to specify the structure of state vectors, such as how the observed state is encoded.
-  """ ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "State Space Vector Type" ;
-  rdfs:subClassOf qudt:VectorType ;
-  sh:property qudt:StateSpaceVector-coordinateSystem .
-
-qudt:StateVectorType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A state-space vector type in general control systems describes the observed states of an object in state space, e.g. in variables of the degrees of freedom for motion. As data types, state vector types are used to specify the structure of state vectors, such as how the observed state is encoded." ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "State Vector Type" ;
-  rdfs:subClassOf qudt:VectorType .
 
 qudt:StringEncodingType
   a rdfs:Class, sh:NodeShape ;
@@ -2108,13 +2002,6 @@ qudt:Tree
   rdfs:label "Tree Type" ;
   rdfs:subClassOf qudt:Graph .
 
-qudt:TreeType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A \"Tree\" is a data type that defines the properties of data structures that represent trees. A tree is a graph data structure accessed beginning at the root node. Each node is either a leaf or an internal node. An internal node has one or more child nodes and is called the parent of its child nodes. Leaf nodes have no chidren. Nodes that share the same parent are siblings. In graph theoretic terminology, a tree is a connected, undirected, acyclic graph." ;
-  prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Tree_(data_structure)> ;
-  rdfs:label "Tree Type" ;
-  rdfs:subClassOf qudt:GraphType .
-
 qudt:Triplet
   a rdfs:Class, sh:NodeShape ;
   dcterms:description "A \"Tuple\"." ;
@@ -2179,8 +2066,6 @@ qudt:TypeVector
   rdfs:label "Type Vector Type" ;
   rdfs:label "Type vector" ;
   rdfs:subClassOf qudt:DatatypeStructuredData ;
-  rdfs:subClassOf qudt:Vector ;
-  rdfs:subClassOf qudt:VectorType ;
   sh:property qudt:TypeVector-objectValue ;
   sh:property qudt:TypeVector-type ;
   sh:property qudt:TypeVector-typeVector .
@@ -3237,30 +3122,53 @@ qudt:zCoordinateDefinition
   vaem:withAttributionTo <http://voag.linkedmodel.org/voag#QUDT-Attribution> .
 
 qudt:AbstractDataItem
-  sh:property qudt:AbstractDataItem-kind ;
+  sh:property qudt:AbstractDataItem-datatype ;
   vaem:isElaboratedIn <http://qudt.org/2.1/schema/shacl/datatype> .
 
-qudt:AbstractDataItem-kind
+qudt:AbstractDataItem-datatype
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:Datatype ;
   sh:maxCount 1 ;
-  sh:minCount 0 ;
+  sh:minCount 1 ;
   sh:path qudt:datatype .
 
-qudt:Array-dimensionality
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
-  sh:maxCount 1 ;
-  sh:minCount 0 ;
-  sh:path qudt:dimensionality .
+qudt:AllValuesMustHaveSameDataTypeShape
+  a sh:NodeShape ;
+  rdfs:label "\"compliance with all values must have same datatype\"" ;
+  sh:sparql [
+    sh:message "All values of a Data Item must have the same type." ;
+    sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
+    sh:select """
+        SELECT $this
+        WHERE {
+              $this qudt:datatype/qudt:rdfsDatatype ?datatype .
+              $this qudt:value ?valueList.
+              ?valueList rdf:rest*/rdf:first ?value .
+              FILTER(datatype(?value) != ?datatype)
+        }
+        """ ;
+  ] .
 
-qudt:Array-dimensions
+qudt:Array-value
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:node qudt:IntegerList ;
-  sh:path qudt:dimensions .
+  sh:node qudt:NumericTypeUnion .
+
+qudt:Array2DvalueList
+  a rdf:List ;
+  dcterms:description """
+  An rdf:List for a 2D array.
+  For example "[[1,2], [3,4], [5,6]]"
+  """ ;
+  rdf:first [
+    sh:datatype qudt:List ;
+  ] ;
+  rdf:rest ( [
+    sh:datatype qudt:List ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "2D Array Value List" .
 
 qudt:AuralCue-sound
   a sh:PropertyShape ;
@@ -3400,14 +3308,6 @@ qudt:CharEncoding
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Char Encoding" .
 
-qudt:Collection-datatype
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:Datatype ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
-  sh:path qudt:datatype .
-
 qudt:Collection-memberQuantity
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -3421,13 +3321,6 @@ qudt:Collection-memberUnit
   sh:class qudt:Unit ;
   sh:maxCount 1 ;
   sh:path qudt:hasUnit .
-
-qudt:Collection-value
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:maxCount 1 ;
-  sh:node qudt:NumericTypeUnion ;
-  sh:path qudt:value .
 
 qudt:ColorCue-rgbCode
   a sh:PropertyShape ;
@@ -3822,6 +3715,27 @@ qudt:DateTypeUnion
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Date Type Union" .
 
+qudt:DimensionalityShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "\"compliance with dimensionality specification\"" ;
+  sh:property qudt:DimensionalityShape-dimensionality ;
+  sh:property qudt:DimensionalityShape-dimensions .
+
+qudt:DimensionalityShape-dimensionality
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 0 ;
+  sh:path qudt:dimensionality .
+
+qudt:DimensionalityShape-dimensions
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:node qudt:IntegerList ;
+  sh:path qudt:dimensions .
+
 qudt:DiscreteState-inverted
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -4029,6 +3943,13 @@ qudt:KinestheticCueEnumeration-defaultValue
   sh:class qudt:KinestheticCue ;
   sh:path qudt:defaultValue .
 
+qudt:List-value
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:maxCount 1 ;
+  sh:node qudt:Array2DvalueList ;
+  sh:path qudt:value .
+
 qudt:LittleEndian
   a qudt:EndianType ;
   dtype:literal "little" ;
@@ -4101,22 +4022,16 @@ qudt:MatrixElementOrder-dataOrder
   sh:maxCount 1 ;
   sh:path qudt:dataOrder .
 
-qudt:MaybeQuantifiable
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:Quantity ;
-  sh:maxCount 1 ;
-  sh:path qudt:quantify .
-
 qudt:MaybeQuantifiableShape
   a sh:NodeShape ;
   dcterms:description """
   <p>A <em>Maybe Quantifiable Shape</em> specifies and checks an optional property for a quantified value.
-  This property is defined as a <em>qudt:Quantity</em>.</p>
+  This property refers to a <em>qudt:Quantity</em>.</p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "Maybe Quantifiable" ;
-  sh:property qudt:MaybeQuantifiable ;
+  rdfs:label "\"compliance with a quantity specification\"" ;
+  sh:property qudt:MaybeQuantity ;
+  sh:property qudt:MaybeUnit ;
   sh:sparql [
     sh:message "A quantifiable value must refer to a quantity that has a unit." ;
     sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -4128,6 +4043,20 @@ qudt:MaybeQuantifiableShape
              }
         """ ;
   ] .
+
+qudt:MaybeQuantity
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:Quantity ;
+  sh:maxCount 1 ;
+  sh:path qudt:quantity .
+
+qudt:MaybeUnit
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:Unit ;
+  sh:maxCount 1 ;
+  sh:path qudt:hasUnit .
 
 qudt:Minor
   a qudt:MajorMinorType ;
@@ -4191,6 +4120,7 @@ qudt:MultiModalType-auralCue
 
 qudt:MultiModalType-iconicCue
   a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:maxCount 1 ;
   sh:path qudt:iconicCue .
 
