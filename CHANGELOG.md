@@ -12,12 +12,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - New QuantityKinds
   - `qk:OsmoticConcentration` by [Toby Broom](https://github.com/Toby-Broom/)
   - `qk:AmountOfCloudCover` by [Jeffrey Vervoort](https://github.com/Jeffrey-Vervoort-KNMI)
+  - 7 new QuantityKinds for the [EDI](https://github.com/EDIorg/Units-WG) community, by [Margaret O'Brien](https://github.com/mobb)
 - New Units
   - `unit:MegaTONNE-PER-YR` by [Jurek Müller](https://github.com/JurekMueller)
   - `unit:OSM` by [Toby Broom](https://github.com/Toby-Broom/)
   - `unit:MilliOSM-PER-KiloGM` by [Toby Broom](https://github.com/Toby-Broom/)
   - `unit:OKTA` by [Jeffrey Vervoort](https://github.com/Jeffrey-Vervoort-KNMI)
   - `unit:REV-PER-MIN-SEC` by [Vladimir Alexiev](https://github.com/VladimirAlexiev)
+  - 31 new Units for the [EDI](https://github.com/EDIorg/Units-WG) community, by [Margaret O'Brien](https://github.com/mobb)
+- New Dimension Vectors
+  - 5 new Dimension Vectors for the [EDI](https://github.com/EDIorg/Units-WG) community, by [Margaret O'Brien](https://github.com/mobb)
 - New QA Tests
   - Added SHACL shapes for checking content under `src/` only
 
