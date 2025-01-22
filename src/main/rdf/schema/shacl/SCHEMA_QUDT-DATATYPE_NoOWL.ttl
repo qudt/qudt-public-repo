@@ -109,13 +109,10 @@ qudt:Array
   <ol>
   <li>Fixed Size: The size of an array may be pre-determined when it is created and cannot be changed;</li>
   <li>Index-Based Access: Elements can be accessed, updated, or modified using their index;</li>
-  <li>Homogeneous Elements: Typically, all elements in an array must be of the same datatype;</li>
   <li>Contiguous Memory Allocation: The elements are stored in consecutive memory locations, which allows efficient access using the index.</li>
   </ol>
   <p>An Array is represented as ordered entries of values arranged according to its dimensionality.
   The number of dimensions is specified in the attribute 'dimensionality'.
-  </p>
-  <p>The property 'qudt:datatype' refers to the datatype of the elements.  
   </p>
   <p>An array can be multi-dimensional.
   Multiple indices are used but they are treated as extensions of the same structure.
@@ -127,11 +124,11 @@ qudt:Array
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Array" ;
-  rdfs:subClassOf qudt:AbstractDataItem ;
-  sh:node qudt:Array-value ;
+  rdfs:subClassOf qudt:StructuredDatatype ;
   sh:node qudt:DimensionalityShape ;
-  sh:property qudt:Array-dimensionality ;
-  sh:property qudt:Array-dimensions .
+  sh:property qudt:Array-value ;
+  sh:property qudt:DimensionalityPropertyShape ;
+  sh:property qudt:DimensionsPropertyShape .
 
 qudt:AssociativeArray
   a rdfs:Class, sh:NodeShape ;
@@ -946,6 +943,40 @@ qudt:HeapType
   rdfs:label "Heap Type" ;
   rdfs:subClassOf qudt:OrderedTreeType .
 
+qudt:HeterogenousArray
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>An <em>Array></em> is a data structure that stores a collection of elements, typically of the same type, in a contiguous block of memory. 
+  Each element in an array is identified by an index or key, which is typically a numerical identifier, either starting at '0' or '1'.
+  </p>
+  <p>The key considerations for an Array are:
+  </p>
+  <ol>
+  <li>Fixed Size: The size of an array may be pre-determined when it is created and cannot be changed;</li>
+  <li>Index-Based Access: Elements can be accessed, updated, or modified using their index;</li>
+  <li>Heterogenous Elements: all elements in the array may be of different data types;</li>
+  <li>Contiguous Memory Allocation: 
+    the elements are stored in consecutive memory locations, which allows efficient access using the index.</li>
+  </ol>
+  <p>An Array is represented as ordered entries of values arranged according to its dimensionality.
+  The number of dimensions is specified in the attribute 'dimensionality'.
+  </p>
+  <p>The property 'qudt:datatype' refers to a list if the datatypes of the elements.  
+  </p>
+  <p>An heterogenous array can be multi-dimensional.
+  Multiple indices are used but they are treated as extensions of the same structure.
+  For example: for a 2D array arr[2][3], indices refer to the row and column positions.
+  A 2D array is still represented as a list, where each member of the list is a list.
+  </p>
+  <p>Higher dimensional arrays can be represented as nested lists.
+  For each dimension a new nested list is defined.
+  </p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Heterogenous Array" ;
+  rdfs:subClassOf qudt:Array ;
+  sh:node qudt:HeterogenousArray-value ;
+  sh:property qudt:HeterogenousArray-datatype .
+
 qudt:HexBinaryType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description "A string composed of hex characters." ;
@@ -956,6 +987,38 @@ qudt:HexBinaryType
   sh:property qudt:HexBinaryType-maxLength ;
   sh:property qudt:HexBinaryType-minLength ;
   sh:property qudt:HexBinaryType-pattern .
+
+qudt:HomogeneousArray
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>An <em>Array></em> is a data structure that stores a collection of elements, typically of the same type, in a contiguous block of memory. 
+  Each element in an array is identified by an index or key, which is typically a numerical identifier, either starting at '0' or '1'.
+  </p>
+  <p>The key considerations for an Array are:
+  </p>
+  <ol>
+  <li>Fixed Size: The size of an array may be pre-determined when it is created and cannot be changed;</li>
+  <li>Index-Based Access: Elements can be accessed, updated, or modified using their index;</li>
+  <li>Homogeneous Elements: all elements in an array must be of the same datatype;</li>
+  <li>Contiguous Memory Allocation: The elements are stored in consecutive memory locations, which allows efficient access using the index.</li>
+  </ol>
+  <p>An Array is represented as ordered entries of values arranged according to its dimensionality.
+  The number of dimensions is specified in the attribute 'dimensionality'.
+  </p>
+  <p>The property 'qudt:datatype' refers to the datatype of the elements.  
+  </p>
+  <p>An array can be multi-dimensional.
+  Multiple indices are used but they are treated as extensions of the same structure.
+  For Example: for a 2D array arr[2][3], indices refer to the row and column positions.
+  A 2D array is still represented as a list, where each member of the list is a list.
+  </p>
+  <p>Higher dimensional arrays can be represented as nested lists.
+  For each dimension a new nested list is defined.
+  </p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Homogeneous Array" ;
+  rdfs:subClassOf qudt:Array ;
+  sh:property qudt:Array-datatype .
 
 qudt:IconicCue
   a rdfs:Class, sh:NodeShape ;
@@ -1009,7 +1072,7 @@ qudt:IntegerEncodingType
     ] ;
   ] .
 
-qudt:IntegerList
+qudt:IntegerListShape
   a rdfs:Class, sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:subClassOf rdf:List ;
@@ -1021,16 +1084,10 @@ qudt:IntegerList
     sh:or ( [
       sh:node ( ) ;
     ] [
-      sh:node qudt:IntegerList ;
+      sh:node qudt:IntegerListShape ;
     ] ) ;
     sh:path rdf:rest ;
   ] .
-
-qudt:IntegerVector
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Integer vector" ;
-  rdfs:subClassOf qudt:Vector .
 
 qudt:InterpolatedTable
   a rdfs:Class, sh:NodeShape ;
@@ -1280,6 +1337,24 @@ qudt:NonRotatingInertialFrame
   rdfs:seeAlso qudt:InertialCoordinateFrame ;
   rdfs:subClassOf qudt:InertialReferenceFrame ;
   sh:property qudt:NonRotatingInertialFrame-frameType .
+
+qudt:NumericListShape
+  a rdfs:Class, sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:subClassOf rdf:List ;
+  sh:message "The list must only have scalar datatypes." ;
+  sh:property [
+    sh:or qudt:NumericTypeUnion ;
+    sh:path rdf:first ;
+  ] ;
+  sh:property [
+    sh:or ( [
+      sh:node ( ) ;
+    ] [
+      sh:node qudt:NumericListShape ;
+    ] ) ;
+    sh:path rdf:rest ;
+  ] .
 
 qudt:NumericType
   a rdfs:Class, sh:NodeShape ;
@@ -1643,6 +1718,24 @@ qudt:ScalarDatatype
   sh:property qudt:ScalarDatatype-rdfsDatatype ;
   vaem:isElaboratedIn <http://qudt.org/2.1/schema/shacl/datatype> .
 
+qudt:ScalarListShape
+  a rdfs:Class, sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:subClassOf rdf:List ;
+  sh:message "The list must only have scalar datatypes." ;
+  sh:property [
+    sh:or qudt:NumericTypeUnion ;
+    sh:path rdf:first ;
+  ] ;
+  sh:property [
+    sh:or ( [
+      sh:node ( ) ;
+    ] [
+      sh:node qudt:ScalarListShape ;
+    ] ) ;
+    sh:path rdf:rest ;
+  ] .
+
 qudt:Sequence
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
@@ -1880,9 +1973,9 @@ qudt:StringUTF8
 qudt:StructuredDatatype
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  A "Structured Datatype", in contrast to a scalar data type, is used to characterize classes of more complex data structures.
+  <p>A <em>Structured Datatype</em>, in contrast to a scalar data type, is used to characterize classes of more complex data structures.
   Examples are collections, linked and indexed lists, trees, ordered trees, and multi-dimensional file formats.
-  """ ;
+  </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Structured Data Type" ;
   rdfs:subClassOf qudt:Datatype .
@@ -2199,7 +2292,7 @@ qudt:Vector
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Vector" ;
-  rdfs:subClassOf qudt:Array .
+  rdfs:subClassOf qudt:HeterogenousArray .
 
 qudt:VehicleCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
@@ -2238,7 +2331,7 @@ qudt:MassPropertiesArray
   """ ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Mass Properties Array" ;
-  rdfs:subClassOf qudt:Array .
+  rdfs:subClassOf qudt:HeterogenousArray .
 
 dcterms:contributor
   a rdf:Property ;
@@ -3124,18 +3217,6 @@ qudt:zCoordinateDefinition
   vaem:usesNonImportedResource <http://voag.linkedmodel.org/voag#QUDT-Attribution> ;
   vaem:withAttributionTo <http://voag.linkedmodel.org/voag#QUDT-Attribution> .
 
-qudt:AbstractDataItem
-  sh:property qudt:AbstractDataItem-datatype ;
-  vaem:isElaboratedIn <http://qudt.org/2.1/schema/shacl/datatype> .
-
-qudt:AbstractDataItem-datatype
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:Datatype ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
-  sh:path qudt:datatype .
-
 qudt:AllValuesMustHaveSameDataTypeShape
   a sh:NodeShape ;
   rdfs:label "\"compliance with all values must have same datatype\"" ;
@@ -3153,26 +3234,19 @@ qudt:AllValuesMustHaveSameDataTypeShape
         """ ;
   ] .
 
-qudt:Array-dimensionality
+qudt:Array-datatype
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
+  sh:class qudt:Datatype ;
   sh:maxCount 1 ;
-  sh:minCount 0 ;
-  sh:path qudt:dimensionality .
-
-qudt:Array-dimensions
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:message "Check the length of the list of values for each dimension. MORE TODO" ;
-  sh:node qudt:IntegerList ;
-  sh:path qudt:dimensions .
+  sh:minCount 1 ;
+  sh:path qudt:datatype .
 
 qudt:Array-value
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:node qudt:NumericTypeUnion ;
-  sh:property qudt:value .
+  sh:node qudt:NumericListShape ;
+  sh:path qudt:value .
 
 qudt:Array2DvalueList
   a rdfs:Resource ;
@@ -3735,10 +3809,20 @@ qudt:DateTypeUnion
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Date Type Union" .
 
+qudt:DimensionalityPropertyShape
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 0 ;
+  sh:path qudt:dimensionality .
+
 qudt:DimensionalityShape
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "\"compliance with dimensionality specification\"" ;
+  sh:property qudt:DimensionalityPropertyShape ;
+  sh:property qudt:DimensionsPropertyShape ;
   sh:sparql [
     sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
     sh:select """
@@ -3756,6 +3840,13 @@ qudt:DimensionalityShape
           }
         """ ;
   ] .
+
+qudt:DimensionsPropertyShape
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:message "Check the length of the list of values for each dimension. MORE TODO" ;
+  sh:node qudt:IntegerListShape ;
+  sh:path qudt:dimensions .
 
 qudt:DiscreteState-inverted
   a sh:PropertyShape ;
@@ -3875,6 +3966,20 @@ qudt:FunctionDatatype-returnType
   sh:minCount 0 ;
   sh:path qudt:returnType .
 
+qudt:HeterogenousArray-datatype
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:Datatype ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+  sh:path qudt:datatype .
+
+qudt:HeterogenousArray-value
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:node qudt:NumericListShape ;
+  sh:path qudt:value .
+
 qudt:HexBinaryType-length
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -3949,7 +4054,7 @@ qudt:IntegerUnionList
     sh:datatype xsd:integer ;
   ] ) ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Integer union list" .
+  rdfs:label "Integer Union List" .
 
 qudt:KinestheticCue-code
   a sh:PropertyShape ;
@@ -5005,6 +5110,26 @@ qudt:WordAligned
   dtype:literal "word" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Word Aligned" .
+
+qudt:XSDatomicTypeUnion
+  a rdf:List ;
+  dcterms:description """
+  <p>In XML Schema Definition (XSD) xsd:anySimpleType is the base type for all simple types.
+  Simple types in XSD represent atomic values without any child elements or complex structures.
+  All simple types are compliant with xsd:anySimpleType.
+  </p>
+  <p>In XSD, the atomic types are: xsd:string, xsd:boolean, xsd:decimal, xsd:float,
+   xsd:double, xsd:duration, xsd:dateTime, xsd:time, xsd:date, xsd:gYearMonth, xsd:gYear, xsd:gMonthDay,
+   xsd:gDay, xsd:gMonth, xsd:hexBinary, xsd:base64Binary, xsd:anyURI, xsd:QName, and xsd:NOTATION.
+  </p>"""^^rdf:HTML ;
+  rdf:first [
+    sh:datatype xsd:anySimpleType ;
+  ] ;
+  rdf:rest ( [
+    sh:datatype xsd:anySimpleType ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "XSD Atomic Type Union" .
 
 qudt:Yes
   a qudt:YesNoType ;
