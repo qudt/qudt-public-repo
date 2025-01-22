@@ -129,7 +129,9 @@ qudt:Array
   rdfs:label "Array" ;
   rdfs:subClassOf qudt:AbstractDataItem ;
   sh:node qudt:Array-value ;
-  sh:node qudt:DimensionalityShape .
+  sh:node qudt:DimensionalityShape ;
+  sh:property qudt:Array-dimensionality ;
+  sh:property qudt:Array-dimensions .
 
 qudt:AssociativeArray
   a rdfs:Class, sh:NodeShape ;
@@ -1128,17 +1130,6 @@ qudt:MarsCoordinateSystem
   rdfs:subClassOf qudt:TrajectoryCoordinateSystem ;
   sh:property qudt:MarsCoordinateSystem-coordinateCenter .
 
-qudt:MassPropertiesArray
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  The Mass Properties of an object are its: Center of Gravity, Mass, Moment of Inertia, and Product of Inertia. 
-  Its elements contain these measured quantities for some object. 
-  The mass properties array data type provides the type specification for a class of arrays.
-  """ ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Mass Properties Array Type" ;
-  rdfs:subClassOf qudt:Array .
-
 qudt:MathsFunctionType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description "A sub-type of 'QUDT Concept'." ;
@@ -1154,7 +1145,8 @@ qudt:Matrix
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Matrix" ;
-  rdfs:subClassOf qudt:MultiDimensionalArray .
+  rdfs:subClassOf qudt:MultiDimensionalArray ;
+  sh:property qudt:MatrixElementOrder-byRow .
 
 qudt:MatrixElementOrder
   a rdfs:Class, sh:NodeShape ;
@@ -1208,8 +1200,7 @@ qudt:MultiDimensionalArray
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Multi-Dimensional Array Type" ;
-  rdfs:subClassOf qudt:Array ;
-  sh:property qudt:StructuredData-dimensionality .
+  rdfs:subClassOf qudt:Array .
 
 qudt:MultiDimensionalDataFormat
   a rdfs:Class, sh:NodeShape ;
@@ -1829,6 +1820,9 @@ qudt:StringEncodingType
    "UTF-16 String", "UTF-8 Encoding".
    </p>
   """^^rdf:HTML ;
+  dcterms:description """
+  An "Encoding" with the following instance(s): "qudt:UTF8-StringEncoding", qudt:UTF16-StringEncoding".
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "String Encoding Type" ;
   rdfs:subClassOf qudt:Encoding .
@@ -1883,6 +1877,16 @@ qudt:StringUTF8
   sh:property qudt:StringUTF8-memberDatatype ;
   vaem:isElaboratedIn <http://qudt.org/2.1/schema/shacl/datatype> .
 
+qudt:StructuredDatatype
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  A "Structured Datatype", in contrast to a scalar data type, is used to characterize classes of more complex data structures.
+  Examples are collections, linked and indexed lists, trees, ordered trees, and multi-dimensional file formats.
+  """ ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Structured Data Type" ;
+  rdfs:subClassOf qudt:Datatype .
+
 qudt:Table
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
@@ -1893,7 +1897,7 @@ qudt:Table
   """ ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Table Type" ;
-  rdfs:subClassOf qudt:Array ;
+  rdfs:subClassOf qudt:StructuredData ;
   sh:property qudt:Table-byRow ;
   sh:property qudt:Table-columns ;
   sh:property qudt:Table-dimensionality ;
@@ -1975,7 +1979,6 @@ qudt:TimeSeriesArray
   """ ;
   rdfs:label "Time Series Array" ;
   rdfs:subClassOf qudt:Array ;
-  sh:property qudt:TimeSeriesArray-dimensions ;
   sh:property qudt:TimeSeriesArray-incrementDatatype ;
   sh:property qudt:TimeSeriesArray-vector .
 
@@ -2198,16 +2201,6 @@ qudt:Vector
   rdfs:label "Vector" ;
   rdfs:subClassOf qudt:Array .
 
-qudt:VectorArray
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Vector Array</em> is an array whose elements are all state vectors. 
-  </p>
-  """^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Vector Array Type" ;
-  rdfs:subClassOf qudt:Array .
-
 qudt:VehicleCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
   dcterms:description "A sub-type of 'Aerospace coordinate system'." ;
@@ -2236,6 +2229,16 @@ qudt:YesNoType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Yes no type" ;
   rdfs:subClassOf qudt:EnumeratedValue .
+
+qudt:MassPropertiesArray
+  a owl:Class ;
+  dcterms:description """
+  <p>A <em>Mass Properties Array</em> holds, for an object, four values for the properties:
+   Center of Gravity, Mass, Moment of Inertia, and Product of Inertia. 
+  """ ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Mass Properties Array" ;
+  rdfs:subClassOf qudt:Array .
 
 dcterms:contributor
   a rdf:Property ;
@@ -3150,13 +3153,29 @@ qudt:AllValuesMustHaveSameDataTypeShape
         """ ;
   ] .
 
+qudt:Array-dimensionality
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 0 ;
+  sh:path qudt:dimensionality .
+
+qudt:Array-dimensions
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:message "Check the length of the list of values for each dimension. MORE TODO" ;
+  sh:node qudt:IntegerList ;
+  sh:path qudt:dimensions .
+
 qudt:Array-value
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:node qudt:NumericTypeUnion .
+  sh:node qudt:NumericTypeUnion ;
+  sh:property qudt:value .
 
 qudt:Array2DvalueList
-  a rdf:List ;
+  a rdfs:Resource ;
   dcterms:description """
   An rdf:List for a 2D array.
   For example "[[1,2], [3,4], [5,6]]"
@@ -3168,7 +3187,8 @@ qudt:Array2DvalueList
     sh:datatype qudt:List ;
   ] ) ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "2D Array Value List" .
+  rdfs:label "2D Array Value List" ;
+  rdfs:subClassOf rdf:List .
 
 qudt:AuralCue-sound
   a sh:PropertyShape ;
@@ -3719,22 +3739,23 @@ qudt:DimensionalityShape
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "\"compliance with dimensionality specification\"" ;
-  sh:property qudt:DimensionalityShape-dimensionality ;
-  sh:property qudt:DimensionalityShape-dimensions .
-
-qudt:DimensionalityShape-dimensionality
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
-  sh:maxCount 1 ;
-  sh:minCount 0 ;
-  sh:path qudt:dimensionality .
-
-qudt:DimensionalityShape-dimensions
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:node qudt:IntegerList ;
-  sh:path qudt:dimensions .
+  sh:sparql [
+    sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
+    sh:select """
+        SELECT $this
+        WHERE {
+            $this qudt:dimensionality ?dimensionality .
+            $this qudt:dimensions ?dimensions .
+            ?dimensions rdf:rest*/rdf:first ?d .
+            { SELECT $this (COUNT(?v )AS ?vl)
+              WHERE {
+              $this qudt:value/rdf:rest*/rdf:first ?v .
+              } GROUP BY $this
+            }
+            FILTER (?d != ?vl)
+          }
+        """ ;
+  ] .
 
 qudt:DiscreteState-inverted
   a sh:PropertyShape ;
@@ -4030,28 +4051,28 @@ qudt:MaybeQuantifiableShape
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "\"compliance with a quantity specification\"" ;
-  sh:property qudt:MaybeQuantity ;
-  sh:property qudt:MaybeUnit ;
+  sh:message "A quantifiable value must refer to a quantity that has a unit." ;
+  sh:property qudt:MaybeQuantifiableShape-quantity ;
+  sh:property qudt:MaybeQuantifiableShape-unit ;
   sh:sparql [
-    sh:message "A quantifiable value must refer to a quantity that has a unit." ;
     sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
     sh:select """
         SELECT $this
         WHERE {
              $this qudt:quantity ?quantity .
-              FILTER NOT EXISTS {?quantity qudt:hasUnit ?unit} 
+             FILTER NOT EXISTS {?quantity qudt:hasUnit ?unit} 
              }
         """ ;
   ] .
 
-qudt:MaybeQuantity
+qudt:MaybeQuantifiableShape-quantity
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:Quantity ;
   sh:maxCount 1 ;
   sh:path qudt:quantity .
 
-qudt:MaybeUnit
+qudt:MaybeQuantifiableShape-unit
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:Unit ;
@@ -4935,12 +4956,6 @@ qudt:VariableLengthIntegerType-minBits
   sh:datatype xsd:integer ;
   sh:hasValue 1 ;
   sh:path qudt:minBits .
-
-qudt:VectorArray-vector
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:StateSpaceVectorType ;
-  sh:path qudt:vector .
 
 qudt:VehicleCoordinateSystem-pitchRotationDefinition
   a sh:PropertyShape ;
