@@ -1,0 +1,39 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+<http://qudt.org/2.1/inference/owl-subset>
+  a owl:Ontology ;
+  rdfs:comment "This ontology contains inference rules to recreate a subset of OWL implications." ;
+  rdfs:label "QUDT OWL-Subset inference graph - v$$QUDT_VERSION$$" .
+
+qudt:
+  sh:declare [
+    sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+    sh:prefix "qudt" ;
+  ] .
+
+qudt:SymmetricRelationShape
+  a sh:NodeShape ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    rdfs:comment "Declare the inverse triples for symmetric relations" ;
+    sh:construct """
+CONSTRUCT {
+?o ?p $this .
+}
+WHERE {
+
+  ?p a qudt:SymmetricRelation .
+  $this ?p ?o .
+FILTER NOT EXISTS {$this qudt:deprecated true}
+}
+""" ;
+    sh:prefixes qudt: ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
+
