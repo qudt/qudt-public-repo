@@ -126,9 +126,9 @@ qudt:Array
   rdfs:label "Array" ;
   rdfs:subClassOf qudt:StructuredDatatype ;
   sh:node qudt:DimensionalityShape ;
-  sh:property qudt:Array-datatype ;
   sh:property qudt:Array-isHeterogeneous ;
   sh:property qudt:Array-value ;
+  sh:property qudt:DatatypePropertyShape ;
   sh:property qudt:DimensionalityPropertyShape ;
   sh:property qudt:DimensionsPropertyShape .
 
@@ -189,16 +189,6 @@ qudt:BigIntegerType
   rdfs:label "Big Integer Type" ;
   rdfs:subClassOf qudt:IntegerDatatype .
 
-qudt:BinaryHeap
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Binary Heap</em> is one where the maximum number of children each node can have is at most two.
-  </p>"""^^rdf:HTML ;
-  prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Heap_(data_structure)> ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/datatype> ;
-  rdfs:label "Binary Heap" ;
-  rdfs:subClassOf qudt:Heap .
-
 qudt:BinaryTree
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
@@ -226,21 +216,6 @@ qudt:BitEncodingType
       sh:inversePath rdf:type ;
     ] ;
   ] .
-
-qudt:BitFieldType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A bit field is a common idiom used in computer programming to store a set of Boolean datatype flags compactly, as a series of bits. 
-  The bit field is stored in an integral type of known, fixed bit-width. 
-  Each Boolean flag is stored in a separate bit. 
-  Usually the source code will define a set of constants, each a power of two,
-   that semantically associate each individual bit with its respective Boolean flag. 
-  The bitwise operators and, or, and not are used in combination to set, reset and test the flags.
-  </p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Bit Field Type" ;
-  rdfs:subClassOf qudt:ScalarDatatype ;
-  sh:property qudt:BitFieldType-encodedValue .
 
 qudt:BooleanEncodingType
   a rdfs:Class, sh:NodeShape ;
@@ -342,29 +317,6 @@ qudt:CharacterType
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Character Type" ;
   rdfs:subClassOf qudt:OrdinalType .
-
-qudt:Collection
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Collection</em> is a group of zero or more data items that need to be operated upon together in some controlled fashion. 
-  The data items (members) will all share the same data type or are derived from some common ancestor data type.
-  An optional property can be specified to specify a quantified value for the data items.
-  This property is defined as a <em>qudt:Quantity</em>.</p>
-  """^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "Collection" ;
-  rdfs:subClassOf qudt:List .
-
-qudt:CollectionKind
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Collection Kind</em> is a group of zero or more data items that need to be operated upon together in some controlled fashion. 
-  The data items (members) will all share the same data type or are derived from some common ancestor data type.
-  </p>
-  """^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Collection Kind" ;
-  rdfs:subClassOf qudt:StructuredDatatype .
 
 qudt:ColorCue
   a rdfs:Class, sh:NodeShape ;
@@ -1134,8 +1086,11 @@ qudt:List
   rdfs:label "List" ;
   rdfs:subClassOf qudt:AbstractDataItem ;
   sh:node qudt:AllValuesMustHaveSameDataTypeShape ;
-  sh:node qudt:MaybeQuantifiableShape ;
-  sh:property qudt:List-value .
+  sh:node qudt:ValidateQuantifiableShape ;
+  sh:property qudt:DatatypePropertyShape ;
+  sh:property qudt:List-value ;
+  sh:property qudt:QuantityPropertyShape ;
+  sh:property qudt:UnitPropertyShape .
 
 qudt:LocalCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
@@ -1674,6 +1629,7 @@ Reference frame may also refer to both an observational reference frame and an a
   sh:property qudt:ReferenceFrame-comment ;
   sh:property qudt:ReferenceFrame-description ;
   sh:property qudt:ReferenceFrame-frameType ;
+  sh:property qudt:ReferenceFrame-informativeReference ;
   sh:property qudt:ReferenceFrame-realization ;
   sh:property qudt:ReferenceFrame-xAxisDefinition ;
   sh:property qudt:ReferenceFrame-xCoordinateDefinition ;
@@ -3228,14 +3184,6 @@ qudt:AllValuesMustHaveSameDataTypeShape
         """ ;
   ] .
 
-qudt:Array-datatype
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:Datatype ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
-  sh:path qudt:datatype .
-
 qudt:Array-isHeterogeneous
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -3303,14 +3251,6 @@ qudt:BitField
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "bitfield" ;
   rdfs:subClassOf xsd:string .
-
-qudt:BitFieldType-encodedValue
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:BitField ;
-  sh:maxCount 1 ;
-  sh:minCount 0 ;
-  sh:path qudt:encodedValue .
 
 qudt:BooleanEncoding
   a qudt:BooleanEncodingType ;
@@ -3759,6 +3699,14 @@ qudt:Datatype-vbName
   sh:minCount 0 ;
   sh:path qudt:vbName .
 
+qudt:DatatypePropertyShape
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:Datatype ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+  sh:path qudt:datatype .
+
 qudt:DateTimeStringEncodingType-allowedPattern
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -4125,42 +4073,6 @@ qudt:MatrixElementOrder-dataOrder
   sh:maxCount 1 ;
   sh:path qudt:dataOrder .
 
-qudt:MaybeQuantifiableShape
-  a sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Maybe Quantifiable Shape</em> specifies and checks an optional property for a quantified value.
-  This property refers to a <em>qudt:Quantity</em>.</p>
-  """^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "\"compliance with a quantity specification\"" ;
-  sh:message "A quantifiable value must refer to a quantity that has a unit." ;
-  sh:property qudt:MaybeQuantifiableShape-quantity ;
-  sh:property qudt:MaybeQuantifiableShape-unit ;
-  sh:sparql [
-    sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
-    sh:select """
-        SELECT $this
-        WHERE {
-             $this qudt:quantity ?quantity .
-             FILTER NOT EXISTS {?quantity qudt:hasUnit ?unit} 
-             }
-        """ ;
-  ] .
-
-qudt:MaybeQuantifiableShape-quantity
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:Quantity ;
-  sh:maxCount 1 ;
-  sh:path qudt:quantity .
-
-qudt:MaybeQuantifiableShape-unit
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:Unit ;
-  sh:maxCount 1 ;
-  sh:path qudt:hasUnit .
-
 qudt:Minor
   a qudt:MajorMinorType ;
   dtype:literal "minor" ;
@@ -4372,6 +4284,13 @@ qudt:Quantifiable-dataEncoding
   sh:maxCount 1 ;
   sh:path qudt:dataEncoding .
 
+qudt:QuantityPropertyShape
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:Quantity ;
+  sh:maxCount 1 ;
+  sh:path qudt:quantity .
+
 qudt:QuantityValueType-basis
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -4442,13 +4361,19 @@ qudt:ReferenceFrame-description
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:maxCount 1 ;
-  sh:path vaem:description .
+  sh:path dcterms:description .
 
 qudt:ReferenceFrame-frameType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:FrameType ;
   sh:path qudt:frameType .
+
+qudt:ReferenceFrame-informativeReference
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:maxCount 1 ;
+  sh:path qudt:informativeReference .
 
 qudt:ReferenceFrame-realization
   a sh:PropertyShape ;
@@ -4941,6 +4866,13 @@ qudt:UNSIGNED
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Unsigned" .
 
+qudt:UnitPropertyShape
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:Unit ;
+  sh:maxCount 1 ;
+  sh:path qudt:hasUnit .
+
 qudt:Unordered
   a qudt:OrderedType ;
   dtype:literal "unordered" ;
@@ -5024,6 +4956,27 @@ qudt:UserModifiableParameter
   rdfs:comment "Parameter is modifiable by a user." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "User modifiable parameter" .
+
+qudt:ValidateQuantifiableShape
+  a sh:NodeShape ;
+  dcterms:description """
+  <p>A <em>Validate Quantifiable Shape</em> specifies and checks an optional property for a quantified value.
+  </p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  rdfs:label "\"compliance with a quantity specification\"" ;
+  sh:message "A quantifiable value must refer to a quantity that has a unit." ;
+  sh:property qudt:QuantityPropertyShape ;
+  sh:property qudt:UnitPropertyShape ;
+  sh:sparql [
+    sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
+    sh:select """
+        SELECT $this
+        WHERE {
+             $this qudt:quantity ?quantity .
+             FILTER NOT EXISTS {?quantity qudt:hasUnit ?unit} 
+             }
+        """ ;
+  ] .
 
 qudt:VariableLengthIntegerType-maxBits
   a sh:PropertyShape ;
