@@ -126,6 +126,8 @@ qudt:Array
   rdfs:label "Array" ;
   rdfs:subClassOf qudt:StructuredDatatype ;
   sh:node qudt:DimensionalityShape ;
+  sh:property qudt:Array-datatype ;
+  sh:property qudt:Array-isHeterogeneous ;
   sh:property qudt:Array-value ;
   sh:property qudt:DimensionalityPropertyShape ;
   sh:property qudt:DimensionsPropertyShape .
@@ -974,7 +976,6 @@ qudt:HeterogenousArray
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Heterogenous Array" ;
   rdfs:subClassOf qudt:Array ;
-  sh:node qudt:HeterogenousArray-value ;
   sh:property qudt:HeterogenousArray-datatype .
 
 qudt:HexBinaryType
@@ -1017,8 +1018,7 @@ qudt:HomogeneousArray
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Homogeneous Array" ;
-  rdfs:subClassOf qudt:Array ;
-  sh:property qudt:Array-datatype .
+  rdfs:subClassOf qudt:Array .
 
 qudt:IconicCue
   a rdfs:Class, sh:NodeShape ;
@@ -1197,24 +1197,12 @@ qudt:MathsFunctionType
 qudt:Matrix
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A <em>Matrix</em> is a data type that specifies the properties of a two-dimensional data structure.
+  <p>A <em>Matrix</em> is a data type that specifies the properties of an N-dimensional data structure.
   </p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Matrix" ;
-  rdfs:subClassOf qudt:MultiDimensionalArray ;
-  sh:property qudt:MatrixElementOrder-byRow .
-
-qudt:MatrixElementOrder
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p><em>Matrix Element Order</em> is a sub-type of 'Enumerated Value' for expressing how the elements of a matrix are ordered.
-  </p>
-  """^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Matrix Element Order" ;
-  rdfs:subClassOf qudt:EnumeratedValue ;
-  sh:in ( qudt:ByColumn qudt:ByRow qudt:ByLeftMostIndex ) .
+  rdfs:subClassOf qudt:Array .
 
 qudt:MemoryOrderType
   a rdfs:Class, sh:NodeShape ;
@@ -1886,10 +1874,11 @@ qudt:SplinePoint
 qudt:StateSpaceMatrix
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  In control engineering, a state space representation is a mathematical model of a physical system as a set of input, output and state variables related by first-order differential equations. 
+  <p>In control engineering, a state space representation is a mathematical model of a physical system
+   as a set of input, output and state variables related by first-order differential equations. 
   To abstract from the number of inputs, outputs and states, the variables are expressed as vectors.
   The differential and algebraic equations are written in matrix form (the last one can be done when the dynamical system is linear and time invariant).
-  """ ;
+  </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "State Space Matrix Type" ;
   rdfs:subClassOf qudt:Matrix .
@@ -2700,6 +2689,11 @@ qudt:isByteString
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "is byte string" .
 
+qudt:isHeterogeneous
+  a rdf:Property ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "is heterogeneous" .
+
 qudt:javaName
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -3242,6 +3236,13 @@ qudt:Array-datatype
   sh:minCount 1 ;
   sh:path qudt:datatype .
 
+qudt:Array-isHeterogeneous
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:datatype xsd:boolean ;
+  sh:maxCount 1 ;
+  sh:path qudt:isHeterogeneous .
+
 qudt:Array-value
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -3322,24 +3323,6 @@ qudt:BooleanType-encoding
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   sh:class qudt:BooleanEncodingType ;
   sh:path qudt:encoding .
-
-qudt:ByColumn
-  a qudt:MatrixElementOrder ;
-  dtype:literal "byColumn" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "By Column" .
-
-qudt:ByLeftMostIndex
-  a qudt:MatrixElementOrder ;
-  dtype:literal "byLeftMostIndex" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "By Left Most Index" .
-
-qudt:ByRow
-  a qudt:MatrixElementOrder ;
-  dtype:literal "byRow" ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "By Row" .
 
 qudt:ByteAligned
   a qudt:AlignmentType ;
@@ -3973,12 +3956,6 @@ qudt:HeterogenousArray-datatype
   sh:maxCount 1 ;
   sh:minCount 1 ;
   sh:path qudt:datatype .
-
-qudt:HeterogenousArray-value
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:node qudt:NumericListShape ;
-  sh:path qudt:value .
 
 qudt:HexBinaryType-length
   a sh:PropertyShape ;
