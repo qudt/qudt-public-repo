@@ -1038,8 +1038,8 @@ qudt:List
   rdfs:subClassOf qudt:AbstractDataItem ;
   sh:property qudt:DatatypePropertyShape ;
   sh:property qudt:List-value ;
-  sh:property qudt:MaybeUnitPropertyShape ;
-  sh:property qudt:QuantityPropertyShape .
+  sh:property qudt:MaybeQuantityPropertyShape ;
+  sh:property qudt:MaybeUnitPropertyShape .
 
 qudt:LocalCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
@@ -2196,7 +2196,9 @@ qudt:Vector
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Vector" ;
-  rdfs:subClassOf qudt:HeterogenousArray .
+  rdfs:subClassOf qudt:Array ;
+  sh:property qudt:MaybeQuantityPropertyShape ;
+  sh:property qudt:QuantityKindsPropertyShape .
 
 qudt:VehicleCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
@@ -4043,6 +4045,13 @@ qudt:MatrixElementOrder-dataOrder
   sh:maxCount 1 ;
   sh:path qudt:dataOrder .
 
+qudt:MaybeQuantityPropertyShape
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:Quantity ;
+  sh:maxCount 1 ;
+  sh:path qudt:quantity .
+
 qudt:MaybeUnitPropertyShape
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -4265,15 +4274,8 @@ qudt:QuantityKindsPropertyShape
   a sh:PropertyShape ;
   rdfs:comment "Invalid quantity kinds list - TODO: SPARQL Query" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:node qudt:QuantiyKindsListShape ;
+  sh:node qudt:QuantityKindsListShape ;
   sh:path qudt:hasQuantityKindsList .
-
-qudt:QuantityPropertyShape
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:Quantity ;
-  sh:maxCount 1 ;
-  sh:path qudt:quantity .
 
 qudt:QuantityValueType-basis
   a sh:PropertyShape ;
@@ -4922,8 +4924,8 @@ qudt:ValidateQuantityHasUnitShape
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "Validate Quantity has Unit Shape" ;
+  sh:property qudt:MaybeQuantityPropertyShape ;
   sh:property qudt:MaybeUnitPropertyShape ;
-  sh:property qudt:QuantityPropertyShape ;
   sh:severity sh:Warning ;
   sh:sparql [
     sh:message "Quantity \"{$this}\" must have a unit." ;
@@ -4936,7 +4938,9 @@ qudt:ValidateQuantityHasUnitShape
              }
         """ ;
   ] ;
-  sh:targetClass qudt:List .
+  sh:targetClass qudt:Array ;
+  sh:targetClass qudt:List ;
+  sh:targetClass qudt:Vector .
 
 qudt:VariableLengthIntegerType-maxBits
   a sh:PropertyShape ;
