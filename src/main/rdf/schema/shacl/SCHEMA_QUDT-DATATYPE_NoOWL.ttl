@@ -1505,6 +1505,33 @@ qudt:Quantifiable
   sh:property qudt:Quantifiable-dataEncoding ;
   vaem:isElaboratedIn <http://qudt.org/2.1/schema/shacl/datatype> .
 
+qudt:QuantityKindList
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>A <em>Quantity Kind List</em> is a list of qudt:QuantityKind. 
+  They are used, for instance, to specify the quantity kind in a Mass Properties Array. 
+  </p>
+  """^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "Quantity kind List" .
+
+qudt:QuantityKindsListShape
+  a rdfs:Class, sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:subClassOf rdf:List ;
+  sh:property [
+    sh:class qudt:QuantityKind ;
+    sh:path rdf:first ;
+  ] ;
+  sh:property [
+    sh:or ( [
+      sh:node ( ) ;
+    ] [
+      sh:node qudt:QuantityKindsListShape ;
+    ] ) ;
+    sh:path rdf:rest ;
+  ] .
+
 qudt:QuantityValueType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description "A sub-type of 'Dimensional Data Type'." ;
@@ -2096,21 +2123,6 @@ qudt:TypeMatrix
   rdfs:label "Type matrix" ;
   rdfs:subClassOf qudt:MatrixType .
 
-qudt:TypeVector
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Type Vector</em> is a vector whose elements are data types. 
-  They are used, for instance, to specify the type of each component of a vector or class of vectors. 
-  </p>
-  """^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Type Vector Type" ;
-  rdfs:label "Type vector" ;
-  rdfs:subClassOf qudt:DatatypeStructuredData ;
-  sh:property qudt:TypeVector-objectValue ;
-  sh:property qudt:TypeVector-type ;
-  sh:property qudt:TypeVector-typeVector .
-
 qudt:UnsignedBigIntegerType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description "An Unsgned Big Integer is an unsigned integer that can be represented in eight octets (64 bits) of machine memory." ;
@@ -2276,7 +2288,8 @@ qudt:MassPropertiesArray
   """ ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Mass Properties Array" ;
-  rdfs:subClassOf qudt:HeterogenousArray .
+  rdfs:subClassOf qudt:HeterogenousArray ;
+  sh:property qudt:QuantityKindsPropertyShape .
 
 dcterms:contributor
   a rdf:Property ;
@@ -2617,6 +2630,12 @@ qudt:functionArity
   dcterms:description "This property is used to state the number of arguments for a function type." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "function arity" .
+
+qudt:hasQuantityKindsList
+  a rdf:Property ;
+  dcterms:description "This property is used to specify a list of quantity kinds." ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  rdfs:label "quantity kinds" .
 
 qudt:iconicCue
   a rdf:Property ;
@@ -4284,6 +4303,13 @@ qudt:Quantifiable-dataEncoding
   sh:maxCount 1 ;
   sh:path qudt:dataEncoding .
 
+qudt:QuantityKindsPropertyShape
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:message "Invalid quantity kinds list - TODO: SPARQL Query" ;
+  sh:node qudt:QuantiyKindsListShape ;
+  sh:path qudt:hasQuantityKindsList .
+
 qudt:QuantityPropertyShape
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
@@ -4833,25 +4859,6 @@ qudt:Two-Tuple-elementTypeCount
   sh:datatype xsd:integer ;
   sh:hasValue 2 ;
   sh:path qudt:elementTypeCount .
-
-qudt:TypeVector-objectValue
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:IndexedList ;
-  sh:path qudt:objectValue .
-
-qudt:TypeVector-type
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:TypeVector ;
-  sh:path qudt:type .
-
-qudt:TypeVector-typeVector
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:Datatype ;
-  sh:maxCount 1 ;
-  sh:path qudt:typeVector .
 
 qudt:UNARY-FUNCTION
   a qudt:FunctionDatatype ;
