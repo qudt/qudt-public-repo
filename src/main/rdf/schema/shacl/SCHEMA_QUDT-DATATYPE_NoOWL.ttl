@@ -42,51 +42,12 @@
   vaem:specificity 1 ;
   vaem:url "http://qudt.org/2.1/schema/dtype"^^xsd:anyURI .
 
-qudt:AbstractDatatype
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>An "Abstract Datatype" (ADT) is a specification of a set of data and the set of operations that can be performed on the data. 
-  Such a data type is abstract in the sense that it is independent of various concrete implementations. 
-  The definition can be mathematical, or it can be programmed as an interface. 
-  A first class ADT supports the creation of multiple instances of the ADT, and the interface normally provides a constructor,
-   which returns an abstract handle to new data, and several operations.
-  These are functions accepting the abstract handle as an argument.
-  </p>
-  """^^rdf:HTML ;
-  prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Abstract_data_type> ;
-  prov:wasInfluencedBy <http://xlinux.nist.gov/dads/HTML/abstractDataType.html> ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Abstract Datatype" ;
-  rdfs:subClassOf qudt:StructuredDatatype .
-
 qudt:AerospaceCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
   dcterms:description "A sub-type of 'Coordinate system'." ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Aerospace Coordinate system" ;
   rdfs:subClassOf qudt:CoordinateSystem .
-
-qudt:AlgebraicDatatype
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-<p>An "Algebraic Datatype" is a datatype each of whose values are data from other data types wrapped in one of the constructors of the data type. 
-Any wrapped datum is an argument to the constructor. 
-In contrast to other data types, the constructor is not executed and the only way to operate on the data is to unwrap the constructor using pattern matching.
-</p>
-<p>The most common algebraic data type is a list with two constructors: Nil or [] for an empty list, and Cons (an abbreviation of constructor), 
- ::, or : for the combination of a new element with a shorter list (for example (Cons 1 '(2 3 4)) or 1:[2,3,4]).
-</p>
-<p>Special cases of algebraic types are product types i.e. records (only one constructor) and enumerated types (many constructors with no arguments). 
-Algebraic types are one kind of composite type (i.e. a type formed by combining other types).
-</p>
-<p>An algebraic data type may also be an abstract data type (ADT) if it is exported from a module without its constructors. 
-Values of such a type can only be manipulated using functions defined in the same module as the type itself.
-</p>"""^^rdf:HTML ;
-  prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Algebraic_data_type> ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Algebraic Datatype" ;
-  rdfs:seeAlso qudt:AbstractDatatype ;
-  rdfs:subClassOf qudt:StructuredDatatype .
 
 qudt:AlignmentType
   a rdfs:Class, sh:NodeShape ;
@@ -372,18 +333,6 @@ qudt:CompositionTreeType
   rdfs:subClassOf qudt:TreeType ;
   sh:property qudt:CompositionTreeType-compositionFunction .
 
-qudt:Container
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Container</em> is a data structure, or an abstract data type (ADT) whose instances are collections of other objects. 
-  They are used to store objects in an organized way following specific access rules.
-  </p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "Container" ;
-  rdfs:seeAlso qudt:CollectionKind ;
-  rdfs:subClassOf qudt:AbstractDatatype ;
-  sh:property qudt:Container-elementTypeCount .
-
 qudt:CoordinateCenterType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
@@ -563,7 +512,7 @@ qudt:Coordinates-3D-Type
 
 qudt:DataEncoding
   a rdfs:Class, sh:NodeShape ;
-  rdfs:comment """
+  dcterms:description """
   <p><em>Data Encoding</em> expresses the properties that specify how data is represented at the bit and byte level. 
   These properties are applicable to describing raw data.
   </p>"""^^rdf:HTML ;
@@ -576,7 +525,9 @@ qudt:DataEncoding
 
 qudt:DataSetElement
   a rdfs:Class, sh:NodeShape ;
-  rdfs:comment "A field is a tuple that carries a name, a type and optionally other properties that characterize a member element of a composite data strucuture." ;
+  dcterms:description """
+  A field is a tuple that carries a name, a type and optionally other properties that characterize a member element of a composite data structure.
+  """ ;
   rdfs:label "QUDT DataSet Element" ;
   rdfs:subClassOf qudt:AbstractDataItem ;
   rdfs:subClassOf qudt:Tuple ;
@@ -1085,12 +1036,10 @@ qudt:List
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "List" ;
   rdfs:subClassOf qudt:AbstractDataItem ;
-  sh:node qudt:AllValuesMustHaveSameDataTypeShape ;
-  sh:node qudt:ValidateQuantifiableShape ;
   sh:property qudt:DatatypePropertyShape ;
   sh:property qudt:List-value ;
-  sh:property qudt:QuantityPropertyShape ;
-  sh:property qudt:UnitPropertyShape .
+  sh:property qudt:MaybeUnitPropertyShape ;
+  sh:property qudt:QuantityPropertyShape .
 
 qudt:LocalCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
@@ -1285,7 +1234,6 @@ qudt:NumericListShape
   a rdfs:Class, sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:subClassOf rdf:List ;
-  sh:message "The list must only have scalar datatypes." ;
   sh:property [
     sh:or qudt:NumericTypeUnion ;
     sh:path rdf:first ;
@@ -1693,7 +1641,6 @@ qudt:ScalarListShape
   a rdfs:Class, sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:subClassOf rdf:List ;
-  sh:message "The list must only have scalar datatypes." ;
   sh:property [
     sh:or qudt:NumericTypeUnion ;
     sh:path rdf:first ;
@@ -3188,20 +3135,23 @@ qudt:zCoordinateDefinition
 
 qudt:AllValuesMustHaveSameDataTypeShape
   a sh:NodeShape ;
-  rdfs:label "\"compliance with all values must have same datatype\"" ;
+  rdfs:label "All Values must have same DataType Shape" ;
+  sh:severity sh:Violation ;
   sh:sparql [
-    sh:message "All values of a Data Item must have the same type." ;
+    sh:message "Data Item {$this} has type {?valueType}." ;
     sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
     sh:select """
-        SELECT $this
+        SELECT $this ?valueType
         WHERE {
               $this qudt:datatype/qudt:rdfsDatatype ?datatype .
               $this qudt:value ?valueList.
               ?valueList rdf:rest*/rdf:first ?value .
-              FILTER(datatype(?value) != ?datatype)
+              BIND(datatype(?value) as ?valueType) .
+              FILTER(?valueType != ?datatype)
         }
         """ ;
-  ] .
+  ] ;
+  sh:targetClass qudt:HomogeneousArray .
 
 qudt:Array-isHeterogeneous
   a sh:PropertyShape ;
@@ -3770,31 +3720,32 @@ qudt:DimensionalityPropertyShape
 qudt:DimensionalityShape
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  rdfs:label "\"compliance with dimensionality specification\"" ;
-  sh:property qudt:DimensionalityPropertyShape ;
-  sh:property qudt:DimensionsPropertyShape ;
+  rdfs:label "Dimensions Shape" ;
+  sh:severity sh:Warning ;
   sh:sparql [
+    sh:message "\"{$this}\" has {$actualDimensions} dimensions extent and needs to have {$specifiedDimensions}" ;
     sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
     sh:select """
-        SELECT $this
+        SELECT $this $actualDimensions $specifiedDimensions
         WHERE {
-            $this qudt:dimensionality ?dimensionality .
+            $this qudt:dimensionality $dimensionality .
             $this qudt:dimensions ?dimensions .
-            ?dimensions rdf:rest*/rdf:first ?d .
-            { SELECT $this (COUNT(?v )AS ?vl)
+            ?dimensions rdf:rest*/rdf:first $specifiedDimensions .
+            { SELECT $this (COUNT(?listValue )AS $actualDimensions)
               WHERE {
-              $this qudt:value/rdf:rest*/rdf:first ?v .
+              $this qudt:value/rdf:rest*/rdf:first ?listValue .
               } GROUP BY $this
             }
-            FILTER (?d != ?vl)
+            FILTER ($actualDimensions != $specifiedDimensions)
           }
         """ ;
-  ] .
+  ] ;
+  sh:targetClass qudt:Array ;
+  sh:targetClass qudt:List .
 
 qudt:DimensionsPropertyShape
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:message "Check the length of the list of values for each dimension. MORE TODO" ;
   sh:node qudt:IntegerListShape ;
   sh:path qudt:dimensions .
 
@@ -4092,6 +4043,13 @@ qudt:MatrixElementOrder-dataOrder
   sh:maxCount 1 ;
   sh:path qudt:dataOrder .
 
+qudt:MaybeUnitPropertyShape
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
+  sh:class qudt:Unit ;
+  sh:maxCount 1 ;
+  sh:path qudt:hasUnit .
+
 qudt:Minor
   a qudt:MajorMinorType ;
   dtype:literal "minor" ;
@@ -4305,8 +4263,8 @@ qudt:Quantifiable-dataEncoding
 
 qudt:QuantityKindsPropertyShape
   a sh:PropertyShape ;
+  rdfs:comment "Invalid quantity kinds list - TODO: SPARQL Query" ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:message "Invalid quantity kinds list - TODO: SPARQL Query" ;
   sh:node qudt:QuantiyKindsListShape ;
   sh:path qudt:hasQuantityKindsList .
 
@@ -4873,13 +4831,6 @@ qudt:UNSIGNED
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "Unsigned" .
 
-qudt:UnitPropertyShape
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
-  sh:class qudt:Unit ;
-  sh:maxCount 1 ;
-  sh:path qudt:hasUnit .
-
 qudt:Unordered
   a qudt:OrderedType ;
   dtype:literal "unordered" ;
@@ -4964,17 +4915,18 @@ qudt:UserModifiableParameter
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/datatype> ;
   rdfs:label "User modifiable parameter" .
 
-qudt:ValidateQuantifiableShape
+qudt:ValidateQuantityHasUnitShape
   a sh:NodeShape ;
   dcterms:description """
-  <p>A <em>Validate Quantifiable Shape</em> specifies and checks an optional property for a quantified value.
+  <p>Specifies and checks an optional property for a quantified value.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  rdfs:label "\"compliance with a quantity specification\"" ;
-  sh:message "A quantifiable value must refer to a quantity that has a unit." ;
+  rdfs:label "Validate Quantity has Unit Shape" ;
+  sh:property qudt:MaybeUnitPropertyShape ;
   sh:property qudt:QuantityPropertyShape ;
-  sh:property qudt:UnitPropertyShape ;
+  sh:severity sh:Warning ;
   sh:sparql [
+    sh:message "Quantity \"{$this}\" must have a unit." ;
     sh:prefixes <http://qudt.org/2.1/schema/shacl/datatype> ;
     sh:select """
         SELECT $this
@@ -4983,7 +4935,8 @@ qudt:ValidateQuantifiableShape
              FILTER NOT EXISTS {?quantity qudt:hasUnit ?unit} 
              }
         """ ;
-  ] .
+  ] ;
+  sh:targetClass qudt:List .
 
 qudt:VariableLengthIntegerType-maxBits
   a sh:PropertyShape ;
