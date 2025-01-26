@@ -150,7 +150,8 @@ qudt:DataItem
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "Data Item" ;
-  rdfs:subClassOf qudt:Concept .
+  rdfs:subClassOf qudt:Concept ;
+  sh:property qudt:ValuePropertyShape .
 
 qudt:Datatype
   a rdfs:Class, sh:NodeShape ;
@@ -235,7 +236,6 @@ qudt:EnumeratedValue
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "Enumerated Value" ;
   rdfs:subClassOf dtype:EnumeratedValue ;
-  rdfs:subClassOf qudt:Concept ;
   rdfs:subClassOf qudt:Verifiable ;
   sh:property qudt:EnumeratedValue-abbreviation ;
   sh:property qudt:EnumeratedValue-altSymbol ;
@@ -262,7 +262,6 @@ qudt:Enumeration
   qudt:informativeReference "http://en.wikipedia.org/wiki/Enumeration"^^xsd:anyURI ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
   rdfs:label "Enumeration" ;
-  rdfs:subClassOf dtype:Enumeration ;
   rdfs:subClassOf qudt:Concept ;
   sh:property qudt:Enumeration-abbreviation ;
   sh:property qudt:Enumeration-default ;
@@ -342,6 +341,23 @@ qudt:NominalScale
   rdfs:seeAlso qudt:OrdinalScale ;
   rdfs:seeAlso qudt:RatioScale ;
   rdfs:subClassOf qudt:Scale .
+
+qudt:NumericListShape
+  a rdfs:Class, sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  rdfs:subClassOf rdf:List ;
+  sh:property [
+    sh:or qudt:NumericTypeUnion ;
+    sh:path rdf:first ;
+  ] ;
+  sh:property [
+    sh:or ( [
+      sh:node ( ) ;
+    ] [
+      sh:node qudt:NumericListShape ;
+    ] ) ;
+    sh:path rdf:rest ;
+  ] .
 
 qudt:OrdinalScale
   a rdfs:Class, sh:NodeShape ;
@@ -2290,8 +2306,12 @@ qudt:Prefix-ucumCode
 qudt:Quantifiable-datatype
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
-  sh:class qudt:Datatype ;
   sh:maxCount 1 ;
+  sh:or ( [
+    sh:class qudt:Datatype ;
+  ] [
+    sh:class qudt:EnumeratedValue ;
+  ] ) ;
   sh:path qudt:datatype .
 
 qudt:Quantifiable-hasUnit
@@ -2338,6 +2358,11 @@ qudt:Quantifiable-value
   ] [
     sh:property [
       sh:class qudt:DataItem ;
+      sh:path qudt:value ;
+    ] ;
+  ] [
+    sh:property [
+      sh:class qudt:EnumeratedValue ;
       sh:path qudt:value ;
     ] ;
   ] ) ;
@@ -2962,6 +2987,13 @@ qudt:UserQuantityKind-hasQuantityKind
   sh:maxCount 1 ;
   sh:minCount 1 ;
   sh:path qudt:hasQuantityKind .
+
+qudt:ValuePropertyShape
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/schema/shacl/qudt> ;
+  sh:maxCount 1 ;
+  sh:node qudt:NumericListShape ;
+  sh:path qudt:value .
 
 qudt:Verifiable
   a qudt:AspectClass, sh:NodeShape ;

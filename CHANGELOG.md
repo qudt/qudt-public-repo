@@ -9,6 +9,34 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- New SHACL Schema for Datatypes
+  - Scalar datatypes unchanged
+  - Structured datatypes have extensive changes
+  - Future work:
+    - completion of heterogeneous and multi-dimensional arrays and vectors
+    - completion of structured datatypes such as records and tables
+    - completion of SHACL rules for validation
+- New SHACL Schema for Coordinate Systems
+- New VOCAB graph for Coordinate Systems
+- New folder `examples` and files for examples of Quantities and Datatypes
+  - `EXAMPLES_QUDT-DATATYPES.ttl` for valid examples
+  - `EXAMPLES_QUDT-INVALID-DATATYPES.ttl` has invalid examples
+- New classes and shapes added to SHACL QUDT Schema:
+  - `DataItem` was added as a parent class for `Data`, supporting scalar values,
+    and, with subtypes for structured values
+
+### Changed
+
+- Migrated constructs for datatypes to:
+  - new SHACL Schema for Datatypes
+  - new SHACL Schema for Coordinate Systems - `<-- TODO`
+  - new VOCAB graph for Coordinate Systems - `<-- TODO`
+  - existing vocabulary for Datatypes
+- Changes to the SHACL QUDT schema:
+  - Added a `value` constraint to the property shape `qudt:Quantifiable-value`
+
+### Added
+
 - New QuantityKinds
   - `qk:OsmoticConcentration` by [Toby Broom](https://github.com/Toby-Broom/)
   - `qk:AmountOfCloudCover` by [Jeffrey Vervoort](https://github.com/Jeffrey-Vervoort-KNMI)
