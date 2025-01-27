@@ -9,6 +9,35 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- New SHACL Schema for Datatypes
+  - Changed file name from `SCHEMA_QUDT-DATATYPE_NoOWL.ttl` to `SCHEMA_QUDT-DATATYPES_NoOWL.ttl`
+  - Scalar datatypes unchanged
+  - Structured datatypes have extensive changes
+  - Future work:
+    - completion of heterogeneous and multi-dimensional arrays and vectors
+    - completion of structured datatypes such as records and tables
+    - completion of SHACL rules for validation
+- New folder `examples` under `src/`
+- New graphs with examples of Quantities and Datatypes
+  - `EXAMPLES_QUDT-DATATYPES.ttl` for valid examples
+  - `EXAMPLES_QUDT-INVALID-DATATYPES.ttl` has invalid examples
+- New classes and shapes added to SHACL QUDT Schema:
+  - `DataItem` was added as a parent class for `Data`, supporting scalar values,
+    and, with subtypes for structured values
+
+### Changed
+
+- Migrated constructs for datatypes to:
+  - new SHACL Schema for Datatypes
+    - Updated OWL Schema is work-in-progress
+  - existing VOCAB for Datatypes
+- Changes to the SHACL QUDT schema:
+  - Added a `value` constraint to the property shape `qudt:Quantifiable-value` to allow a value
+    to be a `qudt:EnumeratedValue`, and to allow a list of values.
+  - `qudt:informativeReference` can now refer to instances of `qudt:Citation` as well as `xsd:anyURI`
+
+### Added
+
 - New QuantityKinds
   - `qk:OsmoticConcentration` by [Toby Broom](https://github.com/Toby-Broom/)
   - `qk:AmountOfCloudCover` by [Jeffrey Vervoort](https://github.com/Jeffrey-Vervoort-KNMI)
@@ -32,8 +61,12 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Corrected numerous issues in the datatypes SHACL schema and the QUDT SHACL schema
+
 - Corrected the `qudt:ucumCode` of `unit:TeraW-HR-PER-YR` to "TW.h/a" by [Jurek Müller](https://github.com/JurekMueller)
+
 - Fixed non-working informativeReference links in units vocabulary [Phil Blackwood](https://github.com/philblackwood)
+
 - Added some missing rdfs:isDefinedBy triples
 
 ## [2.1.46] - 2024-12-09
