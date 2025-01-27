@@ -41,11 +41,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - New QuantityKinds
   - `qk:OsmoticConcentration` by [Toby Broom](https://github.com/Toby-Broom/)
   - `qk:AmountOfCloudCover` by [Jeffrey Vervoort](https://github.com/Jeffrey-Vervoort-KNMI)
+  - 7 new QuantityKinds for the [EDI](https://github.com/EDIorg/Units-WG) community, by [Margaret O'Brien](https://github.com/mobb)
 - New Units
   - `unit:MegaTONNE-PER-YR` by [Jurek Müller](https://github.com/JurekMueller)
   - `unit:OSM` by [Toby Broom](https://github.com/Toby-Broom/)
   - `unit:MilliOSM-PER-KiloGM` by [Toby Broom](https://github.com/Toby-Broom/)
   - `unit:OKTA` by [Jeffrey Vervoort](https://github.com/Jeffrey-Vervoort-KNMI)
+  - `unit:REV-PER-MIN-SEC` by [Vladimir Alexiev](https://github.com/VladimirAlexiev)
+  - 31 new Units for the [EDI](https://github.com/EDIorg/Units-WG) community, by [Margaret O'Brien](https://github.com/mobb)
+- New Dimension Vectors
+  - 5 new Dimension Vectors for the [EDI](https://github.com/EDIorg/Units-WG) community, by [Margaret O'Brien](https://github.com/mobb)
 - New QA Tests
   - Added SHACL shapes for checking content under `src/` only
 
@@ -61,6 +66,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Corrected the `qudt:ucumCode` of `unit:TeraW-HR-PER-YR` to "TW.h/a" by [Jurek Müller](https://github.com/JurekMueller)
 
 - Fixed non-working informativeReference links in units vocabulary [Phil Blackwood](https://github.com/philblackwood)
+- Added some missing rdfs:isDefinedBy triples
 
 ## [2.1.46] - 2024-12-09
 
@@ -73,7 +79,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - `qk:AmountOfSubstanceIonConcentration` as a narrower kind of `qk:Concentration`.
   - `qk:CoefficientOfPerformance` by [lazlop](https://github.com/lazlop)
   - `qk:CompoundPlaneAngle`
-  - `qk:CountRate` ( units: `unit:NUM-PER-SEC`, `unit:NUM-PER-HR`, `unit:NUM-PER-YR`)
+  - `qk:CountRate` (units: `unit:NUM-PER-SEC`, `unit:NUM-PER-HR`, `unit:NUM-PER-YR`)
   - `qk:CurrentOfTheAmountOfSubstance` (replaces`qk:CurrentOfTheAmountOfSubtance`)
   - `qk:RotationalFrequency` (units: `unit:Hz`, `unit:REV-PER-MIN`, `unit:REV-PER-HR`, `unit:REV-PER-SEC`)
   - `qk:VaporPermeability` (unit: `unit:KiloGM-PER-PA-SEC-M`)
