@@ -18,7 +18,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
     - completion of SHACL rules for validation
 - New SHACL Schema for Coordinate Systems
 - New VOCAB graph for Coordinate Systems
-- New folder `examples` and files for examples of Quantities and Datatypes
+- New folder `examples` under `src/`
+- New graphs with examples of Quantities and Datatypes
   - `EXAMPLES_QUDT-DATATYPES.ttl` for valid examples
   - `EXAMPLES_QUDT-INVALID-DATATYPES.ttl` has invalid examples
 - New classes and shapes added to SHACL QUDT Schema:
@@ -31,9 +32,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - new SHACL Schema for Datatypes
   - new SHACL Schema for Coordinate Systems - `<-- TODO`
   - new VOCAB graph for Coordinate Systems - `<-- TODO`
-  - existing vocabulary for Datatypes
+  - existing VOCAB for Datatypes
 - Changes to the SHACL QUDT schema:
-  - Added a `value` constraint to the property shape `qudt:Quantifiable-value`
+  - Added a `value` constraint to the property shape `qudt:Quantifiable-value` to allow a value
+    to be a `qudt:EnumeratedValue`, and to allow a list of values.
+  - `qudt:informativeReference` can now refer to instances of `qudt:Citation` as well as `xsd:anyURI`
 
 ### Added
 
