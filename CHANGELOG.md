@@ -10,14 +10,13 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - New SHACL Schema for Datatypes
+  - Changed file name from `SCHEMA_QUDT-DATATYPE_NoOWL.ttl` to `SCHEMA_QUDT-DATATYPES_NoOWL.ttl`
   - Scalar datatypes unchanged
   - Structured datatypes have extensive changes
   - Future work:
     - completion of heterogeneous and multi-dimensional arrays and vectors
     - completion of structured datatypes such as records and tables
     - completion of SHACL rules for validation
-- New SHACL Schema for Coordinate Systems
-- New VOCAB graph for Coordinate Systems
 - New folder `examples` under `src/`
 - New graphs with examples of Quantities and Datatypes
   - `EXAMPLES_QUDT-DATATYPES.ttl` for valid examples
@@ -30,8 +29,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Migrated constructs for datatypes to:
   - new SHACL Schema for Datatypes
-  - new SHACL Schema for Coordinate Systems - `<-- TODO`
-  - new VOCAB graph for Coordinate Systems - `<-- TODO`
+    - Updated OWL Schema is work-in-progress
   - existing VOCAB for Datatypes
 - Changes to the SHACL QUDT schema:
   - Added a `value` constraint to the property shape `qudt:Quantifiable-value` to allow a value
