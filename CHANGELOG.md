@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [2.1.47] - 2025-01-28
+
 ### Added
 
 - New SHACL Schema for Datatypes
@@ -24,20 +26,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - New classes and shapes added to SHACL QUDT Schema:
   - `DataItem` was added as a parent class for `Data`, supporting scalar values,
     and, with subtypes for structured values
-
-### Changed
-
-- Migrated constructs for datatypes to:
-  - new SHACL Schema for Datatypes
-    - Updated OWL Schema is work-in-progress
-  - existing VOCAB for Datatypes
-- Changes to the SHACL QUDT schema:
-  - Added a `value` constraint to the property shape `qudt:Quantifiable-value` to allow a value
-    to be a `qudt:EnumeratedValue`, and to allow a list of values.
-  - `qudt:informativeReference` can now refer to instances of `qudt:Citation` as well as `xsd:anyURI`
-
-### Added
-
 - New QuantityKinds
   - `qk:OsmoticConcentration` by [Toby Broom](https://github.com/Toby-Broom/)
   - `qk:AmountOfCloudCover` by [Jeffrey Vervoort](https://github.com/Jeffrey-Vervoort-KNMI)
@@ -58,17 +46,22 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
+- Migrated constructs for datatypes to:
+  - new SHACL Schema for Datatypes
+    - Updated OWL Schema is work-in-progress
+  - existing VOCAB for Datatypes
+- Changes to the SHACL QUDT schema:
+  - Added a `value` constraint to the property shape `qudt:Quantifiable-value` to allow a value
+    to be a `qudt:EnumeratedValue`, and to allow a list of values.
+  - `qudt:informativeReference` can now refer to instances of `qudt:Citation` as well as `xsd:anyURI`
 - Removed the vaem:revision triples that were causing retention of v2.1 strings in the URIs
 - `qudt:informativeReference` triples added/replaced by a link to IEC CDD generated based on `qudt:iec61360Code` triples by [Vladimir Alexiev](https://github.com/VladimirAlexiev)
 
 ### Fixed
 
 - Corrected numerous issues in the datatypes SHACL schema and the QUDT SHACL schema
-
 - Corrected the `qudt:ucumCode` of `unit:TeraW-HR-PER-YR` to "TW.h/a" by [Jurek Müller](https://github.com/JurekMueller)
-
 - Fixed non-working informativeReference links in units vocabulary [Phil Blackwood](https://github.com/philblackwood)
-
 - Added some missing rdfs:isDefinedBy triples
 
 ## [2.1.46] - 2024-12-09
@@ -154,7 +147,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v2.1.46...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v2.1.47...HEAD
+[2.1.47]: https://github.com/qudt/qudt-public-repo/compare/v2.1.46...v2.1.47
 [2.1.46]: https://github.com/qudt/qudt-public-repo/compare/v2.1.45...v2.1.46
 [2.1.45]: https://github.com/qudt/qudt-public-repo/compare/v2.1.44...v2.1.45
 
