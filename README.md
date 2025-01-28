@@ -1,4 +1,4 @@
-QUDT - **Q**uantities, **U**nits, **D**imensions and Data**T**ypes
+QUDT - *Q*uantities, *U*nits, *D*imensions and Data*T*ypes
 ======================================================================
 
 ## Quick-Start Guide
