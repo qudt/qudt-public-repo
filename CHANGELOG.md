@@ -53,6 +53,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - 5 new Dimension Vectors for the [EDI](https://github.com/EDIorg/Units-WG) community, by [Margaret O'Brien](https://github.com/mobb)
 - New QA Tests
   - Added SHACL shapes for checking content under `src/` only
+- New Inferences
+  - Added a SHACL rule to generate inverse triples for symmetric relations (such as qudt:exactMatch)
 
 ### Changed
 
