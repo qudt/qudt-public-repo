@@ -7,6 +7,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Fixed
+
+- Corrected unit symbols containing some kind of conversion artifact, e.g. '<C2>'
+
 ## [2.1.47] - 2025-01-28
 
 ### Added
