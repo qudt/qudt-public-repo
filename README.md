@@ -1,6 +1,6 @@
-QUDT - Quantities, Units, Dimensions and DataTypes
-==================================================
-
+QUDT - ***Q***uantities, ***U***nits, ***D***imensions and Data***T***ypes
+==========================================================================
+ 
 ## Quick-Start Guide
 
 There are three ways to bring the QUDT ontology into your environment.
