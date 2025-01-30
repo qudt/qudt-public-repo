@@ -1,5 +1,5 @@
-QUDT - Quantities, Units, Dimensions and dataTypes - public repository
-======================================================================
+QUDT - ***Q***uantities, ***U***nits, ***D***imensions and Data***T***ypes
+==========================================================================
 
 ## Quick-Start Guide
 
