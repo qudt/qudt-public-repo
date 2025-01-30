@@ -10,7 +10,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Corrected unit symbols containing some kind of conversion artifact, e.g. '<C2>'
-- Fix dimension vector of unit:MicroMOL-PER-M2-SEC
+- Fix dimension vector of unit:MicroMOL-PER-M2-SEC2
  
 ## [2.1.47] - 2025-01-28
 
