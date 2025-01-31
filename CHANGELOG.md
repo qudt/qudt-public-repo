@@ -12,6 +12,12 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Corrected unit symbols containing some kind of conversion artifact, e.g. '<C2>'
 - Fix dimension vector of unit:MicroMOL-PER-M2-SEC2
 - Added the newly referred-to dimension vector to the dv vocabulary
+- Corrected 456 unit symbols of derived unist by generating them based on their factors. Note: correcting
+  derived unit symbols without correcting their factor units (e.g. `km/hr` -> `km/h` without `hr`->`h`)
+  will not solve the problem in the long term. We are not yet automatically detecting and correcting
+  incorrect derived unit symbols but it might happen in the future. If we started doing that, the factors
+  would take precedence.
+- Corrected the language tag `@en-us` to `@en-US`
 
 ## [2.1.47] - 2025-01-28
 
