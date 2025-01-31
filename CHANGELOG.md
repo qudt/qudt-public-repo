@@ -18,6 +18,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   incorrect derived unit symbols but it might happen in the future. If we started doing that, the factors
   would take precedence.
 - Corrected the language tag `@en-us` to `@en-US`
+- Corrected a small number of conversion multipliers
 
 ## [2.1.47] - 2025-01-28
 
