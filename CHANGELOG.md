@@ -17,7 +17,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   will not solve the problem in the long term. We are not yet automatically detecting and correcting
   incorrect derived unit symbols but it might happen in the future. If we started doing that, the factors
   would take precedence.
-- Corrected the language tags in `VOCAB_QUDT-UNITS-ALL.ttl`.
+- Corrected the language tag `@en-us` to `@en-US`
 
 ## [2.1.47] - 2025-01-28
 
