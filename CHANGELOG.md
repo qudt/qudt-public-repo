@@ -20,6 +20,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Corrected the language tag `@en-us` to `@en-US`
 - Corrected a small number of conversion multipliers
 
+### Deprecated
+
+- Removed all previously deprecated entities, to begin a new cycle of deprecation when needed.
+
 ## [2.1.47] - 2025-01-28
 
 ### Added
