@@ -7,6 +7,12 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Changed
+
+- Replaced `2.1` with `$$QUDT_VERSION$$` in all graph URI references. This will result in URIs containing
+  full semantic versions, such as 3.0.0, moving forward. Note that this is a breaking change, hence
+  the transition to QUDT version 3. Versionless graph URIs are still dereferenceable on the web.
+
 ### Fixed
 
 - Corrected unit symbols containing some kind of conversion artifact, e.g. '<C2>'
