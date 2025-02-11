@@ -99,16 +99,18 @@ qudt:DeprecatedPropertyConstraint
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Warns if a deprecated QUDT property is used" ;
-    sh:message "Resource '{$this}' uses the object '{?o}' which is deprecated and will be removed in the next major version of QUDT. Please use '{?newo}' instead." ;
+    sh:message "Resource '{$this}' uses the predicate '{?oldpstr}' which is deprecated and will be removed in the next major version of QUDT. Please use '{?newpstr}' instead." ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
     sh:select """
-    SELECT $this ?p ?o ?newo
-        WHERE {
-        ?o qudt:deprecated true .
-        ?p a rdf:Property .
-        $this ?p ?o .
-        ?o dcterms:isReplacedBy ?newo .
-    }""" ;
+    SELECT $this ?p ?oldpstr ?newpstr
+WHERE {
+?p qudt:deprecated true .
+?p a rdf:Property .
+$this ?p ?o .
+?p dcterms:isReplacedBy ?newp .
+BIND (STR(?newp) AS ?newpstr)
+BIND (STR(?p) AS ?oldpstr)
+}""" ;
   ] ;
   sh:targetClass qudt:Concept .
 
