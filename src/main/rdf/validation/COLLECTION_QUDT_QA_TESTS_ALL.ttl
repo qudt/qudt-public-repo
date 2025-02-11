@@ -135,22 +135,58 @@ FILTER NOT EXISTS {$this qudt:deprecated true}
   sh:targetClass qudt:SystemOfUnits ;
   sh:targetClass qudt:Unit .
 
-qudt:DontReferToDeprecatedUnitsConstraint
+qudt:DeprecatedConceptInfoShape
   a sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
-  rdfs:label "Don't refer to deprecated units" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+  rdfs:label "Informs about presence of a deprecated QUDT resource" ;
+  sh:severity sh:Info ;
   sh:sparql [
     a sh:SPARQLConstraint ;
-    rdfs:comment "Don't refer to deprecated units" ;
-    sh:message "Resource '{?s}' should not refer to deprecated unit '{$this}'." ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
-    sh:select """SELECT $this ?s
-WHERE {
-$this qudt:deprecated true .
-?s ?p $this .
-}""" ;
+    rdfs:comment "Informs if a deprecated QUDT resource is present" ;
+    sh:message "Deprecated resource '{?this}' is present, which will be removed in the next major version of QUDT {?replacementMessage}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+    sh:select """
+    SELECT ?s $this ?replacementMessage
+    WHERE {
+        $this qudt:deprecated true .
+        OPTIONAL {
+            $this dcterms:isReplacedBy ?replacement .
+        }
+        BIND(IF(
+                BOUND(?replacement),
+                CONCAT("as it has been replaced by ", STR(?replacement)),
+                "without replacement.")
+            AS ?replacementMessage)
+    }
+    """ ;
   ] ;
-  sh:targetClass qudt:Unit .
+  sh:targetClass qudt:Concept .
+
+qudt:DeprecatedPropertyInfoShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+  rdfs:label "Info about presence of a deprecated QUDT property" ;
+  sh:severity sh:Info ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Informs if a deprecated QUDT property is present" ;
+    sh:message "Deprecated property '{?this}' is present, which will be removed in the next major version of QUDT {?replacementMessage}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+    sh:select """
+    SELECT ?s ?this ?replacementMessage
+        WHERE {
+        ?this qudt:deprecated true .
+        OPTIONAL {
+            $this dcterms:isReplacedBy ?replacement .
+        }
+        BIND(IF(
+            BOUND(?replacement),
+            CONCAT("as it has been replaced by ", STR(?replacement)),
+            "without replacement")
+        AS ?replacementMessage)
+    }""" ;
+  ] ;
+  sh:targetClass rdf:Property .
 
 qudt:ExactMatchGoesBothWaysConstraint
   a sh:NodeShape ;
