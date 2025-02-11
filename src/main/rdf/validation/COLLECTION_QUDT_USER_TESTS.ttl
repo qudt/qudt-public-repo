@@ -21,6 +21,11 @@
   ] ;
   sh:declare [
     a sh:PrefixDeclaration ;
+    sh:namespace "http://qudt.org/schema/qudt-shacl/"^^xsd:anyURI ;
+    sh:prefix "qsh" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
     sh:namespace "http://qudt.org/vocab/dimensionvector/"^^xsd:anyURI ;
     sh:prefix "qkdv" ;
   ] ;
@@ -90,22 +95,20 @@ qudt:DeprecatedPropertyConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
   rdfs:label "Warning about use of a deprecated QUDT property" ;
-  sh:deactivated true ;
   sh:severity sh:Info ;
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Warns if a deprecated QUDT property is used" ;
-    sh:message "Resource, '{$this}' uses the property '{?oldpstr}' which will be deprecated. Please use '{?newpstr}' instead." ;
+    sh:message "Resource '{$this}' uses the object '{?o}' which is deprecated and will be removed in the next major version of QUDT. Please use '{?newo}' instead." ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
-    sh:select """SELECT $this ?p ?oldpstr ?newpstr
-WHERE {
-?o qudt:deprecated true .
-?p a rdf:Property .
-$this ?p ?o .
-?o dcterms:isReplacedBy ?newo .
-BIND (STR(?newo) AS ?newpstr)
-BIND (STR(?o) AS ?oldpstr)
-}""" ;
+    sh:select """
+    SELECT $this ?p ?o ?newo
+        WHERE {
+        ?o qudt:deprecated true .
+        ?p a rdf:Property .
+        $this ?p ?o .
+        ?o dcterms:isReplacedBy ?newo .
+    }""" ;
   ] ;
   sh:targetClass qudt:Concept .
 
@@ -117,17 +120,17 @@ qudt:DeprecationConstraint
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Warns if a deprecated QUDT resource is used" ;
-    sh:message "Resource, '{?s}' refers to '{?oldqstr}' which has been deprecated. Please refer to '{?newqstr}' instead." ;
+    sh:message "Resource, '{?s}' refers to '{?this}' which has been deprecated. Please refer to '{?newq}' instead." ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
-    sh:select """SELECT ?s $this ?oldqstr ?newqstr
-WHERE {
-$this qudt:deprecated true .
-?s ?p $this .
-FILTER (!STRSTARTS(STR(?s),'http://qudt.org')) .
-$this dcterms:isReplacedBy ?newq .
-BIND (STR(?newq) AS ?newqstr)
-BIND (STR($this) AS ?oldqstr)
-}""" ;
+    sh:select """
+    SELECT ?s $this ?s ?newq
+    WHERE {
+        $this qudt:deprecated true .
+        ?s ?p $this .
+        FILTER (!STRSTARTS(STR(?s),'http://qudt.org')) .
+        $this dcterms:isReplacedBy ?newq .
+    }
+    """ ;
   ] ;
   sh:targetClass qudt:Concept .
 
