@@ -86,48 +86,59 @@ FILTER (?qkdv1 != ?qkdv2) .
   ] ;
   sh:targetClass qudt:Quantity .
 
-qudt:DeprecatedPropertyConstraint
-  a sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
-  rdfs:label "Warning about use of a deprecated QUDT property" ;
-  sh:severity sh:Info ;
-  sh:sparql [
-    a sh:SPARQLConstraint ;
-    rdfs:comment "Warns if a deprecated QUDT property is used" ;
-    sh:message "Resource, '{$this}' uses the property '{?oldpstr}' which will be deprecated. Please use '{?newpstr}' instead." ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
-    sh:select """SELECT $this ?p ?oldpstr ?newpstr
-WHERE {
-?p qudt:deprecated true .
-?p a rdf:Property .
-$this ?p ?o .
-?p dcterms:isReplacedBy ?newp .
-BIND (STR(?newp) AS ?newpstr)
-BIND (STR(?p) AS ?oldpstr)
-}""" ;
-  ] ;
-  sh:targetClass qudt:Concept .
-
-qudt:DeprecationConstraint
+qudt:DontReferToDeprecatedConceptConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
   rdfs:label "Warning about use of a deprecated QUDT resource" ;
-  sh:severity sh:Info ;
+  sh:severity sh:Warning ;
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Warns if a deprecated QUDT resource is used" ;
-    sh:message "Resource, '{?s}' refers to '{?oldqstr}' which has been deprecated. Please refer to '{?newqstr}' instead." ;
+    sh:message "Resource '{?s}' refers to deprecated resource '{?this}', which will be removed in the next major version of QUDT. {?replacementMessage}" ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
-    sh:select """SELECT ?s $this ?oldqstr ?newqstr
-WHERE {
-$this qudt:deprecated true .
-?s ?p $this .
-FILTER (!STRSTARTS(STR(?s),'http://qudt.org')) .
-$this dcterms:isReplacedBy ?newq .
-BIND (STR(?newq) AS ?newqstr)
-BIND (STR($this) AS ?oldqstr)
-}""" ;
+    sh:select """
+    SELECT ?s $this ?replacementMessage
+    WHERE {
+        $this qudt:deprecated true .
+        ?s ?p $this .
+        OPTIONAL {
+            $this dcterms:isReplacedBy ?replacement .
+        }
+        BIND(IF(
+                BOUND(?replacement),
+                CONCAT("Please refer to ", STR(?replacement), " instead."),
+                "Please do not refer to this resource any longer - it will be removed without replacement.")
+            AS ?replacementMessage)
+    }
+    """ ;
   ] ;
   sh:targetClass qudt:Concept .
+
+qudt:DontUseDeprecatedPropertyConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+  rdfs:label "Warning about use of a deprecated QUDT property" ;
+  sh:severity sh:Warning ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Warns if a deprecated QUDT property is used" ;
+    sh:message "Resource '{?s}' uses the deprecated property '{?this}', which will be removed in the next major version of QUDT.{?replacementMessage}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+    sh:select """
+    SELECT ?s ?this ?replacementMessage
+        WHERE {
+        ?this qudt:deprecated true .
+        ?s ?this ?o .
+        OPTIONAL {
+            $this dcterms:isReplacedBy ?replacement .
+        }
+        BIND(IF(
+            BOUND(?replacement),
+            CONCAT(" Please use ", STR(?replacement), " instead."),
+            " Please do not use this property any longer - it will be removed without replacement.")
+        AS ?replacementMessage)
+    }""" ;
+  ] ;
+  sh:targetClass rdf:Property .
 
 
