@@ -5,7 +5,7 @@ QUDT - ***Q***uantities, ***U***nits, ***D***imensions and Data***T***ypes
 
 There are three ways to bring the QUDT ontology into your environment.
 1. Download the latest GitHub Release [here](https://github.com/qudt/qudt-public-repo/releases).
-2. Use the resolved graph and instance URIs available [here](https://www.qudt.org/3.0.0/catalog/qudt-catalog.html).
+2. Use the resolved graph and instance URIs available [here](https://www.qudt.org/catalog/qudt-catalog.html).
 3. Use GitHub fork to get the sources and build them using the instructions [here](https://github.com/qudt/qudt-public-repo/wiki/Installing-QUDT-for-Contributors).
 
 Overview
