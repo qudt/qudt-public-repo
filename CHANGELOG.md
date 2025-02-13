@@ -7,11 +7,17 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.0.0] - 2025-02-13
+
 ### Changed
 
 - Replaced `2.1` with `$$QUDT_VERSION$$` in all graph URI references. This will result in URIs containing
   full semantic versions, such as 3.0.0, moving forward. Note that this is a breaking change, hence
   the transition to QUDT version 3. Versionless graph URIs are still dereferenceable on the web.
+
+### Deprecated
+
+- Removed all previously deprecated entities, to begin a new cycle of deprecation when needed.
 
 ### Fixed
 
@@ -25,10 +31,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   would take precedence.
 - Corrected the language tag `@en-us` to `@en-US`
 - Corrected a small number of conversion multipliers
-
-### Deprecated
-
-- Removed all previously deprecated entities, to begin a new cycle of deprecation when needed.
 
 ## [2.1.47] - 2025-01-28
 
@@ -170,7 +172,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v2.1.47...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/qudt/qudt-public-repo/compare/v2.1.47...v3.0.0
 [2.1.47]: https://github.com/qudt/qudt-public-repo/compare/v2.1.46...v2.1.47
 [2.1.46]: https://github.com/qudt/qudt-public-repo/compare/v2.1.45...v2.1.46
 [2.1.45]: https://github.com/qudt/qudt-public-repo/compare/v2.1.44...v2.1.45
