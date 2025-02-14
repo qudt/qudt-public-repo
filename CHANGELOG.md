@@ -7,6 +7,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+- New Units
+  - `unit:MilliGM-PER-DeciM2` by [Matt Goldberg](https://github.com/mgberg)
+
 ## [3.0.0] - 2025-02-13
 
 ### Changed
