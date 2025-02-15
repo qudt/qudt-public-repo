@@ -48,7 +48,7 @@
                   generate-resources       generate-iec-links
                   process-resources
                   compile                  shacl-infer-applicable-units, merge-applicable-units
-                  process-classes
+                  process-classes          generate-factor-units
                   generate-test-sources
                   process-test-sources
                   generate-test-resources
@@ -265,7 +265,7 @@
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>rdfio-maven-plugin</artifactId>
-                <version>1.2.1</version>
+                <version>1.3.0</version>
                 <executions>
                     <execution>
                         <!--
@@ -309,6 +309,32 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>generate-factor-units</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                            src/build/inference/factorUnits/predefined-factors-and-scalings.ttl
+                                        </include>
+                                    </input>
+                                    <filters>
+                                        <sparqlConstructFile>src/build/inference/factorUnits/isScalingOf.rq</sparqlConstructFile>
+                                        <sparqlConstructFile>src/build/inference/factorUnits/factorUnit.rq</sparqlConstructFile>
+                                        <sparqlConstructFile>src/build/inference/factorUnits/missing-units.rq</sparqlConstructFile>
+                                    </filters>
+                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
+                                </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
+
+                    <execution>
                         <!--
                         generates links to IEC CDD
                         -->
@@ -318,6 +344,7 @@
                             <goal>make</goal>
                         </goals>
                         <configuration>
+
                             <products>
                                 <eachFile>
                                     <replaceInputFiles>true</replaceInputFiles>
