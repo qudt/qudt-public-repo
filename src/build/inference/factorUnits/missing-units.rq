@@ -1,0 +1,44 @@
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+PREFIX prefix: <http://qudt.org/vocab/prefix/>
+PREFIX kind: <http://qudt.org/vocab/quantitykind/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+CONSTRUCT {
+    ?unit a qudt:Unit ;
+        qudt:hasDimensionVector ?dimensionVector ;
+        rdfs:label ?unitLocalName;
+        rdfs:comment  ?comment ;
+        qudt:generated true .
+}
+#SELECT distinct ?unit WHERE
+#select count(*) where
+{
+
+    {
+        ?x qudt:factorUnit/qudt:unit ?unit .
+        BIND("factor unit" as ?reason)
+    } UNION {
+        ?unit qudt:factorUnit/qudt:unit ?x .
+        BIND("derived unit" as ?reason)
+    } UNION {
+        ?x qudt:isScalingOf ?unit .
+        BIND("base unit" as ?reason)
+    } UNION {
+        ?unit qudt:isScalingOf ?x .
+        BIND("scaled unit" as ?reason)
+    }
+    FILTER NOT EXISTS {
+        ?unit a qudt:Unit
+    }
+    FILTER NOT EXISTS {
+        ?unit a qudt:CurrencyUnit
+    }
+    OPTIONAL {
+        ?unit qudt:isScalingOf/qudt:hasDimensionVector ?dimensionVector .
+    }
+    BIND(REPLACE(STR(?unit), "^.+/", "") as ?unitLocalName)
+    BIND(STRLANG(CONCAT("This unit was added while generating qudt:factorUnit. This unit is a ", ?reason, " of ", (REPLACE(STR(?x), "http://qudt.org/vocab/unit/", "unit:")), ", missing from the original QUDT data."), "en") as ?comment)
+}
+order by ?unit
