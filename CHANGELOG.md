@@ -7,8 +7,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
-## [3.0.0] - 2025-02-16
-
 ### Changed
 
 - Removed invalid qudt:iec61360Code values (most in the 'UAD' range) from about 40 units, most notably unit:M that was submitted as a bug.
