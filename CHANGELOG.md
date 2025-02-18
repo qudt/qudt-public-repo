@@ -20,6 +20,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Deprecated
 
 - Replaced unit:PPTR_VOL with unit:PPT_VOL
+- Deprecated 7 remaining units with non-uppercase URIs, replacing as appropriate.
 
 ## [3.0.0] - 2025-02-13
 
