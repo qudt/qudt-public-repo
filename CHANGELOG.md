@@ -10,11 +10,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Changed
 
 - Removed invalid qudt:iec61360Code values (most in the 'UAD' range) from about 40 units, most notably unit:M that was submitted as a bug.
+- Cleaned out some remaining shape and restriction references to deprecated properties.
 
 ### Added
 
 - New Units
   - `unit:MilliGM-PER-DeciM2` by [Matt Goldberg](https://github.com/mgberg)
+
+### Deprecated
+
+- Replaced unit:PPTR_VOL with unit:PPT_VOL
 
 ## [3.0.0] - 2025-02-13
 
