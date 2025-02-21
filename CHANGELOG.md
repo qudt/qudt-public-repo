@@ -16,6 +16,13 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - New Units
   - `unit:MilliGM-PER-DeciM2` by [Matt Goldberg](https://github.com/mgberg)
+- Factor Units:
+  - During the build process, multiple SPARQL queries determine the 'factor units' that derived
+    units are made up of. The factor units are associated with their derived units via `qudt:factorUnit' triples.
+  - Units that are 'scaled', ie. derived from another, non-derived unit with conversionMultiplier 1.0 by multiplication,
+    are connected with that unit via `qudt:isScalingOf`.
+  - Wherever the connection cannot be determined from the units' localnames, the triples are explicitly listed
+    in the file `src/build/inference/factorUnits/predefined-factors-and-scalings.ttl`
 
 ### Deprecated
 

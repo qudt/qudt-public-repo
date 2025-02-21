@@ -1,0 +1,102 @@
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+PREFIX prefix: <http://qudt.org/vocab/prefix/>
+PREFIX kind: <http://qudt.org/vocab/quantitykind/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+ ?scaledUnit
+    qudt:isScalingOf ?baseUnit ;
+    qudt:conversionMultiplier ?scaledUnitConversionMultiplier ;
+    qudt:conversionOffset ?scaledUnitConversionOffset ;
+    qudt:prefix ?prefix .
+}
+#SELECT ?scaledUnit ?baseUnit ?prefix ?scaledUnitConversionMultiplier ?scaledUnitConversionOffset
+where
+{
+    {
+        { SELECT DISTINCT ?scaledUnit ?scaledUnitLocalName ?prefixRegex
+            WHERE
+            {
+
+                # select all base units (not using prefixes)
+                {
+                    ?scaledUnit a qudt:Unit .
+                } UNION  {
+                    ?factor qudt:unit ?scaledUnit ;
+                    FILTER NOT EXISTS {
+                        ?scaledUnit a qudt:Unit .
+                    }
+                }
+                BIND(REPLACE(STR(?scaledUnit), "^.+/", "") as ?scaledUnitLocalName)
+                FILTER(REPLACE(?scaledUnitLocalName, ?prefixRegex, "") != ?scaledUnitLocalName)
+                {
+                    SELECT (CONCAT("\\b(",GROUP_CONCAT(STR(?prefixLabel); separator ="|"), ")") as ?prefixRegex) where
+                    {
+                        ?prefix
+                            a qudt:Prefix ;
+                            rdfs:label ?prefixLabel .
+                     }
+                }
+            }
+        }
+
+        # select all base units (not using prefixes)
+        # special handling for prefix + time, e.g.
+        # 'unit:MegaYR qudt:isScalingOf unit:YR', not unit:SEC
+
+        ?baseUnit a qudt:Unit ;
+        BIND(REPLACE(STR(?baseUnit), "^.+/", "") as ?baseUnitLocalName)
+        # we don't generate isScalingOf for bases that are derived units
+        FILTER(! CONTAINS(?baseUnitLocalName, "-"))
+        # we don't generate isScalingOf for bases with a non-1 exponent (because then we cannot use the existing factor as would have to be exponentiated)
+        FILTER(! REGEX(?baseUnitLocalName,".+\\d+"))
+        BIND("(YR|MO|DAY|HR|MIN)\\b" as ?timeRegex)
+        FILTER (
+                    (
+                        REPLACE(?scaledUnitLocalName, CONCAT(?prefixRegex, ?timeRegex), "") = ?scaledUnitLocalName
+                        && ?baseUnitLocalName = REPLACE(REPLACE(?scaledUnitLocalName, ?prefixRegex, ""), ?timeRegex, "SEC")
+                    ) || (
+                        REPLACE(?scaledUnitLocalName, CONCAT(?prefixRegex, ?timeRegex), "") != ?scaledUnitLocalName
+                        && ?baseUnitLocalName = REPLACE(?scaledUnitLocalName, ?prefixRegex, "")
+                    )
+        )
+    }
+    OPTIONAL {
+        # if the scaled unit has a prefix, match it so we can add the triple
+        ?prefix a qudt:Prefix ;
+            rdfs:label ?prefixLabel ;
+            FILTER (!CONTAINS(?baseUnitLocalName, "-"))
+            FILTER (CONTAINS(?scaledUnitLocalName, STR(?prefixLabel)))
+    }
+    OPTIONAL {
+        # if the scaled unit does not have a conversionMultiplier, generate it
+        FILTER NOT EXISTS {
+            ?scaledUnit qudt:conversionMultiplier ?any .
+        }
+        ?baseUnit qudt:conversionMultiplier ?cm .
+        optional {
+            ?baseUnit qudt:conversionOffset ?co
+        }
+        ?prefix a qudt:Prefix ;
+            qudt:prefixMultiplier ?prefixMultiplier ;
+            rdfs:label ?prefixLabel ;
+            FILTER (!CONTAINS(?baseUnitLocalName, "-"))
+            FILTER (CONTAINS(?scaledUnitLocalName, STR(?prefixLabel)))
+        BIND (?cm * ?prefixMultiplier as ?scaledUnitConversionMultiplier )
+        BIND (?co as ?scaledUnitConversionOffset )
+    }
+
+    OPTIONAL {
+        ?baseUnit qudt:dimensionVector ?dv .
+    }
+    FILTER NOT EXISTS {
+        ?scaledUnit qudt:isScalingOf ?baseUnit .
+        {
+            ?scaledUnit qudt:prefix ?prefix
+        } UNION {
+            ?scaledUnit qudt:factorUnit ?x . # for derived units, we don't generate a prefix.
+        }
+    }
+}
+order by ?baseUnit ?scaledUnit
