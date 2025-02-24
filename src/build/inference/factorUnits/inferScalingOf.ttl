@@ -1,0 +1,151 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix qk: <http://qudt.org/schema/quantitykind/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sq: <http://qudt.org/2.1/shacl/infer/applicableUnits> .
+@prefix unit: <http://qudt.org/vocab/unit> .
+
+qk:
+  sh:declare [
+    sh:namespace "http://qudt.org/vocab/quantitykind/"^^xsd:anyURI ;
+    sh:prefix "qk" ;
+  ] .
+
+qudt:
+  sh:declare [
+    sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+    sh:prefix "qudt" ;
+  ] .
+
+rdfs:
+  sh:declare [
+    sh:namespace "http://www.w3.org/2000/01/rdf-schema#" ;
+    sh:prefix "rdfs" ;
+  ] .
+
+skos:
+  sh:declare [
+    sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
+    sh:prefix "skos" ;
+  ] .
+
+sq:qkRule
+  a sh:NodeShape ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:construct """
+
+        CONSTRUCT {
+         ?scaledUnit
+            qudt:scalingOf ?baseUnit ;
+            qudt:conversionMultiplier ?scaledUnitConversionMultiplier ;
+            qudt:conversionOffset ?scaledUnitConversionOffset ;
+            qudt:prefix ?prefix .
+        }
+        #SELECT ?scaledUnit ?baseUnit ?prefix ?scaledUnitConversionMultiplier ?scaledUnitConversionOffset
+        where
+        {
+            {
+                { SELECT DISTINCT ?scaledUnit ?scaledUnitLocalName ?prefixRegex
+                    WHERE
+                    {
+
+                        # select all base units (not using prefixes)
+                        {
+                            ?scaledUnit a qudt:Unit .
+                        } UNION  {
+                            ?factor qudt:unit ?scaledUnit ;
+                            FILTER NOT EXISTS {
+                                ?scaledUnit a qudt:Unit .
+                            }
+                        }
+                        BIND(REPLACE(STR(?scaledUnit), "^.+/", "") as ?scaledUnitLocalName)
+                        FILTER(REPLACE(?scaledUnitLocalName, ?prefixRegex, "") != ?scaledUnitLocalName)
+                        {
+                            SELECT (CONCAT("\\\\b(",GROUP_CONCAT(STR(?prefixLabel); separator ="|"), ")") as ?prefixRegex) where
+                            {
+                                ?prefix
+                                    a qudt:Prefix ;
+                                    rdfs:label ?prefixLabel .
+                             }
+                        }
+                    }
+                }
+
+                # select all base units (not using prefixes)
+                # special handling for prefix + time, e.g.
+                # 'unit:MegaYR qudt:scalingOf unit:YR', not unit:SEC
+
+                ?baseUnit a qudt:Unit ;
+                BIND(REPLACE(STR(?baseUnit), "^.+/", "") as ?baseUnitLocalName)
+                # we don't generate scalingOf for bases that are derived units
+                FILTER(! CONTAINS(?baseUnitLocalName, "-"))
+                # we don't generate scalingOf for bases with a non-1 exponent (because then we cannot use the existing factor as would have to be exponentiated)
+                FILTER(! REGEX(?baseUnitLocalName,".+\\\\d+"))
+                BIND("(YR|MO|DAY|HR|MIN)\\\\b" as ?timeRegex)
+                FILTER (
+                            (
+                                REPLACE(?scaledUnitLocalName, CONCAT(?prefixRegex, ?timeRegex), "") = ?scaledUnitLocalName
+                                && ?baseUnitLocalName = REPLACE(REPLACE(?scaledUnitLocalName, ?prefixRegex, ""), ?timeRegex, "SEC")
+                            ) || (
+                                REPLACE(?scaledUnitLocalName, CONCAT(?prefixRegex, ?timeRegex), "") != ?scaledUnitLocalName
+                                && ?baseUnitLocalName = REPLACE(?scaledUnitLocalName, ?prefixRegex, "")
+                            )
+                )
+            }
+            OPTIONAL {
+                # if the scaled unit has a prefix, match it so we can add the triple
+                ?prefix a qudt:Prefix ;
+                    rdfs:label ?prefixLabel ;
+                    FILTER (!CONTAINS(?baseUnitLocalName, "-"))
+                    FILTER (CONTAINS(?scaledUnitLocalName, STR(?prefixLabel)))
+            }
+            OPTIONAL {
+                # if the scaled unit does not have a conversionMultiplier, generate it
+                FILTER NOT EXISTS {
+                    ?scaledUnit qudt:conversionMultiplier ?any .
+                }
+                ?baseUnit qudt:conversionMultiplier ?cm .
+                optional {
+                    ?baseUnit qudt:conversionOffset ?co
+                }
+                ?prefix a qudt:Prefix ;
+                    qudt:prefixMultiplier ?prefixMultiplier ;
+                    rdfs:label ?prefixLabel ;
+                    FILTER (!CONTAINS(?baseUnitLocalName, "-"))
+                    FILTER (CONTAINS(?scaledUnitLocalName, STR(?prefixLabel)))
+                BIND (?cm * ?prefixMultiplier as ?scaledUnitConversionMultiplier )
+                BIND (?co as ?scaledUnitConversionOffset )
+            }
+
+            OPTIONAL {
+                ?baseUnit qudt:dimensionVector ?dv .
+            }
+            FILTER NOT EXISTS {
+                ?scaledUnit qudt:scalingOf ?baseUnit .
+                {
+                    ?scaledUnit qudt:prefix ?prefix
+                } UNION {
+                    ?scaledUnit qudt:factorUnit ?x . # for derived units, we don't generate a prefix.
+                }
+            }
+        }
+        order by ?baseUnit ?scaledUnit
+
+        """ ;
+    sh:prefixes qudt: ;
+    sh:prefixes rdfs: ;
+    sh:prefixes unit: ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
+unit:
+  sh:declare [
+    sh:namespace "http://qudt.org/vocab/unit"^^xsd:anyURI ;
+    sh:prefix "unit" ;
+  ] .
+
+

@@ -41,13 +41,13 @@
             The build is executed as a series of 'lifecycle phases': https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html)
             Each plugin has an <execution> section that binds its execution to a lifecycle phase. (or it has a default lifecycle phase in which it runs)
             Here are the phases and the execution ids that are linked to them (executed in the order they appear in this file):
-                  validate                 defineAdditionalProperties, check-source-format, shacl-validate-src
-                  initialize               format-sources, copy-rdf, copy-docs, copy-root-files
-                  generate-sources         validate-shacl-files
-                  process-sources          replace-version-placeholder
-                  generate-resources       generate-iec-links
-                  process-resources
-                  compile                  shacl-infer-applicable-units, merge-applicable-units
+                  validate                 defineAdditionalProperties,
+                  initialize               [Profile -Pfix-src: modify-sources ]
+                  generate-sources
+                  process-sources          check-source-format, shacl-validate-src
+                  generate-resources       copy-rdf, copy-docs, copy-root-files, validate-shacl-files
+                  process-resources        generate-iec-links
+                  compile                  infer-applicable-units, merge-applicable-units
                   process-classes          generate-factor-units
                   generate-test-sources
                   process-test-sources
@@ -65,6 +65,77 @@
                   install                  release-zip (if -Pzip is present (profile 'zip' is activated)
                   deploy
             -->
+            <plugin>
+                <groupId>io.github.qudtlib</groupId>
+                <artifactId>seq-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <id>rewrite</id>
+                        <phase>none</phase>
+                        <goals><goal>run</goal></goals>
+                        <configuration>
+                            <label>all source modifications</label>
+                            <steps>
+                                <step>
+                                    <pluginCoordinates>shacl:infer@infer-factor-units</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-factor-units</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>shacl:infer@infer-scaling-of</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-scaling-of</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>spotless:apply@reformat-sources</pluginCoordinates>
+                                </step>
+                            </steps>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>infer-factor-units</id>
+                        <phase>none</phase>
+                        <goals><goal>run</goal></goals>
+                        <configuration>
+                            <label>factor units</label>
+                            <steps>
+                                <step>
+                                    <pluginCoordinates>shacl:infer@infer-factor-units</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-factor-units</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>spotless:apply@reformat-sources</pluginCoordinates>
+                                </step>
+                            </steps>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>infer-scaling-of</id>
+                        <phase>none</phase>
+                        <goals><goal>run</goal></goals>
+                        <configuration>
+                            <label>scalingOf</label>
+                            <step>
+                                <step>
+                                    <pluginCoordinates>shacl:infer@infer-scaling-of</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-scaling-of</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>spotless:apply@reformat-sources</pluginCoordinates>
+                                </step>
+                            </step>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.gmaven</groupId>
                 <artifactId>groovy-maven-plugin</artifactId>
@@ -117,7 +188,7 @@
                 <executions>
                     <execution>
                         <!-- infers qudt:applicableUnits and writes them to target/inferred/applicableUnits.ttl -->
-                        <id>shacl-infer-applicable-units</id>
+                        <id>infer-applicable-units</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>infer</goal>
@@ -165,13 +236,59 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <!-- infers qudt:factorUnit RDF molecules and writes them to target/inferred/factorUnits.ttl -->
+                        <id>infer-factor-units</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>infer</goal>
+                        </goals>
+                        <configuration>
+                            <inferences>
+                                <inference>
+                                    <shapes>
+                                        <include>src/build/inference/factorUnits/inferFactorUnits.ttl</include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            src/main/rdf/vocab/unit/*.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/inferred/factorUnits.ttl</outputFile>
+                                </inference>
+                            </inferences>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- infers qudt:scalingOf triples and writes them to target/inferred/scalingOf.ttl -->
+                        <id>infer-scaling-of</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>infer</goal>
+                        </goals>
+                        <configuration>
+                            <inferences>
+                                <inference>
+                                    <shapes>
+                                        <include>src/build/inference/factorUnits/inferScalingOf.ttl</include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            src/main/rdf/vocab/unit/*.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/inferred/scalingOf.ttl</outputFile>
+                                </inference>
+                            </inferences>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <!--
                         SHACL-validates the union of all ttl files in src/vocab and the No-OWL schema
                         against the union of QA-Tests and No-OWL schema
                         writes the validation report target/validation/validationReportSrc.ttl
                         -->
                         <id>shacl-validate-src</id>
-                        <phase>validate</phase>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>validate</goal>
                         </goals>
@@ -192,6 +309,20 @@
                                         </include>
                                     </data>
                                     <outputFile>target/validation/validationReportSrc.ttl</outputFile>
+                                </validation>
+                                <validation>
+                                    <!--skip>true</skip-->
+                                    <shapes>
+                                        <include>
+                                            src/build/inference/factorUnits/checkFactorUnits.ttl
+                                        </include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/validation/validationReportSrc-factorUnits.ttl</outputFile>
                                 </validation>
                             </validations>
                         </configuration>
@@ -236,7 +367,7 @@
                         writes the validation report target/validation/validationReportShacl.ttl
                         -->
                         <id>validate-shacl-files</id>
-                        <phase>generate-sources</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>validate</goal>
                         </goals>
@@ -309,8 +440,54 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <!--
+                        adds the qudt:factorUnit triples we generated with SHACL to the units source file.
+                        -->
+                        <id>merge-factor-units</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            target/inferred/factorUnits.ttl
+                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </input>
+                                    <outputFile>src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
+                                </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--
+                        adds the qudt:factorUnit triples we generated with SHACL to the units source file.
+                        -->
+                        <id>merge-scaling-of</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            target/inferred/scalingOf.ttl
+                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </input>
+                                    <outputFile>src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
+                                </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>generate-factor-units</id>
-                        <phase>process-classes</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>make</goal>
                         </goals>
@@ -483,7 +660,7 @@
                             the main branch.
                         -->
                         <id>check-source-format</id>
-                        <phase>validate</phase>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
@@ -498,7 +675,7 @@
                     <execution>
                         <!-- formats source files that were generated during the build up to the compile phase -->
                         <id>reformat-sources</id>
-                        <phase>compile</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>apply</goal>
                         </goals>
@@ -509,11 +686,10 @@
                             <rdf>
                                 <!-- redefine includes so we only format the sources that are allowed to change -->
                                 <includes>
-                                    <include>src/main/rdf/vocab/quantitykinds/*.ttl</include>
+                                    <include>src/main/rdf/**/*.ttl</include>
                                 </includes>
                             </rdf>
                         </configuration>
-
                     </execution>
                     <execution>
                         <!-- formats everything in the target/dist folder so we have a clean set of distribution files-->
@@ -531,6 +707,10 @@
                                 <includes>
                                     <include>target/**/*.ttl</include>
                                 </includes>
+                                <excludes>
+                                    <exclude>target/validation/*.ttl</exclude>
+                                    <exclude>target/inferred/*.ttl</exclude>
+                                </excludes>
                             </rdf>
                         </configuration>
                     </execution>
@@ -543,7 +723,7 @@
                 <executions>
                     <execution>
                         <id>copy-rdf</id>
-                        <phase>initialize</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -558,7 +738,7 @@
                     </execution>
                     <execution>
                         <id>copy-docs</id>
-                        <phase>initialize</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -573,7 +753,7 @@
                     </execution>
                     <execution>
                         <id>copy-root-files</id>
-                        <phase>initialize</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -647,6 +827,26 @@
                                     <goal>single</goal>
                                 </goals>
                                 <phase>install</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!--
+                runs all source modifications (inferences and formatting) before anything else in the build
+             -->
+            <id>fix</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.github.qudtlib</groupId>
+                        <artifactId>seq-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>rewrite</id>
+                                <phase>initialize</phase>
                             </execution>
                         </executions>
                     </plugin>
