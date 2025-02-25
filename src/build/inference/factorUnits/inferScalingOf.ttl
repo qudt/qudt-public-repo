@@ -39,30 +39,30 @@ sq:qkRule
     sh:construct """
 
         CONSTRUCT {
-         ?scaledUnit
+         ?this
             qudt:scalingOf ?baseUnit ;
             qudt:conversionMultiplier ?scaledUnitConversionMultiplier ;
             qudt:conversionOffset ?scaledUnitConversionOffset ;
             qudt:prefix ?prefix .
         }
-        #SELECT ?scaledUnit ?baseUnit ?prefix ?scaledUnitConversionMultiplier ?scaledUnitConversionOffset
+        #SELECT ?this ?baseUnit ?prefix ?scaledUnitConversionMultiplier ?scaledUnitConversionOffset
         where
         {
             {
-                { SELECT DISTINCT ?scaledUnit ?scaledUnitLocalName ?prefixRegex
+                { SELECT DISTINCT ?this ?scaledUnitLocalName ?prefixRegex
                     WHERE
                     {
 
                         # select all base units (not using prefixes)
                         {
-                            ?scaledUnit a qudt:Unit .
+                            ?this a qudt:Unit .
                         } UNION  {
-                            ?factor qudt:unit ?scaledUnit ;
+                            ?factor qudt:unit ?this ;
                             FILTER NOT EXISTS {
-                                ?scaledUnit a qudt:Unit .
+                                ?this a qudt:Unit .
                             }
                         }
-                        BIND(REPLACE(STR(?scaledUnit), "^.+/", "") as ?scaledUnitLocalName)
+                        BIND(REPLACE(STR(?this), "^.+/", "") as ?scaledUnitLocalName)
                         FILTER(REPLACE(?scaledUnitLocalName, ?prefixRegex, "") != ?scaledUnitLocalName)
                         {
                             SELECT (CONCAT("\\\\b(",GROUP_CONCAT(STR(?prefixLabel); separator ="|"), ")") as ?prefixRegex) where
@@ -106,7 +106,7 @@ sq:qkRule
             OPTIONAL {
                 # if the scaled unit does not have a conversionMultiplier, generate it
                 FILTER NOT EXISTS {
-                    ?scaledUnit qudt:conversionMultiplier ?any .
+                    ?this qudt:conversionMultiplier ?any .
                 }
                 ?baseUnit qudt:conversionMultiplier ?cm .
                 optional {
@@ -125,15 +125,15 @@ sq:qkRule
                 ?baseUnit qudt:dimensionVector ?dv .
             }
             FILTER NOT EXISTS {
-                ?scaledUnit qudt:scalingOf ?baseUnit .
+                ?this qudt:scalingOf ?baseUnit .
                 {
-                    ?scaledUnit qudt:prefix ?prefix
+                    ?this qudt:prefix ?prefix
                 } UNION {
-                    ?scaledUnit qudt:factorUnit ?x . # for derived units, we don't generate a prefix.
+                    ?this qudt:factorUnit ?x . # for derived units, we don't generate a prefix.
                 }
             }
         }
-        order by ?baseUnit ?scaledUnit
+        order by ?baseUnit ?this
 
         """ ;
     sh:prefixes qudt: ;
