@@ -751,16 +751,18 @@
                                 <singleFile>
                                     <input>
                                         <include>
-                                            src/main/rdf/schema/SCHEMA_QUDT.ttl
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
                                         </include>
                                     </input>
                                     <filters>
                                         <!-- put any query here -->
                                         <sparqlSelect>
-                                            SELECT * where {
-                                                ?prop a ?type
-                                                filter (?type in (owl:ObjectProperty, owl:DatatypeProperty))
-                                            } order by ?prop ?type
+                                            SELECT DISTINCT ?component
+                                            WHERE {
+                                            ?u a qudt:Unit .
+                                            ?u qudt:hasFactorUnit/qudt:hasUnit ?component .
+                                            FILTER NOT EXISTS {?component a qudt:Unit}
+                                            }
                                         </sparqlSelect>
                                     </filters>
                                     <outputFile>target/ignore.txt</outputFile>
