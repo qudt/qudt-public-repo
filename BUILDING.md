@@ -7,7 +7,7 @@ ontology using the tools in this repository. If you're comfortable with RDF, SHA
 
 The QUDT project uses Maven (a build tool) to:
 - **Validate** RDF files against SHACL shapes (like checking if your triples follow the rules).
-- **Infer** new triples e.g., `qudt:applicableUnit`, `qudt:factorUnit`, `qudt:scalingOf` using SHACL rules.
+- **Infer** new triples e.g., `qudt:applicableUnit`, `qudt:hasFactorUnit`, `qudt:scalingOf` using SHACL rules.
 - **Merge** those triples into the right places (like updating `VOCAB_QUDT-UNITS-ALL.ttl`).
 - **Format** RDF files to keep them neat and consistent.
 - **Package** everything into a ZIP file for distribution (optional).
@@ -23,7 +23,7 @@ The process is driven by a `pom.xml` file, which is like a blueprint for Maven. 
 ## Setting Up
 
 1. **Fork the Repository**
-   Before grabbing the code, go to https://github.com/qudt/qudt-public-repohttps://github.com/qudt/qudt-public-repo on GitHub, click the "Fork" button (top right), and create a copy under your own GitHub account. This lets you work on your own version and submit changes later.
+   Before grabbing the code, go to [https://github.com/qudt/qudt-public-repo](https://github.com/qudt/qudt-public-repo) on GitHub, click the "Fork" button (top right), and create a copy under your own GitHub account. This lets you work on your own version and submit changes later.
 2. **Get Your Forked Repository**
    Open your terminal and run replace `YOUR-USERNAME` with your GitHub username:
 
@@ -85,7 +85,7 @@ These commands are for specific ontology tasks—like inferring new triples—an
 mvn seq:run@infer-and-format
 ```
 
-- **What it does**: Infers `qudt:factorUnit` and `qudt:scalingOf` triples, merges them into `src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl`, and formats the result.
+- **What it does**: Infers `qudt:hasFactorUnit` and `qudt:scalingOf` triples, merges them into `src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl`, and formats the result.
 - **When to use**: To refresh all inferred data in the source file at once e.g., after adding new units or prefixes.
 
 2. **Infer and Merge Factor Units**
@@ -94,7 +94,7 @@ mvn seq:run@infer-and-format
    mvn seq:run@infer-factorUnits
    ```
 
-   - **What it does**: Infers `qudt:factorUnit` triples e.g., relationships between units like "meter per second", merges them into `VOCAB_QUDT-UNITS-ALL.ttl`, and formats it.
+   - **What it does**: Infers `qudt:hasFactorUnit` triples e.g., relationships between units like "meter per second", merges them into `VOCAB_QUDT-UNITS-ALL.ttl`, and formats it.
    - **When to use**: If validation fails and says factor units are missing or wrong (check `target/validation/validationReportSrc-factorUnits.ttl`).
 3. **Infer and Merge Scaling Relationships**
 
