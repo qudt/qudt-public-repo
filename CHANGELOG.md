@@ -11,6 +11,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Removed invalid qudt:iec61360Code values (most in the 'UAD' range) from about 40 units, most notably unit:M that was submitted as a bug.
 - Cleaned out some remaining shape and restriction references to deprecated properties.
+- Test entry
 
 ### Added
 
