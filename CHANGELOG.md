@@ -16,6 +16,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - New Units
   - `unit:MilliGM-PER-DeciM2` by [Matt Goldberg](https://github.com/mgberg)
+  - test unit added, A-M
 
 ### Deprecated
 
