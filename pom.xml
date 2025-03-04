@@ -180,64 +180,96 @@
                 <configuration>
                     <scripts>
                         <script><![CDATA[
-                            // Access the Maven project base directory using the project object
+                            // Define base directories
                             def basedir = project.basedir.toString()
-
-                            // Define the source generation input directory
                             def srcgenDir = new File(basedir, "src/build/srcgen")
+                            def targetDir = new File(basedir, "target/srcgen")
+
+                            // Validate source directory
                             if (!srcgenDir.exists() || !srcgenDir.isDirectory()) {
                                 throw new Exception("Source generation directory not found: ${srcgenDir}")
                             }
 
-                            // Define the target output directory
-                            def targetDir = new File(basedir, "target/srcgen")
-                            targetDir.mkdirs()  // Create target directory if it doesn't exist
+                            // Ensure target directory exists
+                            targetDir.mkdirs()
 
-                            // Process each aspect subdirectory
-                            srcgenDir.eachDir { aspectDir ->
+                            // Step 1: Collect all aspect directories and their file status
+                            def allAspectDirs = srcgenDir.listFiles().findAll { it.isDirectory() }
+                            def validAspectDirs = []
+                            def omittedAspectDirsWithReasons = [:] // Map to store omitted dirs and missing files
+
+                            allAspectDirs.each { dir ->
+                                def aspectName = dir.name
+                                def queryFile = new File(dir, "query.rq")
+                                def inferTemplateFile = new File(dir, "infer-template.ttl")
+                                def validateTemplateFile = new File(dir, "validate-template.ttl")
+
+                                def requiredFiles = [
+                                    queryFile: queryFile,
+                                    inferTemplateFile: inferTemplateFile,
+                                    validateTemplateFile: validateTemplateFile
+                                ]
+
+                                // Find missing files for this directory
+                                def missingFiles = requiredFiles.findAll { !it.value.exists() }.keySet()
+
+                                if (missingFiles.isEmpty()) {
+                                    validAspectDirs << dir // All files present, add to valid list
+                                } else {
+                                    omittedAspectDirsWithReasons[dir] = missingFiles // Record missing files
+                                }
+                            }
+
+                            // Step 2: Process valid directories
+                            validAspectDirs.each { aspectDir ->
                                 def aspectName = aspectDir.name
                                 println "Processing aspect: ${aspectName}"
 
-                                // Define input files
+                                // Load required files
                                 def queryFile = new File(aspectDir, "query.rq")
                                 def inferTemplateFile = new File(aspectDir, "infer-template.ttl")
                                 def validateTemplateFile = new File(aspectDir, "validate-template.ttl")
 
-                                // Check that all required files exist
-                                [queryFile, inferTemplateFile, validateTemplateFile].each { file ->
-                                    if (!file.exists()) {
-                                        throw new Exception("Required file not found: ${file}")
-                                    }
-                                }
-
-                                // Read and process the SPARQL query
+                                // Process query file (e.g., remove prefixes)
                                 def queryText = queryFile.text
                                 def queryWithoutPrefixes = queryText.replaceAll('(?is)^\\s*(PREFIX\\s+[^\\n]*\\n)*\\s*', '')
                                                             .replaceAll('(?is)\\s*$', '')
                                 if (!queryWithoutPrefixes) {
                                     throw new Exception("No query body found in ${queryFile}")
                                 }
+                                queryWithoutPrefixes = queryWithoutPrefixes.replaceAll("\\\\", "\\\\\\\\")
 
-                                queryWithoutPrefixes = queryWithoutPrefixes.replaceAll("\\\\","\\\\\\\\");
-
-                                // Create aspect-specific output directory
+                                // Create output directory for this aspect
                                 def aspectOutputDir = new File(targetDir, aspectName)
-                                aspectOutputDir.mkdirs()  // Create aspect directory if it doesn't exist
+                                aspectOutputDir.mkdirs()
 
-                                // Process templates
+                                // Define templates to process
                                 def templates = [
                                     [source: inferTemplateFile, target: "infer.ttl"],
                                     [source: validateTemplateFile, target: "validate.ttl"]
                                 ]
 
+                                // Generate output files
                                 templates.each { template ->
                                     def content = template.source.text
                                     def outputContent = content.replace('{{QUERY_WITHOUT_PREFIXES}}', queryWithoutPrefixes)
-                                    outputContent = outputContent.replace('{{AUTOGENERATED_WARNING_DO_NOT_EDIT}}', " Auto-generated file - ALL EDITS WILL BE LOST! Edit the '-template.ttl' file instead!")
+                                    outputContent = outputContent.replace('{{AUTOGENERATED_WARNING_DO_NOT_EDIT}}',
+                                        " Auto-generated file - ALL EDITS WILL BE LOST! Edit the '-template.ttl' file instead!")
                                     def outputFile = new File(aspectOutputDir, template.target)
                                     outputFile.text = outputContent
                                     println "Generated: ${outputFile}"
                                 }
+                            }
+
+                            // Step 3: Log omitted directories with missing file details
+                            if (omittedAspectDirsWithReasons) {
+                                println "The following aspects were omitted due to missing required files:"
+                                omittedAspectDirsWithReasons.each { dir, missingFiles ->
+                                    def missingFileNames = missingFiles.collect { it.toString().replaceAll('^.*\\.', '') } // Simplify to file names
+                                    println " - ${dir.name}: Missing ${missingFileNames.join(', ')}"
+                                }
+                            } else {
+                                println "All aspects processed successfully; no missing files detected."
                             }
                         ]]>
                         </script>
@@ -258,7 +290,7 @@
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>shacl-maven-plugin</artifactId>
-                <version>1.0.3</version>
+                <version>1.0.4-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <!-- infers qudt:applicableUnits and writes them to target/inferred/applicableUnits.ttl -->
@@ -756,14 +788,9 @@
                                     </input>
                                     <filters>
                                         <!-- put any query here -->
-                                        <sparqlSelect>
-                                            SELECT DISTINCT ?component
-                                            WHERE {
-                                            ?u a qudt:Unit .
-                                            ?u qudt:hasFactorUnit/qudt:hasUnit ?component .
-                                            FILTER NOT EXISTS {?component a qudt:Unit}
-                                            }
-                                        </sparqlSelect>
+                                        <sparqlSelectFile>
+                                            src/build/srcgen/conversionMultiplier/query.rq
+                                        </sparqlSelectFile>
                                     </filters>
                                     <outputFile>target/ignore.txt</outputFile>
                                 </singleFile>
