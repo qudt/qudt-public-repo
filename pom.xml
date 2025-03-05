@@ -42,12 +42,12 @@
                 Each plugin has an <execution> section that binds its execution to a lifecycle phase (or it has a default lifecycle phase in which it runs, or 'none' for direct invocation).
                 Here are the phases and the execution ids that are linked to them (executed in the order they appear in this file):
                       validate                 defineAdditionalProperties, preprocess-shacl-files
-                      initialize               [Profile -Pfix: infer-and-format]
+                      initialize               [Profile -Pfix: reformat-sources]
                       generate-sources
                       process-sources          check-source-format, shacl-validate-src
                       generate-resources       copy-rdf, copy-docs, copy-root-files, validate-shacl-files
                       process-resources        generate-iec-links
-                      compile                  infer-applicableUnits, merge-applicableUnits, merge-owl-subset, merge-predefined-units
+                      compile                  infer-and-format
                       process-classes
                       generate-test-sources
                       process-test-sources
@@ -55,7 +55,7 @@
                       process-test-resources
                       test-compile
                       process-test-classes     format-dist
-                      test                     shacl-validate
+                      test                     shacl-validate-target
                       prepare-package
                       package
                       pre-integration-test
@@ -66,7 +66,7 @@
                       deploy
 
                 Executions with phase 'none' (invocable directly via command line, not bound to lifecycle):
-                      none                     infer-and-format, infer-factorUnits, infer-scalingOf, merge-factorUnits-src, query-factorUnits, query-scalingOf, merge-scalingOf-src, reformat-sources
+                      none                     infer-and-format, infer-factorUnits, infer-scalingOf, merge-factorUnits-target, query-factorUnits, query-scalingOf, merge-scalingOf-target, reformat-sources
             -->
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
@@ -75,22 +75,37 @@
                 <executions>
                     <execution>
                         <id>infer-and-format</id>
-                        <phase>none</phase>
+                        <phase>compile</phase>
                         <goals><goal>run</goal></goals>
                         <configuration>
-                            <label>all source modifications</label>
+                            <label>make all inferences and write to target</label>
                             <steps>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-predefinedUnits-target</pluginCoordinates>
+                                </step>
                                 <step>
                                     <pluginCoordinates>shacl:infer@infer-factorUnits</pluginCoordinates>
                                 </step>
                                 <step>
-                                    <pluginCoordinates>rdfio:make@merge-factorUnits-src</pluginCoordinates>
+                                    <pluginCoordinates>rdfio:make@merge-factorUnits-target</pluginCoordinates>
                                 </step>
                                 <step>
                                     <pluginCoordinates>shacl:infer@infer-scalingOf</pluginCoordinates>
                                 </step>
                                 <step>
-                                    <pluginCoordinates>rdfio:make@merge-scalingOf-src</pluginCoordinates>
+                                    <pluginCoordinates>rdfio:make@merge-scalingOf-target</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>shacl:infer@infer-applicableUnits</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-applicableUnits-target</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>shacl:infer@infer-owlSubset</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-owlSubset-target</pluginCoordinates>
                                 </step>
                                 <step>
                                     <pluginCoordinates>spotless:apply@reformat-sources</pluginCoordinates>
@@ -109,7 +124,7 @@
                                     <pluginCoordinates>shacl:infer@infer-factorUnits</pluginCoordinates>
                                 </step>
                                 <step>
-                                    <pluginCoordinates>rdfio:make@merge-factorUnits-src</pluginCoordinates>
+                                    <pluginCoordinates>rdfio:make@merge-factorUnits-target</pluginCoordinates>
                                 </step>
                                 <step>
                                     <pluginCoordinates>spotless:apply@reformat-sources</pluginCoordinates>
@@ -128,7 +143,7 @@
                                     <pluginCoordinates>shacl:infer@infer-scalingOf</pluginCoordinates>
                                 </step>
                                 <step>
-                                    <pluginCoordinates>rdfio:make@merge-scalingOf-src</pluginCoordinates>
+                                    <pluginCoordinates>rdfio:make@merge-scalingOf-target</pluginCoordinates>
                                 </step>
                                 <step>
                                     <pluginCoordinates>spotless:apply@reformat-sources</pluginCoordinates>
@@ -295,7 +310,7 @@
                     <execution>
                         <!-- infers qudt:applicableUnits and writes them to target/inferred/applicableUnits.ttl -->
                         <id>infer-applicableUnits</id>
-                        <phase>compile</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>infer</goal>
                         </goals>
@@ -345,6 +360,33 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <!-- infers qudt:applicableUnits and writes them to target/inferred/applicableUnits.ttl -->
+                        <id>infer-owlSubset</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>infer</goal>
+                        </goals>
+                        <configuration>
+                            <inferences>
+                                <inference>
+                                    <message>Performing our custom subset of OWL inferences</message>
+                                    <shapes>
+                                        <include>
+                                            src/build/inference/owl-subset.shapes.ttl
+                                        </include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            src/main/rdf/schema/SCHEMA_QUDT.ttl
+                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/inferred/owl-subset.ttl</outputFile>
+                                </inference>
+                            </inferences>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <!-- infers qudt:hasFactorUnit RDF molecules and writes them to target/inferred/factorUnits.ttl -->
                         <id>infer-factorUnits</id>
                         <phase>none</phase>
@@ -359,9 +401,9 @@
                                     </shapes>
                                     <data>
                                         <include>
-                                            src/build/inference/factorUnits/predefined-factors-and-scalings.ttl
-                                            src/main/rdf/vocab/unit/*.ttl
-                                            src/main/rdf/vocab/prefixes/*.ttl
+                                            <!-- assuming predefined units have already been merged into the target units -->
+                                            target/dist/vocab/unit/*.ttl
+                                            target/dist/vocab/prefixes/*.ttl
                                         </include>
                                     </data>
                                     <outputFile>target/inferred/factorUnits.ttl</outputFile>
@@ -384,9 +426,9 @@
                                     </shapes>
                                     <data>
                                         <include>
-                                            src/build/inference/factorUnits/predefined-factors-and-scalings.ttl
-                                            src/main/rdf/vocab/unit/*.ttl
-                                            src/main/rdf/vocab/prefixes/*.ttl
+                                            <!-- assuming predefined units and factor units have already been merged into the target units -->
+                                            target/dist/vocab/unit/*.ttl
+                                            target/dist/vocab/prefixes/*.ttl
                                         </include>
                                     </data>
                                     <outputFile>target/inferred/scalingOf.ttl</outputFile>
@@ -424,40 +466,6 @@
                                     </data>
                                     <outputFile>target/validation/validationReportSrc.ttl</outputFile>
                                 </validation>
-                                <validation>
-                                    <message>Validating QUDT factor units</message>
-                                    <failureMessage>Problems found - please run mvn seq:run@infer-factorUnits, then try again</failureMessage>
-                                    <!--skip>true</skip-->
-                                    <shapes>
-                                        <include>
-                                            target/srcgen/factorUnits/validate.ttl
-                                        </include>
-                                    </shapes>
-                                    <data>
-                                        <include>
-                                            src/build/inference/factorUnits/predefined-factors-and-scalings.ttl
-                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                        </include>
-                                    </data>
-                                    <outputFile>target/validation/validationReportSrc-factorUnits.ttl</outputFile>
-                                </validation>
-                                <validation>
-                                    <message>Validating QUDT scalingOf</message>
-                                    <failureMessage>Problems found - please run mvn seq:run@infer-scalingOf, then try again</failureMessage>
-                                    <!--skip>true</skip-->
-                                    <shapes>
-                                        <include>
-                                            target/srcgen/scalingOf/validate.ttl
-                                        </include>
-                                    </shapes>
-                                    <data>
-                                        <include>
-                                            src/build/inference/factorUnits/predefined-factors-and-scalings.ttl
-                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                        </include>
-                                    </data>
-                                    <outputFile>target/validation/validationReportSrc-factorUnits.ttl</outputFile>
-                                </validation>
                             </validations>
                         </configuration>
                     </execution>
@@ -467,7 +475,7 @@
                         against the union of QA-Tests and No-OWL schema
                         writes the validation report target/validation/validationReport.ttl
                         -->
-                        <id>shacl-validate</id>
+                        <id>shacl-validate-target</id>
                         <phase>test</phase>
                         <goals>
                             <goal>validate</goal>
@@ -492,6 +500,38 @@
                                         </include>
                                     </data>
                                     <outputFile>target/validation/validationReport.ttl</outputFile>
+                                </validation>
+                                <validation>
+                                    <message>Validating QUDT factor units</message>
+                                    <failureMessage>Problems found</failureMessage>
+                                    <!--skip>true</skip-->
+                                    <shapes>
+                                        <include>
+                                            target/srcgen/factorUnits/validate.ttl
+                                        </include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/validation/validationReport-factorUnits.ttl</outputFile>
+                                </validation>
+                                <validation>
+                                    <message>Validating QUDT scalingOf</message>
+                                    <failureMessage>Problems found</failureMessage>
+                                    <!--skip>true</skip-->
+                                    <shapes>
+                                        <include>
+                                            target/srcgen/scalingOf/validate.ttl
+                                        </include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/validation/validationReport-factorUnits.ttl</outputFile>
                                 </validation>
                             </validations>
                         </configuration>
@@ -538,8 +578,8 @@
                         <!--
                         adds the qudt:applicableUnits triples we generated with SHACL to the quantitykinds target file.
                         -->
-                        <id>merge-applicableUnits</id>
-                        <phase>compile</phase>
+                        <id>merge-applicableUnits-target</id>
+                        <phase>none</phase>
                         <goals>
                             <goal>make</goal>
                         </goals>
@@ -579,8 +619,8 @@
                         <!--
                         adds the qudt:applicableUnits triples we generated with SHACL to the quantitykinds target file.
                         -->
-                        <id>merge-owl-subset</id>
-                        <phase>compile</phase>
+                        <id>merge-owlSubset-target</id>
+                        <phase>none</phase>
                         <goals>
                             <goal>make</goal>
                         </goals>
@@ -602,8 +642,8 @@
                         <!--
                         adds the qudt:applicableUnits triples we generated with SHACL to the quantitykinds target file.
                         -->
-                        <id>merge-predefined-units</id>
-                        <phase>compile</phase>
+                        <id>merge-predefinedUnits-target</id>
+                        <phase>none</phase>
                         <goals>
                             <goal>make</goal>
                         </goals>
@@ -613,10 +653,10 @@
                                     <input>
                                         <include>
                                             src/build/inference/factorUnits/predefined-factors-and-scalings.ttl
-                                            target/dist/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
                                         </include>
                                     </input>
-                                    <outputFile>target/dist/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
+                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
                                 </singleFile>
                             </products>
                         </configuration>
@@ -625,7 +665,7 @@
                         <!--
                         adds the qudt:hasFactorUnit triples we generated with SHACL to the units source file.
                         -->
-                        <id>merge-factorUnits-src</id>
+                        <id>merge-factorUnits-target</id>
                         <phase>none</phase>
                         <goals>
                             <goal>make</goal>
@@ -636,10 +676,10 @@
                                     <input>
                                         <include>
                                             target/inferred/factorUnits.ttl
-                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
                                         </include>
                                     </input>
-                                    <outputFile>src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
+                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
                                 </singleFile>
                             </products>
                         </configuration>
@@ -708,7 +748,7 @@
                         <!--
                         adds the qudt:hasFactorUnit triples we generated with SHACL to the units source file.
                         -->
-                        <id>merge-scalingOf-src</id>
+                        <id>merge-scalingOf-target</id>
                         <phase>none</phase>
                         <goals>
                             <goal>make</goal>
@@ -719,10 +759,10 @@
                                     <input>
                                         <include>
                                             target/inferred/scalingOf.ttl
-                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
                                         </include>
                                     </input>
-                                    <outputFile>src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
+                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
                                 </singleFile>
                             </products>
                         </configuration>
@@ -1099,12 +1139,12 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>io.github.qudtlib</groupId>
-                        <artifactId>seq-maven-plugin</artifactId>
+                        <groupId>com.diffplug.spotless</groupId>
+                        <artifactId>spotless-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>infer-and-format</id>
-                                <phase>initialize</phase>
+                                <id>reformat-sources</id>
+                                <phase>validate</phase>
                             </execution>
                         </executions>
                     </plugin>
