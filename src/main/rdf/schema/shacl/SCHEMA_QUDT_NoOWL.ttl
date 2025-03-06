@@ -267,6 +267,17 @@ qudt:Enumeration
   sh:property qudt:Enumeration-default ;
   sh:property qudt:Enumeration-element .
 
+qudt:FactorUnit
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>A <em>Factor Unit</em> is a type specification for a unit, exponent pair that is a component of a derived unit.
+  </p>"""^^rdf:HTML ;
+  qudt:dbpediaMatch "http://dbpedia.org/resource/Category:SI_derived_units"^^xsd:anyURI ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  rdfs:label "Factor Unit" ;
+  sh:property qudt:FactorUnit-exponent ;
+  sh:property qudt:FactorUnit-hasUnit .
+
 qudt:Figure
   a rdfs:Class, sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
@@ -432,6 +443,7 @@ qudt:Prefix
   sh:property qudt:Prefix-altSymbol ;
   sh:property qudt:Prefix-latexSymbol ;
   sh:property qudt:Prefix-prefixMultiplier ;
+  sh:property qudt:Prefix-prefixMultiplierSN ;
   sh:property qudt:Prefix-siExactMatch ;
   sh:property qudt:Prefix-symbol ;
   sh:property qudt:Prefix-ucumCode .
@@ -812,7 +824,9 @@ qudt:Unit
   sh:property qudt:Unit-derivedCoherentUnitOfSystem ;
   sh:property qudt:Unit-derivedUnitOfSystem ;
   sh:property qudt:Unit-expression ;
+  sh:property qudt:Unit-factorUnitScalar ;
   sh:property qudt:Unit-hasDimensionVector ;
+  sh:property qudt:Unit-hasFactorUnit ;
   sh:property qudt:Unit-hasQuantityKind ;
   sh:property qudt:Unit-iec61360Code ;
   sh:property qudt:Unit-latexDefinition ;
@@ -822,6 +836,7 @@ qudt:Unit
   sh:property qudt:Unit-prefix ;
   sh:property qudt:Unit-qkdvDenominator ;
   sh:property qudt:Unit-qkdvNumerator ;
+  sh:property qudt:Unit-scalingOf ;
   sh:property qudt:Unit-siExactMatch ;
   sh:property qudt:Unit-siUnitsExpression ;
   sh:property qudt:Unit-symbol ;
@@ -1195,6 +1210,12 @@ qudt:example
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "example" .
 
+qudt:exponent
+  a rdf:Property ;
+  qudt:plainTextDescription "Defines the exponent of a factor unit" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  rdfs:label "exponent" .
+
 qudt:expression
   a rdf:Property ;
   dcterms:description """
@@ -1202,6 +1223,12 @@ qudt:expression
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "expression" .
+
+qudt:factorUnitScalar
+  a rdf:Property ;
+  dcterms:description "For a derived unit that is not exactly the product of its factor units, this property defines the scalar with which that product has to be multiplied with."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
+  rdfs:label "factorUnitScalar" .
 
 qudt:fieldCode
   a rdf:Property ;
@@ -1321,6 +1348,12 @@ qudt:hasDimensionVector
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "has dimension vector" .
 
+qudt:hasFactorUnit
+  a rdf:Property ;
+  dcterms:description "This property relates a derived unit to one of its constituent factor units"^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
+  rdfs:label "hasFactorUnit" .
+
 qudt:hasNumeratorPart
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
@@ -1355,7 +1388,7 @@ qudt:hasRule
 qudt:hasUnit
   a rdf:Property ;
   dcterms:description """
-  <p>This property relates a system of units with a unit of measure that is either:
+  <p>This property relates a factor unit to its unit or system of units with a unit of measure that is either:
   </p>
   <dd>a) defined by the system,</dd>
   <dd>b) accepted for use by the system and is convertible to a unit of equivalent dimension that is defined by the system,</dd>
@@ -1550,6 +1583,11 @@ qudt:prefixMultiplier
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "prefix multiplier" .
 
+qudt:prefixMultiplierSN
+  a rdf:Property ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  rdfs:label "prefix multiplier scientific" .
+
 qudt:qkdvDenominator
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
@@ -1612,6 +1650,12 @@ qudt:scaleType
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "scale type" .
+
+qudt:scalingOf
+  a rdf:Property ;
+  dcterms:description "This property relates a unit that is scaled to the base unit that its qudt:conversionMultiplier converts it to"^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
+  rdfs:label "scalingOf" .
 
 qudt:siExactMatch
   a rdf:Property ;
@@ -1948,6 +1992,20 @@ qudt:Enumeration-element
   sh:minCount 1 ;
   sh:path qudt:element .
 
+qudt:FactorUnit-exponent
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:path qudt:exponent .
+
+qudt:FactorUnit-hasUnit
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:class qudt:Unit ;
+  sh:maxCount 1 ;
+  sh:path qudt:hasUnit .
+
 qudt:Figure-figureCaption
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
@@ -2173,9 +2231,16 @@ qudt:Prefix-latexSymbol
 qudt:Prefix-prefixMultiplier
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  sh:datatype xsd:double ;
+  sh:datatype xsd:decimal ;
   sh:maxCount 1 ;
   sh:path qudt:prefixMultiplier .
+
+qudt:Prefix-prefixMultiplierSN
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:datatype xsd:double ;
+  sh:maxCount 1 ;
+  sh:path qudt:prefixMultiplierSN .
 
 qudt:Prefix-siExactMatch
   a sh:PropertyShape ;
@@ -2746,6 +2811,13 @@ qudt:Unit-expression
   sh:minCount 0 ;
   sh:path qudt:expression .
 
+qudt:Unit-factorUnitScalar
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:datatype xsd:decimal ;
+  sh:maxCount 1 ;
+  sh:path qudt:factorUnitScalar .
+
 qudt:Unit-hasDimensionVector
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
@@ -2753,6 +2825,12 @@ qudt:Unit-hasDimensionVector
   sh:maxCount 1 ;
   sh:minCount 1 ;
   sh:path qudt:hasDimensionVector .
+
+qudt:Unit-hasFactorUnit
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:nodeKind sh:BlankNodeOrIRI ;
+  sh:path qudt:hasFactorUnit .
 
 qudt:Unit-hasQuantityKind
   a sh:PropertyShape ;
@@ -2814,6 +2892,14 @@ qudt:Unit-qkdvNumerator
   sh:class qudt:QuantityKindDimensionVector ;
   sh:maxCount 1 ;
   sh:path qudt:qkdvNumerator .
+
+qudt:Unit-scalingOf
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:class qudt:Unit ;
+  sh:maxCount 1 ;
+  sh:nodeKind sh:BlankNodeOrIRI ;
+  sh:path qudt:scalingOf .
 
 qudt:Unit-siExactMatch
   a sh:PropertyShape ;
