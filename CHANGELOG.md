@@ -31,6 +31,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Replaced unit:PPTR_VOL with unit:PPT_VOL
 - Deprecated 13 remaining units with non-uppercase URIs, replacing as appropriate.
+- Replaced the volt ampere family of units having URIs with V-A, to have VA instead.
 
 ## [3.0.0] - 2025-02-13
 
