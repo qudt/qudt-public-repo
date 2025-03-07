@@ -25,6 +25,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
     in the file `src/build/inference/factorUnits/predefined-factors-and-scalings.ttl`, which are added to
     the units file (`target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl`) during the build
 - a new BUILDING.md file
+- Added the ContextualUnit class, to identify units that are common, but are really specializations of generic units.
 
 ### Deprecated
 
