@@ -7,6 +7,60 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Changed
+
+- Removed invalid qudt:iec61360Code values (most in the 'UAD' range) from about 40 units, most notably unit:M that was submitted as a bug.
+- Cleaned out some remaining shape and restriction references to deprecated properties.
+
+### Added
+
+- New Units
+  - `unit:MilliGM-PER-DeciM2` by [Matt Goldberg](https://github.com/mgberg)
+- Factor Units by [Florian Kleedorfer](https://github.com/fkleedorfer):
+  - During the build process, multiple SPARQL queries determine the 'factor units' that derived
+    units are made up of. The factor units are associated with their derived units via `qudt:hasFactorUnit' triples.
+  - Units that are 'scaled', ie. derived from another, non-derived unit with conversionMultiplier 1.0 by multiplication,
+    are connected with that unit via `qudt:scalingOf`.
+  - Wherever the connection cannot be determined from the units' localnames, the triples are explicitly listed
+    in the file `src/build/inference/factorUnits/predefined-factors-and-scalings.ttl`, which are added to
+    the units file (`target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl`) during the build
+- a new BUILDING.md file
+- Added the ContextualUnit class, to identify units that are common, but are really specializations of generic units.
+
+### Deprecated
+
+- Replaced unit:PPTR_VOL with unit:PPT_VOL
+- Deprecated 13 remaining units with non-uppercase URIs, replacing as appropriate.
+- Replaced the volt ampere family of units having URIs with V-A, to have VA instead.
+- Further, replaced ..V-A_Reactive with ...VAR.
+
+## [3.0.0] - 2025-02-13
+
+### Changed
+
+- Replaced `2.1` with `$$QUDT_VERSION$$` in all graph URI references. This will result in URIs containing
+  full semantic versions, such as 3.0.0, moving forward. Note that this is a breaking change, hence
+  the transition to QUDT version 3. Versionless graph URIs are still dereferenceable on the web.
+
+### Deprecated
+
+- Removed all previously deprecated entities, to begin a new cycle of deprecation when needed.
+
+### Fixed
+
+- Corrected unit symbols containing some kind of conversion artifact, e.g. '<C2>'
+- Fix dimension vector of unit:MicroMOL-PER-M2-SEC2
+- Added the newly referred-to dimension vector to the dv vocabulary
+- Corrected 456 unit symbols of derived unist by generating them based on their factors. Note: correcting
+  derived unit symbols without correcting their factor units (e.g. `km/hr` -> `km/h` without `hr`->`h`)
+  will not solve the problem in the long term. We are not yet automatically detecting and correcting
+  incorrect derived unit symbols but it might happen in the future. If we started doing that, the factors
+  would take precedence.
+- Corrected the language tag `@en-us` to `@en-US`
+- Corrected a small number of conversion multipliers
+
+## [2.1.47] - 2025-01-28
+
 ### Added
 
 - New SHACL Schema for Datatypes
@@ -24,20 +78,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - New classes and shapes added to SHACL QUDT Schema:
   - `DataItem` was added as a parent class for `Data`, supporting scalar values,
     and, with subtypes for structured values
-
-### Changed
-
-- Migrated constructs for datatypes to:
-  - new SHACL Schema for Datatypes
-    - Updated OWL Schema is work-in-progress
-  - existing VOCAB for Datatypes
-- Changes to the SHACL QUDT schema:
-  - Added a `value` constraint to the property shape `qudt:Quantifiable-value` to allow a value
-    to be a `qudt:EnumeratedValue`, and to allow a list of values.
-  - `qudt:informativeReference` can now refer to instances of `qudt:Citation` as well as `xsd:anyURI`
-
-### Added
-
 - New QuantityKinds
   - `qk:OsmoticConcentration` by [Toby Broom](https://github.com/Toby-Broom/)
   - `qk:AmountOfCloudCover` by [Jeffrey Vervoort](https://github.com/Jeffrey-Vervoort-KNMI)
@@ -53,20 +93,27 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - 5 new Dimension Vectors for the [EDI](https://github.com/EDIorg/Units-WG) community, by [Margaret O'Brien](https://github.com/mobb)
 - New QA Tests
   - Added SHACL shapes for checking content under `src/` only
+- New Inferences
+  - Added a SHACL rule to generate inverse triples for symmetric relations (such as qudt:exactMatch)
 
 ### Changed
 
+- Migrated constructs for datatypes to:
+  - new SHACL Schema for Datatypes
+    - Updated OWL Schema is work-in-progress
+  - existing VOCAB for Datatypes
+- Changes to the SHACL QUDT schema:
+  - Added a `value` constraint to the property shape `qudt:Quantifiable-value` to allow a value
+    to be a `qudt:EnumeratedValue`, and to allow a list of values.
+  - `qudt:informativeReference` can now refer to instances of `qudt:Citation` as well as `xsd:anyURI`
 - Removed the vaem:revision triples that were causing retention of v2.1 strings in the URIs
 - `qudt:informativeReference` triples added/replaced by a link to IEC CDD generated based on `qudt:iec61360Code` triples by [Vladimir Alexiev](https://github.com/VladimirAlexiev)
 
 ### Fixed
 
 - Corrected numerous issues in the datatypes SHACL schema and the QUDT SHACL schema
-
 - Corrected the `qudt:ucumCode` of `unit:TeraW-HR-PER-YR` to "TW.h/a" by [Jurek Müller](https://github.com/JurekMueller)
-
 - Fixed non-working informativeReference links in units vocabulary [Phil Blackwood](https://github.com/philblackwood)
-
 - Added some missing rdfs:isDefinedBy triples
 
 ## [2.1.46] - 2024-12-09
@@ -152,7 +199,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v2.1.46...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/qudt/qudt-public-repo/compare/v2.1.47...v3.0.0
+[2.1.47]: https://github.com/qudt/qudt-public-repo/compare/v2.1.46...v2.1.47
 [2.1.46]: https://github.com/qudt/qudt-public-repo/compare/v2.1.45...v2.1.46
 [2.1.45]: https://github.com/qudt/qudt-public-repo/compare/v2.1.44...v2.1.45
 

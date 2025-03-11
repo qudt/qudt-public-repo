@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.qudt</groupId>
     <artifactId>qudt-public-repo</artifactId>
-    <version>2.1.47-SNAPSHOT</version>
+    <version>3.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,94 +37,284 @@
         </pluginManagement>
         <plugins>
             <!--
-            this section defines the actions taken during the build.
-            The build is executed as a series of 'lifecycle phases': https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html)
-            Each plugin has an <execution> section that binds its execution to a lifecycle phase. (or it has a default lifecycle phase in which it runs)
-            Here are the phases and the execution ids that are linked to them (executed in the order they appear in this file):
-                  validate                 defineAdditionalProperties, check-source-format, shacl-validate-src
-                  initialize               format-sources, copy-rdf, copy-docs, copy-root-files
-                  generate-sources         validate-shacl-files
-                  process-sources          replace-version-placeholder
-                  generate-resources       generate-iec-links
-                  process-resources
-                  compile                  shacl-infer-applicable-units, merge-applicable-units
-                  process-classes
-                  generate-test-sources
-                  process-test-sources
-                  generate-test-resources
-                  process-test-resources
-                  test-compile
-                  process-test-classes
-                  test                     shacl-validate
-                  prepare-package          update-vaem-references, format-dist
-                  package
-                  pre-integration-test
-                  integration-test
-                  post-integration-test
-                  verify
-                  install                  release-zip (if -Pzip is present (profile 'zip' is activated)
-                  deploy
+                this section defines the actions taken during the build.
+                The build is executed as a series of 'lifecycle phases': https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html)
+                Each plugin has an <execution> section that binds its execution to a lifecycle phase (or it has a default lifecycle phase in which it runs, or 'none' for direct invocation).
+                Here are the phases and the execution ids that are linked to them (executed in the order they appear in this file):
+                      validate                 defineAdditionalProperties, preprocess-shacl-files
+                      initialize               [Profile -Pfix: reformat-sources]
+                      generate-sources
+                      process-sources          check-source-format, shacl-validate-src
+                      generate-resources       copy-rdf, copy-docs, copy-root-files, validate-shacl-files
+                      process-resources        generate-iec-links
+                      compile                  infer-and-format
+                      process-classes
+                      generate-test-sources
+                      process-test-sources
+                      generate-test-resources
+                      process-test-resources
+                      test-compile
+                      process-test-classes     format-dist
+                      test                     shacl-validate-target
+                      prepare-package
+                      package
+                      pre-integration-test
+                      integration-test
+                      post-integration-test
+                      verify
+                      install                  [Profile -Pzip: release-zip]
+                      deploy
+
+                Executions with phase 'none' (invocable directly via command line, not bound to lifecycle):
+                      none                     infer-and-format, infer-factorUnits, infer-scalingOf, merge-factorUnits-target, query-factorUnits, query-scalingOf, merge-scalingOf-target, reformat-sources
             -->
             <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>groovy-maven-plugin</artifactId>
-                <version>2.1.1</version>
+                <groupId>io.github.qudtlib</groupId>
+                <artifactId>seq-maven-plugin</artifactId>
+                <version>1.0.0</version>
                 <executions>
                     <execution>
-                        <!-- we use placeholders in our files that are replaced with
-                        appropriate values during the build.
-
-                        This execution generates a number of new maven properties that
-                        are later used as the replacement values, e.g. ${project.version.majorminor}.
-                        -->
-                        <id>defineAdditionalProperties</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
+                        <id>infer-and-format</id>
+                        <phase>compile</phase>
+                        <goals><goal>run</goal></goals>
                         <configuration>
-                            <source>import java.time.OffsetDateTime
-
-                            import java.time.format.DateTimeFormatter
-                            import java.time.temporal.ChronoField
-                            def majorMinorVersion = "${project.version}".replaceAll('^(\\w+.\\w+).*\$', '\$1')
-                            project.properties.setProperty('project.version.majorminor', majorMinorVersion)
-                            project.properties.setProperty('qudt.versioned.iri.prefix', "http://qudt.org/${majorMinorVersion}/")
-                            def now = OffsetDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0)
-                            project.properties.setProperty('qudt.build.date', "${now}")
-                            def currentMonth = now.format(DateTimeFormatter.ofPattern("MM"))
-                            def currentYear = now.format(DateTimeFormatter.ofPattern("YYYY"))
-                            project.properties.setProperty('qudt.current.month', currentMonth)
-                            project.properties.setProperty('qudt.current.year', currentYear)
-                            </source>
+                            <label>make all inferences and write to target</label>
+                            <steps>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-predefinedUnits-target</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>shacl:infer@infer-factorUnits</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-factorUnits-target</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>shacl:infer@infer-scalingOf</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-scalingOf-target</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>shacl:infer@infer-applicableUnits</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-applicableUnits-target</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>shacl:infer@infer-owlSubset</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-owlSubset-target</pluginCoordinates>
+                                </step>
+                            </steps>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>infer-factorUnits</id>
+                        <phase>none</phase>
+                        <goals><goal>run</goal></goals>
+                        <configuration>
+                            <label>factor units</label>
+                            <steps>
+                                <step>
+                                    <pluginCoordinates>shacl:infer@infer-factorUnits</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-factorUnits-target</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>spotless:apply@reformat-sources</pluginCoordinates>
+                                </step>
+                            </steps>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>infer-scalingOf</id>
+                        <phase>none</phase>
+                        <goals><goal>run</goal></goals>
+                        <configuration>
+                            <label>scalingOf</label>
+                            <steps>
+                                <step>
+                                    <pluginCoordinates>shacl:infer@infer-scalingOf</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-scalingOf-target</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>spotless:apply@reformat-sources</pluginCoordinates>
+                                </step>
+                            </steps>
                         </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <!-- we replace this dependency of the groovy plugin because the version
-                        it uses has security issues -->
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                        <version>33.1.0-jre</version>
-                    </dependency>
-                </dependencies>
             </plugin>
+            <plugin>
+            <groupId>org.codehaus.gmavenplus</groupId>
+            <artifactId>gmavenplus-plugin</artifactId>
+            <version>4.1.1</version>
+            <executions>
+            <!-- Ported execution: defineAdditionalProperties -->
+            <execution>
+                <id>defineAdditionalProperties</id>
+                <phase>validate</phase>
+                <goals>
+                    <goal>execute</goal>
+                </goals>
+                <configuration>
+                    <scripts>
+                        <script><![CDATA[
+                                import java.time.OffsetDateTime
+                                import java.time.format.DateTimeFormatter
+                                import java.time.temporal.ChronoField
+
+                                def majorMinorVersion = "${project.version}".replaceAll('^(\\w+\\.\\w+).*\$', '\$1')
+                                project.properties.setProperty('project.version.majorminor', majorMinorVersion)
+                                project.properties.setProperty('qudt.versioned.iri.prefix', "http://qudt.org/${majorMinorVersion}/")
+                                def now = OffsetDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0)
+                                project.properties.setProperty('qudt.build.date', "${now}")
+                                def currentMonth = now.format(DateTimeFormatter.ofPattern("MM"))
+                                def currentYear = now.format(DateTimeFormatter.ofPattern("YYYY"))
+                                project.properties.setProperty('qudt.current.month', currentMonth)
+                                project.properties.setProperty('qudt.current.year', currentYear)
+                            ]]></script>
+                    </scripts>
+                </configuration>
+            </execution>
+            <!-- New execution: preprocess-shacl-files -->
+            <execution>
+                <id>preprocess-shacl-files</id>
+                <phase>validate</phase>
+                <goals>
+                    <goal>execute</goal>
+                </goals>
+                <configuration>
+                    <scripts>
+                        <script><![CDATA[
+                            // Define base directories
+                            def basedir = project.basedir.toString()
+                            def srcgenDir = new File(basedir, "src/build/srcgen")
+                            def targetDir = new File(basedir, "target/srcgen")
+
+                            // Validate source directory
+                            if (!srcgenDir.exists() || !srcgenDir.isDirectory()) {
+                                throw new Exception("Source generation directory not found: ${srcgenDir}")
+                            }
+
+                            // Ensure target directory exists
+                            targetDir.mkdirs()
+
+                            // Step 1: Collect all aspect directories and their file status
+                            def allAspectDirs = srcgenDir.listFiles().findAll { it.isDirectory() }
+                            def validAspectDirs = []
+                            def omittedAspectDirsWithReasons = [:] // Map to store omitted dirs and missing files
+
+                            allAspectDirs.each { dir ->
+                                def aspectName = dir.name
+                                def queryFile = new File(dir, "query.rq")
+                                def inferTemplateFile = new File(dir, "infer-template.ttl")
+                                def validateTemplateFile = new File(dir, "validate-template.ttl")
+
+                                def requiredFiles = [
+                                    queryFile: queryFile,
+                                    inferTemplateFile: inferTemplateFile,
+                                    validateTemplateFile: validateTemplateFile
+                                ]
+
+                                // Find missing files for this directory
+                                def missingFiles = requiredFiles.findAll { !it.value.exists() }.keySet()
+
+                                if (missingFiles.isEmpty()) {
+                                    validAspectDirs << dir // All files present, add to valid list
+                                } else {
+                                    omittedAspectDirsWithReasons[dir] = missingFiles // Record missing files
+                                }
+                            }
+
+                            // Step 2: Process valid directories
+                            validAspectDirs.each { aspectDir ->
+                                def aspectName = aspectDir.name
+                                println "Processing aspect: ${aspectName}"
+
+                                // Load required files
+                                def queryFile = new File(aspectDir, "query.rq")
+                                def inferTemplateFile = new File(aspectDir, "infer-template.ttl")
+                                def validateTemplateFile = new File(aspectDir, "validate-template.ttl")
+
+                                // Process query file (e.g., remove prefixes)
+                                def queryText = queryFile.text
+                                def queryWithoutPrefixes = queryText.replaceAll('(?is)^\\s*(PREFIX\\s+[^\\n]*\\n)*\\s*', '')
+                                                            .replaceAll('(?is)\\s*$', '')
+                                if (!queryWithoutPrefixes) {
+                                    throw new Exception("No query body found in ${queryFile}")
+                                }
+                                queryWithoutPrefixes = queryWithoutPrefixes.replaceAll("\\\\", "\\\\\\\\")
+
+                                // Create output directory for this aspect
+                                def aspectOutputDir = new File(targetDir, aspectName)
+                                aspectOutputDir.mkdirs()
+
+                                // Define templates to process
+                                def templates = [
+                                    [source: inferTemplateFile, target: "infer.ttl"],
+                                    [source: validateTemplateFile, target: "validate.ttl"]
+                                ]
+
+                                // Generate output files
+                                templates.each { template ->
+                                    def content = template.source.text
+                                    def outputContent = content.replace('{{QUERY_WITHOUT_PREFIXES}}', queryWithoutPrefixes)
+                                    outputContent = outputContent.replace('{{AUTOGENERATED_WARNING_DO_NOT_EDIT}}',
+                                        " Auto-generated file - ALL EDITS WILL BE LOST! Edit the '-template.ttl' file instead!")
+                                    def outputFile = new File(aspectOutputDir, template.target)
+                                    outputFile.text = outputContent
+                                    println "Generated: ${outputFile}"
+                                }
+                            }
+
+                            // Step 3: Log omitted directories with missing file details
+                            if (omittedAspectDirsWithReasons) {
+                                println "The following aspects were omitted due to missing required files:"
+                                omittedAspectDirsWithReasons.each { dir, missingFiles ->
+                                    def missingFileNames = missingFiles.collect { it.toString().replaceAll('^.*\\.', '') } // Simplify to file names
+                                    println " - ${dir.name}: Missing ${missingFileNames.join(', ')}"
+                                }
+                            } else {
+                                println "All aspects processed successfully; no missing files detected."
+                            }
+                        ]]>
+                        </script>
+                    </scripts>
+                </configuration>
+            </execution>
+        </executions>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.groovy</groupId>
+                <artifactId>groovy-ant</artifactId>
+                <version>4.0.23</version>
+                <scope>runtime</scope>
+            </dependency>
+        </dependencies>
+        </plugin>
+
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>shacl-maven-plugin</artifactId>
-                <version>1.0.1</version>
+                <version>1.0.4</version>
                 <executions>
                     <execution>
                         <!-- infers qudt:applicableUnits and writes them to target/inferred/applicableUnits.ttl -->
-                        <id>shacl-infer-applicable-units</id>
-                        <phase>compile</phase>
+                        <id>infer-applicableUnits</id>
+                        <phase>none</phase>
                         <goals>
                             <goal>infer</goal>
                         </goals>
                         <configuration>
                             <inferences>
                                 <inference>
+                                    <message>Inferring qudt:applicableUnit triples (non-currency units)</message>
                                     <shapes>
                                         <include>src/build/inference/inferApplicableUnits.ttl</include>
                                     </shapes>
@@ -137,6 +327,7 @@
                                     <outputFile>target/inferred/applicableUnits.ttl</outputFile>
                                 </inference>
                                 <inference>
+                                    <message>Inferring qudt:applicableUnit triples (currency units)</message>
                                     <shapes>
                                         <include>src/build/inference/inferApplicableUnits.ttl</include>
                                     </shapes>
@@ -146,6 +337,98 @@
                                         </include>
                                     </data>
                                     <outputFile>target/inferred/applicableUnits-currency.ttl</outputFile>
+                                </inference>
+                                <inference>
+                                    <message>Performing our custom subset of OWL inferences</message>
+                                    <shapes>
+                                        <include>
+                                            src/build/inference/owl-subset.shapes.ttl
+                                        </include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            src/main/rdf/schema/SCHEMA_QUDT.ttl
+                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/inferred/owl-subset.ttl</outputFile>
+                                </inference>
+                            </inferences>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- infers qudt:applicableUnits and writes them to target/inferred/applicableUnits.ttl -->
+                        <id>infer-owlSubset</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>infer</goal>
+                        </goals>
+                        <configuration>
+                            <inferences>
+                                <inference>
+                                    <message>Performing our custom subset of OWL inferences</message>
+                                    <shapes>
+                                        <include>
+                                            src/build/inference/owl-subset.shapes.ttl
+                                        </include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            src/main/rdf/schema/SCHEMA_QUDT.ttl
+                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/inferred/owl-subset.ttl</outputFile>
+                                </inference>
+                            </inferences>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- infers qudt:hasFactorUnit RDF molecules and writes them to target/inferred/factorUnits.ttl -->
+                        <id>infer-factorUnits</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>infer</goal>
+                        </goals>
+                        <configuration>
+                            <inferences>
+                                <inference>
+                                    <shapes>
+                                        <include>target/srcgen/factorUnits/infer.ttl</include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            <!-- assuming predefined units have already been merged into the target units -->
+                                            target/dist/vocab/unit/*.ttl
+                                            target/dist/vocab/prefixes/*.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/inferred/factorUnits.ttl</outputFile>
+                                </inference>
+                            </inferences>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- infers qudt:scalingOf triples and writes them to target/inferred/scalingOf.ttl -->
+                        <id>infer-scalingOf</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>infer</goal>
+                        </goals>
+                        <configuration>
+                            <inferences>
+                                <inference>
+                                    <shapes>
+                                        <include>target/srcgen/scalingOf/infer.ttl</include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            <!-- assuming predefined units and factor units have already been merged into the target units -->
+                                            target/dist/vocab/unit/*.ttl
+                                            target/dist/vocab/prefixes/*.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/inferred/scalingOf.ttl</outputFile>
                                 </inference>
                             </inferences>
                         </configuration>
@@ -157,13 +440,14 @@
                         writes the validation report target/validation/validationReportSrc.ttl
                         -->
                         <id>shacl-validate-src</id>
-                        <phase>validate</phase>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>validate</goal>
                         </goals>
                         <configuration>
                             <validations>
                                 <validation>
+                                    <message>Validating the QUDT sources</message>
                                     <!--skip>true</skip-->
                                     <shapes>
                                         <include>
@@ -188,7 +472,7 @@
                         against the union of QA-Tests and No-OWL schema
                         writes the validation report target/validation/validationReport.ttl
                         -->
-                        <id>shacl-validate</id>
+                        <id>shacl-validate-target</id>
                         <phase>test</phase>
                         <goals>
                             <goal>validate</goal>
@@ -196,12 +480,14 @@
                         <configuration>
                             <validations>
                                 <validation>
+                                    <message>Validating QUDT build output (target/dist/)</message>
                                     <!--skip>true</skip-->
                                     <shapes>
                                         <include>
-                                            target/dist/validation/COLLECTION_QUDT_QA_TESTS_ALL.ttl
-                                            target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
-                                            target/dist/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl
+                                            src/main/rdf/validation/COLLECTION_QUDT_QA_TESTS_ALL.ttl
+                                            src/main/rdf/validation/COLLECTION_QUDT_USER_TESTS.ttl
+                                            src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
+                                            src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl
                                         </include>
                                     </shapes>
                                     <data>
@@ -212,6 +498,38 @@
                                     </data>
                                     <outputFile>target/validation/validationReport.ttl</outputFile>
                                 </validation>
+                                <validation>
+                                    <message>Validating QUDT factor units</message>
+                                    <failureMessage>Problems found</failureMessage>
+                                    <!--skip>true</skip-->
+                                    <shapes>
+                                        <include>
+                                            target/srcgen/factorUnits/validate.ttl
+                                        </include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/validation/validationReport-factorUnits.ttl</outputFile>
+                                </validation>
+                                <validation>
+                                    <message>Validating QUDT scalingOf</message>
+                                    <failureMessage>Problems found</failureMessage>
+                                    <!--skip>true</skip-->
+                                    <shapes>
+                                        <include>
+                                            target/srcgen/scalingOf/validate.ttl
+                                        </include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/validation/validationReport-factorUnits.ttl</outputFile>
+                                </validation>
                             </validations>
                         </configuration>
                     </execution>
@@ -221,13 +539,14 @@
                         writes the validation report target/validation/validationReportShacl.ttl
                         -->
                         <id>validate-shacl-files</id>
-                        <phase>generate-sources</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>validate</goal>
                         </goals>
                         <configuration>
                             <validations>
                                 <validation>
+                                    <message>Validating QUDT SHACL files</message>
                                     <!--skip>true</skip-->
                                     <shapes>
                                         <include>src/build/validation/SHACL-SHACL.ttl</include>
@@ -250,14 +569,14 @@
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>rdfio-maven-plugin</artifactId>
-                <version>1.2.1</version>
+                <version>1.3.1</version>
                 <executions>
                     <execution>
                         <!--
                         adds the qudt:applicableUnits triples we generated with SHACL to the quantitykinds target file.
                         -->
-                        <id>merge-applicable-units</id>
-                        <phase>compile</phase>
+                        <id>merge-applicableUnits-target</id>
+                        <phase>none</phase>
                         <goals>
                             <goal>make</goal>
                         </goals>
@@ -280,6 +599,167 @@
                                         </include>
                                     </input>
                                     <outputFile>target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl</outputFile>
+                                </singleFile>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            target/inferred/owl-subset.ttl
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </input>
+                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
+                                </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--
+                        adds the qudt:applicableUnits triples we generated with SHACL to the quantitykinds target file.
+                        -->
+                        <id>merge-owlSubset-target</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            target/inferred/owl-subset.ttl
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </input>
+                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
+                                </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--
+                        adds the qudt:applicableUnits triples we generated with SHACL to the quantitykinds target file.
+                        -->
+                        <id>merge-predefinedUnits-target</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            src/build/inference/factorUnits/predefined-factors-and-scalings.ttl
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </input>
+                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
+                                </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--
+                        adds the qudt:hasFactorUnit triples we generated with SHACL to the units source file.
+                        -->
+                        <id>merge-factorUnits-target</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            target/inferred/factorUnits.ttl
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </input>
+                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
+                                </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--
+                        executes the query that is used to generate/validate qudt:hasFactorUnit triples
+                        -->
+                        <id>query-factorUnits</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            target/inferred/factorUnits.ttl
+                                            src/build/inference/factorUnits/predefined-factors-and-scalings.ttl
+                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                            src/main/rdf/vocab/prefixes/VOCAB_QUDT-PREFIXES.ttl
+                                        </include>
+                                    </input>
+                                    <filters>
+                                        <sparqlSelectFile>src/build/srcgen/factorUnits/query.rq</sparqlSelectFile>
+                                    </filters>
+                                    <outputFile>target/ignore.txt</outputFile>
+                                </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--
+                        executes the query that is used to generate/validate qudt:scalingOf triples
+                        -->
+                        <id>query-scalingOf</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            <!--
+                                                we include anything we might have already inferrd, and we
+                                                include the predefined scalings (they are merged into the target units later)
+                                            -->
+                                            src/build/inference/factorUnits/predefined-factors-and-scalings.ttl
+                                            target/inferred/scalingOf.ttl
+                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                            src/main/rdf/vocab/prefixes/VOCAB_QUDT-PREFIXES.ttl
+                                        </include>
+                                    </input>
+                                    <filters>
+                                        <sparqlSelectFile>src/build/srcgen/scalingOf/query.rq</sparqlSelectFile>
+                                    </filters>
+                                    <outputFile>target/ignore.txt</outputFile>
+                                </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--
+                        adds the qudt:hasFactorUnit triples we generated with SHACL to the units source file.
+                        -->
+                        <id>merge-scalingOf-target</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            target/inferred/scalingOf.ttl
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </input>
+                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
                                 </singleFile>
                             </products>
                         </configuration>
@@ -323,6 +803,37 @@
                             </products>
                         </configuration>
                     </execution>
+                    <execution>
+                        <!--
+                        execute any query you like (not used in the build - just edit below an run
+                        ```
+                        mvn rdfio:make@myQuery
+                        ```
+                        -->
+                        <id>myQuery</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </input>
+                                    <filters>
+                                        <!-- put any query here -->
+                                        <sparqlSelectFile>
+                                            src/build/srcgen/conversionMultiplier/query.rq
+                                        </sparqlSelectFile>
+                                    </filters>
+                                    <outputFile>target/ignore.txt</outputFile>
+                                </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -336,9 +847,13 @@
                         <rdf>
                             <includes>
                                 <include>src/main/rdf/**/*.ttl</include>
-                                <include>src/build/inference/**/*.ttl</include>
+                                <include>src/build/**/*.ttl</include>
                                 <include>target/**/*.ttl</include>
                             </includes>
+                            <excludes>
+                                <exclude>target/inferred/</exclude>
+                                <exclude>target/validation/</exclude>
+                            </excludes>
                             <format>
                                 <failOnWarning>false</failOnWarning>
                                 <verify>true</verify>
@@ -432,14 +947,19 @@
                             the main branch.
                         -->
                         <id>check-source-format</id>
-                        <phase>validate</phase>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
                         <configuration>
                             <rdf>
+                                <includes>
+                                    <include>src/**/*.ttl</include>
+                                </includes>
                                 <excludes>
                                     <exclude>**/target/**/*.*</exclude>
+                                    <exclude>src/build/srcgen/**/infer.ttl</exclude>
+                                    <exclude>src/build/srcgen/**/validate.ttl</exclude>
                                 </excludes>
                             </rdf>
                         </configuration>
@@ -447,7 +967,7 @@
                     <execution>
                         <!-- formats source files that were generated during the build up to the compile phase -->
                         <id>reformat-sources</id>
-                        <phase>compile</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>apply</goal>
                         </goals>
@@ -458,16 +978,15 @@
                             <rdf>
                                 <!-- redefine includes so we only format the sources that are allowed to change -->
                                 <includes>
-                                    <include>src/main/rdf/vocab/quantitykinds/*.ttl</include>
+                                    <include>src/main/rdf/**/*.ttl</include>
                                 </includes>
                             </rdf>
                         </configuration>
-
                     </execution>
                     <execution>
                         <!-- formats everything in the target/dist folder so we have a clean set of distribution files-->
                         <id>format-dist</id>
-                        <phase>prepare-package</phase>
+                        <phase>process-test-classes</phase>
                         <goals>
                             <goal>apply</goal>
                         </goals>
@@ -480,6 +999,10 @@
                                 <includes>
                                     <include>target/**/*.ttl</include>
                                 </includes>
+                                <excludes>
+                                    <exclude>target/validation/*.ttl</exclude>
+                                    <exclude>target/inferred/*.ttl</exclude>
+                                </excludes>
                             </rdf>
                         </configuration>
                     </execution>
@@ -492,7 +1015,7 @@
                 <executions>
                     <execution>
                         <id>copy-rdf</id>
-                        <phase>initialize</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -507,7 +1030,7 @@
                     </execution>
                     <execution>
                         <id>copy-docs</id>
-                        <phase>initialize</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -522,7 +1045,7 @@
                     </execution>
                     <execution>
                         <id>copy-root-files</id>
-                        <phase>initialize</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -534,6 +1057,9 @@
                                     <includes>
                                         <include>*.md</include>
                                     </includes>
+                                    <excludes>
+                                        <exclude>BUILDING.md</exclude>
+                                    </excludes>
                                 </resource>
                             </resources>
                         </configuration>
@@ -596,6 +1122,26 @@
                                     <goal>single</goal>
                                 </goals>
                                 <phase>install</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!--
+                runs all source modifications (inferences and formatting) before anything else in the build
+             -->
+            <id>fix</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.diffplug.spotless</groupId>
+                        <artifactId>spotless-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>reformat-sources</id>
+                                <phase>validate</phase>
                             </execution>
                         </executions>
                     </plugin>

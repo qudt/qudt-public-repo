@@ -1,11 +1,11 @@
-QUDT - Quantities, Units, Dimensions and dataTypes - public repository
-======================================================================
+QUDT - ***Q***uantities, ***U***nits, ***D***imensions and Data***T***ypes
+==========================================================================
 
 ## Quick-Start Guide
 
 There are three ways to bring the QUDT ontology into your environment.
 1. Download the latest GitHub Release [here](https://github.com/qudt/qudt-public-repo/releases).
-2. Use the resolved graph and instance URIs available [here](https://www.qudt.org/2.1/catalog/qudt-catalog.html).
+2. Use the resolved graph and instance URIs available [here](https://www.qudt.org/catalog/qudt-catalog.html).
 3. Use GitHub fork to get the sources and build them using the instructions [here](https://github.com/qudt/qudt-public-repo/wiki/Installing-QUDT-for-Contributors).
 
 Overview
@@ -43,18 +43,18 @@ The QUDT ontology is provided in two forms: OWL and SHACL. By default, the vocab
 
 ```
 Change this line:
-owl:imports <http://qudt.org/2.1/schema/shacl/qudt> ;
+owl:imports <http://qudt.org/3.0.0/schema/shacl/qudt> ;
 To:
-owl:imports <http://qudt.org/2.1/schema/qudt> ;
+owl:imports <http://qudt.org/3.0.0/schema/qudt> ;
 ```
 
 If you are using the tools from TopQuadrant, you should also change the comment line at the top of the same file:
 
 ```
 Change this line:
-# imports: http://qudt.org/2.1/schema/shacl/qudt
+# imports: http://qudt.org/3.0.0/schema/shacl/qudt
 To:
-# imports: http://qudt.org/2.1/schema/qudt
+# imports: http://qudt.org/3.0.0/schema/qudt
 ```
 
 Configuration for QUDT Users versus QUDT Developers
@@ -64,18 +64,18 @@ QUDT SHACL is supported by a set of validation rules that check the integrity an
 
 ```
 Change this line:
-owl:imports <http://qudt.org/2.1/collection/qa/all> ;
+owl:imports <http://qudt.org/3.0.0/collection/qa/all> ;
 To:
-owl:imports <http://qudt.org/2.1/collection/usertest> ;
+owl:imports <http://qudt.org/3.0.0/collection/usertest> ;
 ```
 
 If you are using the tools from TopQuadrant, you should also change the comment line at the top of the same file:
 
 ```
 Change this line:
-# imports: http://qudt.org/2.1/collection/qa/all
+# imports: http://qudt.org/3.0.0/collection/qa/all
 To:
-# imports: http://qudt.org/2.1/collection/usertest
+# imports: http://qudt.org/3.0.0/collection/usertest
 ```
 
 Currently, the tests in the usertest graph check for references to deprecated instances or properties and recommend the updated instance or property.
@@ -85,9 +85,9 @@ Protege Users
 
 The QUDT ontologies have been tested to load without error in Protege 5.6.4.
 
-To load QUDT into Protege, choose "Open from URI" from the file menu, and enter http://qudt.org/2.1/vocab/unit
+To load QUDT into Protege, choose "Open from URI" from the file menu, and enter http://qudt.org/3.0.0/vocab/unit
 
-(The "facade" file that is resolvable on the web (http://qudt.org/2.1/schema/facade/qudt) is already configured to load the OWL schema rather than the SHACL schema, so Protege users will be in the OWL world using this method.)
+(The "facade" file that is resolvable on the web (http://qudt.org/3.0.0/schema/facade/qudt) is already configured to load the OWL schema rather than the SHACL schema, so Protege users will be in the OWL world using this method.)
 
 Ontology libraries
 ------------------
