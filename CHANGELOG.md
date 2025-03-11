@@ -11,6 +11,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Add the qudt:altSymbol relation
 - Add "mph" and "kph" as `qudt:altSymbol` 
+- Add "StateOfCharge" quantitykind
 
 ### Changed
 
