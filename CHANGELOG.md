@@ -33,7 +33,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Deprecated 13 remaining units with non-uppercase URIs, replacing as appropriate.
 - Replaced the volt ampere family of units having URIs with V-A, to have VA instead.
 - Further, replaced ..V-A_Reactive with ...VAR.
-- Deprecated all currency units in the currency graph, with redirection from cur:<currency> to unit:<currency> in the unit graph
+- Deprecated all currency units in the currency graph, with redirection from cur:<currency> to unit:CCY_<currency> in the unit graph.
+  The "class preamble" is there to avoid collisions of URI with non-currency units (Notably unit:CUP and unit:CCY_CUP).
 
 ## [3.0.0] - 2025-02-13
 
