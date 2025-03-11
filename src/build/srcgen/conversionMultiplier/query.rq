@@ -1,0 +1,51 @@
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?this (xsd:decimal(?m1 * ?m2 * ?m3 * ?m4 * ?m5 * ?m6 * ?m7) AS ?total_multiplier)
+WHERE {
+  # Inner query to get concatenated multipliers
+  {
+    SELECT ?this (GROUP_CONCAT(?fu_multiplier; SEPARATOR="|") AS ?concat)
+    WHERE {
+      ?this qudt:hasFactorUnit ?fu .
+      ?fu qudt:hasUnit ?baseUnit ;
+          qudt:exponent ?exp .
+      ?baseUnit qudt:conversionMultiplier ?b .
+      BIND(
+        IF(ABS(?exp) = 1, ?b,
+          IF(ABS(?exp) = 2, ?b * ?b,
+          IF(ABS(?exp) = 3, ?b * ?b * ?b,
+          IF(ABS(?exp) = 4, ?b * ?b * ?b * ?b,
+          IF(ABS(?exp) = 5, ?b * ?b * ?b * ?b * ?b,
+          IF(ABS(?exp) = 6, ?b * ?b * ?b * ?b * ?b * ?b,
+          IF(ABS(?exp) = 7, ?b * ?b * ?b * ?b * ?b * ?b * ?b,
+            CONCAT("Error: cannot handle exponent ", ?exp))))))))
+        AS ?m_tmp
+      )
+      BIND(
+        IF(?exp < 0, 1 / ?m_tmp,
+          IF(?exp = 0, 1.0, ?m_tmp))
+        AS ?fu_multiplier
+      )
+    }
+    GROUP BY ?this
+  }
+
+  # Extract each multiplier using regex, default to "1" if not present
+  BIND( REPLACE(?concat, "^([^|]*).*", "$1") AS ?m1_str )
+  BIND( IF(REGEX(?concat, "\\|"), REPLACE(?concat, "^[^|]*\\|([^|]*).*", "$1"), "1") AS ?m2_str )
+  BIND( IF(REGEX(?concat, "\\|.*\\|"), REPLACE(?concat, "^[^|]*\\|[^|]*\\|([^|]*).*", "$1"), "1") AS ?m3_str )
+  BIND( IF(REGEX(?concat, "\\|.*\\|.*\\|"), REPLACE(?concat, "^[^|]*\\|[^|]*\\|[^|]*\\|([^|]*).*", "$1"), "1") AS ?m4_str )
+  BIND( IF(REGEX(?concat, "\\|.*\\|.*\\|.*\\|"), REPLACE(?concat, "^[^|]*\\|[^|]*\\|[^|]*\\|[^|]*\\|([^|]*).*", "$1"), "1") AS ?m5_str )
+  BIND( IF(REGEX(?concat, "\\|.*\\|.*\\|.*\\|.*\\|"), REPLACE(?concat, "^[^|]*\\|[^|]*\\|[^|]*\\|[^|]*\\|[^|]*\\|([^|]*).*", "$1"), "1") AS ?m6_str )
+  BIND( IF(REGEX(?concat, "\\|.*\\|.*\\|.*\\|.*\\|.*\\|"), REPLACE(?concat, "^[^|]*\\|[^|]*\\|[^|]*\\|[^|]*\\|[^|]*\\|[^|]*\\|([^|]*).*", "$1"), "1") AS ?m7_str )
+
+  # Convert strings to doubles for multiplication
+  BIND( xsd:decimal(?m1_str) AS ?m1 )
+  BIND( xsd:decimal(?m2_str) AS ?m2 )
+  BIND( xsd:decimal(?m3_str) AS ?m3 )
+  BIND( xsd:decimal(?m4_str) AS ?m4 )
+  BIND( xsd:decimal(?m5_str) AS ?m5 )
+  BIND( xsd:decimal(?m6_str) AS ?m6 )
+  BIND( xsd:decimal(?m7_str) AS ?m7 )
+}
