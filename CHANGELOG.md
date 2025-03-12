@@ -27,6 +27,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - a new BUILDING.md file
 - Added the ContextualUnit class, to identify units that are common, but are really specializations of generic units.
 - New Quantity Kinds: ServiceFactor, WetBulbTemperature, DryBulbTemperature, supporting building management
+- New Quantity Kind: State of Charge for batteries https://github.com/lazlop
 
 ### Deprecated
 
