@@ -26,6 +26,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
     the units file (`target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl`) during the build
 - a new BUILDING.md file
 - Added the ContextualUnit class, to identify units that are common, but are really specializations of generic units.
+- New Quantity Kinds: ServiceFactor, WetBulbTemperature, DryBulbTemperature, supporting building management
+- New Quantity Kind: State of Charge for batteries https://github.com/lazlop
 
 ### Deprecated
 
@@ -33,6 +35,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Deprecated 13 remaining units with non-uppercase URIs, replacing as appropriate.
 - Replaced the volt ampere family of units having URIs with V-A, to have VA instead.
 - Further, replaced ..V-A_Reactive with ...VAR.
+- Deprecated all currency units in the currency graph, with redirection from cur:<currency> to unit:CCY_<currency> in the unit graph.
+  The "class preamble" is there to avoid collisions of URI with non-currency units (Notably unit:CUP and unit:CCY_CUP).
 
 ## [3.0.0] - 2025-02-13
 
