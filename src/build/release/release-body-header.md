@@ -6,4 +6,3 @@ We are also introducing the idea of a ContextualUnit that allows users to introd
 
 Finally, we are continuing to refine the automation of our build process to minimize human error, while hopefully not making the contribution process too complicated. Feedback is always welcome.
 
-
