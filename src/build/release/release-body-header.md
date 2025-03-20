@@ -1,9 +1,8 @@
 ## Please note!
 
-As mentioned in Release 2.1.47, we are coming out with version 3.0.0 with this Release. This could be a breaking change for your applications, since some of you may be using the versioned graph URIs that include  "2.1". Moving forward, those will include "3.0.x", but of course the un-versioned graphs will always resolve to the latest version. So, for example, if you use the owl:imports mechanism, your application could import http://qudt.org/2.1/vocab/unit if you want to stay with 2.1, http://qudt.org/3.0.0/vocab/unit if you want to explicitly migrate to the new Release, or http://qudt.org/vocab/unit if you want to always get the latest Release.
+This new Release adds some significant new functionality by generating 'factor units' for most units. This will be a new relation that could help when defining profiles (still coming). For this reason the semantic version is incremented from 3.0.0 to 3.1.0.
 
-In Release 3.0.0, we have removed all the deprecated entities that have accumulated to date. In the 2.1 releases, they all contained the triple:
+We are also introducing the idea of a ContextualUnit that allows users to introduce domain-specific units (recall our discussion about CFU, Colony Forming Units, suggested by @Toby-Broom and @dr-shorthair). We will depend on the introduction of profiles to keep these additions from overwhelming the vocabularies. Such ContextualUnits will be related to more generic versions of units using skos:broader.
 
-\<entity\> qudt:deprecated true
+Finally, we are continuing to refine the automation of our build process to minimize human error, while hopefully not making the contribution process too complicated. Feedback is always welcome.
 
-If you have been using SHACL, you should have already been receiving notifications during validation if you were using properties or instances that were marked as deprecated, so you had an opportunity to migrate to the replacement concepts. With this new Release, those entities no longer exist.
