@@ -7,10 +7,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
-### Changed
-
-- Removed invalid qudt:iec61360Code values (most in the 'UAD' range) from about 40 units, most notably unit:M that was submitted as a bug.
-- Cleaned out some remaining shape and restriction references to deprecated properties.
+## [3.1.0] - 2025-03-20
 
 ### Added
 
@@ -26,8 +23,13 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
     the units file (`target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl`) during the build
 - a new BUILDING.md file
 - Added the ContextualUnit class, to identify units that are common, but are really specializations of generic units.
-- New Quantity Kinds: ServiceFactor, WetBulbTemperature, DryBulbTemperature, supporting building management
+- New Quantity Kinds: ServiceFactor, DutyCycle, WetBulbTemperature, DryBulbTemperature, supporting building management
 - New Quantity Kind: State of Charge for batteries https://github.com/lazlop
+
+### Changed
+
+- Removed invalid qudt:iec61360Code values (most in the 'UAD' range) from about 40 units, most notably unit:M that was submitted as a bug.
+- Cleaned out some remaining shape and restriction references to deprecated properties.
 
 ### Deprecated
 
@@ -203,7 +205,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/qudt/qudt-public-repo/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/qudt/qudt-public-repo/compare/v2.1.47...v3.0.0
 [2.1.47]: https://github.com/qudt/qudt-public-repo/compare/v2.1.46...v2.1.47
 [2.1.46]: https://github.com/qudt/qudt-public-repo/compare/v2.1.45...v2.1.46
