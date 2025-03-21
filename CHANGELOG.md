@@ -7,6 +7,14 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Deprecated
+
+- Removed 8 invalid dimension vectors (without deprecation since they were invalid)
+
 ## [3.1.0] - 2025-03-20
 
 ### Added
