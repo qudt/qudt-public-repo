@@ -7,6 +7,14 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+- New Units
+  - Counting units for some powers of ten; specifically TEN, HUNDRED, THOUSAND, MILLION, BILLION_Short and BILLION_Long.
+    This allows some dimensionless counts to have more intuitive URIs, such as unit:PERCENT-PER-TEN-THOUSAND instead of
+    unit:PERCENT-PER-DecaKiloCOUNT.
+  - unit:COUNT was added as an exact match with unit:NUM. Both units have a quantity kind of Count (and others).
+
 ## [3.1.0] - 2025-03-20
 
 ### Added
