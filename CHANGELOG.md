@@ -15,6 +15,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Removed 8 invalid dimension vectors (without deprecation since they were invalid)
 
+### Changed
+
+- Updated constraint for use of hasFactorUnit in OWL schema
+
 ## [3.1.0] - 2025-03-20
 
 ### Added
