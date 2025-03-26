@@ -21,7 +21,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
-- Updated constraint for use of hasFactorUnit in OWL schema
+- Updated and fixed constraint for use of hasFactorUnit in OWL schema
 - Added `qk:Emissivity` to `unit:PERCENT`
 
 ## [3.1.0] - 2025-03-20
