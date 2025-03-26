@@ -23,6 +23,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Updated constraint for use of hasFactorUnit in OWL schema
 - Added `qk:Emissivity` to `unit:PERCENT`
+- Untangled unit:AWG and unit:CCY_AWG that had becomed combined in migration of currency into units graph
 
 ## [3.1.0] - 2025-03-20
 
