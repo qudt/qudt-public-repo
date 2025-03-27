@@ -23,6 +23,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Updated constraint for use of hasFactorUnit in OWL schema
 - Added `qk:Emissivity` to `unit:PERCENT`
+- Fixed mistakes on MicroW-PER-CentiM2-MicroM-SR, unit:W-PER-M2-MicroM, unit:W-PER-M2-MicroM-SR variously replaceing
+  qudit:unit to qudt:Unit, adding SI as applicable system, and removing @en-us tag from a plainTextDescription.
 
 ## [3.1.0] - 2025-03-20
 
