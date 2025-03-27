@@ -23,6 +23,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Updated constraint for use of hasFactorUnit in OWL schema
 - Added `qk:Emissivity` to `unit:PERCENT`
+- Upgraded the closed world validation constraint from sh:Info to sh:Violation. Errors will now cause the build to fail.
 
 ## [3.1.0] - 2025-03-20
 
