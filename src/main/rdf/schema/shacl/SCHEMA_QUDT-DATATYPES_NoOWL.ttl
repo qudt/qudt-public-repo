@@ -230,6 +230,19 @@ qudt:Array2DvalueList
   rdfs:label "2D Array Value List" ;
   rdfs:subClassOf rdf:List ;
 .
+qudt:ArrayDataOrder
+  a rdfs:Class ;
+  a sh:NodeShape ;
+  dcterms:description "A sub-type of 'Enumerated Value'. Detailed description to be provided in a future version." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Array data order" ;
+  rdfs:subClassOf qudt:EnumeratedValue ;
+  sh:oneOf (
+      qudt:ByColumn
+      qudt:ByRow
+      qudt:ByLeftMostIndex
+    ) ;
+.
 qudt:AssociativeArray
   a rdfs:Class ;
   a sh:NodeShape ;
@@ -374,7 +387,6 @@ qudt:BitField
   The bitwise operators and, or, and not are used in combination to set, reset and test the flags.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "bitfield" ;
   rdfs:subClassOf xsd:string ;
 .
 qudt:BooleanEncoding
@@ -424,6 +436,24 @@ qudt:BooleanTypeEnumeratedValue
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "boolean value" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
+.
+qudt:ByColumn
+  a qudt:ArrayDataOrder ;
+  dtype:literal "byColumn" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "By Column" ;
+.
+qudt:ByLeftMostIndex
+  a qudt:ArrayDataOrder ;
+  dtype:literal "byLeftMostIndex" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "By Left Most Index" ;
+.
+qudt:ByRow
+  a qudt:ArrayDataOrder ;
+  dtype:literal "byRow" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "By row" ;
 .
 qudt:ByteAligned
   a qudt:AlignmentType ;
@@ -704,14 +734,7 @@ qudt:CompositionTreeType-compositionFunction
   sh:maxCount 1 ;
   sh:minCount 1 ;
 .
-qudt:Container-elementTypeCount
-  a sh:PropertyShape ;
-  sh:path qudt:elementTypeCount ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
-  sh:hasValue 1 ;
-.
-qudt:CoordinateCenterType
+qudt:CoordinateCenterKind
   a rdfs:Class ;
   a sh:NodeShape ;
   dcterms:description """
@@ -719,10 +742,9 @@ qudt:CoordinateCenterType
    \"Earth centered\", \"Mars centered\", \"Moon centered\", \"Sun centered\",  and \"Vehicle centered\".
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Coordinate Center Type" ;
+  rdfs:label "Coordinate Center Kind" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
   rdfs:subClassOf qudt:NominalScale ;
-  skos:prefLabel "Coordinate center type" ;
   sh:in (
       qudt:CCT_MarsCentered
       qudt:CCT_EarthCentered
@@ -779,6 +801,7 @@ qudt:CoordinateSystem
   sh:property qudt:CoordinateSystem-abbreviation ;
   sh:property qudt:CoordinateSystem-acronym ;
   sh:property qudt:CoordinateSystem-coordinateCenter ;
+  sh:property qudt:CoordinateSystem-originDefinition ;
   sh:property qudt:CoordinateSystem-referenceFrame ;
 .
 qudt:CoordinateSystem-abbreviation
@@ -797,8 +820,16 @@ qudt:CoordinateSystem-coordinateCenter
   a sh:PropertyShape ;
   sh:path qudt:coordinateCenter ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:CoordinateCenterType ;
+  sh:class qudt:CoordinateCenterKind ;
   sh:maxCount 1 ;
+.
+qudt:CoordinateSystem-originDefinition
+  a sh:PropertyShape ;
+  sh:path qudt:originDefinition ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:datatype xsd:string ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
 .
 qudt:CoordinateSystem-referenceFrame
   a sh:PropertyShape ;
@@ -806,33 +837,6 @@ qudt:CoordinateSystem-referenceFrame
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:class qudt:ReferenceFrame ;
   sh:maxCount 1 ;
-.
-qudt:CoordinateSystemType
-  a rdfs:Class ;
-  a sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Coordinate System</em> is a mathematical structure for assigning a unique n-tuple of numbers or scalars to each point in an n-dimensional space. 
-  A Coordinate System Type is a data type that defines the properties of data structures that represent coordinate systems.
-  </p>
-  <p>The primary attributes of any coordinate system are the coordinate frame or orientation of the axes of the coordinate system and the coordinate center or origin of the coordinate system.
-  The coordinate center is the easier of the two attributes to define and in trajectory-related coordinate systems is often taken to be the center of mass of natural solar system bodies such as the Earth, the Moon, or Mars.
-  Precise definition of the coordinate frame, however, usually takes much more effort. 
-  As a result, the primary purpose is to provide a detailed description of a number of different coordinate frames commonly used in mission analysis.
-  </p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Coordinate System Type" ;
-  rdfs:subClassOf qudt:EnumeratedValue ;
-  rdfs:subClassOf qudt:Tuple ;
-  sh:property qudt:CoordinateSystemType-originDefinition ;
-  sh:property qudt:Coordinates-elementType ;
-.
-qudt:CoordinateSystemType-originDefinition
-  a sh:PropertyShape ;
-  sh:path qudt:originDefinition ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:string ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
 .
 qudt:Coordinates
   a rdfs:Class ;
@@ -1466,7 +1470,7 @@ qudt:EarthCoordinateSystem-coordinateCenter
   a sh:PropertyShape ;
   sh:path qudt:coordinateCenter ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:CoordinateCenterType ;
+  sh:class qudt:CoordinateCenterKind ;
   sh:hasValue qudt:CCT_EarthCentered ;
 .
 qudt:Encoding
@@ -2134,7 +2138,7 @@ qudt:LunarCoordinateSystem
 qudt:LunarCoordinateSystem-coordinateCenter
   a sh:PropertyShape ;
   sh:path qudt:coordinateCenter ;
-  sh:class qudt:CoordinateCenterType ;
+  sh:class qudt:CoordinateCenterKind ;
   sh:hasValue qudt:CCT_MoonCentered ;
 .
 qudt:LunarCoordinateSystem-realization
@@ -2204,11 +2208,12 @@ qudt:MarsCoordinateSystem-coordinateCenter
   a sh:PropertyShape ;
   sh:path qudt:coordinateCenter ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:CoordinateCenterType ;
+  sh:class qudt:CoordinateCenterKind ;
   sh:hasValue qudt:CCT_MarsCentered ;
 .
 qudt:MassPropertiesArray
   a rdf:Class ;
+  a sh:NodeShape ;
   dcterms:description """
   <p>A <em>Mass Properties Array</em> holds, for an object, four values for the properties:
    Center of Gravity, Mass, Moment of Inertia, and Product of Inertia. 
@@ -5281,7 +5286,7 @@ qudt:zCoordinateDefinition
   Specification of coordinate systems is also covered.
   </p>
   """^^rdf:HTML ;
-  dcterms:modified "2024-11-22T14:54:24-05:00"^^xsd:dateTime ;
+  dcterms:modified "2025-04-01T10:54:24-05:00"^^xsd:dateTime ;
   dcterms:rights """
   <p>The QUDT Ontologies are issued under a Creative Commons Attribution 4.0 International License (CC BY 4.0), available  <a href=\"https://creativecommons.org/licenses/by/4.0/\">here</a>. 
   Attribution should be made to <a href=\"https://www.qudt.org\">QUDT.org</a>.
