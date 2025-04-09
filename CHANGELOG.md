@@ -18,6 +18,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Deprecated
 
 - Removed 8 invalid dimension vectors (without deprecation since they were invalid)
+- Quantity kind ComplexPower, replaced by ElectricPower. ActivePower, ReactivePower and ApparentPower are still available, having skos:broader of ElectricPower.
 
 ### Changed
 
@@ -26,6 +27,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed mistakes on MicroW-PER-CentiM2-MicroM-SR, unit:W-PER-M2-MicroM, unit:W-PER-M2-MicroM-SR, J-PER-M2-SEC0pt5-K variously replacing qudit:unit to qudt:Unit, adding SI as applicable system, and removing @en-us tag from a plainTextDescription, changing conversionMultiplierSM to conversionMultiplierSN, and adding decimal point to xsd:double values, and avoiding using explicit datatypes on conversion factors.
 - Upgraded the closed world validation constraint from sh:Info to sh:Violation. Errors will now cause the build to fail.
 - Untangled unit:AWG and unit:CCY_AWG that had becomed combined in migration of currency into units graph
+- Refactored and cleaned up applicable units for ElectricPower subtree, deprecating ComplexPower
 
 ## [3.1.0] - 2025-03-20
 
