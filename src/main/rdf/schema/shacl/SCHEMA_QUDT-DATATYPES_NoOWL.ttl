@@ -239,6 +239,26 @@ qudt:ArrayDataOrder
       qudt:ByLeftMostIndex
     ) ;
 .
+qudt:ArrayType
+  a rdfs:Class ;
+  a sh:NodeShape ;
+  dcterms:description """
+  <p>An <em>Array Type</em> is a type specification for ordered entries of values arranged according to the dimensions given. 
+  The dimensions are given as a list of integers where each integer is the cardinality of each dimension. 
+  The number of dimensions is specified in the attribute 'dimensionality'.
+  </p>
+  <p>Optionally a reference can be made to a variable, whose values are the array entries. 
+  The data type of the array entries is an optional field, 'elementType', which points to a data type definition. 
+  If the data type is given, then it applies to all elements.  
+  If it is not given then the elements can be of different types for each position in the array.
+  </p>
+  <p>The property <em>qudt:typeMatrix</em> must refer to a matrix of types.
+  If a default value is given this can be used to place the appropriate value in a cell when an entry value is not known. 
+  If no dimensionality or dimension vector is specified the array is under-specified but still legitimate as a place-holder for a data type.
+  </p>"""^^rdf:HTML ;
+  rdfs:label "Array Type" ;
+  rdfs:subClassOf qudt:CompositeDatatype ;
+.
 qudt:AssociativeArray
   a rdfs:Class ;
   a sh:NodeShape ;
@@ -1517,7 +1537,6 @@ qudt:EngineeringValueTupleMember
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Engineering Value Tuple Member" ;
   rdfs:subClassOf qudt:TupleMember ;
-  rdfs:subClassOf qudt:TupleMember ;
   sh:disjoint qudt:RawValueTupleMember ;
   sh:disjoint qudt:RawValueTupleMemberType ;
   sh:property qudt:EngineeringValueTupleMember-elementType ;
@@ -1653,11 +1672,10 @@ qudt:FixedIntervalTimeSeriesArray
 qudt:FixedIntervalTimeSeriesArrayType
   a rdfs:Class ;
   a sh:NodeShape ;
-  dcterms:description """
-  A <em>Fixed Interval Time Series Array Type</em> is a data type that specifies the properties of arrays that hold time series data.
-  For example, data that has been sampled over uniformly spaced time intervals. 
-  A time series is a sequence of data points, measured typically at successive times, spaced at uniform or non-uniform time intervals.
-  </p>"""^^rdf:HTML ;
+  dcterms:description """A <em>Fixed Interval Time Series Array Type</em> is a data type that specifies the properties of arrays that hold time series data.
+ For example, data that has been sampled over uniformly spaced time intervals. 
+ A time series is a sequence of data points, measured typically at successive times, spaced at uniform or non-uniform time intervals.
+ </p>"""^^rdf:HTML ;
   rdfs:label "Fixed Interval Time Series Array Type" ;
   rdfs:subClassOf qudt:TimeSeriesArrayType ;
 .
@@ -3708,7 +3726,7 @@ qudt:Table
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Table Type" ;
-  rdfs:subClassOf qudt:StructuredData ;
+  rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:Table-byRow ;
   sh:property qudt:Table-columns ;
   sh:property qudt:Table-dimensionality ;
@@ -3839,7 +3857,7 @@ qudt:Time
   a sh:NodeShape ;
   rdfs:comment "The class of data values that denote a point in time. Time values may be encoded in a 12-hour clock or a 24-hour clock, such as 1:35 AM, or 13:35." ;
   rdfs:label "Time" ;
-  rdfs:subClassOf qudt:Scalar ;
+  rdfs:subClassOf qudt:ScalarDatatype ;
   sh:property qudt:Time-type ;
 .
 qudt:Time-type
@@ -3908,6 +3926,18 @@ qudt:TimeSeriesArray-vector
   sh:class qudt:Vector ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
+.
+qudt:TimeSeriesArrayType
+  a rdfs:Class ;
+  a sh:NodeShape ;
+  dcterms:description """
+  <p>A <em>Time Series Array Type</em> is a data type that specifies the properties of arrays that hold time series data. 
+  A time series is a sequence of data points, measured at successive time intervals. 
+  The time intervals may be uniformly or non-uniformly spaced.
+  </p>
+  """^^rdf:HTML ;
+  rdfs:label "Time Series Array Type" ;
+  rdfs:subClassOf qudt:ArrayType ;
 .
 qudt:TimeStringType
   a rdfs:Class ;
@@ -4000,19 +4030,6 @@ qudt:Tuple-length
   sh:maxCount 1 ;
   sh:minCount 0 ;
 .
-qudt:TupleMember-elementType
-  a sh:PropertyShape ;
-  sh:path qudt:elementDatatype ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:ScalarDatatype ;
-.
-qudt:TupleMember-orderInStructure
-  a sh:PropertyShape ;
-  sh:path qudt:orderInStructure ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
-.
 qudt:TupleMember
   a rdfs:Class ;
   a sh:NodeShape ;
@@ -4026,6 +4043,19 @@ qudt:TupleMember
   rdfs:subClassOf qudt:CompositeDatatype ;
   sh:property qudt:TupleMember-elementType ;
   sh:property qudt:TupleMember-orderInStructure ;
+.
+qudt:TupleMember-elementType
+  a sh:PropertyShape ;
+  sh:path qudt:elementDatatype ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:class qudt:ScalarDatatype ;
+.
+qudt:TupleMember-orderInStructure
+  a sh:PropertyShape ;
+  sh:path qudt:orderInStructure ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
 .
 qudt:TupleType
   a rdfs:Class ;
@@ -4108,7 +4138,7 @@ qudt:TypeMatrix
   That is, the members of this class are matrices with cells that contain datatypes (c.f. type:Datatype) and are used to describe the datatype structure of other matrices.
   """ ;
   rdfs:label "Type matrix" ;
-  rdfs:subClassOf qudt:MatrixType ;
+  rdfs:subClassOf qudt:Matrix ;
 .
 qudt:TypeVector
   a rdfs:Class ;
