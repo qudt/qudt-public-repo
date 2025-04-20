@@ -52,7 +52,7 @@ dcterms:title
   vaem:hasCatalogEntry voag:QUDT-SchemaCatalogEntry ;
   vaem:hasGraphMetadata <http://qudt.org/schema/shacl/datatype/GMD_datatype> ;
   vaem:hasGraphRole vaem:SchemaGraph ;
-  vaem:intent "This ontology is to be used by other ontologies that need to reference type definitions." ;
+  vaem:intent "This ontology is to be used by other ontologies that need datatype definitions." ;
   vaem:specificity 1 ;
   vaem:url "http://qudt.org/$$QUDT_VERSION$$/schema/dtype"^^xsd:anyURI ;
   rdfs:label "QUDT SHACL SCHEMA Datatypes Version $$QUDT_VERSION$$" ;
@@ -132,8 +132,8 @@ qudt:AlignmentType
   The alignment could be at a bit, byte or word boundary.
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:subClassOf qudt:EnumeratedValue ;
   rdfs:label "Alignment type" ;
+  rdfs:subClassOf qudt:EnumeratedValue ;
   sh:in (
       qudt:BitAligned
       qudt:ByteAligned
@@ -1517,7 +1517,7 @@ qudt:EngineeringValueTupleMember
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Engineering Value Tuple Member" ;
   rdfs:subClassOf qudt:TupleMember ;
-  rdfs:subClassOf qudt:TupleMemberType ;
+  rdfs:subClassOf qudt:TupleMember ;
   sh:disjoint qudt:RawValueTupleMember ;
   sh:disjoint qudt:RawValueTupleMemberType ;
   sh:property qudt:EngineeringValueTupleMember-elementType ;
@@ -2882,7 +2882,7 @@ qudt:RawValueTupleMemberType
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Raw value tuple member type" ;
-  rdfs:subClassOf qudt:TupleMemberType ;
+  rdfs:subClassOf qudt:TupleMember ;
   sh:property qudt:RawValueTupleMember-elementType ;
 .
 qudt:RealDatatype
@@ -3674,7 +3674,7 @@ qudt:StructuredDatatype
   a rdfs:Class ;
   a sh:NodeShape ;
   dcterms:description """
-  <p>A <em>Structured Datatype</em>, in contrast to a scalar data type, is used to characterize classes of more complex data structures.
+  <p>A <em>Structured Datatype</em>, in contrast to a scalar data type, is used to characterize classes of complex data structures.
   Examples are collections, linked and indexed lists, trees, ordered trees, and multi-dimensional file formats.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -3824,7 +3824,7 @@ qudt:ThreeTuple-elementType
   a sh:PropertyShape ;
   sh:path qudt:elementDatatype ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:TupleMemberType ;
+  sh:class qudt:TupleMember ;
   sh:minCount 0 ;
 .
 qudt:ThreeTuple-elementTypeCount
@@ -3983,7 +3983,7 @@ qudt:Tuple-elementType
   a sh:PropertyShape ;
   sh:path qudt:elementDatatype ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:TupleMemberType ;
+  sh:class qudt:TupleMember ;
 .
 qudt:Tuple-elementTypeCount
   a sh:PropertyShape ;
@@ -3999,6 +3999,62 @@ qudt:Tuple-length
   sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:minCount 0 ;
+.
+qudt:TupleMember-elementType
+  a sh:PropertyShape ;
+  sh:path qudt:elementDatatype ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:class qudt:ScalarDatatype ;
+.
+qudt:TupleMember-orderInStructure
+  a sh:PropertyShape ;
+  sh:path qudt:orderInStructure ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+.
+qudt:TupleMember
+  a rdfs:Class ;
+  a sh:NodeShape ;
+  dcterms:description """
+  <p><em>Tuple Member</em> defines the properties of a member of a tuple. 
+  It is used to provide fine grained type specification to the elements of tuples.
+  </p>
+  """^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Tuple Member Type" ;
+  rdfs:subClassOf qudt:CompositeDatatype ;
+  sh:property qudt:TupleMember-elementType ;
+  sh:property qudt:TupleMember-orderInStructure ;
+.
+qudt:TupleType
+  a rdfs:Class ;
+  a sh:NodeShape ;
+  dcterms:description """
+  <p><em>Tuple</em> originated as an abstraction of the sequence: single, double, triple, quadruple, quintuple, n-tuple.  
+  In mathematics, a tuple is a finite sequence (also known as an <em>Ordered List</em> of objects, each of a specified type. 
+  The <em>n</em> can be any non-negative integer.
+  </p>
+  """^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Tuple Type" ;
+  rdfs:subClassOf qudt:CompositeDatatype ;
+  sh:property qudt:Tuple-elementType ;
+  sh:property qudt:Tuple-elementTypeCount ;
+  sh:property qudt:Tuple-length ;
+.
+qudt:Two-Tuple-elementType
+  a sh:PropertyShape ;
+  sh:path qudt:elementDatatype ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:minCount 0 ;
+.
+qudt:Two-Tuple-elementTypeCount
+  a sh:PropertyShape ;
+  sh:path qudt:elementTypeCount ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:datatype xsd:integer ;
+  sh:hasValue 2 ;
 .
 qudt:TwoTuple
   a rdfs:Class ;
@@ -4026,6 +4082,15 @@ qudt:TwoTuple-elementTypeCount
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
   sh:hasValue 2 ;
+.
+qudt:TwoTupleType
+  a rdfs:Class ;
+  a sh:NodeShape ;
+  dcterms:description "A 2-tuple is called a pair. For example, a complex number can be represented as a 2-tuple, and 2D coordinates are sometimes represented as 2-tuples." ;
+  rdfs:label "Two-Tuple Type" ;
+  rdfs:subClassOf qudt:N-TupleType ;
+  sh:property qudt:Two-Tuple-elementType ;
+  sh:property qudt:Two-Tuple-elementTypeCount ;
 .
 qudt:TypeList
   a rdfs:Class ;
