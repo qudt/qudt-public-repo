@@ -34,6 +34,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   is work-in-progress.
 - Refactored coordinate systems into a new SHACL schema for coordinate systems. OWL schema for coordinate systems
   is work-in-progress.
+- Tweaked the definition and applicableUnits for quantitykind:StateOfCharge
 
 ## [3.1.0] - 2025-03-20
 
