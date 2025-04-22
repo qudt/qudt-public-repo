@@ -2,7 +2,6 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
@@ -15,7 +14,6 @@
 
 <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>
   a owl:Ontology ;
-  owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/facade/qudt> ;
   owl:imports <http://www.linkedmodel.org/schema/dtype> ;
   owl:imports <http://www.linkedmodel.org/schema/vaem> ;
   owl:imports <http://www.w3.org/2004/02/skos/core> ;
@@ -31,7 +29,7 @@
 qudt:AbstractDatatype
   a owl:Class ;
   dcterms:description """
-  <p class="lm-para">An "Abstract Datatype" (ADT) is a specification of a set of data and the set of operations that can be performed on the data. 
+  <p>An "Abstract Datatype" (ADT) is a specification of a set of data and the set of operations that can be performed on the data. 
   Such a data type is abstract in the sense that it is independent of various concrete implementations. 
   The definition can be mathematical, or it can be programmed as an interface. 
   A first class ADT supports the creation of multiple instances of the ADT, and the interface normally provides a constructor,
@@ -54,17 +52,17 @@ qudt:AerospaceCoordinateSystem
 qudt:AlgebraicDatatype
   a owl:Class ;
   dcterms:description """
-<p class="lm-para">An "Algebraic Datatype" is a datatype each of whose values are data from other data types wrapped in one of the constructors of the data type. 
+<p>An "Algebraic Datatype" is a datatype each of whose values are data from other data types wrapped in one of the constructors of the data type. 
 Any wrapped datum is an argument to the constructor. 
 In contrast to other data types, the constructor is not executed and the only way to operate on the data is to unwrap the constructor using pattern matching.
 </p>
-<p class="lm-para">The most common algebraic data type is a list with two constructors: Nil or [] for an empty list, and Cons (an abbreviation of constructor), 
+<p>The most common algebraic data type is a list with two constructors: Nil or [] for an empty list, and Cons (an abbreviation of constructor), 
  ::, or : for the combination of a new element with a shorter list (for example (Cons 1 '(2 3 4)) or 1:[2,3,4]).
 </p>
-<p class="lm-para">Special cases of algebraic types are product types i.e. records (only one constructor) and enumerated types (many constructors with no arguments). 
+<p>Special cases of algebraic types are product types i.e. records (only one constructor) and enumerated types (many constructors with no arguments). 
 Algebraic types are one kind of composite type (i.e. a type formed by combining other types).
 </p>
-<p class="lm-para">An algebraic data type may also be an abstract data type (ADT) if it is exported from a module without its constructors. 
+<p>An algebraic data type may also be an abstract data type (ADT) if it is exported from a module without its constructors. 
 Values of such a type can only be manipulated using functions defined in the same module as the type itself.
 </p>"""^^rdf:HTML ;
   prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Algebraic_data_type> ;
@@ -102,12 +100,12 @@ qudt:Array
   rdfs:subClassOf qudt:CompositeDatatype ;
   rdfs:subClassOf [
     a owl:Restriction ;
-    owl:allValuesFrom qudt:ArrayDataOrderType ;
+    owl:allValuesFrom qudt:ArrayDataOrder ;
     owl:onProperty qudt:dataOrder ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
-    owl:allValuesFrom <http://qudt.org/schema/type#TypeMatrix> ;
+    owl:allValuesFrom qudt:TypeMatrix ;
     owl:onProperty qudt:typeMatrix ;
   ] ;
   rdfs:subClassOf [
@@ -123,12 +121,12 @@ qudt:Array
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:maxCardinality 1 ;
-    owl:onProperty qudt:dimensions ;
+    owl:onProperty qudt:dimensionality ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:maxCardinality 1 ;
-    owl:onProperty qudt:dimensionality ;
+    owl:onProperty qudt:dimensions ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
@@ -136,50 +134,13 @@ qudt:Array
     owl:onProperty qudt:typeMatrix ;
   ] .
 
-qudt:ArrayDataOrderType
+qudt:ArrayDataOrder
   a owl:Class ;
   dcterms:description "A sub-type of 'Enumerated Value'. Detailed description to be provided in a future version." ;
   owl:oneOf ( qudt:ByColumn qudt:ByRow qudt:ByLeftMostIndex ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Array data order type" ;
+  rdfs:label "Array data order" ;
   rdfs:subClassOf qudt:EnumeratedValue .
-
-qudt:ArrayIndex
-  a owl:Class ;
-  dcterms:description "An Array Index Type is a data type that specifies the properties of data structures that hold array indexes." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Array Index Type" ;
-  rdfs:subClassOf qudt:Vector ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:hasValue qudt.type:UNSIGNED-INTEGER ;
-    owl:onProperty qudt:datatype ;
-  ] .
-
-qudt:ArrayIndexType
-  a owl:Class ;
-  dcterms:description "An Array Index Type is a data type that specifies the properties of data structures that hold array indexes." ;
-  rdfs:label "Array Index Type" ;
-  rdfs:subClassOf qudt:VectorType .
-
-qudt:ArrayType
-  a owl:Class ;
-  dcterms:description """
-  <p>An <em>array type</em> is a type specification for ordered entries of values arranged according to the dimensions given. 
-  The dimensions are given as a list of integers where each integer is the cardinality of each dimension. 
-  The number of dimensions is specified in the attribute 'dimensionality'.
-  </p>
-  <p>Optionally a reference can be made to a variable, whose values are the array entries. 
-  The data type of the array entries is an optional field, 'elementType', which points to a data type definition. 
-  If the data type is given, then it applies to all elements.  
-  If it is not given then the elements can be of different types for each position in the array.
-  </p>
-  <p>The property <em>qudt:typeMatrix</em> must refer to a matrix of types.
-  If a default value is given this can be used to place the appropriate value in a cell when an entry value is not known. 
-  If no dimensionality or dimension vector is specified the array is under-specified but still legitimate as a place-holder for a data type.
-  </p>"""^^rdf:HTML ;
-  rdfs:label "Array Type" ;
-  rdfs:subClassOf qudt:CompositeDatatype .
 
 qudt:AssociativeArray
   a owl:Class ;
@@ -193,7 +154,7 @@ qudt:AssociativeArray
   owl:equivalentClass qudt:Map ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Associative Array" ;
-  rdfs:subClassOf qudt:CollectionKind .
+  rdfs:subClassOf qudt:Collection .
 
 qudt:AssociativeArrayType
   a owl:Class ;
@@ -299,27 +260,18 @@ qudt:BitEncodingType
   rdfs:label "Bit Encoding" ;
   rdfs:subClassOf qudt:Encoding .
 
-qudt:BitFieldType
-  a owl:Class ;
+qudt:BitField
+  a owl:Class, owl:DataRange, rdfs:Datatype ;
   dcterms:description """
   <p>A bit field is a common idiom used in computer programming to store a set of Boolean datatype flags compactly, as a series of bits. 
   The bit field is stored in an integral type of known, fixed bit-width. 
-  Each Boolean flag is stored in a separate bit. Usually the source code will define a set of constants, each a power of two, that semantically associate each individual bit with its respective Boolean flag. 
+  Each Boolean flag is stored in a separate bit. 
+  Usually the source code will define a set of constants, each a power of two, that semantically associate each individual bit with its respective Boolean flag. 
   The bitwise operators and, or, and not are used in combination to set, reset and test the flags.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Bit Field Type" ;
-  rdfs:subClassOf qudt:ScalarDatatype ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:allValuesFrom qudt:BitField ;
-    owl:onProperty qudt:encodedValue ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:cardinality 1 ;
-    owl:onProperty qudt:encodedValue ;
-  ] .
+  rdfs:label "Bit Field" ;
+  rdfs:subClassOf xsd:string .
 
 qudt:BooleanEncodingType
   a owl:Class ;
@@ -356,7 +308,7 @@ qudt:ByteEncodingType
 qudt:CardinalityType
   a owl:Class ;
   dcterms:description """
-  <p class="lm-para">In mathematics, the cardinality of a set is a measure of the number of elements of the set.  
+  <p>In mathematics, the cardinality of a set is a measure of the number of elements of the set.  
   For example, the set <em>A = {2, 4, 6}</em> contains 3 elements, and therefore <em>A</em> has a cardinality of 3. 
   There are two approaches to cardinality – one which compares sets directly using bijections and injections,
    and another which uses cardinal numbers.
@@ -405,7 +357,7 @@ qudt:CharacterType
   rdfs:label "Character Type" ;
   rdfs:subClassOf qudt:OrdinalType .
 
-qudt:CollectionKind
+qudt:Collection
   a owl:Class ;
   dcterms:description """
   <p>A collection is a grouping of some variable number of zero or more data items that need to be operated upon together in some controlled fashion. 
@@ -479,9 +431,11 @@ qudt:CompositionFunction
   rdfs:label "Composition function" ;
   rdfs:subClassOf qudt:Function .
 
-qudt:CompositionTreeType
+qudt:CompositionTree
   a owl:Class ;
-  rdfs:subClassOf qudt:TreeType .
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
+  rdfs:label "Composition Tree" ;
+  rdfs:subClassOf qudt:Tree .
 
 qudt:Concept
   a owl:Class ;
@@ -489,24 +443,7 @@ qudt:Concept
   rdfs:label "QUDT Concept" ;
   rdfs:subClassOf owl:Thing .
 
-qudt:Container
-  a owl:Class ;
-  dcterms:description """
-  <p>A container is a class, a data structure, or an abstract data type (ADT) whose instances are collections of other objects. 
-  They are used to store objects in an organized way following specific access rules.
-  </p>"""^^rdf:HTML ;
-  owl:equivalentClass qudt:CollectionKind ;
-  owl:equivalentClass qudt:CollectionType ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Container" ;
-  rdfs:subClassOf qudt:AbstractDatatype ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:hasValue 1 ;
-    owl:onProperty qudt:elementTypeCount ;
-  ] .
-
-qudt:CoordinateCenterType
+qudt:CoordinateCenterKind
   a owl:Class ;
   dcterms:description """
   <p>An enumeration of coordinate centers for coordinate systems, such as:
@@ -515,11 +452,10 @@ qudt:CoordinateCenterType
   owl:oneOf ( qudt.type:CC_MarsCentered qudt.type:CC_EarthCentered qudt.type:CC_MoonCentered
     qudt.type:CC_VehicleCentered qudt.type:CC_SunCentered ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Coordinate Center Type" ;
+  rdfs:label "Coordinate Center Kind" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
   rdfs:subClassOf qudt:NominalScale ;
-  skos:prefLabel "Coordinate center" ;
-  skos:prefLabel "Coordinate center type" .
+  skos:prefLabel "Coordinate center" .
 
 qudt:CoordinateMember
   a owl:Class ;
@@ -527,9 +463,8 @@ qudt:CoordinateMember
   <p>A Coordinate Member Type is a data type that defines the properties of a coordinate in a coordinate system.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Coordinate Member Type" ;
-  rdfs:subClassOf qudt:TupleMember ;
-  rdfs:subClassOf qudt:TupleMemberType .
+  rdfs:label "Coordinate Member" ;
+  rdfs:subClassOf qudt:TupleMember .
 
 qudt:CoordinateSystem
   a owl:Class ;
@@ -569,6 +504,11 @@ qudt:CoordinateSystem
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
+    owl:allValuesFrom xsd:string ;
+    owl:onProperty qudt:originDefinition ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
     owl:cardinality 1 ;
     owl:onProperty qudt:abbreviation ;
   ] ;
@@ -580,40 +520,17 @@ qudt:CoordinateSystem
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:cardinality 1 ;
+    owl:onProperty qudt:originDefinition ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:cardinality 1 ;
     owl:onProperty qudt:referenceFrame ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:maxCardinality 1 ;
     owl:onProperty vaem:acronym ;
-  ] .
-
-qudt:CoordinateSystemFrame
-  a owl:Class ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Coordinate system frame" ;
-  rdfs:subClassOf skos:Concept .
-
-qudt:CoordinateSystemType
-  a owl:Class ;
-  dcterms:description """
-  <p>A coordinate system is a mathematical structure for assigning a unique n-tuple of numbers or scalars to each point in an n-dimensional space. 
-  A Coordinate System Type is a data type that defines the properties of data structures that represent coordinate systems.
-  </p>
-  <p>The primary attributes of any coordinate system are the coordinate frame or orientation of the axes of the coordinate system and the coordinate center or origin of the coordinate system.
-  The coordinate center is the easier of the two attributes to define and in trajectory-related coordinate systems is often taken to be the center of mass of natural solar system bodies such as the Earth, the Moon, or Mars.
-  Precise definition of the coordinate frame, however, usually takes much more effort. 
-  As a result, the primary purpose is to provide a detailed description of a number of different coordinate frames commonly used in mission analysis.
-  </p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Coordinate System Type" ;
-  rdfs:label "Coordinate system type" ;
-  rdfs:subClassOf qudt:EnumeratedValue ;
-  rdfs:subClassOf qudt:TupleType ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:cardinality 1 ;
-    owl:onProperty qudt:originDefinition ;
   ] .
 
 qudt:Coordinates
@@ -645,7 +562,7 @@ qudt:Coordinates-2D
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "2D Coordinate Type" ;
   rdfs:subClassOf qudt:CartesianCoordinates ;
-  rdfs:subClassOf qudt:Two-Tuple .
+  rdfs:subClassOf qudt:TwoTuple .
 
 qudt:Coordinates-2D-DoublePrecision
   a owl:Class, qudt:Coordinates-2D-Type ;
@@ -726,7 +643,7 @@ qudt:Coordinates-3D
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "3D Coordinate Type" ;
   rdfs:subClassOf qudt:CartesianCoordinates ;
-  rdfs:subClassOf qudt:Three-Tuple .
+  rdfs:subClassOf qudt:ThreeTuple .
 
 qudt:Coordinates-3D-DoublePrecision
   a owl:Class ;
@@ -814,7 +731,7 @@ qudt:Coordinates-3D-Type
   </p>"""^^rdf:HTML ;
   rdfs:label "3D Coordinate Type" ;
   rdfs:subClassOf qudt:CartesianCoordinatesType ;
-  rdfs:subClassOf qudt:ThreeTupleType .
+  rdfs:subClassOf qudt:ThreeTuple .
 
 qudt:DataSetElement
   a owl:Class ;
@@ -862,25 +779,6 @@ qudt:DateTimeStringType
     owl:maxCardinality 1 ;
     owl:onProperty qudt:encoding ;
   ] .
-
-qudt:Dictionary
-  a owl:Class ;
-  dcterms:description "A \"Map\"." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Dictionary Type" ;
-  rdfs:subClassOf qudt:Map .
-
-qudt:DictionaryType
-  a owl:Class ;
-  dcterms:description "A kind of \"Map\"." ;
-  rdfs:label "Dictionary Type" ;
-  rdfs:subClassOf qudt:MapType .
-
-qudt:DimensionVector
-  a owl:Class ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Dimension Vector" ;
-  rdfs:subClassOf skos:Concept .
 
 qudt:DimensionalDatatype
   a owl:Class ;
@@ -949,31 +847,6 @@ qudt:Encoding
     a owl:Restriction ;
     owl:maxCardinality 1 ;
     owl:onProperty qudt:bytes ;
-  ] .
-
-qudt:EngineeringValueTupleMember
-  a owl:Class ;
-  dcterms:description """
-  <p>A sub-type of 'Tuple Member Type'. 
-  </p>"""^^rdf:HTML ;
-  owl:disjointWith qudt:RawValueTupleMember ;
-  owl:disjointWith qudt:RawValueTupleMemberType ;
-  owl:equivalentClass [
-    a owl:Class ;
-    owl:intersectionOf ( qudt:TupleMemberType [
-      a owl:Restriction ;
-      owl:allValuesFrom qudt:RealSinglePrecisionType ;
-      owl:onProperty qudt:datatype ;
-    ] ) ;
-  ] ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Engineering Value Tuple Member" ;
-  rdfs:subClassOf qudt:TupleMember ;
-  rdfs:subClassOf qudt:TupleMemberType ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:allValuesFrom qudt:RealSinglePrecisionType ;
-    owl:onProperty qudt:datatype ;
   ] .
 
 qudt:Enumeration
@@ -1103,53 +976,12 @@ qudt:FunctionDatatype
     owl:onProperty qudt:returnType ;
   ] .
 
-qudt:Graph
-  a owl:Class ;
-  dcterms:description """
-  <p>A <em>Graph</em> is an instance of a kind of abstract data type, that consists of a set of nodes (also called vertices) and a set of edges that establish relationships (connections) between the nodes. 
-  A Graph Type is a data type that defines the properties of data structures that represent graphs and their members (nodes and edges).
-  </p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Graph Type" ;
-  rdfs:subClassOf qudt:CollectionKind .
-
-qudt:GraphType
-  a owl:Class ;
-  dcterms:description """
-  <p>A <em>Graph Type</em> is a kind of abstract data type, that consists of a set of nodes (also called vertices) and a set of edges that establish relationships (connections) between the nodes. 
-  A Graph Type is a data type that defines the properties of data structures that represent graphs and their members (nodes and edges).
-  </p>"""^^rdf:HTML ;
-  rdfs:label "Graph Type" ;
-  rdfs:subClassOf qudt:CollectionType .
-
 qudt:GroundCoordinateSystem
   a owl:Class ;
   dcterms:description "A sub-type of 'Aerospace coordinate system'. Detailed description to be provided in a future version." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Ground coordinate system" ;
   rdfs:subClassOf qudt:AerospaceCoordinateSystem .
-
-qudt:HashTable
-  a owl:Class ;
-  dcterms:description """
-  <p>A hash table is a kind of map that utilizes a hash function to perform efficient lookup: given a key (e.g., a person's name), find the corresponding value (e.g., that person's telephone number). 
-  Hash tables support the efficient lookup, insertion and deletion of elements in constant time on average. 
-  A Hash Table Type is a data type that defines the types of a hash table's key-value pairs.
-  </p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Hash Table Type" ;
-  rdfs:subClassOf qudt:Map ;
-  rdfs:subClassOf qudt:TableType .
-
-qudt:HashTableType
-  a owl:Class ;
-  dcterms:description """
-  <p>A hash table is a kind of map that utilizes a hash function to perform efficient lookup: given a key (e.g., a person's name), find the corresponding value (e.g., that person's telephone number). 
-  Hash tables support the efficient lookup, insertion and deletion of elements in constant time on average. 
-  A Hash Table Type is a data type that defines the types of a hash table's key-value pairs.
-  </p>"""^^rdf:HTML ;
-  rdfs:label "Hash Table Type" ;
-  rdfs:subClassOf qudt:MapType .
 
 qudt:Heap
   a owl:Class ;
@@ -1161,15 +993,8 @@ qudt:Heap
   </p>"""^^rdf:HTML ;
   prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Heap_(data_structure)> ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Heap Type" ;
+  rdfs:label "Heap" ;
   rdfs:subClassOf qudt:OrderedTree .
-
-qudt:HeapType
-  a owl:Class ;
-  dcterms:description "A heap is a specialized tree-based data structure that satisfies the condition: if B is a child node of A, then <em>key(A) &gt; key(B)</em>. This implies that an element with the greatest key is always in the root node, and so such a heap is sometimes called a max heap. Alternatively, if the comparison is reversed, the smallest element is always in the root node, which results in a min heap. The function or method that implements the key() operator is specified by the heap type."^^rdf:HTML ;
-  prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Heap_(data_structure)> ;
-  rdfs:label "Heap Type" ;
-  rdfs:subClassOf qudt:OrderedTreeType .
 
 qudt:HexBinaryType
   a owl:Class ;
@@ -1243,6 +1068,7 @@ qudt:IntegerEncodingType
 
 qudt:IntegerVector
   a owl:Class ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Integer vector" ;
   rdfs:subClassOf qudt:Vector .
 
@@ -1251,8 +1077,7 @@ qudt:InterpolatedTable
   dcterms:description "A sub-type of 'Table Type'. Detailed description to be provided in a future version." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Interpolated Table Type" ;
-  rdfs:subClassOf qudt:Table ;
-  rdfs:subClassOf qudt:TableType .
+  rdfs:subClassOf qudt:Table .
 
 qudt:KinestheticCue
   a owl:Class ;
@@ -1282,7 +1107,7 @@ qudt:List
   dcterms:description "A sub-type of 'Collection Type'. Detailed description to be provided in a future version." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "List" ;
-  rdfs:subClassOf qudt:CollectionKind ;
+  rdfs:subClassOf qudt:Collection ;
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:allValuesFrom qudt:Datatype ;
@@ -1369,7 +1194,7 @@ qudt:Map
   owl:equivalentClass qudt:AssociativeArray ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Map Type" ;
-  rdfs:subClassOf qudt:CollectionKind .
+  rdfs:subClassOf qudt:Collection .
 
 qudt:MapType
   a owl:Class ;
@@ -1397,14 +1222,7 @@ qudt:MassPropertiesArray
    Center of Gravity, Mass, Moment of Inertia, and Product of Inertia. 
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Mass Properties Array Type" ;
   rdfs:subClassOf qudt:Array .
-
-qudt:MassPropertiesArrayType
-  a owl:Class ;
-  dcterms:description "The Mass Properties of an object are its: Center of Gravity, Mass, Moment of Inertia, and Product of Inertia. A mass properties array is an array whose elements contain these measured quantities for some object. A mass properties array data type provides the type specification for a class of arrays in which the data types of the elements are constrained to be one of these four properties." ;
-  rdfs:label "Mass Properties Array Type" ;
-  rdfs:subClassOf qudt:ArrayType .
 
 qudt:MathsFunctionType
   a owl:Class ;
@@ -1452,16 +1270,15 @@ qudt:ModalEnumeration
 
 qudt:MultiDimensionalArray
   a owl:Class ;
-  dcterms:description "Ordinary or one-dimensional arrays are indexed by a single integer. For a multi-dimensional array, the index into the array uses an ordered list of integers, such as in a[3,1,5]. The length of the list of integers used to index into the multi-dimensional array is always the same and is referred to as the array's dimensionality. The bounds on each of these are called the array's dimensions." ;
+  dcterms:description """
+  Ordinary or one-dimensional arrays are indexed by a single integer. 
+  For a multi-dimensional array, the index into the array uses an ordered list of integers, such as in a[3,1,5]. 
+  The length of the list of integers used to index into the multi-dimensional array is always the same and is referred to as the array's dimensionality. 
+  The bounds on each of these are called the array's dimensions.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Multi Dimensional Array Type" ;
   rdfs:subClassOf qudt:Array .
-
-qudt:MultiDimensionalArrayType
-  a owl:Class ;
-  dcterms:description "Ordinary or one-dimensional arrays are indexed by a single integer. For a multi-dimensional array, the index into the array uses an ordered list of integers, such as in a[3,1,5]. The length of the list of integers used to index into the multi-dimensional array is always the same and is referred to as the array's dimensionality. The bounds on each of these are called the array's dimensions." ;
-  rdfs:label "Multi Dimensional Array Type" ;
-  rdfs:subClassOf qudt:ArrayType .
 
 qudt:MultiDimensionalDataFormat
   a owl:Class ;
@@ -1554,11 +1371,15 @@ qudt:MultiSet
   a owl:Class ;
   dcterms:description "A bag is a set in which elements may be repeated." ;
   rdfs:label "Bag" ;
-  rdfs:subClassOf qudt:CollectionKind .
+  rdfs:subClassOf qudt:Collection .
 
 qudt:N-Tuple
   a owl:Class ;
-  dcterms:description "A tuple containing n objects is known as an \"n-tuple\". For example the 4-tuple (or \"quadruple\"), with components of respective types PERSON, DAY, MONTH and YEAR, could be used to record that a certain person was born on a certain day of a certain month of a certain year." ;
+  dcterms:description """
+  A tuple containing n objects is known as an "n-tuple". 
+  For example the 4-tuple (or "quadruple"), with components of respective types: PERSON, DAY, MONTH and YEAR,
+   could be used to record that a certain person was born on a certain day of a certain month of a certain year.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "N-Tuple Type" ;
   rdfs:subClassOf qudt:Tuple ;
@@ -1567,12 +1388,6 @@ qudt:N-Tuple
     owl:minCardinality 1 ;
     owl:onProperty qudt:datatype ;
   ] .
-
-qudt:N-TupleType
-  a owl:Class ;
-  dcterms:description "A tuple containing n objects is known as an \"n-tuple\". For example the 4-tuple (or \"quadruple\"), with components of respective types PERSON, DAY, MONTH and YEAR, could be used to record that a certain person was born on a certain day of a certain month of a certain year." ;
-  rdfs:label "N-Tuple Type" ;
-  rdfs:subClassOf qudt:TupleType .
 
 qudt:NonRotatingInertialFrame
   a owl:Class ;
@@ -1620,19 +1435,13 @@ qudt:OctetType
   rdfs:label "Octet Type" ;
   rdfs:subClassOf qudt:UnsignedIntegerType .
 
-qudt:OnOffStateType
+qudt:OnOffState
   a owl:Class ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "On off state type" ;
+  rdfs:label "On/Off state" ;
   rdfs:subClassOf qudt:DiscreteState .
 
-qudt:OpenCloseStateType
-  a owl:Class ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Open Close State Type" ;
-  rdfs:subClassOf qudt:DiscreteState .
-
-qudt:OrderedCollectionKind
+qudt:OrderedCollection
   a owl:Class ;
   dcterms:description """
   <p>An <em>Ordered Collection Type</em> is an abstract data type that defines the properties of collection data structures whose members can be linearly ordered. 
@@ -1640,7 +1449,7 @@ qudt:OrderedCollectionKind
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Ordered Collection Type" ;
-  rdfs:subClassOf qudt:CollectionKind ;
+  rdfs:subClassOf qudt:Collection ;
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:allValuesFrom qudt:Datatype ;
@@ -1648,7 +1457,7 @@ qudt:OrderedCollectionKind
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
-    owl:allValuesFrom qudt:OrderedCollectionKind ;
+    owl:allValuesFrom qudt:OrderedCollection ;
     owl:onProperty rdf:rest ;
   ] ;
   rdfs:subClassOf [
@@ -1656,15 +1465,6 @@ qudt:OrderedCollectionKind
     owl:allValuesFrom dtype:ComparisonOperator ;
     owl:onProperty qudt:orderingRelation ;
   ] .
-
-qudt:OrderedCollectionKindType
-  a owl:Class ;
-  dcterms:description """
-  <p>An Ordered Collection Type is an abstract data type that defines the properties of collection data structures whose members can be linearly ordered. 
-  An ordered collection is a collection together with an ordering relation (such as greater than) that linearly orders the collection elements.
-  </p>"""^^rdf:HTML ;
-  rdfs:label "Ordered Collection Type" ;
-  rdfs:subClassOf qudt:CollectionType .
 
 qudt:OrderedTree
   a owl:Class ;
@@ -1675,19 +1475,8 @@ qudt:OrderedTree
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Ordered Tree Type" ;
-  rdfs:subClassOf qudt:OrderedCollectionKind ;
+  rdfs:subClassOf qudt:OrderedCollection ;
   rdfs:subClassOf qudt:Tree .
-
-qudt:OrderedTreeType
-  a owl:Class ;
-  dcterms:description """
-  <p>"Ordered Tree Type" is a data type that defines the properties of data structures that represent ordered trees. 
-  An ordered tree is a tree where the children of every node are ordered, that is, there is a first child, second child, third child, etc. 
-  Typically a type specification for an ordered tree will include the comparison operator (such as <b>lt</b> or <b>gt</b>) that is used to order the nodes.
-  </p>"""^^rdf:HTML ;
-  rdfs:label "Ordered Tree Type" ;
-  rdfs:subClassOf qudt:OrderedCollectionKindType ;
-  rdfs:subClassOf qudt:TreeType .
 
 qudt:OrdinalType
   a owl:Class ;
@@ -1717,16 +1506,8 @@ qudt:ParameterModifiabilityType
   rdfs:label "Parameter modifiability type" ;
   rdfs:subClassOf qudt:EnumeratedValue .
 
-qudt:Percentage
-  a owl:Class ;
-  dcterms:description "A Scalar Datatype for expressing a dimensionless ratio." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Percentage Type" ;
-  rdfs:subClassOf qudt:NumericType .
-
 qudt:PhysicalAddress
   a owl:Class ;
-  dcterms:description "A \"Structured Datatype\"." ;
   dcterms:description "A physical address is a pointer to a memory location." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Physical Address Type" ;
@@ -1792,39 +1573,6 @@ qudt:QuantityValueType
     owl:allValuesFrom qudt:Unit ;
     owl:onProperty qudt:elementUnit ;
   ] .
-
-qudt:RawValueTupleMember
-  a owl:Class ;
-  dcterms:description "A sub-type of 'Tuple Member Type'. Detailed description to be provided in a future version." ;
-  owl:equivalentClass [
-    a owl:Class ;
-    owl:intersectionOf ( qudt:TupleMember [
-      a owl:Restriction ;
-      owl:allValuesFrom qudt:UnsignedIntegerType ;
-      owl:onProperty qudt:datatype ;
-    ] ) ;
-  ] ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Raw value tuple member" ;
-  rdfs:subClassOf qudt:TupleMember ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:allValuesFrom qudt:UnsignedIntegerType ;
-    owl:onProperty qudt:datatype ;
-  ] .
-
-qudt:RawValueTupleMemberType
-  a owl:Class ;
-  owl:equivalentClass [
-    a owl:Class ;
-    owl:intersectionOf ( qudt:TupleMemberType [
-      a owl:Restriction ;
-      owl:allValuesFrom qudt:UnsignedIntegerType ;
-      owl:onProperty qudt:datatype ;
-    ] ) ;
-  ] ;
-  rdfs:label "Raw value tuple member type" ;
-  rdfs:subClassOf qudt:TupleMemberType .
 
 qudt:RealDatatype
   a owl:Class ;
@@ -1993,7 +1741,7 @@ qudt:Sequence
   dcterms:description "A \"Structured Datatype\"." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Sequence" ;
-  rdfs:subClassOf qudt:CollectionKind ;
+  rdfs:subClassOf qudt:Collection ;
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:allValuesFrom qudt:Datatype ;
@@ -2016,7 +1764,7 @@ qudt:Set
   dcterms:description "A Set Type is an abstract data type that defines the properties of sets. A set is a collection (container) of certain values, without any particular order, and no repeated values. It corresponds with a finite set in mathematics." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Set Type" ;
-  rdfs:subClassOf qudt:CollectionKind .
+  rdfs:subClassOf qudt:Collection .
 
 qudt:SetType
   a owl:Class ;
@@ -2180,7 +1928,7 @@ qudt:SplinePoint
 qudt:SplinePointType
   a owl:Class ;
   rdfs:label "Spline point type" ;
-  rdfs:subClassOf qudt:TupleType .
+  rdfs:subClassOf qudt:Tuple .
 
 qudt:StateSpaceMatrix
   a owl:Class ;
@@ -2331,12 +2079,6 @@ qudt:Table
     owl:onProperty qudt:byRow ;
   ] .
 
-qudt:TableType
-  a owl:Class ;
-  dcterms:description "A Table Type is a data type that specifies the properties of table data structures. A table is both a mode of visual communication and a means of arranging data. The use of tables is pervasive throughout NASA The precise conventions and terminology for describing tables varies depending on the context. Moreover, tables differ significantly in variety, structure, flexibility, notation, representation and use." ;
-  rdfs:label "Table Type" ;
-  rdfs:subClassOf qudt:ArrayType .
-
 qudt:TaggedEnumeration
   a owl:Class ;
   dcterms:description "An enumeration where each literal  has a tag that is a non-negative integer. These enumerations are likely to have their literals encoded - hence the need for the tag." ;
@@ -2364,12 +2106,25 @@ qudt:TextStringType
   rdfs:label "Text String Type" ;
   rdfs:subClassOf qudt:StringType .
 
-qudt:Three-Tuple
+qudt:ThreeBodyRotatingCoordinateSystem
   a owl:Class ;
+  dcterms:description "The lunar coordinate systems are primarily used when operating in close proximity to the Moon. There are, however, a few additional coordinate systems that are also useful when analyzing (and depicting) trajectories in the vicinity of the Earth-Moon system. They are rotating coordinate systems associated with two different three-body systems: the Sun-Earth-spacecraft system and the Earth-Moon-spacecraft system. The Sun-Earth and Earth-Moon rotating coordinate frames are defined as follows. The pole vector or Z-axis of the coordinate frame is set equal to the instantaneous orbit normal of the secondary (smaller) body about the primary (larger) body and the X-axis is set equal to the vector from the primary body center of mass (CM) to the secondary body CM. The X-axis rotates at a rate equal to the instantaneous rotation rate of the secondary body about the primary body." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
+  rdfs:label "Three Body Rotating Coordinate System Type" ;
+  rdfs:subClassOf qudt:AerospaceCoordinateSystem .
+
+qudt:ThreeTuple
+  a owl:Class ;
+  dcterms:description """
+  A three-tuple is a tuple with exactly three members. 
+  A Three-Tuple Type is a data type that defines the type properties of a class of three-tuples and their members.
+  """ ;
   dcterms:description "A three-tuple is a tuple with exactly three members. A Three-Tuple Type is a data type that defines the type properties of a class of three-tuples and their members." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
+  rdfs:label "Three-Tuple" ;
   rdfs:label "Three-Tuple Type" ;
   rdfs:subClassOf qudt:N-Tuple ;
+  rdfs:subClassOf qudt:N-TupleType ;
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:cardinality 3 ;
@@ -2380,19 +2135,6 @@ qudt:Three-Tuple
     owl:hasValue 3 ;
     owl:onProperty qudt:elementTypeCount ;
   ] .
-
-qudt:ThreeBodyRotatingCoordinateSystem
-  a owl:Class ;
-  dcterms:description "The lunar coordinate systems are primarily used when operating in close proximity to the Moon. There are, however, a few additional coordinate systems that are also useful when analyzing (and depicting) trajectories in the vicinity of the Earth-Moon system. They are rotating coordinate systems associated with two different three-body systems: the Sun-Earth-spacecraft system and the Earth-Moon-spacecraft system. The Sun-Earth and Earth-Moon rotating coordinate frames are defined as follows. The pole vector or Z-axis of the coordinate frame is set equal to the instantaneous orbit normal of the secondary (smaller) body about the primary (larger) body and the X-axis is set equal to the vector from the primary body center of mass (CM) to the secondary body CM. The X-axis rotates at a rate equal to the instantaneous rotation rate of the secondary body about the primary body." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Three Body Rotating Coordinate System Type" ;
-  rdfs:subClassOf qudt:AerospaceCoordinateSystem .
-
-qudt:ThreeTupleType
-  a owl:Class ;
-  dcterms:description "A three-tuple is a tuple with exactly three members. A Three-Tuple Type is a data type that defines the type properties of a class of three-tuples and their members." ;
-  rdfs:label "Three-Tuple Type" ;
-  rdfs:subClassOf qudt:N-TupleType .
 
 qudt:Time
   a owl:Class ;
@@ -2447,12 +2189,6 @@ qudt:TimeSeriesArray
     owl:onProperty <http://qudt.org/schema/type#vector> ;
   ] .
 
-qudt:TimeSeriesArrayType
-  a owl:Class ;
-  dcterms:description "A Time Series Array Type is a data type that specifies the properties of arrays that hold time series data. A time series is a sequence of data points, measured at successive time intervals. The time intervals may be uniformly or non-uniformly spaced." ;
-  rdfs:label "Time Series Array Type" ;
-  rdfs:subClassOf qudt:ArrayType .
-
 qudt:TimeStringType
   a owl:Class ;
   dcterms:description "Time takes a number of forms, depending on the units used (e.g., year, day, minute, millisecond, or combinations thereof) and the origin (i.e., time zero) to which the time value is related." ;
@@ -2476,27 +2212,24 @@ qudt:Tree
   rdfs:label "Tree Type" ;
   rdfs:subClassOf qudt:Graph .
 
-qudt:TreeType
-  a owl:Class ;
-  dcterms:description "A \"Tree\" is a data type that defines the properties of data structures that represent trees. A tree is a graph data structure accessed beginning at the root node. Each node is either a leaf or an internal node. An internal node has one or more child nodes and is called the parent of its child nodes. Leaf nodes have no chidren. Nodes that share the same parent are siblings. In graph theoretic terminology, a tree is a connected, undirected, acyclic graph." ;
-  prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Tree_(data_structure)> ;
-  rdfs:label "Tree Type" ;
-  rdfs:subClassOf qudt:GraphType .
-
 qudt:Triplet
   a owl:Class ;
   dcterms:description "A \"Tuple\"." ;
-  owl:equivalentClass qudt:Three-Tuple ;
-  owl:equivalentClass qudt:ThreeTupleType ;
+  owl:equivalentClass qudt:ThreeTuple ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Triplet" ;
-  rdfs:subClassOf qudt:Three-Tuple ;
-  rdfs:subClassOf qudt:ThreeTupleType .
+  rdfs:subClassOf qudt:ThreeTuple .
 
 qudt:Tuple
   a owl:Class ;
+  dcterms:description """
+  <p>The term <em>Tuple</em> originated as an abstraction of the sequence: single, double, triple, quadruple, quintuple, n-tuple. 
+  In mathematics, a tuple is a finite sequence (also known as an <em>Ordered List</em> of objects, each of a specified type. 
+  The <em>n</em> can be any non-negative integer.
+  </p>"""^^rdf:HTML ;
   dcterms:description "<p>The term <em>Tuple</em> originated as an abstraction of the sequence: single, double, triple, quadruple, quintuple, n-tuple.  In mathematics, a tuple is a finite sequence (also known as an <em>Ordered List</em> of objects, each of a specified type. The <em>n</em> can be any non-negative integer.</p>"^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
+  rdfs:label "Tuple" ;
   rdfs:label "Tuple Type" ;
   rdfs:subClassOf qudt:CompositeDatatype ;
   rdfs:subClassOf [
@@ -2515,38 +2248,13 @@ qudt:Tuple
     owl:onProperty qudt:length ;
   ] .
 
-qudt:TupleMember
+qudt:TwoTuple
   a owl:Class ;
-  dcterms:description "A Tuple Member Type is a data type that defines the properties of a member of a tuple. It is used to provide fine grained type specification to the elements of tuples." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Tuple Member Type" ;
-  rdfs:subClassOf qudt:CompositeDatatype ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:allValuesFrom qudt:ScalarDatatype ;
-    owl:onProperty qudt:datatype ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:cardinality 1 ;
-    owl:onProperty qudt:orderInStructure ;
-  ] .
-
-qudt:TupleMemberType
-  a owl:Class ;
-  dcterms:description "A Tuple Member Type is a data type that defines the properties of a member of a tuple. It is used to provide fine grained type specification to the elements of tuples." ;
-  rdfs:label "Tuple Member Type" ;
-  rdfs:subClassOf qudt:CompositeDatatype .
-
-qudt:TupleType
-  a owl:Class ;
-  dcterms:description "<p>The term <em>Tuple</em> originated as an abstraction of the sequence: single, double, triple, quadruple, quintuple, n-tuple.  In mathematics, a tuple is a finite sequence (also known as an <em>Ordered List</em> of objects, each of a specified type. The <em>n</em> can be any non-negative integer.</p>"^^rdf:HTML ;
-  rdfs:label "Tuple Type" ;
-  rdfs:subClassOf qudt:CompositeDatatype .
-
-qudt:Two-Tuple
-  a owl:Class ;
-  dcterms:description "A 2-tuple is called a pair. For example, a complex number can be represented as a 2-tuple, and 2D coordinates are sometimes represented as 2-tuples." ;
+  dcterms:description """
+  A 2-tuple is called a pair. 
+  For example, a complex number can be represented as a 2-tuple.
+  2D coordinates are sometimes represented as 2-tuples.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Two-Tuple Type" ;
   rdfs:subClassOf qudt:N-Tuple ;
@@ -2561,15 +2269,11 @@ qudt:Two-Tuple
     owl:onProperty qudt:elementTypeCount ;
   ] .
 
-qudt:TwoTupleType
-  a owl:Class ;
-  dcterms:description "A 2-tuple is called a pair. For example, a complex number can be represented as a 2-tuple, and 2D coordinates are sometimes represented as 2-tuples." ;
-  rdfs:label "Two-Tuple Type" ;
-  rdfs:subClassOf qudt:N-TupleType .
-
 qudt:TypeList
   a owl:Class ;
-  dcterms:description "A sub-type of 'QUDT Datatype'. Detailed description to be provided in a future version." ;
+  dcterms:description """
+  A sub-type of 'QUDT Datatype'. Detailed description to be provided in a future version.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Type list" ;
   rdfs:subClassOf qudt:Datatype .
@@ -2584,20 +2288,15 @@ qudt:TypeVector
   a owl:Class ;
   dcterms:description """
   <p>A <em>Type Vector</em> is a vector whose elements are data types. 
-  They are used, for instance, to specify the type of each component of a vector or class of vectors. 
-  A <em>Type Vector Type</em> is a further abstraction that specifies the structure of Type Vectors.
+  They are used to specify the type of each component of a vector or class of vectors. 
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Type Vector Type" ;
   rdfs:label "Type vector" ;
-  rdfs:subClassOf qudt:DatatypeStructuredData ;
   rdfs:subClassOf qudt:Vector ;
-  rdfs:subClassOf qudt:VectorType ;
   rdfs:subClassOf [
     a owl:Restriction ;
-    owl:cardinality 1 ;
-    owl:onClass qudt:Vector ;
-    owl:onProperty qudt:typeVector ;
+    owl:allValuesFrom qudt:DataType ;
+    owl:onProperty qudt:datatype ;
   ] .
 
 qudt:UnsignedBigIntegerType
@@ -2828,17 +2527,19 @@ qudt:VehicleCoordinateSystem
 
 qudt:VisualCue
   a owl:Class ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Visual Cue" ;
   rdfs:subClassOf qudt:ModalCue .
 
-qudt:WetDryStateType
+qudt:WetDryState
   a owl:Class ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Wet dry state type" ;
+  rdfs:label "Wet dry state" ;
   rdfs:subClassOf qudt:DiscreteState .
 
 qudt:YesNoType
   a owl:Class ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Yes no type" ;
   rdfs:subClassOf qudt:EnumeratedValue .
 
@@ -2853,6 +2554,7 @@ qudt:datatype
 qudt:elementLabel
   a rdf:Property ;
   dcterms:description "This property is used to label the field of a composite data structure." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "element label" .
 
 qudt:field
@@ -2906,6 +2608,7 @@ qudt:argType
 
 qudt:auralCue
   a owl:ObjectProperty ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "aural cue" ;
   rdfs:subPropertyOf qudt:modalCue .
 
@@ -2996,6 +2699,7 @@ qudt:encoding
 
 qudt:enumeration
   a owl:ObjectProperty ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "enumeration" .
 
 qudt:fieldLabels
@@ -3031,16 +2735,19 @@ qudt:kinestheticCueEnumeration
 
 qudt:modalCue
   a owl:ObjectProperty ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "modal cue" .
 
 qudt:modalCueEnumeration
   a owl:ObjectProperty ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "modal cue enumeration" ;
   rdfs:subPropertyOf qudt:enumeration .
 
 qudt:modifiability
   a owl:ObjectProperty ;
   dcterms:description "Reference to one in a list of enumerated elements that indicates whether data (e.g. variable or parameter) can be changed." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "modifiability" .
 
 qudt:orderedType
@@ -3165,9 +2872,14 @@ qudt:abbreviation
 
 qudt:accuracy
   a owl:DatatypeProperty, owl:FunctionalProperty ;
-  dcterms:description """Accuracy is the degree to which a given quantity is correct and free from error. For example, a quantity specified as 100+/-1 has an (absolute) accuracy of +/-1 (meaning its true value can fall in the range 99-101), while a quantity specified as 100+/-2% has a (relative) accuracy of +/-2% (meaning its true value can fall in the range 98-102).
-
-The concepts of accuracy and precision are both closely related and often confused. While the accuracy of a number x is given by the number of significant decimal (or other) digits to the right of the decimal point in x, the precision of x is the total number of significant decimal (or other) digits. """ ;
+  dcterms:description """
+  Accuracy is the degree to which a given quantity is correct and free from error. 
+  For example, a quantity specified as 100+/-1 has an (absolute) accuracy of +/-1 (meaning its true value can fall in the range 99-101).
+  While a quantity specified as 100+/-2% has a (relative) accuracy of +/-2% (meaning its true value can fall in the range 98-102).
+  The concepts of accuracy and precision are both closely related and often confused. 
+  While the accuracy of a number x is given by the number of significant decimal (or other) digits to the right of the decimal point in x,
+   the precision of x is the total number of significant decimal (or other) digits.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "accuracy" ;
   rdfs:range xsd:integer .
@@ -3212,6 +2924,13 @@ qudt:bytes
   rdfs:label "octets" ;
   rdfs:range xsd:integer .
 
+qudt:cName
+  a owl:DatatypeProperty ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
+  rdfs:label "C name" ;
+  rdfs:range xsd:string ;
+  rdfs:subPropertyOf qudt:id .
+
 qudt:columns
   a owl:DatatypeProperty ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
@@ -3231,6 +2950,7 @@ qudt:dimensionality
 
 qudt:elementName
   a owl:DatatypeProperty ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "element name" .
 
 qudt:elementTypeCount
@@ -3247,6 +2967,7 @@ qudt:encodedValue
 
 qudt:exponent
   a owl:DatatypeProperty, owl:FunctionalProperty ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "exponent" .
 
 qudt:fieldName
@@ -3316,9 +3037,7 @@ qudt:length
   dcterms:description "The length of a structure, for example the size of a vector" ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "length" ;
-  rdfs:range xsd:integer ;
-  rdfs:subPropertyOf qudt:maxLength ;
-  rdfs:subPropertyOf qudt:minLength .
+  rdfs:range xsd:integer .
 
 qudt:lowerBound
   a owl:DatatypeProperty ;
@@ -3374,7 +3093,8 @@ qudt:maxLength
   a owl:DatatypeProperty ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "max length" ;
-  rdfs:range xsd:integer .
+  rdfs:range xsd:integer ;
+  rdfs:subPropertyOf qudt:Length .
 
 qudt:maxMantissa
   a owl:DatatypeProperty ;
@@ -3418,7 +3138,8 @@ qudt:minLength
   a owl:DatatypeProperty ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "min length" ;
-  rdfs:range xsd:integer .
+  rdfs:range xsd:integer ;
+  rdfs:subPropertyOf qudt:Length .
 
 qudt:minMantissa
   a owl:DatatypeProperty ;
@@ -3492,19 +3213,24 @@ qudt:pattern
 
 qudt:precision
   a owl:DatatypeProperty, owl:FunctionalProperty ;
-  dcterms:description """Precision is the number of digits used to perform a given computation. The concepts of accuracy and precision are both closely related and often confused. While the accuracy of a number x is given by the number of significant decimal (or other) digits to the right of the decimal point in x, the precision of x is the total number of significant decimal (or other) digits.
-
-For a given numeric data type, the value of type:precision (?p) is related to the values of type:maxMantissa (?M) and type:base (?b) by the formula 
-
-?p := log(?b, ?M) 
-
-where log(a,y) = x iff y=a^x.""" ;
+  dcterms:description """
+  Precision is the number of digits used to perform a given computation.
+  The concepts of accuracy and precision are both closely related and often confused. 
+  While the accuracy of a number x is given by the number of significant decimal (or other) digits to the right of the decimal point in x,
+   the precision of x is the total number of significant decimal (or other) digits.
+  For a given numeric data type, the value of type:precision (?p) is related to the values of type:maxMantissa (?M) and type:base (?b) by the formula 
+  
+   ?p := log(?b, ?M) 
+   
+  where log(a,y) = x iff y=a^x.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "precision" ;
   rdfs:range xsd:integer .
 
 qudt:protocolBuffersName
   a owl:DatatypeProperty ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "protocol buffers name" ;
   rdfs:subPropertyOf qudt:id .
 
@@ -3571,7 +3297,11 @@ qudt:vbName
 
 qudt:xAxisDefinition
   a owl:DatatypeProperty ;
-  dcterms:description "The definition of the X-Axis could be an intersection, cross-product or other function of a  meridian or orbit. It could also mention any aspects of rotation, for example, the rotation equator of the Earth,  Sun, Moon or other celestial body. An epoch might also be given." ;
+  dcterms:description """
+  The definition of the X-Axis could be an intersection, cross-product or other function of a  meridian or orbit. 
+  It could also mention any aspects of rotation, for example, the rotation equator of the Earth, Sun, Moon or other celestial body. 
+  An epoch might also be given.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "X-Axis Definition" ;
   rdfs:range xsd:string .
@@ -3584,7 +3314,10 @@ qudt:xCoordinateDefinition
 
 qudt:yAxisDefinition
   a owl:DatatypeProperty ;
-  dcterms:description "The definition of the Y-Axis could be an intersection, cross-product or other function of a meridian or orbit. It could also mention any aspects of rotation, for example, the rotation equator of the Earth,  Sun, Moon or other celestial body. An epoch might also be given." ;
+  dcterms:description """
+  The definition of the Y-Axis could be an intersection, cross-product or other function of a meridian or orbit. 
+  It could also mention any aspects of rotation, for example, the rotation equator of the Earth, Sun, Moon or other celestial body. 
+  An epoch might also be given.""" ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Y-Axis definition" ;
   rdfs:range xsd:string .
@@ -3597,7 +3330,11 @@ qudt:yCoordinateDefinition
 
 qudt:zAxisDefinition
   a owl:DatatypeProperty ;
-  dcterms:description "The definition of the Y-Axis could be an intersection, croos-product or other function of a meridian or orbit. It could also mention any aspects of rotation, for example, the rotation equator of the Earth,  Sun, Moon or other celestial body. An epoch might also be given." ;
+  dcterms:description """
+  The definition of the Y-Axis could be an intersection, croos-product or other function of a meridian or orbit. 
+  It could also mention any aspects of rotation, for example, the rotation equator of the Earth, Sun, Moon or other celestial body. 
+  An epoch might also be given.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Z-Axis definition" ;
   rdfs:range xsd:string .
@@ -3638,9 +3375,6 @@ qudt:defaultValue
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Default Value" .
 
-dtype:GMD_DTYPE
-  dcterms:description "The ontology \"dtype\" provides a specification of simple data types such as enumerations and codelists. These are needed in support of the conversion of XML Schemas and UML Models to OWL. The purpose of \"dtype\" is to provide a foundation for expressing rich data types. These data types are typically needed when dealing with OWL representations of data structures derived from XML Schema." .
-
 <http://qudt.org/schema/datatype/GMD_datatype>
   a vaem:GraphMetaData ;
   dcterms:description """
@@ -3650,7 +3384,7 @@ dtype:GMD_DTYPE
   Specification of coordinate systems is also covered.
   </p>
   """^^rdf:HTML ;
-  dcterms:modified "2024-11-22T14:54:24-05:00"^^xsd:dateTime ;
+  dcterms:modified "2025-04-01T10:54:24-05:00"^^xsd:dateTime ;
   dcterms:rights """
   <p>The QUDT Ontologies are issued under a Creative Commons Attribution 4.0 International License (CC BY 4.0), available  <a href="https://creativecommons.org/licenses/by/4.0/">here</a>. 
   Attribution should be made to <a href="https://www.qudt.org">QUDT.org</a>.
@@ -3727,271 +3461,24 @@ qudt:BitAligned
   dtype:literal "bit" ;
   rdfs:label "Bit Aligned" .
 
-qudt:BitField
-  a owl:DataRange, rdfs:Datatype ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "bitfield" ;
-  rdfs:subClassOf xsd:string .
-
-qudt:BitField01
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B1" ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:string ;
-    owl:withRestrictions ( [
-      xsd:length 1 ;
-    ] [
-      xsd:pattern "[0-1]" ;
-    ] ) ;
-  ] ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf1" ;
-  qudt:bits 1 ;
-  qudt:mySQLName "BIT(1)" ;
-  rdfs:label "Bit Field of 1 bit" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField02
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B2" ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:string ;
-    owl:withRestrictions ( [
-      xsd:length 2 ;
-    ] [
-      xsd:pattern "[0-1]{2}" ;
-    ] ) ;
-  ] ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf2" ;
-  qudt:bits 2 ;
-  qudt:mySQLName "BIT(2)" ;
-  rdfs:label "Bit Field of 2 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField03
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B3" ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:string ;
-    owl:withRestrictions ( [
-      xsd:length 3 ;
-    ] [
-      xsd:pattern "[0-1]{3}" ;
-    ] ) ;
-  ] ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf3" ;
-  qudt:bits 3 ;
-  qudt:mySQLName "BIT(3)" ;
-  rdfs:label "Bit Field of 3 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField04
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B4" ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:string ;
-    owl:withRestrictions ( [
-      xsd:length 4 ;
-    ] [
-      xsd:pattern "[0-1]{4}" ;
-    ] ) ;
-  ] ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf4" ;
-  qudt:bits 4 ;
-  qudt:mySQLName "BIT(4)" ;
-  rdfs:label "Bit Field of 4 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField05
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B5" ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:string ;
-    owl:withRestrictions ( [
-      xsd:length 5 ;
-    ] [
-      xsd:pattern "[0-1]{5}" ;
-    ] ) ;
-  ] ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf5" ;
-  qudt:bits 5 ;
-  qudt:mySQLName "BIT(5)" ;
-  rdfs:label "Bit Field of 5 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField06
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B6" ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:string ;
-    owl:withRestrictions ( [
-      xsd:length 6 ;
-    ] [
-      xsd:pattern "[0-1]{6}" ;
-    ] ) ;
-  ] ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf6" ;
-  qudt:bits 6 ;
-  qudt:mySQLName "BIT(6)" ;
-  qudt:rdfsDatatype qudt:BitField06 ;
-  rdfs:label "Bit Field of 6 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField07
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B7" ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:string ;
-    owl:withRestrictions ( [
-      xsd:length 7 ;
-    ] [
-      xsd:pattern "[0-1]{7}" ;
-    ] ) ;
-  ] ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf7" ;
-  qudt:bits 7 ;
-  qudt:mySQLName "BIT(7)" ;
-  qudt:rdfsDatatype qudt:BitField07 ;
-  rdfs:label "Bit Field of 7 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField08
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B8" ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:string ;
-    owl:withRestrictions ( [
-      xsd:length 8 ;
-    ] [
-      xsd:pattern "[0-1]{8}" ;
-    ] ) ;
-  ] ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf8" ;
-  qudt:bits 8 ;
-  qudt:mySQLName "BIT(8)" ;
-  qudt:rdfsDatatype qudt:BitField08 ;
-  rdfs:label "Bit Field of 8 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField09
-  a qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B9" ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:string ;
-    owl:withRestrictions ( [
-      xsd:length 9 ;
-    ] [
-      xsd:pattern "[0-1]{9}" ;
-    ] ) ;
-  ] ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf9" ;
-  qudt:bits 9 ;
-  qudt:mySQLName "BIT(9)" ;
-  qudt:rdfsDatatype qudt:BitField09 ;
-  rdfs:label "Bit Field of 9 bits" ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField10
-  a owl:DataRange, qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B10" ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:string ;
-    owl:withRestrictions ( [
-      xsd:length 10 ;
-    ] [
-      xsd:pattern "[0-1]{10}" ;
-    ] ) ;
-  ] ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf10" ;
-  qudt:bitOrder qudt:BigEndian ;
-  qudt:bits 10 ;
-  qudt:byteOrder qudt:BigEndian ;
-  qudt:mySQLName "BIT(10)" ;
-  qudt:rdfsDatatype qudt:BitField10 ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Bit Field Of 10 Bits" ;
-  rdfs:subClassOf qudt:BitField ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField11
-  a owl:DataRange, qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B11" ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:string ;
-    owl:withRestrictions ( [
-      xsd:length 11 ;
-    ] [
-      xsd:pattern "[0-1]{11}" ;
-    ] ) ;
-  ] ;
-  prov:wasInfluencedBy "http://dev.mysql.com/doc/refman/5.0/en/bit-type.html"^^xsd:anyURI ;
-  qudt:abbreviation "bf11" ;
-  qudt:bits 11 ;
-  qudt:mySQLName "BIT(11)" ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Bit Field Of 11 Bits" ;
-  rdfs:subClassOf qudt:BitField ;
-  rdfs:subClassOf rdfs:Literal .
-
-qudt:BitField12
-  a owl:DataRange, qudt:BitFieldType, rdfs:Datatype ;
-  dtype:literal "B12" ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:string ;
-    owl:withRestrictions ( [
-      xsd:length 12 ;
-    ] [
-      xsd:pattern "[0-1]{12}" ;
-    ] ) ;
-  ] ;
-  qudt:abbreviation "bf12" ;
-  qudt:bits 12 ;
-  qudt:mySQLName "BIT(12)" ;
-  qudt:rdfsDatatype qudt:BitField12 ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Bit Field of 12 bits" ;
-  rdfs:subClassOf qudt:BitField ;
-  rdfs:subClassOf rdfs:Literal .
-
 qudt:BooleanEncoding
   a qudt:BooleanEncodingType ;
   rdfs:label "Boolean Encoding" .
 
 qudt:ByColumn
-  a qudt:ArrayDataOrderType ;
+  a qudt:ArrayDataOrder ;
   dtype:literal "byColumn" ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "By Column" .
 
 qudt:ByLeftMostIndex
-  a qudt:ArrayDataOrderType ;
+  a qudt:ArrayDataOrder ;
   dtype:literal "byLeftMostIndex" ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "By Left Most Index" .
 
 qudt:ByRow
-  a qudt:ArrayDataOrderType ;
+  a qudt:ArrayDataOrder ;
   dtype:literal "byRow" ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "By Row" .
@@ -4000,77 +3487,6 @@ qudt:ByteAligned
   a qudt:AlignmentType ;
   dtype:literal "byte" ;
   rdfs:label "Byte Aligned" .
-
-qudt:CCT_EarthCentered
-  a qudt:CoordinateCenterType ;
-  rdfs:label "Earth-centered Coordinate System Type" .
-
-qudt:CCT_MarsCentered
-  a qudt:CoordinateCenterType ;
-  rdfs:label "Mars-centered Coordinate System Type" .
-
-qudt:CCT_MoonCentered
-  a qudt:CoordinateCenterType ;
-  rdfs:label "Moon-centered Coordinate System Type" .
-
-qudt:CCT_SunCentered
-  a qudt:CoordinateCenterType ;
-  rdfs:label "Sun-centered Coordinate System Type" .
-
-qudt:CCT_VehicleCentered
-  a qudt:CoordinateCenterType ;
-  rdfs:label "Vehicle-centered Coordinate System Type" .
-
-qudt:COLOR_AMBER
-  a qudt:ColorCue ;
-  dtype:literal "amber" ;
-  qudt:rgbCode "#FFBF00" ;
-  rdfs:label "Amber Color" .
-
-qudt:COLOR_GREEN
-  a qudt:ColorCue ;
-  dtype:literal "green" ;
-  qudt:rgbCode "#008000" ;
-  rdfs:label "Green color" .
-
-qudt:COLOR_ORANGE
-  a qudt:ColorCue ;
-  dtype:literal "orange" ;
-  qudt:rgbCode "#FFA500" ;
-  rdfs:label "Orange color" .
-
-qudt:COLOR_RED
-  a qudt:ColorCue ;
-  dtype:literal "red" ;
-  qudt:rgbCode "#FF0000" ;
-  rdfs:label "Red color" .
-
-qudt:COLOR_YELLOW
-  a qudt:ColorCue ;
-  dtype:literal "yellow" ;
-  qudt:rgbCode "#FFFF00" ;
-  rdfs:label "Yellow color" .
-
-qudt:CRC32
-  a owl:DataRange, rdfs:Datatype ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:integer ;
-    owl:withRestrictions ( [
-      xsd:minInclusive 0 ;
-    ] [
-      xsd:maxInclusive "4294967295"^^xsd:unsignedInt ;
-    ] ) ;
-  ] ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "CRC-32" ;
-  rdfs:subClassOf xsd:integer .
-
-qudt:CharEncoding
-  a qudt:BooleanEncodingType, qudt:CharEncodingType ;
-  dc:description "7 bits of 1 octet" ;
-  qudt:bytes 1 ;
-  rdfs:label "Char Encoding" .
 
 qudt:Coordinates-3D-DoublePrecision-Type
   a qudt:Coordinates-3D-Type ;
@@ -4122,13 +3538,6 @@ qudt:FT_ROTATING
 
 qudt:Figure
   dcterms:description "A sub-type of 'QUDT Concept'. Detailed description to be provided in a future version." .
-
-qudt:GreekCharacter
-  dcterms:description "A sub-type of 'Symbol'. Detailed description to be provided in a future version." .
-
-qudt:HEAP
-  a qudt:HeapType ;
-  rdfs:label "HEAP" .
 
 qudt:HEXBINARY
   a qudt:HexBinaryType ;
@@ -4213,24 +3622,12 @@ qudt:MULTi-DIMENSIONAL-ARRAY
   a qudt:MultiDimensionalArrayType ;
   rdfs:label "MULTI-DIMENSIONAL ARRAY" .
 
-qudt:NUMERIC
-  a qudt:NumericType ;
-  dtype:literal "numeric" ;
-  qudt:ansiSQLName "DECIMAL(p,s)" ;
-  qudt:odbcName "SQL_DECIMAL(p,s)" ;
-  qudt:oracleSQLName "NUMBER(p,s)" ;
-  rdfs:label "Numeric" .
-
-qudt:No
-  a qudt:YesNoType ;
-  dtype:literal "N" ;
-  rdfs:label "No" .
-
 qudt:NonModifiableParameter
   a qudt:ParameterModifiabilityType ;
   dcterms:description "Parameter is fixed, not modifiable." ;
   dtype:code "0" ;
   dtype:literal "fixed" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Non modifiable parameter" .
 
 qudt:NonNegativeIntegerUnionList
@@ -4241,24 +3638,16 @@ qudt:NonNegativeIntegerUnionList
   rdf:rest ( [
     sh:datatype xsd:positiveInteger ;
   ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Non-negative union list" .
 
 qudt:OctetEncoding
   a qudt:BooleanEncodingType, qudt:ByteEncodingType ;
   qudt:bytes 1 ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "OCTET Encoding" .
 
-qudt:OffOnStateTypeEnumeration
-  dcterms:description "A discrete state enumeration whose values are 'off' and 'on'. The 'off' value is encoded as a zero (0) and the 'on' value as a one (1)." .
-
-qudt:OffState
-  a qudt:OnOffStateType ;
-  dtype:code "0" ;
-  dtype:literal "off" ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Off State" .
-
-qudt:OnOffStateTypeEnumeration
+qudt:OnOffStateEnumeration
   dcterms:description """
   A discrete state enumeration whose values are 'off' and 'on'. 
   The 'on' value is encoded as a zero (0) and the 'off' value as a one (1).
@@ -4266,33 +3655,6 @@ qudt:OnOffStateTypeEnumeration
   qudt:inverted true ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "On/Off State Enumeration" .
-
-qudt:OnState
-  a qudt:OnOffStateType ;
-  dtype:code "1" ;
-  dtype:literal "on" ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "On State" .
-
-qudt:OneMeansOff
-  a qudt:OnOffStateType ;
-  dtype:literal "off" ;
-  qudt:inverted true ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "One means off" .
-
-qudt:Open
-  a qudt:OpenCloseStateType ;
-  dtype:code "1" ;
-  dtype:literal "open" ;
-  rdfs:label "Open" .
-
-qudt:Organization
-  dcterms:description "A sub-type of 'QUDT Concept'. Detailed description to be provided in a future version." .
-
-qudt:PARTIAL-ARRAY
-  a qudt:ArrayType ;
-  rdfs:label "PARTIAL ARRAY" .
 
 qudt:RN_BINARY-BASE
   a qudt:RealNumberType ;
@@ -4438,51 +3800,6 @@ qudt:SystemModifiableParameter
   dtype:literal "system" ;
   rdfs:label "System modifiable parameter" .
 
-qudt:TABLE-COMPOSITION-EXAMPLE-SUBTREE_1
-  a qudt:Tree ;
-  qudt:node qudt:TIME-SERIES-TABLE-A-2x4 ;
-  rdfs:label "TABLE-COMPOSITION-EXAMPLE-SUBTREE_1" .
-
-qudt:TABLE-COMPOSITION-EXAMPLE-SUBTREE_2
-  a qudt:Tree ;
-  qudt:node qudt:TIME-SERIES-TABLE-B-2x4 ;
-  rdfs:label "TABLE-COMPOSITION-EXAMPLE-SUBTREE_2" .
-
-qudt:TABLE-COMPOSITION-SUBTREE-LIST-MEMBER_1
-  a qudt:TreeListMember ;
-  qudt:order "1"^^xsd:int ;
-  qudt:value qudt:TABLE-COMPOSITION-EXAMPLE-SUBTREE_1 ;
-  rdfs:label "TABLE-COMPOSITION-SUBTREE-1" .
-
-qudt:TABLE-COMPOSITION-SUBTREE-LIST-MEMBER_2
-  a qudt:IndexedCollectionMember ;
-  qudt:order "2"^^xsd:int ;
-  qudt:value qudt:TABLE-COMPOSITION-EXAMPLE-SUBTREE_2 ;
-  rdfs:label "TABLE-COMPOSITION-SUBTREE_2" .
-
-qudt:TABLE-COMPOSTION-SUBTREE-LIST-EXAMPLE_1
-  a qudt:TreeListMember ;
-  qudt:element qudt:TABLE-COMPOSITION-SUBTREE-LIST-MEMBER_1 ;
-  qudt:element qudt:TABLE-COMPOSITION-SUBTREE-LIST-MEMBER_2 ;
-  rdfs:label "TABLE-COMPOSTION-SUBTREES-EXAMPLE_1" .
-
-qudt:TABLE-TYPE_2x4
-  a qudt:TableType ;
-  qudt:byRow true ;
-  qudt:columns 4 ;
-  qudt:dimensionality 2 ;
-  qudt:dimensions ( 2 4 ) ;
-  qudt:rows 2 ;
-  rdfs:label "Table type  2x4" .
-
-qudt:TIME
-  a qudt:TimeStringType ;
-  dc:description "Time in hh:mm:ss[Z|(+|-)hh:mm]format." ;
-  dtype:literal "time" ;
-  qudt:dimensionality 1 ;
-  qudt:rdfsDatatype xsd:time ;
-  rdfs:label "TIME" .
-
 qudt:TRUE
   a qudt:BooleanTypeEnumeratedValue ;
   dtype:literal "true" ;
@@ -4537,32 +3854,11 @@ qudt:VECTOR_3D
   qudt:protocolBuffersName "Vector3D" ;
   rdfs:label "VECTOR 3D" .
 
-qudt:WDST_DRY
-  a qudt:WetDryStateType ;
-  dtype:code "2" ;
-  dtype:literal "dry" ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Dry" .
-
-qudt:WDST_WET
-  a qudt:WetDryStateType ;
-  dtype:code "1" ;
-  dtype:literal "wet" ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "Wet" .
-
 qudt:WordAligned
   a qudt:AlignmentType ;
   dtype:literal "word" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "Word Aligned" .
-
-qudt:Yes
-  a qudt:YesNoType ;
-  dtype:literal "Y" ;
-  rdfs:label "Yes" .
-
-qudt:cName
-  rdfs:subPropertyOf qudt:id .
 
 qudt:hexbinary
   a rdfs:Datatype ;
@@ -4576,36 +3872,6 @@ qudt:hexbinary
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:label "hexbinary" ;
   rdfs:subClassOf xsd:string .
-
-qudt:integer1to12
-  a owl:DataRange, rdfs:Datatype ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:integer ;
-    owl:withRestrictions ( [
-      xsd:minInclusive 1 ;
-    ] [
-      xsd:maxInclusive 12 ;
-    ] ) ;
-  ] ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "integer 1..12" ;
-  rdfs:subClassOf xsd:integer .
-
-qudt:integer1to31
-  a owl:DataRange, rdfs:Datatype ;
-  owl:equivalentClass [
-    a rdfs:Datatype ;
-    owl:onDatatype xsd:integer ;
-    owl:withRestrictions ( [
-      xsd:minInclusive 1 ;
-    ] [
-      xsd:maxInclusive 31 ;
-    ] ) ;
-  ] ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
-  rdfs:label "integer 1..31" ;
-  rdfs:subClassOf xsd:integer .
 
 qudt:negative
   a qudt:Polarity ;
@@ -4628,83 +3894,5 @@ xsd:dateTime
   All fields require leading zeros.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> .
-
-[
-  a owl:Restriction ;
-  owl:allValuesFrom qudt:ScalarDatatype ;
-  owl:onProperty qudt:encoding ;
-] .
-
-[
-  a owl:Restriction ;
-  owl:cardinality 1 ;
-  owl:onProperty qudt:realization ;
-] .
-
-[
-  a owl:Restriction ;
-  owl:cardinality 1 ;
-  owl:onProperty qudt:xAxisDefinition ;
-] .
-
-[
-  a owl:Restriction ;
-  owl:cardinality 1 ;
-  owl:onProperty qudt:xAxisDefinition ;
-] .
-
-[
-  a owl:Restriction ;
-  owl:cardinality 1 ;
-  owl:onProperty qudt:yAxisDefinition ;
-] .
-
-[
-  a owl:Restriction ;
-  owl:cardinality 1 ;
-  owl:onProperty qudt:yAxisDefinition ;
-] .
-
-[
-  a owl:Restriction ;
-  owl:cardinality 1 ;
-  owl:onProperty qudt:zAxisDefinition ;
-] .
-
-[
-  a owl:Restriction ;
-  owl:cardinality 1 ;
-  owl:onProperty qudt:zAxisDefinition ;
-] .
-
-[
-  a owl:Restriction ;
-  owl:maxCardinality 1 ;
-  owl:onProperty qudt:bitOrder ;
-] .
-
-[
-  a owl:Restriction ;
-  owl:maxCardinality 1 ;
-  owl:onProperty qudt:byteOrder ;
-] .
-
-[
-  a owl:Restriction ;
-  owl:maxCardinality 1 ;
-  owl:onProperty qudt:xCoordinateDefinition ;
-] .
-
-[
-  a owl:Restriction ;
-  owl:maxCardinality 1 ;
-  owl:onProperty qudt:yCoordinateDefinition ;
-] .
-
-[
-  a owl:Restriction ;
-  owl:maxCardinality 1 ;
-  owl:onProperty qudt:zCoordinateDefinition ;
-] .
 
 

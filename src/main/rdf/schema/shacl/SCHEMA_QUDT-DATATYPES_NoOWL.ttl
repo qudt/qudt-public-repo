@@ -13,7 +13,6 @@
 
 <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype>
   a owl:Ontology ;
-  owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   owl:imports <http://www.linkedmodel.org/schema/dtype> ;
   owl:imports <http://www.linkedmodel.org/schema/vaem> ;
   owl:imports <http://www.w3.org/2004/02/skos/core> ;
@@ -38,9 +37,25 @@
   vaem:hasCatalogEntry voag:QUDT-SchemaCatalogEntry ;
   vaem:hasGraphMetadata <http://qudt.org/schema/shacl/datatype/GMD_datatype> ;
   vaem:hasGraphRole vaem:SchemaGraph ;
-  vaem:intent "This ontology is to be used by other ontologies that need to reference type definitions." ;
+  vaem:intent "This ontology is to be used by other ontologies that need datatype definitions." ;
   vaem:specificity 1 ;
   vaem:url "http://qudt.org/$$QUDT_VERSION$$/schema/dtype"^^xsd:anyURI .
+
+qudt:AbstractDatatype
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>An "Abstract Datatype" (ADT) is a specification of a set of data and the set of operations that can be performed on the data. 
+  Such a data type is abstract in the sense that it is independent of various concrete implementations. 
+  The definition can be mathematical, or it can be programmed as an interface. 
+  A first class ADT supports the creation of multiple instances of the ADT, and the interface normally provides a constructor,
+   which returns an abstract handle to new data, and several operations, 
+   which are functions accepting the abstract handle as an argument.</p>
+  """^^rdf:HTML ;
+  prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Abstract_data_type> ;
+  prov:wasInfluencedBy <http://xlinux.nist.gov/dads/HTML/abstractDataType.html> ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Abstract Datatype" ;
+  rdfs:subClassOf qudt:StructuredDatatype .
 
 qudt:AerospaceCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
@@ -48,6 +63,27 @@ qudt:AerospaceCoordinateSystem
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Aerospace Coordinate system" ;
   rdfs:subClassOf qudt:CoordinateSystem .
+
+qudt:AlgebraicDatatype
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """<p>An <em>Algebraic Datatype</em> is a datatype each of whose values are data from other data types wrapped in one of the constructors of the data type. 
+Any wrapped datum is an argument to the constructor. 
+In contrast to other data types, the constructor is not executed and the only way to operate on the data is to unwrap the constructor using pattern matching.
+</p>
+<p>The most common algebraic data type is a list with two constructors: Nil or [] for an empty list, and Cons (an abbreviation of constructor), 
+ ::, or : for the combination of a new element with a shorter list (for example (Cons 1 '(2 3 4)) or 1:[2,3,4]).
+</p>
+<p>Special cases of algebraic types are product types i.e. records (only one constructor) and enumerated types (many constructors with no arguments). 
+Algebraic types are one kind of composite type (i.e. a type formed by combining other types).
+</p>
+<p>An algebraic data type may also be an abstract data type (ADT) if it is exported from a module without its constructors. 
+Values of such a type can only be manipulated using functions defined in the same module as the type itself.
+</p>"""^^rdf:HTML ;
+  prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Algebraic_data_type> ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Algebraic Datatype" ;
+  rdfs:seeAlso qudt:AbstractDatatype ;
+  rdfs:subClassOf qudt:StructuredDatatype .
 
 qudt:AlignmentType
   a rdfs:Class, sh:NodeShape ;
@@ -57,6 +93,7 @@ qudt:AlignmentType
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Alignment type" ;
+  rdfs:subClassOf qudt:EnumeratedValue ;
   sh:in ( qudt:BitAligned qudt:ByteAligned qudt:WordAligned ) .
 
 qudt:Array
@@ -92,6 +129,33 @@ qudt:Array
   sh:property qudt:DatatypePropertyShape ;
   sh:property qudt:DimensionalityPropertyShape ;
   sh:property qudt:DimensionsPropertyShape .
+
+qudt:ArrayDataOrder
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description "A sub-type of 'Enumerated Value'. Detailed description to be provided in a future version." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Array data order" ;
+  rdfs:subClassOf qudt:EnumeratedValue ;
+  sh:oneOf ( qudt:ByColumn qudt:ByRow qudt:ByLeftMostIndex ) .
+
+qudt:ArrayType
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>An <em>Array Type</em> is a type specification for ordered entries of values arranged according to the dimensions given. 
+  The dimensions are given as a list of integers where each integer is the cardinality of each dimension. 
+  The number of dimensions is specified in the attribute 'dimensionality'.
+  </p>
+  <p>Optionally a reference can be made to a variable, whose values are the array entries. 
+  The data type of the array entries is an optional field, 'elementType', which points to a data type definition. 
+  If the data type is given, then it applies to all elements.  
+  If it is not given then the elements can be of different types for each position in the array.
+  </p>
+  <p>The property <em>qudt:typeMatrix</em> must refer to a matrix of types.
+  If a default value is given this can be used to place the appropriate value in a cell when an entry value is not known. 
+  If no dimensionality or dimension vector is specified the array is under-specified but still legitimate as a place-holder for a data type.
+  </p>"""^^rdf:HTML ;
+  rdfs:label "Array Type" ;
+  rdfs:subClassOf qudt:CompositeDatatype .
 
 qudt:AssociativeArray
   a rdfs:Class, sh:NodeShape ;
@@ -273,11 +337,21 @@ qudt:CharEncodingType
 qudt:CharacterType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  A Character Type is a data type that defines the type and encoding of single characters.
+  A <em>Character Type</em> is a data type that defines the type and encoding of single characters.
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Character Type" ;
   rdfs:subClassOf qudt:OrdinalType .
+
+qudt:Collection
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>A collection is a grouping of some variable number of zero or more data items that need to be operated upon together in some controlled fashion. 
+  Generally, the data items will all share the same data type or are derived from some common ancestor data type.
+  </p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Collection Type" ;
+  rdfs:subClassOf qudt:StructuredDatatype .
 
 qudt:ColorCue
   a rdfs:Class, sh:NodeShape ;
@@ -326,26 +400,25 @@ qudt:CompositionFunction
   rdfs:label "Composition function" ;
   rdfs:subClassOf qudt:Function .
 
-qudt:CompositionTreeType
+qudt:CompositionTree
   a rdfs:Class, sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Composition Tree Type" ;
-  rdfs:subClassOf qudt:TreeType ;
-  sh:property qudt:CompositionTreeType-compositionFunction .
+  rdfs:label "Composition Tree" ;
+  rdfs:subClassOf qudt:Tree ;
+  sh:property qudt:CompositionTree-compositionFunction .
 
-qudt:CoordinateCenterType
+qudt:CoordinateCenterKind
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
   <p>An enumeration of coordinate centers for coordinate systems, such as:
    "Earth centered", "Mars centered", "Moon centered", "Sun centered",  and "Vehicle centered".
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Coordinate Center Type" ;
+  rdfs:label "Coordinate Center Kind" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
   rdfs:subClassOf qudt:NominalScale ;
   sh:in ( qudt:CCT_MarsCentered qudt:CCT_EarthCentered qudt:CCT_MoonCentered
-    qudt:CCT_VehicleCentered qudt:CCT_SunCentered ) ;
-  skos:prefLabel "Coordinate center type" .
+    qudt:CCT_VehicleCentered qudt:CCT_SunCentered ) .
 
 qudt:CoordinateMember
   a rdfs:Class, sh:NodeShape ;
@@ -353,9 +426,8 @@ qudt:CoordinateMember
   <p>A <em>Coordinate Member</em> is a data type that defines the properties of a coordinate in a coordinate system.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Coordinate Member Type" ;
-  rdfs:subClassOf qudt:TupleMember ;
-  rdfs:subClassOf qudt:TupleMemberType .
+  rdfs:label "Coordinate Member" ;
+  rdfs:subClassOf qudt:TupleMember .
 
 qudt:CoordinateSystem
   a rdfs:Class, sh:NodeShape ;
@@ -393,25 +465,8 @@ qudt:CoordinateSystem
   sh:property qudt:CoordinateSystem-abbreviation ;
   sh:property qudt:CoordinateSystem-acronym ;
   sh:property qudt:CoordinateSystem-coordinateCenter ;
+  sh:property qudt:CoordinateSystem-originDefinition ;
   sh:property qudt:CoordinateSystem-referenceFrame .
-
-qudt:CoordinateSystemType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Coordinate System</em> is a mathematical structure for assigning a unique n-tuple of numbers or scalars to each point in an n-dimensional space. 
-  A Coordinate System Type is a data type that defines the properties of data structures that represent coordinate systems.
-  </p>
-  <p>The primary attributes of any coordinate system are the coordinate frame or orientation of the axes of the coordinate system and the coordinate center or origin of the coordinate system.
-  The coordinate center is the easier of the two attributes to define and in trajectory-related coordinate systems is often taken to be the center of mass of natural solar system bodies such as the Earth, the Moon, or Mars.
-  Precise definition of the coordinate frame, however, usually takes much more effort. 
-  As a result, the primary purpose is to provide a detailed description of a number of different coordinate frames commonly used in mission analysis.
-  </p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Coordinate System Type" ;
-  rdfs:subClassOf qudt:EnumeratedValue ;
-  rdfs:subClassOf qudt:TupleType ;
-  sh:property qudt:CoordinateSystemType-originDefinition ;
-  sh:property qudt:Coordinates-elementType .
 
 qudt:Coordinates
   a rdfs:Class, sh:NodeShape ;
@@ -438,7 +493,7 @@ qudt:Coordinates-2D
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "2D Coordinate Type" ;
   rdfs:subClassOf qudt:CartesianCoordinates ;
-  rdfs:subClassOf qudt:Two-Tuple .
+  rdfs:subClassOf qudt:TwoTuple .
 
 qudt:Coordinates-2D-DoublePrecision
   a rdfs:Class, sh:NodeShape ;
@@ -473,7 +528,7 @@ qudt:Coordinates-3D
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "3D Coordinate Type" ;
   rdfs:subClassOf qudt:CartesianCoordinates ;
-  rdfs:subClassOf qudt:Three-Tuple .
+  rdfs:subClassOf qudt:ThreeTuple .
 
 qudt:Coordinates-3D-DoublePrecision
   a rdfs:Class, sh:NodeShape ;
@@ -508,7 +563,7 @@ qudt:Coordinates-3D-Type
   </p>"""^^rdf:HTML ;
   rdfs:label "3D Coordinate Type" ;
   rdfs:subClassOf qudt:CartesianCoordinatesType ;
-  rdfs:subClassOf qudt:ThreeTupleType .
+  rdfs:subClassOf qudt:ThreeTuple .
 
 qudt:DataEncoding
   a rdfs:Class, sh:NodeShape ;
@@ -535,29 +590,6 @@ qudt:DataSetElement
   sh:property qudt:DataSetElement-optional ;
   sh:property qudt:DataSetElement-quantityKind .
 
-qudt:Datatype
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:subClassOf rdfs:Resource ;
-  sh:property qudt:Datatype-ansiSQLName ;
-  sh:property qudt:Datatype-basis ;
-  sh:property qudt:Datatype-bounded ;
-  sh:property qudt:Datatype-cName ;
-  sh:property qudt:Datatype-cardinality ;
-  sh:property qudt:Datatype-id ;
-  sh:property qudt:Datatype-javaName ;
-  sh:property qudt:Datatype-jsName ;
-  sh:property qudt:Datatype-matlabName ;
-  sh:property qudt:Datatype-microsoftSQLServerName ;
-  sh:property qudt:Datatype-mySQLName ;
-  sh:property qudt:Datatype-odbcName ;
-  sh:property qudt:Datatype-oleDBName ;
-  sh:property qudt:Datatype-oracleSQLName ;
-  sh:property qudt:Datatype-orderedType ;
-  sh:property qudt:Datatype-protocolBuffersName ;
-  sh:property qudt:Datatype-pythonName ;
-  sh:property qudt:Datatype-vbName ;
-  vaem:isElaboratedIn <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> .
-
 qudt:DateStringType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description "Date String Types are scalar data types that define the properties of strings that represent calendar dates." ;
@@ -567,9 +599,6 @@ qudt:DateStringType
 
 qudt:DateTimeStringEncodingType
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  Date Time encodings are logical encodings for expressing date/time quantities as strings by applying unambiguous formatting and parsing rules.
-  """ ;
   dcterms:description "Date Time encodings are logical encodings for expressing date/time quantities as strings by applying unambiguous formatting and parsing rules." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Date Time String Encoding Type" ;
@@ -642,12 +671,12 @@ qudt:EarthCoordinateSystem
   <p>A "Trajectory Coordinate System" for all earth-centered coordinates, such as:
   </p>
   <ul>
-  <li>Earth mean equator and prime meridian coordinate system";</li>
-  <li>Earth true equator and prime meridian of epoch coordinate system";</li> 
-  <li>International celestial reference system";</li>
-  <li>International terrestrial reference system";</li>
-  <li>Sun centered international celestial reference system";</li>
-  <li>Vehicle centered international celestial reference system".</li>
+  <li>Earth mean equator and prime meridian coordinate system;;</li>
+  <li>Earth true equator and prime meridian of epoch coordinate system;</li> 
+  <li>International celestial reference system;</li>
+  <li>International terrestrial reference system;</li>
+  <li>Sun centered international celestial reference system;</li>
+  <li>Vehicle centered international celestial reference system.</li>
   </ul>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Earth Coordinate System Type" ;
@@ -690,7 +719,6 @@ qudt:EngineeringValueTupleMember
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Engineering Value Tuple Member" ;
   rdfs:subClassOf qudt:TupleMember ;
-  rdfs:subClassOf qudt:TupleMemberType ;
   sh:disjoint qudt:RawValueTupleMember ;
   sh:disjoint qudt:RawValueTupleMemberType ;
   sh:property qudt:EngineeringValueTupleMember-elementType .
@@ -752,11 +780,10 @@ qudt:FixedIntervalTimeSeriesArray
 
 qudt:FixedIntervalTimeSeriesArrayType
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  A <em>Fixed Interval Time Series Array Type</em> is a data type that specifies the properties of arrays that hold time series data.
-  For example, data that has been sampled over uniformly spaced time intervals. 
-  A time series is a sequence of data points, measured typically at successive times, spaced at uniform or non-uniform time intervals.
-  </p>"""^^rdf:HTML ;
+  dcterms:description """A <em>Fixed Interval Time Series Array Type</em> is a data type that specifies the properties of arrays that hold time series data.
+ For example, data that has been sampled over uniformly spaced time intervals. 
+ A time series is a sequence of data points, measured typically at successive times, spaced at uniform or non-uniform time intervals.
+ </p>"""^^rdf:HTML ;
   rdfs:label "Fixed Interval Time Series Array Type" ;
   rdfs:subClassOf qudt:TimeSeriesArrayType .
 
@@ -766,7 +793,9 @@ qudt:FloatingPointEncodingType
   <p>A type for specifying an "Encoding" with the following instance(s): 
   "Double Precision Encoding", and "Single Precision Real Encoding".
   </p>"""^^rdf:HTML ;
-  dcterms:description "A \"Encoding\" with the following instance(s): \"Double Precision Encoding\", \"Single Precision Real Encoding\"." ;
+  dcterms:description """
+  A "Encoding" with the following instance(s): "Double Precision Encoding", "Single Precision Real Encoding".
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Floating Point Encoding" ;
   rdfs:subClassOf qudt:Encoding .
@@ -818,6 +847,19 @@ qudt:GroundCoordinateSystem
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Ground coordinate system" ;
   rdfs:subClassOf qudt:AerospaceCoordinateSystem .
+
+qudt:Heap
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>A heap is a specialized tree-based data structure that satisfies the condition: if B is a child node of A, then $key(A) \\ge key(B)$. 
+  This implies that an element with the greatest key is always in the root node, and so such a heap is sometimes called a max heap. 
+  Alternatively, if the comparison is reversed, the smallest element is always in the root node, which results in a min heap. 
+  The function or method that implements the key() operator is specified by the heap type.
+  </p>"""^^rdf:HTML ;
+  prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Heap_(data_structure)> ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Heap" ;
+  rdfs:subClassOf qudt:OrderedTree .
 
 qudt:HeterogenousArray
   a rdfs:Class, sh:NodeShape ;
@@ -1013,21 +1055,36 @@ qudt:List
 
 qudt:LocalCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A \"Trajectory Coordinate System\" with the following instance(s): \"Local vertical curvilinear coordinate system\", \"Local vertical local horizontal coordinate system\", \"Vehicle centered local vertical curvilinear coordinate system\"." ;
+  dcterms:description """
+  A "Trajectory Coordinate System" with the following instance(s):
+   "Local vertical curvilinear coordinate system",
+   "Local vertical local horizontal coordinate system",
+   "Vehicle centered local vertical curvilinear coordinate system".
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Local Coordinate System Type" ;
+  rdfs:label "Local Coordinate System" ;
   rdfs:subClassOf qudt:TrajectoryCoordinateSystem .
 
 qudt:LongIntegerType
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A Long Integer is an integer that can be represented in four octets (32 bits) of machine memory. Long integers may be signed or unsigned." ;
+  dcterms:description """
+  A "Long Integer" is an integer that can be represented in four octets (32 bits) of machine memory. 
+  Long integers may be signed or unsigned.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Long Integer Type" ;
   rdfs:subClassOf qudt:IntegerDatatype .
 
 qudt:LunarCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "Two slightly different coordinate frames are commonly used to define the orientation of the axes of a lunar body-fixed coordinate system: a mean Earth/rotation frame and a principal axis coordinate frame. The mean Earth/rotation frame (sometimes called the \"Mean Earth/polar axis\" frame) is a lunar body-fixed coordinate frame with the X-axis aligned with the mean direction from the Moon to the Earth and the Z-axis aligned with the mean axis of rotation of the Moon. The principal axis frame is a lunar body-fixed coordinate frame aligned with the principal axes of the Moon. Due to the fact that the Moon is synchronously rotating but is not exactly symmetric, the principal axes and the mean Earth/rotation axes of the Moon do not coincide." ;
+  dcterms:description """
+  Two slightly different coordinate frames are commonly used to define the orientation of the axes of a lunar body-fixed coordinate system:
+   a mean Earth/rotation frame and a principal axis coordinate frame. 
+  The mean Earth/rotation frame (sometimes called the "Mean Earth/polar axis" frame) is a lunar body-fixed coordinate frame.
+  This has the X-axis aligned with the mean direction from the Moon to the Earth and the Z-axis aligned with the mean axis of rotation of the Moon. 
+  The principal axis frame is a lunar body-fixed coordinate frame aligned with the principal axes of the Moon. 
+  Due to the fact that the Moon is synchronously rotating but is not exactly symmetric, the principal axes and the mean Earth/rotation axes of the Moon do not coincide.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Lunar Coordinate System" ;
   rdfs:subClassOf qudt:TrajectoryCoordinateSystem ;
@@ -1051,11 +1108,13 @@ qudt:Map
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Map Type" ;
   rdfs:seeAlso qudt:AssociativeArray ;
-  rdfs:subClassOf qudt:CollectionKind .
+  rdfs:subClassOf qudt:Collection .
 
 qudt:MarsCoordinateSystem
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A \"Trajectory Coordinate System\" with the following instance(s): \"Mars mean equator and IAU-Node of epoch\", \"Mars mean equator and prime meridian body-fixed\"." ;
+  dcterms:description """
+  A "Trajectory Coordinate System" with the following instance(s): "Mars mean equator and IAU-Node of epoch", "Mars mean equator and prime meridian body-fixed".
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Mars Coordinate System Type" ;
   rdfs:subClassOf qudt:TrajectoryCoordinateSystem ;
@@ -1161,7 +1220,7 @@ qudt:MultiSet
   dcterms:description "A bag is a set in which elements may be repeated." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Bag" ;
-  rdfs:subClassOf qudt:CollectionKind .
+  rdfs:subClassOf qudt:Collection .
 
 qudt:N-Tuple
   a rdfs:Class, sh:NodeShape ;
@@ -1184,7 +1243,7 @@ qudt:N-TupleType
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "N-Tuple Type" ;
-  rdfs:subClassOf qudt:TupleType ;
+  rdfs:subClassOf qudt:Tuple ;
   sh:property qudt:N-Tuple-elementType .
 
 qudt:NonRotatingInertialFrame
@@ -1241,13 +1300,7 @@ qudt:OnOffStateTypeEnumeration
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:subClassOf qudt:Enumeration .
 
-qudt:OpenCloseStateType
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Open Close State Type" ;
-  rdfs:subClassOf qudt:DiscreteState .
-
-qudt:OrderedCollectionKind
+qudt:OrderedCollection
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
   <p>An <em>Ordered Collection Kind</em> is an abstract data type that defines the properties of collection data structures whose members can be linearly ordered. 
@@ -1255,8 +1308,8 @@ qudt:OrderedCollectionKind
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Ordered Collection Kind" ;
-  rdfs:subClassOf qudt:CollectionKind ;
-  sh:property qudt:OrderedCollectionKind-orderingRelation .
+  rdfs:subClassOf qudt:Collection ;
+  sh:property qudt:OrderedCollection-orderingRelation .
 
 qudt:OrderedTree
   a rdfs:Class, sh:NodeShape ;
@@ -1267,7 +1320,7 @@ qudt:OrderedTree
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Ordered Tree Type" ;
-  rdfs:subClassOf qudt:OrderedCollectionKind ;
+  rdfs:subClassOf qudt:OrderedCollection ;
   rdfs:subClassOf qudt:Tree .
 
 qudt:OrderedType
@@ -1322,43 +1375,12 @@ qudt:PartialArray
   rdfs:label "Partial Array" ;
   rdfs:subClassOf qudt:Array .
 
-qudt:Percentage
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A Scalar Datatype for expressing a dimensionless ratio." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Percentage Type" ;
-  rdfs:subClassOf qudt:NumericType .
-
 qudt:PhysicalAddress
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A \"Structured Datatype\"." ;
   dcterms:description "A physical address is a pointer to a memory location." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Physical Address Type" ;
   rdfs:subClassOf qudt:CompositeDatatype .
-
-qudt:PolarCoordinates
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A set of  variables which fix a geometric object. 
-  If the coordinates of a point P are determined by the distance from P to the origin and the angle subtended by the radial vector at P and a fixed axis, they are known as polar coordinates. 
-  Typically, the angle is measured with respect to the x-axis." ;
-  </p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Polar Coordinate System Type" ;
-  rdfs:subClassOf qudt:Coordinates .
-
-qudt:PolarCoordinatesType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A set of  variables which fix a geometric object. 
-  If the coordinates of a point P are determined by the distance from P to the origin and the angle subtended by the radial vector at P and a fixed axis, they are known as polar coordinates. 
-  Typically, the angle is measured with respect to the x-axis." ;
-  </p>
-  """^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Polar Coordinate System Type" ;
-  rdfs:subClassOf qudt:CoordinateSystemType .
 
 qudt:Polarity
   a rdfs:Class, sh:NodeShape ;
@@ -1387,19 +1409,6 @@ qudt:PositiveIntegerType
   rdfs:subClassOf qudt:UnsignedType ;
   sh:disjoint qudt:SignedIntegerType .
 
-qudt:PriorityQueue
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Priority Queue</em> is a specialization of a queue where additionally each element has a priority associated with it. 
-  In a priority queue, an element with high priority is served before an element with low priority. 
-  If two elements have the same priority, they are served according to their order in the queue.
-  </p>
-  """^^rdf:HTML ;
-  prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Priority_queue> ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Priority Queue" ;
-  rdfs:subClassOf qudt:Queue .
-
 qudt:Quantifiable
   a rdfs:Class, sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -1414,11 +1423,7 @@ qudt:QuantityKindList
   </p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Quantity kind List" .
-
-qudt:QuantityKindsListShape
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Quantity kind List" ;
   rdfs:subClassOf rdf:List ;
   sh:property [
     sh:class qudt:QuantityKind ;
@@ -1428,7 +1433,7 @@ qudt:QuantityKindsListShape
     sh:or ( [
       sh:node ( ) ;
     ] [
-      sh:node qudt:QuantityKindsListShape ;
+      sh:node qudt:QuantityKindList ;
     ] ) ;
     sh:path rdf:rest ;
   ] .
@@ -1455,7 +1460,7 @@ qudt:RawValueTupleMemberType
   a rdfs:Class, sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Raw value tuple member type" ;
-  rdfs:subClassOf qudt:TupleMemberType ;
+  rdfs:subClassOf qudt:TupleMember ;
   sh:property qudt:RawValueTupleMember-elementType .
 
 qudt:RealDatatype
@@ -1623,7 +1628,7 @@ qudt:Sequence
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Sequence" ;
-  rdfs:subClassOf qudt:CollectionKind .
+  rdfs:subClassOf qudt:Collection .
 
 qudt:Set
   a rdfs:Class, sh:NodeShape ;
@@ -1635,7 +1640,7 @@ qudt:Set
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Set Type" ;
-  rdfs:subClassOf qudt:CollectionKind .
+  rdfs:subClassOf qudt:Collection .
 
 qudt:ShortIntegerType
   a rdfs:Class, sh:NodeShape ;
@@ -1679,7 +1684,9 @@ qudt:SignedLongIntegerType
 
 qudt:SignedMediumIntegerType
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A \"Signed Medium Integers\" is an integer of 24 bits that can take on both positive and negative values." ;
+  dcterms:description """
+  A "Signed Medium Integers" is an integer of 24 bits that can take on both positive and negative values.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Signed Integer Type" ;
   rdfs:subClassOf qudt:SignedIntegerType .
@@ -1711,9 +1718,8 @@ qudt:SignedVariableLengthIntegerType
   rdfs:subClassOf qudt:VariableLengthIntegerType .
 
 qudt:SignednessType
-  a owl:Class, rdfs:Class, sh:NodeShape ;
+  a rdfs:Class, sh:NodeShape ;
   dcterms:description "Specifics whether a value should be signed or unsigned." ;
-  owl:oneOf ( qudt:SIGNED qudt:UNSIGNED ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Signedness type" ;
@@ -1786,7 +1792,7 @@ qudt:StringEncodingType
    </p>
   """^^rdf:HTML ;
   dcterms:description """
-  An "Encoding" with the following instance(s): "qudt:UTF8-StringEncoding", qudt:UTF16-StringEncoding".
+  An "Encoding" with the following instance(s): "qudt:UTF8-StringEncoding", "qudt:UTF16-StringEncoding".
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "String Encoding Type" ;
@@ -1795,7 +1801,7 @@ qudt:StringEncodingType
 qudt:StringType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A <em>String Datatype</em> is a data type that specifies the properties of a list structure that holds characters.
+  <p>A <em>String Type</em> is a data type that specifies the properties of a list structure that holds characters.
   </p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -1810,7 +1816,7 @@ qudt:StringType
 qudt:StringUTF16
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>String UTF-16 Type is a string data type that specifies the properties of string data structures which encode strings using the UTF-16 encoding. 
+  <p><em>String UTF-16</em> is a string data type that specifies the properties of string data structures which encode strings using the UTF-16 encoding. 
   UTF-16 is the native internal representation of text in many software systems, for example:
   </p>
   <ol>
@@ -1822,7 +1828,7 @@ qudt:StringUTF16
   </ol>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "String UTF16 Type" ;
+  rdfs:label "String UTF16" ;
   rdfs:subClassOf qudt:StringType ;
   rdfs:subClassOf qudt:TextStringType ;
   sh:property qudt:StringUTF16-memberDatatype .
@@ -1845,7 +1851,7 @@ qudt:StringUTF8
 qudt:StructuredDatatype
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A <em>Structured Datatype</em>, in contrast to a scalar data type, is used to characterize classes of more complex data structures.
+  <p>A <em>Structured Datatype</em>, in contrast to a scalar data type, is used to characterize classes of complex data structures.
   Examples are collections, linked and indexed lists, trees, ordered trees, and multi-dimensional file formats.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -1863,7 +1869,8 @@ qudt:Table
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Table Type" ;
-  rdfs:subClassOf qudt:StructuredData ;
+  rdfs:subClassOf qudt:StructuredDatatype ;
+  sh:property qudt:DimensionsPropertyShape ;
   sh:property qudt:Table-byRow ;
   sh:property qudt:Table-columns ;
   sh:property qudt:Table-dimensionality ;
@@ -1880,7 +1887,7 @@ qudt:TaggedEnumeration
 qudt:TextStringType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  A text string. Encodings can be specified as subclass or in connection to character arrays in Structured Datatypes.
+  A <em>Text String Type</em> has encodings that are specified in subclasses or in connection to character arrays in <em>Structured Datatypes</em>.
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Text String Type" ;
@@ -1905,19 +1912,22 @@ qudt:ThreeBodyRotatingCoordinateSystem
   rdfs:label "Three Body Rotating Coordinate System Type" ;
   rdfs:subClassOf qudt:AerospaceCoordinateSystem .
 
-qudt:ThreeTupleType
+qudt:ThreeTuple
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A three-tuple is a tuple with exactly three members. A Three-Tuple Type is a data type that defines the type properties of a class of three-tuples and their members." ;
-  rdfs:label "Three-Tuple Type" ;
-  rdfs:subClassOf qudt:N-TupleType ;
-  sh:property qudt:Three-Tuple-elementType ;
-  sh:property qudt:Three-Tuple-elementTypeCount .
+  dcterms:description """
+  A three-tuple is a tuple with exactly three members. 
+  A Three-Tuple Type is a data type that defines the type properties of a class of three-tuples and their members.
+  """ ;
+  rdfs:label "Three-Tuple" ;
+  rdfs:subClassOf qudt:N-Tuple ;
+  sh:property qudt:ThreeTuple-elementType ;
+  sh:property qudt:ThreeTuple-elementTypeCount .
 
 qudt:Time
   a rdfs:Class, sh:NodeShape ;
   rdfs:comment "The class of data values that denote a point in time. Time values may be encoded in a 12-hour clock or a 24-hour clock, such as 1:35 AM, or 13:35." ;
   rdfs:label "Time" ;
-  rdfs:subClassOf qudt:Scalar ;
+  rdfs:subClassOf qudt:ScalarDatatype ;
   sh:property qudt:Time-type .
 
 qudt:TimeDataType
@@ -1931,9 +1941,11 @@ qudt:TimeDataType
 
 qudt:TimeInterval
   a rdfs:Class, sh:NodeShape ;
-  rdfs:comment "A relative interval that is an increment in time. For example, this is used in time series arrays to express the time point of a vector of values." ;
+  rdfs:comment """A relative interval that is an increment in time. 
+  For example, this is used in time series arrays to express the time point of a vector of values.
+  """ ;
   rdfs:label "Time interval" ;
-  rdfs:subClassOf qudt:Parameter ;
+  rdfs:subClassOf qudt:Concept ;
   sh:property qudt:TimeInterval-type .
 
 qudt:TimeSeriesArray
@@ -1947,6 +1959,17 @@ qudt:TimeSeriesArray
   rdfs:subClassOf qudt:Array ;
   sh:property qudt:TimeSeriesArray-incrementDatatype ;
   sh:property qudt:TimeSeriesArray-vector .
+
+qudt:TimeSeriesArrayType
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>A <em>Time Series Array Type</em> is a data type that specifies the properties of arrays that hold time series data. 
+  A time series is a sequence of data points, measured at successive time intervals. 
+  The time intervals may be uniformly or non-uniformly spaced.
+  </p>
+  """^^rdf:HTML ;
+  rdfs:label "Time Series Array Type" ;
+  rdfs:subClassOf qudt:ArrayType .
 
 qudt:TimeStringType
   a rdfs:Class, sh:NodeShape ;
@@ -1965,7 +1988,13 @@ qudt:TrajectoryCoordinateSystem
 
 qudt:Tree
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A \"Tree\" is a data type that defines the properties of data structures that represent trees. A tree is a graph data structure accessed beginning at the root node. Each node is either a leaf or an internal node. An internal node has one or more child nodes and is called the parent of its child nodes. Leaf nodes have no chidren. Nodes that share the same parent are siblings. In graph theoretic terminology, a tree is a connected, undirected, acyclic graph." ;
+  dcterms:description """
+  A "Tree" is a data type that defines the properties of data structures that represent trees. 
+  Each node is either a leaf or an internal node. 
+  An internal node has one or more child nodes and is called the parent of its child nodes. 
+  Leaf nodes have no chidren. Nodes that share the same parent are siblings. 
+  In graph theoretic terminology, a tree is a connected, undirected, acyclic graph.
+  """ ;
   prov:wasInfluencedBy <http://en.wikipedia.org/wiki/Tree_(data_structure)> ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Tree Type" ;
@@ -1976,14 +2005,30 @@ qudt:Triplet
   dcterms:description "A \"Tuple\"." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Triplet" ;
-  rdfs:seeAlso qudt:Three-Tuple ;
-  rdfs:seeAlso qudt:ThreeTupleType ;
-  rdfs:subClassOf qudt:Three-Tuple ;
-  rdfs:subClassOf qudt:ThreeTupleType .
+  rdfs:seeAlso qudt:ThreeTuple ;
+  rdfs:subClassOf qudt:ThreeTuple .
 
-qudt:TupleMemberType
+qudt:Tuple
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A Tuple Member Type is a data type that defines the properties of a member of a tuple. It is used to provide fine grained type specification to the elements of tuples." ;
+  dcterms:description """
+  <p>The term <em>Tuple</em> originated as an abstraction of the sequence: single, double, triple, quadruple, quintuple, n-tuple. 
+  In mathematics, a tuple is a finite sequence (also known as an <em>Ordered List</em> of objects, each of a specified type. 
+  The <em>n</em> can be any non-negative integer.
+  </p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Tuple" ;
+  rdfs:subClassOf qudt:CompositeDatatype ;
+  sh:property qudt:Tuple-elementType ;
+  sh:property qudt:Tuple-elementTypeCount ;
+  sh:property qudt:Tuple-length .
+
+qudt:TupleMember
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p><em>Tuple Member</em> defines the properties of a member of a tuple. 
+  It is used to provide fine grained type specification to the elements of tuples.
+  </p>
+  """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Tuple Member Type" ;
   rdfs:subClassOf qudt:CompositeDatatype ;
@@ -1992,13 +2037,31 @@ qudt:TupleMemberType
 
 qudt:TupleType
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "<p>The term <em>Tuple</em> originated as an abstraction of the sequence: single, double, triple, quadruple, quintuple, n-tuple.  In mathematics, a tuple is a finite sequence (also known as an <em>Ordered List</em> of objects, each of a specified type. The <em>n</em> can be any non-negative integer.</p>"^^rdf:HTML ;
+  dcterms:description """
+  <p><em>Tuple</em> originated as an abstraction of the sequence: single, double, triple, quadruple, quintuple, n-tuple.  
+  In mathematics, a tuple is a finite sequence (also known as an <em>Ordered List</em> of objects, each of a specified type. 
+  The <em>n</em> can be any non-negative integer.
+  </p>
+  """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Tuple Type" ;
   rdfs:subClassOf qudt:CompositeDatatype ;
   sh:property qudt:Tuple-elementType ;
   sh:property qudt:Tuple-elementTypeCount ;
   sh:property qudt:Tuple-length .
+
+qudt:TwoTuple
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  A 2-tuple is called a pair. 
+  For example, a complex number can be represented as a 2-tuple.
+  2D coordinates are sometimes represented as 2-tuples.
+  """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Two-Tuple" ;
+  rdfs:subClassOf qudt:N-Tuple ;
+  sh:property qudt:TwoTuple-elementType ;
+  sh:property qudt:TwoTuple-elementTypeCount .
 
 qudt:TwoTupleType
   a rdfs:Class, sh:NodeShape ;
@@ -2022,7 +2085,18 @@ qudt:TypeMatrix
   That is, the members of this class are matrices with cells that contain datatypes (c.f. type:Datatype) and are used to describe the datatype structure of other matrices.
   """ ;
   rdfs:label "Type matrix" ;
-  rdfs:subClassOf qudt:MatrixType .
+  rdfs:subClassOf qudt:Matrix .
+
+qudt:TypeVector
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>A <em>Type Vector</em> is a vector whose elements are data types. 
+  They are used to specify the type of each component of a vector or class of vectors. 
+  </p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Type vector" ;
+  rdfs:subClassOf qudt:Vector ;
+  sh:property qudt:TypeVector-datatype .
 
 qudt:UnsignedBigIntegerType
   a rdfs:Class, sh:NodeShape ;
@@ -2182,17 +2256,6 @@ qudt:YesNoType
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Yes no type" ;
   rdfs:subClassOf qudt:EnumeratedValue .
-
-qudt:MassPropertiesArray
-  a owl:Class ;
-  dcterms:description """
-  <p>A <em>Mass Properties Array</em> holds, for an object, four values for the properties:
-   Center of Gravity, Mass, Moment of Inertia, and Product of Inertia. 
-  """ ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Mass Properties Array" ;
-  rdfs:subClassOf qudt:HeterogenousArray ;
-  sh:property qudt:QuantityKindsPropertyShape .
 
 dcterms:contributor
   a rdf:Property ;
@@ -2770,7 +2833,9 @@ qudt:orderedType
 
 qudt:orderingRelation
   a rdf:Property ;
-  dcterms:description "This property identifies the mathematical comparison operator (such as \"<\" or \">\") that is used to order the elements of a collection." ;
+  dcterms:description """
+  This property identifies the mathematical comparison operator (such as "<" or ">") that is used to order the elements of a collection.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Ordering Relation" .
 
@@ -3027,7 +3092,7 @@ qudt:zCoordinateDefinition
   Specification of coordinate systems is also covered.
   </p>
   """^^rdf:HTML ;
-  dcterms:modified "2024-11-22T14:54:24-05:00"^^xsd:dateTime ;
+  dcterms:modified "2025-04-02T10:54:24-05:00"^^xsd:dateTime ;
   dcterms:rights """
   <p>The QUDT Ontologies are issued under a Creative Commons Attribution 4.0 International License (CC BY 4.0), available  <a href="https://creativecommons.org/licenses/by/4.0/">here</a>. 
   Attribution should be made to <a href="https://www.qudt.org">QUDT.org</a>.
@@ -3142,8 +3207,14 @@ qudt:BitAligned
 
 qudt:BitField
   a rdfs:Datatype ;
+  dcterms:description """
+  <p>A bit field is a common idiom used in computer programming to store a set of Boolean datatype flags compactly, as a series of bits. 
+  The bit field is stored in an integral type of known, fixed bit-width. 
+  Each Boolean flag is stored in a separate bit. 
+  Usually the source code will define a set of constants, each a power of two, that semantically associate each individual bit with its respective Boolean flag. 
+  The bitwise operators and, or, and not are used in combination to set, reset and test the flags.
+  </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "bitfield" ;
   rdfs:subClassOf xsd:string .
 
 qudt:BooleanEncoding
@@ -3157,6 +3228,24 @@ qudt:BooleanType-encoding
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:class qudt:BooleanEncodingType ;
   sh:path qudt:encoding .
+
+qudt:ByColumn
+  a qudt:ArrayDataOrder ;
+  dtype:literal "byColumn" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "By Column" .
+
+qudt:ByLeftMostIndex
+  a qudt:ArrayDataOrder ;
+  dtype:literal "byLeftMostIndex" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "By Left Most Index" .
+
+qudt:ByRow
+  a qudt:ArrayDataOrder ;
+  dtype:literal "byRow" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "By row" .
 
 qudt:ByteAligned
   a qudt:AlignmentType ;
@@ -3187,7 +3276,9 @@ qudt:CT_COUNTABLY-INFINITE
 qudt:CT_FINITE
   a qudt:CardinalityType ;
   dcterms:description """
-  Any set $X$ with cardinality less than that of the natural numbers, or $| X | \\\\; <  \\; | \\\\mathbb N | $, is said to be a finite set.
+  Any set $X$ with cardinality less than that of the natural numbers, or
+  $$| X | \\; <  \\; | \\mathbb N | $$
+  is said to be a finite set.
   """^^qudt:LatexString ;
   dtype:literal "finite" ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -3268,20 +3359,13 @@ qudt:CompositeDatatype-padding
   sh:maxCount 1 ;
   sh:path qudt:padding .
 
-qudt:CompositionTreeType-compositionFunction
+qudt:CompositionTree-compositionFunction
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:class qudt:CompositionFunction ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
   sh:path qudt:function .
-
-qudt:Container-elementTypeCount
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
-  sh:hasValue 1 ;
-  sh:path qudt:elementTypeCount .
 
 qudt:CoordinateSystem-abbreviation
   a sh:PropertyShape ;
@@ -3298,9 +3382,16 @@ qudt:CoordinateSystem-acronym
 qudt:CoordinateSystem-coordinateCenter
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:CoordinateCenterType ;
+  sh:class qudt:CoordinateCenterKind ;
   sh:maxCount 1 ;
   sh:path qudt:coordinateCenter .
+
+qudt:CoordinateSystem-originDefinition
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:datatype xsd:string ;
+  sh:maxCount 1 ;
+  sh:path qudt:originDefinition .
 
 qudt:CoordinateSystem-referenceFrame
   a sh:PropertyShape ;
@@ -3308,14 +3399,6 @@ qudt:CoordinateSystem-referenceFrame
   sh:class qudt:ReferenceFrame ;
   sh:maxCount 1 ;
   sh:path qudt:referenceFrame .
-
-qudt:CoordinateSystemType-originDefinition
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:string ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
-  sh:path qudt:originDefinition .
 
 qudt:Coordinates-2D-DoublePrecision-double_X
   a sh:PropertyShape ;
@@ -3446,6 +3529,28 @@ qudt:DataSetElement-quantityKind
   sh:class qudt:QuantityKind ;
   sh:maxCount 1 ;
   sh:path qudt:hasQuantityKind .
+
+qudt:Datatype
+  a sh:NodeShape ;
+  sh:property qudt:Datatype-ansiSQLName ;
+  sh:property qudt:Datatype-basis ;
+  sh:property qudt:Datatype-bounded ;
+  sh:property qudt:Datatype-cName ;
+  sh:property qudt:Datatype-cardinality ;
+  sh:property qudt:Datatype-id ;
+  sh:property qudt:Datatype-javaName ;
+  sh:property qudt:Datatype-jsName ;
+  sh:property qudt:Datatype-matlabName ;
+  sh:property qudt:Datatype-microsoftSQLServerName ;
+  sh:property qudt:Datatype-mySQLName ;
+  sh:property qudt:Datatype-odbcName ;
+  sh:property qudt:Datatype-oleDBName ;
+  sh:property qudt:Datatype-oracleSQLName ;
+  sh:property qudt:Datatype-orderedType ;
+  sh:property qudt:Datatype-protocolBuffersName ;
+  sh:property qudt:Datatype-pythonName ;
+  sh:property qudt:Datatype-vbName ;
+  vaem:isElaboratedIn <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> .
 
 qudt:Datatype-ansiSQLName
   a sh:PropertyShape ;
@@ -3639,7 +3744,6 @@ qudt:DimensionalityPropertyShape
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
   sh:maxCount 1 ;
-  sh:minCount 0 ;
   sh:path qudt:dimensionality .
 
 qudt:DimensionalityShape
@@ -3684,7 +3788,7 @@ qudt:DiscreteState-inverted
 qudt:EarthCoordinateSystem-coordinateCenter
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:CoordinateCenterType ;
+  sh:class qudt:CoordinateCenterKind ;
   sh:hasValue qudt:CCT_EarthCentered ;
   sh:path qudt:coordinateCenter .
 
@@ -3903,7 +4007,7 @@ qudt:LongUnsignedIntegerEncoding
 
 qudt:LunarCoordinateSystem-coordinateCenter
   a sh:PropertyShape ;
-  sh:class qudt:CoordinateCenterType ;
+  sh:class qudt:CoordinateCenterKind ;
   sh:hasValue qudt:CCT_MoonCentered ;
   sh:path qudt:coordinateCenter .
 
@@ -3943,9 +4047,20 @@ qudt:Major
 qudt:MarsCoordinateSystem-coordinateCenter
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:CoordinateCenterType ;
+  sh:class qudt:CoordinateCenterKind ;
   sh:hasValue qudt:CCT_MarsCentered ;
   sh:path qudt:coordinateCenter .
+
+qudt:MassPropertiesArray
+  a rdf:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>A <em>Mass Properties Array</em> holds, for an object, four values for the properties:
+   Center of Gravity, Mass, Moment of Inertia, and Product of Inertia. 
+  """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Mass Properties Array" ;
+  rdfs:subClassOf qudt:HeterogenousArray ;
+  sh:property qudt:QuantityKindsPropertyShape .
 
 qudt:MatrixElementOrder-byRow
   a sh:PropertyShape ;
@@ -4066,12 +4181,6 @@ qudt:N-Tuple-elementType
   sh:minCount 0 ;
   sh:path qudt:elementDatatype .
 
-qudt:No
-  a qudt:YesNoType ;
-  dtype:literal "N" ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "No" .
-
 qudt:NonModifiableParameter
   a qudt:ParameterModifiabilityType ;
   dtype:code "0" ;
@@ -4117,13 +4226,6 @@ qudt:OctetEncoding
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "OCTET Encoding" .
 
-qudt:OnState
-  a qudt:OnOffStateType ;
-  dtype:code "1" ;
-  dtype:literal "on" ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "On" .
-
 qudt:OneMeansOff
   a qudt:OnOffStateType ;
   dtype:literal "off" ;
@@ -4131,14 +4233,7 @@ qudt:OneMeansOff
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "One means off" .
 
-qudt:Open
-  a qudt:OpenCloseStateType ;
-  dtype:code "1" ;
-  dtype:literal "open" ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Open" .
-
-qudt:OrderedCollectionKind-orderingRelation
+qudt:OrderedCollection-orderingRelation
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:class dtype:ComparisonOperator ;
@@ -4163,7 +4258,7 @@ qudt:QuantityKindsPropertyShape
   a sh:PropertyShape ;
   rdfs:comment "Invalid quantity kinds list - TODO: SPARQL Query" ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:node qudt:QuantityKindsListShape ;
+  sh:node qudt:QuantityKindList ;
   sh:path qudt:hasQuantityKindsList .
 
 qudt:QuantityValueType-basis
@@ -4381,7 +4476,7 @@ qudt:ScalarDatatype-minInclusive
 qudt:ScalarDatatype-rdfsDatatype
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class rdfs:Literal ;
+  sh:class rdfs:Datatype ;
   sh:maxCount 1 ;
   sh:path qudt:rdfsDatatype .
 
@@ -4480,7 +4575,11 @@ qudt:StateSpaceVector-coordinateSystem
 qudt:StringType-dimensionality
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
+  sh:or ( [
+    sh:datatype xsd:integer ;
+  ] [
+    sh:datatype xsd:int ;
+  ] ) ;
   sh:path qudt:dimensionality .
 
 qudt:StringType-elementType
@@ -4604,14 +4703,14 @@ qudt:TextTypeUnion
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Text Type Union" .
 
-qudt:Three-Tuple-elementType
+qudt:ThreeTuple-elementType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:TupleMemberType ;
+  sh:class qudt:TupleMember ;
   sh:minCount 0 ;
   sh:path qudt:elementDatatype .
 
-qudt:Three-Tuple-elementTypeCount
+qudt:ThreeTuple-elementTypeCount
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
@@ -4671,7 +4770,7 @@ qudt:True
 qudt:Tuple-elementType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:TupleMemberType ;
+  sh:class qudt:TupleMember ;
   sh:path qudt:elementDatatype .
 
 qudt:Tuple-elementTypeCount
@@ -4714,6 +4813,25 @@ qudt:Two-Tuple-elementTypeCount
   sh:datatype xsd:integer ;
   sh:hasValue 2 ;
   sh:path qudt:elementTypeCount .
+
+qudt:TwoTuple-elementType
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:minCount 0 ;
+  sh:path qudt:elementDatatype .
+
+qudt:TwoTuple-elementTypeCount
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:datatype xsd:integer ;
+  sh:hasValue 2 ;
+  sh:path qudt:elementTypeCount .
+
+qudt:TypeVector-datatype
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:class qudt:DataType ;
+  sh:path qudt:datatype .
 
 qudt:UNARY-FUNCTION
   a qudt:FunctionDatatype ;
