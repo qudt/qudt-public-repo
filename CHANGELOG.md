@@ -14,6 +14,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
     This allows some dimensionless counts to have more intuitive URIs, such as unit:PERCENT-PER-TEN-THOUSAND instead of
     unit:PERCENT-PER-DecaKiloCOUNT.
   - unit:COUNT was added as an exact match with unit:NUM. Both units have a quantity kind of Count (and others).
+- New Coordinate Systems SHACL schema.
+  - OWL schema for coordinate systems is work-in-progress.
 
 ### Deprecated
 
@@ -25,7 +27,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `qk:Emissivity` to `unit:PERCENT`
 - Fixed mistakes on MicroW-PER-CentiM2-MicroM-SR, unit:W-PER-M2-MicroM, unit:W-PER-M2-MicroM-SR, J-PER-M2-SEC0pt5-K variously replacing qudit:unit to qudt:Unit, adding SI as applicable system, and removing @en-us tag from a plainTextDescription, changing conversionMultiplierSM to conversionMultiplierSN, and adding decimal point to xsd:double values, and avoiding using explicit datatypes on conversion factors.
 - Upgraded the closed world validation constraint from sh:Info to sh:Violation. Errors will now cause the build to fail.
-- Untangled unit:AWG and unit:CCY_AWG that had becomed combined in migration of currency into units graph
+- Untangled unit:AWG and unit:CCY_AWG that had become combined in migration of currency into units graph
+- Updated the SHACL schema for datatypes to specify qudt:Concept as the ultimate parent. OWL schema for datatypes
+  is work-in-progress.
+- Refactored coordinate systems into a new SHACL schema for coordinate systems. OWL schema for coordinate systems
+  is work-in-progress.
 
 ## [3.1.0] - 2025-03-20
 
