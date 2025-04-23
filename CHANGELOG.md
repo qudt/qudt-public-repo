@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.1.1] - 2025-04-23
+
 ### Added
 
 - New Units
@@ -16,11 +18,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - unit:COUNT was added as an exact match with unit:NUM. Both units have a quantity kind of Count (and others).
 - New Coordinate Systems SHACL schema.
   - OWL schema for coordinate systems is work-in-progress.
-
-### Deprecated
-
-- Removed 8 invalid dimension vectors (without deprecation since they were invalid)
-- Quantity kind ComplexPower, replaced by ElectricPower. ActivePower, ReactivePower and ApparentPower are still available, having skos:broader of ElectricPower.
 
 ### Changed
 
@@ -35,6 +32,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Refactored coordinate systems into a new SHACL schema for coordinate systems. OWL schema for coordinate systems
   is work-in-progress.
 - Tweaked the definition and applicableUnits for quantitykind:StateOfCharge
+
+### Deprecated
+
+- Removed 8 invalid dimension vectors (without deprecation since they were invalid)
+- Quantity kind ComplexPower, replaced by ElectricPower. ActivePower, ReactivePower and ApparentPower are still available, having skos:broader of ElectricPower.
 
 ## [3.1.0] - 2025-03-20
 
@@ -234,7 +236,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.1...HEAD
+[3.1.1]: https://github.com/qudt/qudt-public-repo/compare/v3.1.0...v3.1.1
 [3.1.0]: https://github.com/qudt/qudt-public-repo/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/qudt/qudt-public-repo/compare/v2.1.47...v3.0.0
 [2.1.47]: https://github.com/qudt/qudt-public-repo/compare/v2.1.46...v2.1.47
