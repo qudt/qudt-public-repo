@@ -4,7 +4,7 @@ We’re excited to announce that QUDT.org has signed a Letter of Intent with the
 
 PCA brings deep expertise in industrial data ontologies, open standards, and trusted stewardship.
 Together, we will continue to build on the strong foundation of QUDT while preserving its open-
-source model and commitment to community involvement. 
+source model and commitment to community involvement.
 
 Looking forward to working closely with Lars Berthinussen and the PCA team on this shared vision.
 
