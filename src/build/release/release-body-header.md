@@ -1,8 +1,10 @@
-## Please note!
+## Announcement
 
-This new Release adds some significant new functionality by generating 'factor units' for most units. This will be a new relation that could help when defining profiles (still coming). For this reason the semantic version is incremented from 3.0.0 to 3.1.0.
+We’re excited to announce that QUDT.org has signed a Letter of Intent with the [POSC Caesar Association (PCA)](https://www.posccaesar.org/). This collaboration marks an exciting new chapter for QUDT — ensuring its future growth, openness, and continued service to our global community of users.
 
-We are also introducing the idea of a ContextualUnit that allows users to introduce domain-specific units (recall our discussion about CFU, Colony Forming Units, suggested by @Toby-Broom and @dr-shorthair). We will depend on the introduction of profiles to keep these additions from overwhelming the vocabularies. Such ContextualUnits will be related to more generic versions of units using skos:broader.
+PCA brings deep expertise in industrial data ontologies, open standards, and trusted stewardship.
+Together, we will continue to build on the strong foundation of QUDT while preserving its open-
+source model and commitment to community involvement.
 
-Finally, we are continuing to refine the automation of our build process to minimize human error, while hopefully not making the contribution process too complicated. Feedback is always welcome.
+Looking forward to working closely with Lars Berthinussen and the PCA team on this shared vision.
 
