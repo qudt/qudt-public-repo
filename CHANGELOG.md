@@ -11,6 +11,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - New Units
   - unit:KiloPOISE
+- New Distribution Files
+  - qudt-allinone.ttl: the union of all vocab files and the shacl schema
 
 ### Fixed
 
