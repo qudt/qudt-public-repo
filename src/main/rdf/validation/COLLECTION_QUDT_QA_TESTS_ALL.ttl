@@ -550,6 +550,115 @@ qudt:prefixMultiplierSnShape
   ] ;
   sh:targetClass qudt:Prefix .
 
+qudt:scaledUnitMultiplierShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment """
+       Ensure that
+         - if unit u has factor units f_1, ..., f_n (n <= 10!)
+         - and if u has a mulitipler m_u
+         - and if all f_i have a multiplier m_i and an exponent e_i
+      then
+         m_u = (Product over all i:) m_i ^ e_i
+    """ ;
+    sh:message """
+    {$this}
+    Multiplier differs from the multiplier calculated from its factor units.
+    actual multiplier : {?actualMultiplier}
+    calculated        : {?calculatedMultiplier}
+    badness           : {?relDiff}
+    The badness is the relative difference of the difference and the actual or calculated multiplier, whichever is bigger. A badness >> 0 is a real issue to look at. A badness ~ 0 is usually due to a difference in precision and should be resolved by using the calculated value.
+    A
+    """ ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:select """
+
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?this ?relDiff
+       (IF(?actualMultiplier = ?calculatedMultiplier, "Equal", "Not Equal") AS ?equalityFlag)
+       ?actualMultiplier ?calculatedMultiplier
+WHERE {
+  ?this a qudt:Unit .
+  OPTIONAL { ?this qudt:conversionMultiplier ?actualMultiplier . }
+
+  # Subquery to compute and concatenate factor unit contributions
+  {
+    SELECT ?this (GROUP_CONCAT(?factorContribution; SEPARATOR="|") AS ?contributions)
+    WHERE {
+      ?this qudt:hasFactorUnit ?factor .
+      ?factor qudt:hasUnit ?baseUnit ;
+              qudt:exponent ?exponent .
+      ?baseUnit qudt:conversionMultiplier ?baseMultiplier .
+      # Compute contribution (exponents 0 to 8)
+      BIND(ABS(?exponent) as ?absoluteExponent)
+            BIND(if (?exponent < 0, 1.0 / ?baseMultiplier, ?baseMultiplier ) as ?multiplier)
+            BIND(
+        IF(?absoluteExponent = 0, 1.0,
+        IF(?absoluteExponent = 1, ?multiplier,
+        IF(?absoluteExponent = 2, ?multiplier * ?multiplier,
+        IF(?absoluteExponent = 3, ?multiplier * ?multiplier * ?multiplier,
+        IF(?absoluteExponent = 4, ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+        IF(?absoluteExponent = 5, ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+        IF(?absoluteExponent = 6, ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+        IF(?absoluteExponent = 7, ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+        IF(?absoluteExponent = 8, ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                                            CONCAT("CANNOT HANDLE EXPONENT ", ?exponent)))))))))) AS ?factorContribution )
+
+
+    }
+    GROUP BY ?this
+  }
+    # Disassemble contributions into up to 10 variables
+    BIND(COALESCE(CONCAT("|",?contributions), "|") AS ?contribString)
+
+    # Make sure we don't accidentally swallow stuff that isn't made of numbers
+    FILTER(REGEX("[0-9\\\\-\\\\.\\\\|]+", ?contribString))
+
+    BIND(REPLACE(?contribString, ".*\\\\|", "") as ?f1)
+    BIND(SUBSTR(?contribString, 0, STRLEN(?contribString) - STRLEN(?f1)) as ?f1removed)
+    BIND(REPLACE(?f1removed, ".*\\\\|", "") as ?f2)
+    BIND(SUBSTR(?f1removed, 0, STRLEN(?f1removed) - STRLEN(?f2)) as ?f2removed)
+    BIND(REPLACE(?f2removed, ".*\\\\|", "") as ?f3)
+  \tBIND(SUBSTR(?f2removed, 0, STRLEN(?f2removed) - STRLEN(?f3)) as ?f3removed)
+    BIND(REPLACE(?f3removed, ".*\\\\|", "") as ?f4)
+    BIND(SUBSTR(?f3removed, 0, STRLEN(?f3removed) - STRLEN(?f4)) as ?f4removed)
+    BIND(REPLACE(?f4removed, ".*\\\\|", "") as ?f5)
+    BIND(SUBSTR(?f4removed, 0, STRLEN(?f4removed) - STRLEN(?f5)) as ?f5removed)
+    BIND(REPLACE(?f5removed, ".*\\\\|", "") as ?f6)
+    BIND(SUBSTR(?f5removed, 0, STRLEN(?f5removed) - STRLEN(?f6)) as ?f6removed)
+    BIND(REPLACE(?f6removed, ".*\\\\|", "") as ?f7)
+    BIND(SUBSTR(?f6removed, 0, STRLEN(?f6removed) - STRLEN(?f7)) as ?f7removed)
+    BIND(REPLACE(?f7removed, ".*\\\\|", "") as ?f8)
+    BIND(SUBSTR(?f7removed, 0, STRLEN(?f7removed) - STRLEN(?f8)) as ?f8removed)
+    BIND(REPLACE(?f8removed, ".*\\\\|", "") as ?f9)
+  # Compute calculatedMultiplier by multiplying all contributions
+    BIND(COALESCE(xsd:decimal(?f1), 1.0)
+        * COALESCE(xsd:decimal(?f2), 1.0)
+        * COALESCE(xsd:decimal(?f3), 1.0)
+        * COALESCE(xsd:decimal(?f4), 1.0)
+        * COALESCE(xsd:decimal(?f5), 1.0)
+        * COALESCE(xsd:decimal(?f6), 1.0)
+        * COALESCE(xsd:decimal(?f7), 1.0)
+        * COALESCE(xsd:decimal(?f8), 1.0)
+        * COALESCE(xsd:decimal(?f9), 1.0) as ?calculatedMultiplier)
+
+    BIND (?actualMultiplier - ?calculatedMultiplier as ?diff)
+    BIND (IF (?actualMultiplier = 0 , 0.0, ABS(?diff) / ABS(?actualMultiplier)) as ?relDiffAct)
+    BIND (IF( ?calculatedMultiplier = 0, 0.0, ABS(?diff) / ABS(?calculatedMultiplier)) as ?relDiffCalc)
+    BIND(IF(?relDiffAct > ?relDiffCalc, ?relDiffAct, ?relDiffCalc) as ?relDiff)
+    FILTER(?actualMultiplier != ?calculatedMultiplier)
+}
+ORDER BY DESC(?relDiff)
+""" ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
 qudt:standardUncertaintySnShape
   rdfs:comment "qudt:standardUncertainty must match qudt:standardUncertaintySN if present" ;
   sh:sparql [
