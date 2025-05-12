@@ -12,6 +12,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - New Units
   - unit:KiloPOISE
 
+### Changed
+
+- conversion multipliers:
+  a SHACL check was added to compare the conversion multipliers of derived units withthe conversion multiplier obtained from the factor units, failing the build if there is a discrepancy. This is a first step toward more stability with regard to conversion multipliers.
+
 ### Fixed
 
 - Corrected symbol of `unit:BU_US` and `unit:GAL_US`, which both were `in³`.
