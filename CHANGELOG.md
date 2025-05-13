@@ -12,6 +12,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - New Units
   - unit:KiloPOISE
 
+### Changed
+
+- Increased the severity of some validation constraints
+
 ### Fixed
 
 - Corrected symbol of `unit:BU_US` and `unit:GAL_US`, which both were `in³`.
