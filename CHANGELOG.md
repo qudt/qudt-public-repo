@@ -11,6 +11,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - New Units
   - unit:KiloPOISE
+  - unit:CCY_BGN-PER-KiloW-HR
+  - unit:CCY_CHF-PER-KiloW-HR
+  - unit:CCY_CZK-PER-KiloW-HR
+  - unit:CCY_DKK-PER-KiloW-HR
+  - unit:CCY_GBP-PER-KiloW-HR
+  - unit:CCY_HUF-PER-KiloW-HR
+  - unit:CCY_NOK-PER-KiloW-HR
+  - unit:CCY_PLN-PER-KiloW-HR
+  - unit:CCY_RON-PER-KiloW-HR
+  - unit:CCY_SEK-PER-KiloW-HR
 
 ### Fixed
 
