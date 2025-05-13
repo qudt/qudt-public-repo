@@ -11,10 +11,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - New Units
   - unit:KiloPOISE
+  - unit:PIXEL_Count
+  - unit:PIXEL_Area
 
 ### Fixed
 
 - Corrected symbol of `unit:BU_US` and `unit:GAL_US`, which both were `in³`.
+
+### Deprecated
+
+- Deprecated unit:2PiRAD as a unit, with no replacement.
 
 ## [3.1.1] - 2025-04-23
 
