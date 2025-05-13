@@ -2,15 +2,16 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qfn: <http://qudt.org/shacl/functions#> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix qfn: <http://qudt.org/schema/qudt/fn#> .
 
 <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all>
   a owl:Ontology ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/constant> ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/soqk> ;
+  owl:imports qfn: ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
   rdfs:label "QUDT Collection - QA TESTS - ALL - v $$QUDT_VERSION$$" ;
   sh:declare [
@@ -62,11 +63,6 @@
     a sh:PrefixDeclaration ;
     sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
     sh:prefix "skos" ;
-  ] ;
-  sh:declare [
-   a sh:PrefixDeclaration ;
-   sh:namespace "http://qudt.org/schema/qudt/fn#"^^xsd:anyURI ;
-   sh:prefix "qfn" ;
   ] ;
   sh:declare [
     a sh:PrefixDeclaration ;
@@ -555,203 +551,6 @@ qudt:prefixMultiplierSnShape
         """ ;
   ] ;
   sh:targetClass qudt:Prefix .
-
-
-qfn:decimalRoundToPrecision a sh:SPARQLFunction ;
-  sh:parameter [
-    sh:path qfn:value ;
-    sh:order 0 ;
-    sh:datatype xsd:decimal ;
-    sh:description "The decimal value to normalize" ;
-  ] ;
-  sh:parameter [
-    sh:path qfn:precision ;
-    sh:order 1 ;
-    sh:datatype xsd:integer ;
-    sh:description "Number of significant digits" ;
-  ] ;
-  sh:returnType xsd:decimal ;
-  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
-  sh:select """
-        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-        SELECT ?result
-        WHERE {
-            # rounds input decimal v to precision p
-            #
-            # unscaled number: significant digits
-            # precision: number of significant digits
-            # scale: (value = unscaled * 10^(-scale) ) eg: 123.45: unscaled: 12345 scale = 2;  110 = unscaled: 11, scale = -1; 0.000123 = unscaled: 123, scale = 6
-            #
-            # Algorithm:
-            #
-            # 1. val = normalized v (strip leading 0s, don't add trailing 0 if it has no dot)
-            # 2. find the dot position dVal (dVal = length(val) if no dot)
-            # 3. find the unscaled number uVal as the digits without the dot, leading 0s removed, trailing 0s kept
-            # 4. length of uVal is the precision of our value, pVal = length(uVal)
-            # 5. find the position eVal in val at which the unscaled number ends
-            # 6. scale sVal = eVal - dVal (e.g 123.456: dVal = 3, eVal = 6, sVal = 3, pVal = 6; 123: dVal = 0; 12345: dVal = 5, eVal = 5, sVal = 0, pVal = 5; 12000: dVal = 5, eVal = 2, sVal = -3, pVal = 2; 0.00123: dVal = 1, eVal=6, sVal= 5, pVal=3 )
-            # 7. precision to use pNew = min (p, pVal)
-            # 8. New unscaled number uNew with given precision. if pNew == pVal: uNew = uVal . otherwise, make tmp value from unscaled, inserting a dot at position pNew and use ROUND on it, ie uNew = ROUND(tmp)
-            # 9. New scale sNew = sVal - (pVal - pNew)
-            # 10. if sNew = 0 : newVal = CONCAT(uVal)
-            #     if sNew < 0 : newVal = CONCAT(uNew, SUBSTR(zeros,1,- sNew) ) - append zeros for each negative scale point
-            #     if sNew > 0 : newVal = CONCAT("0.", SUBSTR(zeros, 1, - sNew - pNew), uNew) - insert zeros to fill if needed
-            # 11. result = xsd:decimal(newVal)
-            #
-            # for testing:
-            # VALUES (?value ?precision) { (12345678 4) (0.00123456 3) (.00123456 4) (000123.456000 2) (123456789.0123456789 14) (0.123 5) (12345 3) (2 10) (3 1) (7 0) }
-            #
-        	BIND(IF(bound(?precision), ?precision, 34) as ?p)
-            BIND("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000" as ?zeroPad)
-            # 1: normalize
-            BIND(STR(?value) as ?tmpValueStr)
-            # leading 0 before the dot are insignificant. strip.
-            BIND(REPLACE(?tmpValueStr, "^0*(0\\\\.|[1-9])","$1") as ?tmpValueStrNoLeading0)
-            # if the number starts with '.', prepend '0'
-            BIND(IF(STRSTARTS(?tmpValueStrNoLeading0, "."), CONCAT("0", ?tmpValueStrNoLeading0), ?tmpValueStrNoLeading0) as ?val)
-            # 2. dVal
-            BIND(STRLEN(STRBEFORE(?val,".")) as ?tmp0)
-            BIND(IF(?tmp0 = 0, STRLEN(?val), ?tmp0) as ?dVal)
-            # 3. uVal
-            BIND(REPLACE(REPLACE(?val,"\\\\.",""), "^0+","") as ?uVal)
-            # 4. pVal
-            BIND(STRLEN(?uVal) as ?pVal)
-            # 5. eVal
-            BIND(REPLACE(?val,"\\\\.","") as ?tmp1)
-            BIND(STRLEN(?tmp1) - STRLEN(STRAFTER(?tmp1,?uVal)) as ?eVal)
-            # 6. sVal
-            BIND(?eVal - ?dVal as ?sVal)
-            # 7. pNew
-            BIND(IF(?p < ?pVal, ?p, ?pVal) as ?pNew)
-            # 8. uNew
-            BIND(CONCAT(SUBSTR(?uVal,1,?pNew),".", SUBSTR(?uVal, ?pNew+1) ) as ?tmp2)
-            BIND(IF(?pNew = ?pVal, ?uVal, REPlACE(STR(ROUND(xsd:decimal(?tmp2))), ".0$","")) as ?uNew)
-            # 9. sNew
-            BIND(?sVal - (?pVal - ?pNew) as ?sNew)
-            # 10. newVal
-            BIND(IF(?sNew = 0, ?uNew,
-                    IF (?sNew < 0 ,
-                        CONCAT(?uNew, SUBSTR(?zeroPad, 1, - ?sNew)),
-                        CONCAT(SUBSTR(?zeroPad, 1, ?sNew - ?pNew), ?uNew)
-                    )) as ?tmp3)
-            BIND(IF(?sNew <= 0, ?tmp3,
-                    CONCAT(SUBSTR(?tmp3,1,STRLEN(?tmp3) - ?sNew), ".", SUBSTR(?tmp3, STRLEN(?tmp3) - ?sNew + 1))
-                ) as ?tmp4)
-            BIND(IF(STRSTARTS(?tmp4, "."), CONCAT("0",?tmp4), ?tmp4) as ?newVal)
-            # 11. result
-            BIND(xsd:decimal(?newVal) as ?result)
-        }
-    """
-  .
-
-qudt:scaledUnitMultiplierShape
-  a sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/2.1/collection/qa/all> ;
-  sh:severity sh:Violation ;
-  sh:sparql [
-    a sh:SPARQLConstraint ;
-    rdfs:comment """
-       Ensure that
-         - if unit u has factor units f_1, ..., f_n (n <= 10!)
-         - and if u has a mulitipler m_u
-         - and if all f_i have a multiplier m_i and an exponent e_i
-      then
-         m_u = (Product over all i:) m_i ^ e_i
-    """ ;
-    sh:message """
-    {$this}
-    Multiplier differs from the multiplier calculated from its factor units.
-    actual multiplier : {?actualMultiplier}
-    calculated        : {?calculatedMultiplier}
-    badness           : {?relDiff}
-    The badness is the relative difference of the difference and the actual or calculated multiplier, whichever is bigger. A badness >> 0 is a real issue to look at. A badness ~ 0 is usually due to a difference in precision and should be resolved by using the calculated value.
-    A
-    """ ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
-    sh:select """
-
-PREFIX qudt: <http://qudt.org/schema/qudt/>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-
-SELECT ?this ?relDiff
-       (IF(?actualMultiplier = ?calculatedMultiplier, "Equal", "Not Equal") AS ?equalityFlag)
-       ?actualMultiplier ?calculatedMultiplier
-WHERE {
-  ?this a qudt:Unit .
-  OPTIONAL { ?this qudt:conversionMultiplier ?actualMultiplier . }
-
-  # Subquery to compute and concatenate factor unit contributions
-  {
-    SELECT ?this (GROUP_CONCAT(?factorContribution; SEPARATOR="|") AS ?contributions)
-    WHERE {
-      ?this qudt:hasFactorUnit ?factor .
-      ?factor qudt:hasUnit ?baseUnit ;
-              qudt:exponent ?exponent .
-      ?baseUnit qudt:conversionMultiplier ?baseMultiplier .
-      # Compute contribution (exponents 0 to 8)
-      BIND(ABS(?exponent) as ?absoluteExponent)
-            BIND(if (?exponent < 0, 1.0 / ?baseMultiplier, ?baseMultiplier ) as ?multiplier)
-            BIND(
-        IF(?absoluteExponent = 0, 1.0,
-        IF(?absoluteExponent = 1, ?multiplier,
-        IF(?absoluteExponent = 2, ?multiplier * ?multiplier,
-        IF(?absoluteExponent = 3, ?multiplier * ?multiplier * ?multiplier,
-        IF(?absoluteExponent = 4, ?multiplier * ?multiplier * ?multiplier * ?multiplier,
-        IF(?absoluteExponent = 5, ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
-        IF(?absoluteExponent = 6, ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
-        IF(?absoluteExponent = 7, ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
-        IF(?absoluteExponent = 8, ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
-                                                            CONCAT("CANNOT HANDLE EXPONENT ", ?exponent)))))))))) AS ?factorContribution )
-
-
-    }
-    GROUP BY ?this
-  }
-    # Disassemble contributions into up to 10 variables
-    BIND(COALESCE(CONCAT("|",?contributions), "|") AS ?contribString)
-
-    # Make sure we don't accidentally swallow stuff that isn't made of numbers
-    FILTER(REGEX("[0-9\\\\-\\\\.\\\\|]+", ?contribString))
-
-    BIND(REPLACE(?contribString, ".*\\\\|", "") as ?f1)
-    BIND(SUBSTR(?contribString, 0, STRLEN(?contribString) - STRLEN(?f1)) as ?f1removed)
-    BIND(REPLACE(?f1removed, ".*\\\\|", "") as ?f2)
-    BIND(SUBSTR(?f1removed, 0, STRLEN(?f1removed) - STRLEN(?f2)) as ?f2removed)
-    BIND(REPLACE(?f2removed, ".*\\\\|", "") as ?f3)
-  \tBIND(SUBSTR(?f2removed, 0, STRLEN(?f2removed) - STRLEN(?f3)) as ?f3removed)
-    BIND(REPLACE(?f3removed, ".*\\\\|", "") as ?f4)
-    BIND(SUBSTR(?f3removed, 0, STRLEN(?f3removed) - STRLEN(?f4)) as ?f4removed)
-    BIND(REPLACE(?f4removed, ".*\\\\|", "") as ?f5)
-    BIND(SUBSTR(?f4removed, 0, STRLEN(?f4removed) - STRLEN(?f5)) as ?f5removed)
-    BIND(REPLACE(?f5removed, ".*\\\\|", "") as ?f6)
-    BIND(SUBSTR(?f5removed, 0, STRLEN(?f5removed) - STRLEN(?f6)) as ?f6removed)
-    BIND(REPLACE(?f6removed, ".*\\\\|", "") as ?f7)
-    BIND(SUBSTR(?f6removed, 0, STRLEN(?f6removed) - STRLEN(?f7)) as ?f7removed)
-    BIND(REPLACE(?f7removed, ".*\\\\|", "") as ?f8)
-    BIND(SUBSTR(?f7removed, 0, STRLEN(?f7removed) - STRLEN(?f8)) as ?f8removed)
-    BIND(REPLACE(?f8removed, ".*\\\\|", "") as ?f9)
-  # Compute calculatedMultiplier by multiplying all contributions
-    BIND(COALESCE(xsd:decimal(?f1), 1.0)
-        * COALESCE(xsd:decimal(?f2), 1.0)
-        * COALESCE(xsd:decimal(?f3), 1.0)
-        * COALESCE(xsd:decimal(?f4), 1.0)
-        * COALESCE(xsd:decimal(?f5), 1.0)
-        * COALESCE(xsd:decimal(?f6), 1.0)
-        * COALESCE(xsd:decimal(?f7), 1.0)
-        * COALESCE(xsd:decimal(?f8), 1.0)
-        * COALESCE(xsd:decimal(?f9), 1.0) as ?cumMul)
-    BIND(qfn:decimalRoundToPrecision(?cumMul, 34) as ?calculatedMultiplier)
-    BIND (?actualMultiplier - ?calculatedMultiplier as ?diff)
-    BIND (IF (?actualMultiplier = 0 , 0.0, ABS(?diff) / ABS(?actualMultiplier)) as ?relDiffAct)
-    BIND (IF( ?calculatedMultiplier = 0, 0.0, ABS(?diff) / ABS(?calculatedMultiplier)) as ?relDiffCalc)
-    BIND(IF(?relDiffAct > ?relDiffCalc, ?relDiffAct, ?relDiffCalc) as ?relDiff)
-    FILTER(?actualMultiplier != ?calculatedMultiplier)
-}
-ORDER BY DESC(?relDiff)
-""" ;
-  ] ;
-  sh:targetClass qudt:Unit .
 
 qudt:standardUncertaintySnShape
   rdfs:comment "qudt:standardUncertainty must match qudt:standardUncertaintySN if present" ;

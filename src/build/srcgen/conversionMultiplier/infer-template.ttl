@@ -1,0 +1,34 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qfn: <http://qudt.org/shacl/functions#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+qfn:inferConversionMultiplier
+  a owl:Ontology ;
+  owl:imports qfn: .
+
+qfn:conversionMultiplierRule
+  a sh:NodeShape ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:construct """
+        CONSTRUCT {
+            ?this qudt:conversionMultiplier ?calculatedMultiplier .
+        }
+        WHERE
+        {
+            {
+                {{QUERY_WITHOUT_PREFIXES}}
+            }
+            FILTER ( ?relDiff < 0.00001 ) # the lower the threshold, the fewer, less error-prone inferences
+        }
+
+
+        """ ;
+    sh:prefixes qfn: ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
+

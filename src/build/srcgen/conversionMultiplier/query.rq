@@ -1,51 +1,73 @@
-PREFIX qudt: <http://qudt.org/schema/qudt/>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-
-SELECT ?this (xsd:decimal(?m1 * ?m2 * ?m3 * ?m4 * ?m5 * ?m6 * ?m7) AS ?total_multiplier)
+SELECT ?this ?relDiff ?actualMultiplier ?calculatedMultiplier
 WHERE {
-  # Inner query to get concatenated multipliers
+  ?this a qudt:Unit .
+  OPTIONAL { ?this qudt:conversionMultiplier ?actualMultiplier . }
+
+  # Subquery to compute and concatenate factor unit contributions
   {
-    SELECT ?this (GROUP_CONCAT(?fu_multiplier; SEPARATOR="|") AS ?concat)
+    SELECT ?this (GROUP_CONCAT(?factorContribution; SEPARATOR="|") AS ?contributions)
     WHERE {
-      ?this qudt:hasFactorUnit ?fu .
-      ?fu qudt:hasUnit ?baseUnit ;
-          qudt:exponent ?exp .
-      ?baseUnit qudt:conversionMultiplier ?b .
-      BIND(
-        IF(ABS(?exp) = 1, ?b,
-          IF(ABS(?exp) = 2, ?b * ?b,
-          IF(ABS(?exp) = 3, ?b * ?b * ?b,
-          IF(ABS(?exp) = 4, ?b * ?b * ?b * ?b,
-          IF(ABS(?exp) = 5, ?b * ?b * ?b * ?b * ?b,
-          IF(ABS(?exp) = 6, ?b * ?b * ?b * ?b * ?b * ?b,
-          IF(ABS(?exp) = 7, ?b * ?b * ?b * ?b * ?b * ?b * ?b,
-            CONCAT("Error: cannot handle exponent ", ?exp))))))))
-        AS ?m_tmp
-      )
-      BIND(
-        IF(?exp < 0, 1 / ?m_tmp,
-          IF(?exp = 0, 1.0, ?m_tmp))
-        AS ?fu_multiplier
-      )
+      ?this qudt:hasFactorUnit ?factor .
+      ?factor qudt:hasUnit ?baseUnit ;
+              qudt:exponent ?exponent .
+      ?baseUnit qudt:conversionMultiplier ?baseMultiplier .
+      # Compute contribution (exponents 0 to 8)
+      BIND(ABS(?exponent) as ?absoluteExponent)
+            BIND(if (?exponent < 0, 1.0 / ?baseMultiplier, ?baseMultiplier ) as ?multiplier)
+            BIND(
+        IF(?absoluteExponent = 0, 1.1,
+        IF(?absoluteExponent = 1, ?multiplier,
+        IF(?absoluteExponent = 2, ?multiplier * ?multiplier,
+        IF(?absoluteExponent = 3, ?multiplier * ?multiplier * ?multiplier,
+        IF(?absoluteExponent = 4, ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+        IF(?absoluteExponent = 5, ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+        IF(?absoluteExponent = 6, ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+        IF(?absoluteExponent = 7, ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+        IF(?absoluteExponent = 8, ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                                            CONCAT("CANNOT HANDLE EXPONENT ", ?exponent)))))))))) AS ?factorContribution )
+
+
     }
     GROUP BY ?this
   }
+    # Disassemble contributions into up to 10 variables
+    BIND(COALESCE(CONCAT("|",?contributions), "|") AS ?contribString)
 
-  # Extract each multiplier using regex, default to "1" if not present
-  BIND( REPLACE(?concat, "^([^|]*).*", "$1") AS ?m1_str )
-  BIND( IF(REGEX(?concat, "\\|"), REPLACE(?concat, "^[^|]*\\|([^|]*).*", "$1"), "1") AS ?m2_str )
-  BIND( IF(REGEX(?concat, "\\|.*\\|"), REPLACE(?concat, "^[^|]*\\|[^|]*\\|([^|]*).*", "$1"), "1") AS ?m3_str )
-  BIND( IF(REGEX(?concat, "\\|.*\\|.*\\|"), REPLACE(?concat, "^[^|]*\\|[^|]*\\|[^|]*\\|([^|]*).*", "$1"), "1") AS ?m4_str )
-  BIND( IF(REGEX(?concat, "\\|.*\\|.*\\|.*\\|"), REPLACE(?concat, "^[^|]*\\|[^|]*\\|[^|]*\\|[^|]*\\|([^|]*).*", "$1"), "1") AS ?m5_str )
-  BIND( IF(REGEX(?concat, "\\|.*\\|.*\\|.*\\|.*\\|"), REPLACE(?concat, "^[^|]*\\|[^|]*\\|[^|]*\\|[^|]*\\|[^|]*\\|([^|]*).*", "$1"), "1") AS ?m6_str )
-  BIND( IF(REGEX(?concat, "\\|.*\\|.*\\|.*\\|.*\\|.*\\|"), REPLACE(?concat, "^[^|]*\\|[^|]*\\|[^|]*\\|[^|]*\\|[^|]*\\|[^|]*\\|([^|]*).*", "$1"), "1") AS ?m7_str )
-
-  # Convert strings to doubles for multiplication
-  BIND( xsd:decimal(?m1_str) AS ?m1 )
-  BIND( xsd:decimal(?m2_str) AS ?m2 )
-  BIND( xsd:decimal(?m3_str) AS ?m3 )
-  BIND( xsd:decimal(?m4_str) AS ?m4 )
-  BIND( xsd:decimal(?m5_str) AS ?m5 )
-  BIND( xsd:decimal(?m6_str) AS ?m6 )
-  BIND( xsd:decimal(?m7_str) AS ?m7 )
+    # Make sure we don't accidentally swallow stuff that isn't made of numbers
+    FILTER(REGEX("[0-9\\-\\.\\|]+", ?contribString))
+    
+    BIND(REPLACE(?contribString, ".*\\|", "") as ?f1)
+    BIND(SUBSTR(?contribString, 0, STRLEN(?contribString) - STRLEN(?f1)) as ?f1removed)
+    BIND(REPLACE(?f1removed, ".*\\|", "") as ?f2)
+    BIND(SUBSTR(?f1removed, 0, STRLEN(?f1removed) - STRLEN(?f2)) as ?f2removed)
+    BIND(REPLACE(?f2removed, ".*\\|", "") as ?f3)
+    BIND(SUBSTR(?f2removed, 0, STRLEN(?f2removed) - STRLEN(?f3)) as ?f3removed)
+    BIND(REPLACE(?f3removed, ".*\\|", "") as ?f4)
+    BIND(SUBSTR(?f3removed, 0, STRLEN(?f3removed) - STRLEN(?f4)) as ?f4removed)
+    BIND(REPLACE(?f4removed, ".*\\|", "") as ?f5)
+    BIND(SUBSTR(?f4removed, 0, STRLEN(?f4removed) - STRLEN(?f5)) as ?f5removed)
+    BIND(REPLACE(?f5removed, ".*\\|", "") as ?f6)
+    BIND(SUBSTR(?f5removed, 0, STRLEN(?f5removed) - STRLEN(?f6)) as ?f6removed)
+    BIND(REPLACE(?f6removed, ".*\\|", "") as ?f7)
+    BIND(SUBSTR(?f6removed, 0, STRLEN(?f6removed) - STRLEN(?f7)) as ?f7removed)
+    BIND(REPLACE(?f7removed, ".*\\|", "") as ?f8)
+    BIND(SUBSTR(?f7removed, 0, STRLEN(?f7removed) - STRLEN(?f8)) as ?f8removed)
+    BIND(REPLACE(?f8removed, ".*\\|", "") as ?f9)
+  # Compute calculatedMultiplier by multiplying all contributions
+    BIND(COALESCE(xsd:decimal(?f1), 1.0)
+        * COALESCE(xsd:decimal(?f2), 1.0)
+        * COALESCE(xsd:decimal(?f3), 1.0)
+        * COALESCE(xsd:decimal(?f4), 1.0)
+        * COALESCE(xsd:decimal(?f5), 1.0)
+        * COALESCE(xsd:decimal(?f6), 1.0)
+        * COALESCE(xsd:decimal(?f7), 1.0)
+        * COALESCE(xsd:decimal(?f8), 1.0)
+        * COALESCE(xsd:decimal(?f9), 1.0) as ?cumMul)
+    BIND(qfn:decimalRoundToPrecision(?cumMul, 34) as ?calculatedMultiplier)
+    BIND (?actualMultiplier - ?calculatedMultiplier as ?diff)
+    BIND (IF (?actualMultiplier = 0 , 0.0, ABS(?diff) / ABS(?actualMultiplier)) as ?relDiffAct)
+    BIND (IF( ?calculatedMultiplier = 0, 0.0, ABS(?diff) / ABS(?calculatedMultiplier)) as ?relDiffCalc)
+    BIND(IF(?relDiffAct > ?relDiffCalc, ?relDiffAct, ?relDiffCalc) as ?relDiff)
+    FILTER(?actualMultiplier != ?calculatedMultiplier)
 }
+ORDER BY DESC(?relDiff)

@@ -97,6 +97,12 @@
                                     <pluginCoordinates>rdfio:make@merge-scalingOf-target</pluginCoordinates>
                                 </step>
                                 <step>
+                                    <pluginCoordinates>shacl:infer@infer-conversionMultiplier</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-conversionMultiplier-target</pluginCoordinates>
+                                </step>
+                                <step>
                                     <pluginCoordinates>shacl:infer@infer-applicableUnits</pluginCoordinates>
                                 </step>
                                 <step>
@@ -142,6 +148,25 @@
                                 </step>
                                 <step>
                                     <pluginCoordinates>rdfio:make@merge-scalingOf-target</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>spotless:apply@reformat-sources</pluginCoordinates>
+                                </step>
+                            </steps>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>infer-derivedUnit-conversionMultiplier</id>
+                        <phase>none</phase>
+                        <goals><goal>run</goal></goals>
+                        <configuration>
+                            <label>derived units multipliers</label>
+                            <steps>
+                                <step>
+                                    <pluginCoordinates>shacl:infer@infer-conversionMultipliers</pluginCoordinates>
+                                </step>
+                                <step>
+                                    <pluginCoordinates>rdfio:make@merge-conversionMultipliers-target</pluginCoordinates>
                                 </step>
                                 <step>
                                     <pluginCoordinates>spotless:apply@reformat-sources</pluginCoordinates>
@@ -438,6 +463,34 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <!-- infers qudt:conversionMultiplier triples and writes them to target/inferred/conversionMultiplier.ttl -->
+                        <id>infer-conversionMultiplier</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>infer</goal>
+                        </goals>
+                        <configuration>
+                            <inferences>
+                                <inference>
+                                    <shapes>
+                                        <include>
+                                            target/srcgen/conversionMultiplier/infer.ttl
+                                            src/main/rdf/validation/qudt-shacl-functions.ttl
+                                        </include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            <!-- assuming predefined units and factor units have already been merged into the target units -->
+                                            target/dist/vocab/unit/*.ttl
+                                            target/dist/vocab/prefixes/*.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/inferred/conversionMultiplier.ttl</outputFile>
+                                </inference>
+                            </inferences>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <!--
                         SHACL-validates the union of all ttl files in src/vocab and the No-OWL schema
                         against the union of QA-Tests and No-OWL schema
@@ -484,12 +537,29 @@
                         <configuration>
                             <validations>
                                 <validation>
+                                    <message>Validating QUDT conversionMultiplier</message>
+                                    <failureMessage>Problems found</failureMessage>
+                                    <shapes>
+                                        <include>
+                                            target/srcgen/conversionMultiplier/validate.ttl
+                                            src/main/rdf/validation/qudt-shacl-functions.ttl
+                                        </include>
+                                    </shapes>
+                                    <data>
+                                        <include>
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </data>
+                                    <outputFile>target/validation/validationReport-conversionMultiplier.ttl</outputFile>
+                                </validation>
+                                <validation>
                                     <message>Validating QUDT build output (target/dist/)</message>
                                     <!--skip>true</skip-->
                                     <shapes>
                                         <include>
                                             src/main/rdf/validation/COLLECTION_QUDT_QA_TESTS_ALL.ttl
                                             src/main/rdf/validation/COLLECTION_QUDT_USER_TESTS.ttl
+                                            src/main/rdf/validation/qudt-shacl-functions.ttl
                                             src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
                                             src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl
                                         </include>
@@ -677,6 +747,29 @@
                                     <input>
                                         <include>
                                             target/inferred/factorUnits.ttl
+                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                        </include>
+                                    </input>
+                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
+                                </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--
+                        adds the qudt:hasFactorUnit triples we generated with SHACL to the units source file.
+                        -->
+                        <id>merge-conversionMultiplier-target</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            target/inferred/conversionMultiplier.ttl
                                             target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
                                         </include>
                                     </input>
