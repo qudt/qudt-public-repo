@@ -21,6 +21,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Deprecated
 
 - Deprecated unit:2PiRAD as a unit, with no replacement.
+- Deprecated the ambiguous unit:PIXEL, with seeAlso notes to unit:PIXEL_Area and unit:PIXEL_Count.
 
 ## [3.1.1] - 2025-04-23
 
