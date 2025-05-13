@@ -1,0 +1,68 @@
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+    SELECT *
+    WHERE {
+        # rounds input decimal v to precision p
+        #
+        # unscaled number: significant digits
+        # precision: number of significant digits
+        # scale: (value = unscaled * 10^(-scale) ) eg: 123.45: unscaled: 12345 scale = 2;  110 = unscaled: 11, scale = -1; 0.000123 = unscaled: 123, scale = 6
+        #
+        # Algorithm:
+        #
+        # 1. val = normalized v (strip leading 0s, don't add trailing 0 if it has no dot)
+        # 2. find the dot position dVal (dVal = length(val) if no dot)
+        # 3. find the unscaled number uVal as the digits without the dot, leading 0s removed, trailing 0s kept
+        # 4. length of uVal is the precision of our value, pVal = length(uVal)
+        # 5. find the position eVal in val at which the unscaled number ends
+        # 6. scale sVal = eVal - dVal (e.g 123.456: dVal = 3, eVal = 6, sVal = 3, pVal = 6; 123: dVal = 0; 12345: dVal = 5, eVal = 5, sVal = 0, pVal = 5; 12000: dVal = 5, eVal = 2, sVal = -3, pVal = 2; 0.00123: dVal = 1, eVal=6, sVal= 5, pVal=3 )
+        # 7. precision to use pNew = min (p, pVal)
+        # 8. New unscaled number uNew with given precision. if pNew == pVal: uNew = uVal . otherwise, make tmp value from unscaled, inserting a dot at position pNew and use ROUND on it, ie uNew = ROUND(tmp)
+        # 9. New scale sNew = sVal - (pVal - pNew)
+        # 10. if sNew = 0 : newVal = CONCAT(uVal)
+        #     if sNew < 0 : newVal = CONCAT(uNew, SUBSTR(zeros,1,- sNew) ) - append zeros for each negative scale point
+        #     if sNew > 0 : newVal = CONCAT("0.", SUBSTR(zeros, 1, - sNew - pNew), uNew) - insert zeros to fill if needed
+        # 11. result = xsd:decimal(newVal)
+        #
+        # for testing:
+    VALUES (?value ?precision) { ( 438735434.18234027234132943816725522054055902409299111398204019161729399005 7 )(12345678 4) (0.00123456 3) (.00123456 4) (000123.456000 2) (123456789.0123456789 14) (0.123 5) (12345 3) (2 10) (3 1) (7 0) }
+        #
+    	BIND(IF(bound(?precision), ?precision, 34) as ?p)
+        BIND("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000" as ?zeroPad)
+        # 1: normalize
+        BIND(STR(?value) as ?tmpValueStr)
+        # leading 0 before the dot are insignificant. strip.
+        BIND(REPLACE(?tmpValueStr, "^0*(0\\.|[1-9])","$1") as ?tmpValueStrNoLeading0)
+        # if the number starts with '.', prepend '0'
+        BIND(IF(STRSTARTS(?tmpValueStrNoLeading0, "."), CONCAT("0", ?tmpValueStrNoLeading0), ?tmpValueStrNoLeading0) as ?val)
+        # 2. dVal
+        BIND(STRLEN(STRBEFORE(?val,".")) as ?tmp0)
+        BIND(IF(?tmp0 = 0, STRLEN(?val), ?tmp0) as ?dVal)
+        # 3. uVal
+        BIND(REPLACE(REPLACE(?val,"\\.",""), "^0+","") as ?uVal)
+        # 4. pVal
+        BIND(STRLEN(?uVal) as ?pVal)
+        # 5. eVal
+        BIND(REPLACE(?val,"\\.","") as ?tmp1)
+        BIND(STRLEN(?tmp1) - STRLEN(STRAFTER(?tmp1,?uVal)) as ?eVal)
+        # 6. sVal
+        BIND(?eVal - ?dVal as ?sVal)
+        # 7. pNew
+        BIND(IF(?p < ?pVal, ?p, ?pVal) as ?pNew)
+        # 8. uNew
+        BIND(CONCAT(SUBSTR(?uVal,1,?pNew),".", SUBSTR(?uVal, ?pNew+1) ) as ?tmp2)
+        BIND(IF(?pNew = ?pVal, ?uVal, REPlACE(STR(ROUND(xsd:decimal(?tmp2))), ".0$","")) as ?uNew)
+        # 9. sNew
+        BIND(?sVal - (?pVal - ?pNew) as ?sNew)
+        # 10. newVal
+        BIND(IF(?sNew = 0, ?uNew,
+                IF (?sNew < 0 ,
+                    CONCAT(?uNew, SUBSTR(?zeroPad, 1, - ?sNew)),
+                    CONCAT(SUBSTR(?zeroPad, 1, ?sNew - ?pNew), ?uNew)
+                )) as ?tmp3)
+        BIND(IF(?sNew <= 0, ?tmp3,
+                CONCAT(SUBSTR(?tmp3,1,STRLEN(?tmp3) - ?sNew), ".", SUBSTR(?tmp3, STRLEN(?tmp3) - ?sNew + 1))
+            ) as ?tmp4)
+        BIND(IF(STRSTARTS(?tmp4, "."), CONCAT("0",?tmp4), ?tmp4) as ?newVal)
+        # 11. result
+        BIND(xsd:decimal(?newVal) as ?result)
+    }
