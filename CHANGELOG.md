@@ -13,10 +13,25 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - unit:KiloPOISE
   - unit:PIXEL_Count
   - unit:PIXEL_Area
+  - unit:CCY_BGN-PER-KiloW-HR
+  - unit:CCY_CHF-PER-KiloW-HR
+  - unit:CCY_CZK-PER-KiloW-HR
+  - unit:CCY_DKK-PER-KiloW-HR
+  - unit:CCY_GBP-PER-KiloW-HR
+  - unit:CCY_HUF-PER-KiloW-HR
+  - unit:CCY_NOK-PER-KiloW-HR
+  - unit:CCY_PLN-PER-KiloW-HR
+  - unit:CCY_RON-PER-KiloW-HR
+  - unit:CCY_SEK-PER-KiloW-HR
+
+### Changed
+
+- Increased the severity of some validation constraints
 
 ### Fixed
 
 - Corrected symbol of `unit:BU_US` and `unit:GAL_US`, which both were `in³`.
+- Fixed some units with rdfs:isDefinedBy lacking version, and added a constraint to check for this.
 
 ### Deprecated
 
