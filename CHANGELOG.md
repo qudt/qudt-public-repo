@@ -22,6 +22,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - unit:CCY_RON-PER-KiloW-HR
   - unit:CCY_SEK-PER-KiloW-HR
 
+### Changed
+
+- Increased the severity of some validation constraints
+
 ### Fixed
 
 - Corrected symbol of `unit:BU_US` and `unit:GAL_US`, which both were `in³`.
