@@ -25,6 +25,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Corrected symbol of `unit:BU_US` and `unit:GAL_US`, which both were `in³`.
+- Fixed some units with rdfs:isDefinedBy lacking version, and added a constraint to check for this.
 
 ## [3.1.1] - 2025-04-23
 

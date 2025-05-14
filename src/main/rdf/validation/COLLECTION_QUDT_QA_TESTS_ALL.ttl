@@ -114,7 +114,6 @@ qudt:DefinedByConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
   rdfs:label "Target class must be have a rdfs:isDefinedBy property" ;
-  sh:severity sh:Info ;
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Target class must be have a rdfs:isDefinedBy property" ;
@@ -126,13 +125,26 @@ FILTER NOT EXISTS {$this rdfs:isDefinedBy ?y}
 FILTER NOT EXISTS {$this qudt:deprecated true}
 }""" ;
   ] ;
-  sh:targetClass qudt:PhysicalConstant ;
-  sh:targetClass qudt:Prefix ;
-  sh:targetClass qudt:QuantityKind ;
-  sh:targetClass qudt:QuantityKindDimensionVector ;
-  sh:targetClass qudt:SystemOfQuantityKinds ;
-  sh:targetClass qudt:SystemOfUnits ;
-  sh:targetClass qudt:Unit .
+  sh:targetClass qudt:Concept .
+
+qudt:DefinedByStringConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Target class must be have a rdfs:isDefinedBy property containing the string '$$QUDT_VERSION$$'" ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Target class must be have a rdfs:isDefinedBy property containing the string '$$QUDT_VERSION$$'" ;
+    sh:message "Resource '{$this}' lacks an rdfs:isDefinedBy property containing the string '$$QUDT_VERSION$$'." ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:select """SELECT $this
+WHERE {
+$this rdfs:isDefinedBy ?graph .
+BIND (STR(?graph) AS ?graphstring) .
+FILTER (REGEX(STR(?graphstring), "^(http://qudt.org/v|http://qudt.org/s)"))
+FILTER NOT EXISTS {$this qudt:deprecated true}
+}""" ;
+  ] ;
+  sh:targetClass qudt:Concept .
 
 qudt:DeprecatedConceptInfoShape
   a sh:NodeShape ;
