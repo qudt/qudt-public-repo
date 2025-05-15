@@ -23,15 +23,20 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - unit:CCY_PLN-PER-KiloW-HR
   - unit:CCY_RON-PER-KiloW-HR
   - unit:CCY_SEK-PER-KiloW-HR
+  - unit:DEG_C-HR
+  - unit:DEG_C-DAY
+  - unit:DEG_F-DAY
 
 ### Changed
 
 - Increased the severity of some validation constraints
+- Added description to unit:DEG_F-DAY
 
 ### Fixed
 
 - Corrected symbol of `unit:BU_US` and `unit:GAL_US`, which both were `in³`.
 - Fixed some units with rdfs:isDefinedBy lacking version, and added a constraint to check for this.
+- Corrected conversion multipliers for unit:DEG_F-DAY
 
 ### Deprecated
 
