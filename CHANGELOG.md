@@ -31,11 +31,13 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Changed
 
 - Increased the severity of some validation constraints
+- Added description to unit:DEG_F-DAY
 
 ### Fixed
 
 - Corrected symbol of `unit:BU_US` and `unit:GAL_US`, which both were `in³`.
 - Fixed some units with rdfs:isDefinedBy lacking version, and added a constraint to check for this.
+- Corrected conversion multipliers for unit:DEG_F-DAY
 
 ### Deprecated
 
