@@ -114,7 +114,6 @@ qudt:DefinedByConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
   rdfs:label "Target class must be have a rdfs:isDefinedBy property" ;
-  sh:severity sh:Info ;
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Target class must be have a rdfs:isDefinedBy property" ;
@@ -126,13 +125,26 @@ FILTER NOT EXISTS {$this rdfs:isDefinedBy ?y}
 FILTER NOT EXISTS {$this qudt:deprecated true}
 }""" ;
   ] ;
-  sh:targetClass qudt:PhysicalConstant ;
-  sh:targetClass qudt:Prefix ;
-  sh:targetClass qudt:QuantityKind ;
-  sh:targetClass qudt:QuantityKindDimensionVector ;
-  sh:targetClass qudt:SystemOfQuantityKinds ;
-  sh:targetClass qudt:SystemOfUnits ;
-  sh:targetClass qudt:Unit .
+  sh:targetClass qudt:Concept .
+
+qudt:DefinedByStringConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Target class must be have a rdfs:isDefinedBy property containing the string '$$QUDT_VERSION$$'" ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Target class must be have a rdfs:isDefinedBy property containing the string '$$QUDT_VERSION$$'" ;
+    sh:message "Resource '{$this}' lacks an rdfs:isDefinedBy property containing the string '$$QUDT_VERSION$$'." ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:select """SELECT $this
+WHERE {
+$this rdfs:isDefinedBy ?graph .
+BIND (STR(?graph) AS ?graphstring) .
+FILTER (REGEX(STR(?graphstring), "^(http://qudt.org/v|http://qudt.org/s)"))
+FILTER NOT EXISTS {$this qudt:deprecated true}
+}""" ;
+  ] ;
+  sh:targetClass qudt:Concept .
 
 qudt:DeprecatedConceptInfoShape
   a sh:NodeShape ;
@@ -190,7 +202,7 @@ qudt:DeprecatedPropertyInfoShape
 qudt:ExactMatchGoesBothWaysConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
-  sh:severity sh:Info ;
+  sh:severity sh:Warning ;
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensure that if A qudt:exactMatch B then B qudt:exactMatch A" ;
@@ -210,7 +222,6 @@ FILTER NOT EXISTS {?t qudt:exactMatch $this } .
 qudt:InconsistentDimensionVectorInSKOSHierarchyConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
-  sh:severity sh:Info ;
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Checks that a QuantityKind has the same dimension vector as any skos:broader QuantityKind" ;
@@ -232,7 +243,6 @@ FILTER (?udv != ?qdv) .
 qudt:InconsistentUnitAndDimensionVectorConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
-  sh:severity sh:Info ;
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Checks that a Unit and its QuantityKind have the same dimension vector" ;
@@ -257,7 +267,6 @@ qudt:MultipleDescriptionsConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
   rdfs:label "Warning about use of multiple descriptions with the same language tag" ;
-  sh:severity sh:Info ;
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensures each qudt:Concept instance doesn't have multiple dcterms:description values with the same language tag." ;
@@ -281,7 +290,6 @@ qudt:MultipleLabelsConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
   rdfs:label "Warning about use of multiple labels with the same language tag" ;
-  sh:severity sh:Info ;
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensures each qudt:Concept instance doesn't have multiple rdfs:labels with the same language tag." ;
@@ -347,7 +355,7 @@ qudt:UniqueSymbolTypeRestrictedPropertyConstraint
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
   rdfs:label "Unique symbol type restricted property constraint" ;
   sh:deactivated true ;
-  sh:severity sh:Info ;
+  sh:severity sh:Warning ;
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Checks that a resource has a unique symbol within its type hierarchy below qudt:Concept" ;
@@ -372,7 +380,6 @@ WHERE {{
 qudt:UnitPointsToAllExactMatchQuantityKindsConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
-  sh:severity sh:Info ;
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensure that if a Unit hasQuantityKind A, and A qudt:exactMatch B, then the Unit hasQuantityKind B " ;

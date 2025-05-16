@@ -11,10 +11,37 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - New Units
   - unit:KiloPOISE
+  - unit:PIXEL_Count
+  - unit:PIXEL_Area
+  - unit:CCY_BGN-PER-KiloW-HR
+  - unit:CCY_CHF-PER-KiloW-HR
+  - unit:CCY_CZK-PER-KiloW-HR
+  - unit:CCY_DKK-PER-KiloW-HR
+  - unit:CCY_GBP-PER-KiloW-HR
+  - unit:CCY_HUF-PER-KiloW-HR
+  - unit:CCY_NOK-PER-KiloW-HR
+  - unit:CCY_PLN-PER-KiloW-HR
+  - unit:CCY_RON-PER-KiloW-HR
+  - unit:CCY_SEK-PER-KiloW-HR
+  - unit:DEG_C-HR
+  - unit:DEG_C-DAY
+  - unit:DEG_F-DAY
+
+### Changed
+
+- Increased the severity of some validation constraints
+- Added description to unit:DEG_F-DAY
 
 ### Fixed
 
 - Corrected symbol of `unit:BU_US` and `unit:GAL_US`, which both were `in³`.
+- Fixed some units with rdfs:isDefinedBy lacking version, and added a constraint to check for this.
+- Corrected conversion multipliers for unit:DEG_F-DAY
+
+### Deprecated
+
+- Deprecated unit:2PiRAD as a unit, with no replacement.
+- Deprecated the ambiguous unit:PIXEL, with seeAlso notes to unit:PIXEL_Area and unit:PIXEL_Count.
 
 ## [3.1.1] - 2025-04-23
 
