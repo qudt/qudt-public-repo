@@ -23,6 +23,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - unit:CCY_PLN-PER-KiloW-HR
   - unit:CCY_RON-PER-KiloW-HR
   - unit:CCY_SEK-PER-KiloW-HR
+  - unit:DEG_C-HR
+  - unit:DEG_C-DAY
+  - unit:DEG_F-DAY
   - unit:MilliBAR_A by [Toby Broom](https://github.com/Toby-Broom/)
 
 ### Changed
