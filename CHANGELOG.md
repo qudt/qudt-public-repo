@@ -31,6 +31,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Increased the severity of some validation constraints
 - Added description to unit:DEG_F-DAY
+- Added qudt:Unit to hasUnit, hasDefinedUnit & hasAllowedUnit
 
 ### Fixed
 
