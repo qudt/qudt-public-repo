@@ -34,6 +34,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added description to unit:DEG_F-DAY
 - Changed qualifiers on unit:PIXEL to be uppercase, for consistency with current use
 - Added qudt:Unit to hasUnit, hasDefinedUnit & hasAllowedUnit
+- Added `qudt:hasQuantityKind quantitykind:BatteryCapacity` to `unit:A-HR`, `unit:A-SEC`, `unit:KiloA-HR` and `unit:MilliA-HR`
 
 ### Fixed
 
