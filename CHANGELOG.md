@@ -9,9 +9,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
-### Changed
+- Added an updated intro slide deck in the doc folder
 
-- Updated the intro slide deck link on the home page
+### Changed
 
 ### Deprecated
 
