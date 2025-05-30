@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.1.2] - 2025-05-30
+
 ### Added
 
 - New Units
@@ -36,17 +38,17 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added qudt:Unit to hasUnit, hasDefinedUnit & hasAllowedUnit
 - Added `qudt:hasQuantityKind quantitykind:BatteryCapacity` to `unit:A-HR`, `unit:A-SEC`, `unit:KiloA-HR` and `unit:MilliA-HR`
 
-### Fixed
-
-- Corrected symbol of `unit:BU_US` and `unit:GAL_US`, which both were `in³`.
-- Fixed some units with rdfs:isDefinedBy lacking version, and added a constraint to check for this.
-- Corrected conversion multipliers for unit:DEG_F-DAY
-
 ### Deprecated
 
 - Deprecated unit:2PiRAD as a unit, replaced with unit:REV.
 - Deprecated unit:IN-PER-2PiRAD, replaced with unit:IN-PER-REV.
 - Deprecated the ambiguous unit:PIXEL, with seeAlso notes to unit:PIXEL_Area and unit:PIXEL_Count.
+
+### Fixed
+
+- Corrected symbol of `unit:BU_US` and `unit:GAL_US`, which both were `in³`.
+- Fixed some units with rdfs:isDefinedBy lacking version, and added a constraint to check for this.
+- Corrected conversion multipliers for unit:DEG_F-DAY
 
 ## [3.1.1] - 2025-04-23
 
@@ -277,7 +279,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.1...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.2...HEAD
+[3.1.2]: https://github.com/qudt/qudt-public-repo/compare/v3.1.1...v3.1.2
 [3.1.1]: https://github.com/qudt/qudt-public-repo/compare/v3.1.0...v3.1.1
 [3.1.0]: https://github.com/qudt/qudt-public-repo/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/qudt/qudt-public-repo/compare/v2.1.47...v3.0.0
