@@ -7,6 +7,17 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+- Updated the intro slide deck link on the home page
+
+### Deprecated
+
+### Fixed
+
+
 ## [3.1.2] - 2025-05-30
 
 ### Added
