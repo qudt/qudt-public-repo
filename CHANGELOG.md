@@ -17,6 +17,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Fixed erroneous prefix definition for cross-references to SI Quantity (equivalent to qudt:QuantityKind)
+
 ## [3.1.2] - 2025-05-30
 
 ### Added
