@@ -15,6 +15,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Deprecated
 
+- Deprecated unit:CHF-PER-KiloGM in favor of unit:CCY_CHF-PER-KiloGM
+
 ### Fixed
 
 - Fixed erroneous prefix definition for cross-references to SI Quantity (equivalent to qudt:QuantityKind)
