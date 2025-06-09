@@ -209,7 +209,8 @@
                             // Step 1: Collect all aspect directories and their file status
                             def allAspectDirs = srcgenDir.listFiles().findAll { it.isDirectory() }
                             def validAspectDirs = []
-                            def omittedAspectDirsWithReasons = [:] // Map to store omitted dirs and missing files
+                            // Map to store omitted dirs and missing files
+                            def omittedAspectDirsWithReasons = [:] 
 
                             allAspectDirs.each { dir ->
                                 def aspectName = dir.name
@@ -227,8 +228,10 @@
                                 def missingFiles = requiredFiles.findAll { !it.value.exists() }.keySet()
 
                                 if (missingFiles.isEmpty()) {
-                                    validAspectDirs << dir // All files present, add to valid list 
-                                    } else { omittedAspectDirsWithReasons[dir] = missingFiles // Record missing files
+                                    // All files present, add to valid list
+                                    validAspectDirs << dir  
+                                    // Record missing files
+                                    } else { omittedAspectDirsWithReasons[dir] = missingFiles 
                                      }
                             }
 
@@ -276,8 +279,9 @@
                             // Step 3: Log omitted directories with missing file details
                             if (omittedAspectDirsWithReasons) {
                                 println "The following aspects were omitted due to missing required files:"
+                                // Simplify to file names
                                 omittedAspectDirsWithReasons.each { dir, missingFiles ->
-                                    def missingFileNames = missingFiles.collect { it.toString().replaceAll('^.*\\.', '') } // Simplify to file names
+                                    def missingFileNames = missingFiles.collect { it.toString().replaceAll('^.*\\.', '') } 
                                     println " - ${dir.name}: Missing ${missingFileNames.join(', ')}"
                                 }
                             } else {
