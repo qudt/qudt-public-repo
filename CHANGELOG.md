@@ -10,6 +10,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - Added an updated intro slide deck in the doc folder
+- New Units
+  - unit:CCY_CHF-PER-HA
 
 ### Changed
 
