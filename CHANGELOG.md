@@ -22,6 +22,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Fixed erroneous prefix definition for cross-references to SI Quantity (equivalent to qudt:QuantityKind)
+- Corrected symbol for `unit:IN_H2O` from `inH₂0` to `inH₂O` [Reto Schneebeli](https://github.com/reto-siemens)
 
 ## [3.1.2] - 2025-05-30
 
