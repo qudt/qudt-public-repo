@@ -48,8 +48,7 @@
                       process-sources          check-source-format, shacl-validate-src
                       generate-resources       copy-rdf, copy-docs, copy-root-files, validate-shacl-files
                       process-resources        generate-iec-links
-                      compile                  infer-and-format
-                      process-classes
+                      process-classes          mainRdfPipeline
                       generate-test-sources
                       process-test-sources
                       generate-test-resources
@@ -235,7 +234,7 @@
                             def allAspectDirs = srcgenDir.listFiles().findAll { it.isDirectory() }
                             def validAspectDirs = []
                             // Map to store omitted dirs and missing files
-                            def omittedAspectDirsWithReasons = [:] 
+                            def omittedAspectDirsWithReasons = [:]
 
                             allAspectDirs.each { dir ->
                                 def aspectName = dir.name
@@ -254,9 +253,9 @@
 
                                 if (missingFiles.isEmpty()) {
                                     // All files present, add to valid list
-                                    validAspectDirs << dir  
+                                    validAspectDirs << dir
                                     // Record missing files
-                                    } else { omittedAspectDirsWithReasons[dir] = missingFiles 
+                                    } else { omittedAspectDirsWithReasons[dir] = missingFiles
                                      }
                             }
 
@@ -306,7 +305,7 @@
                                 println "The following aspects were omitted due to missing required files:"
                                 // Simplify to file names
                                 omittedAspectDirsWithReasons.each { dir, missingFiles ->
-                                    def missingFileNames = missingFiles.collect { it.toString().replaceAll('^.*\\.', '') } 
+                                    def missingFileNames = missingFiles.collect { it.toString().replaceAll('^.*\\.', '') }
                                     println " - ${dir.name}: Missing ${missingFileNames.join(', ')}"
                                 }
                             } else {
@@ -333,163 +332,7 @@
                 <artifactId>shacl-maven-plugin</artifactId>
                 <version>1.0.5</version>
                 <executions>
-                    <execution>
-                        <!-- infers qudt:applicableUnits and writes them to target/inferred/applicableUnits.ttl -->
-                        <id>infer-applicableUnits</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>infer</goal>
-                        </goals>
-                        <configuration>
-                            <inferences>
-                                <inference>
-                                    <message>Inferring qudt:applicableUnit triples (non-currency units)</message>
-                                    <shapes>
-                                        <include>src/build/inference/inferApplicableUnits.ttl</include>
-                                    </shapes>
-                                    <data>
-                                        <include>
-                                            src/main/rdf/vocab/unit/*.ttl
-                                            src/main/rdf/vocab/quantitykinds/*.ttl
-                                        </include>
-                                    </data>
-                                    <outputFile>target/inferred/applicableUnits.ttl</outputFile>
-                                </inference>
-                                <inference>
-                                    <message>Inferring qudt:applicableUnit triples (currency units)</message>
-                                    <shapes>
-                                        <include>src/build/inference/inferApplicableUnits.ttl</include>
-                                    </shapes>
-                                    <data>
-                                        <include>
-                                            src/main/rdf/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl
-                                        </include>
-                                    </data>
-                                    <outputFile>target/inferred/applicableUnits-currency.ttl</outputFile>
-                                </inference>
-                                <inference>
-                                    <message>Performing our custom subset of OWL inferences</message>
-                                    <shapes>
-                                        <include>
-                                            src/build/inference/owl-subset.shapes.ttl
-                                        </include>
-                                    </shapes>
-                                    <data>
-                                        <include>
-                                            src/main/rdf/schema/SCHEMA_QUDT.ttl
-                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                        </include>
-                                    </data>
-                                    <outputFile>target/inferred/owl-subset.ttl</outputFile>
-                                </inference>
-                            </inferences>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!-- infers qudt:applicableUnits and writes them to target/inferred/applicableUnits.ttl -->
-                        <id>infer-owlSubset</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>infer</goal>
-                        </goals>
-                        <configuration>
-                            <inferences>
-                                <inference>
-                                    <message>Performing our custom subset of OWL inferences</message>
-                                    <shapes>
-                                        <include>
-                                            src/build/inference/owl-subset.shapes.ttl
-                                        </include>
-                                    </shapes>
-                                    <data>
-                                        <include>
-                                            src/main/rdf/schema/SCHEMA_QUDT.ttl
-                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                        </include>
-                                    </data>
-                                    <outputFile>target/inferred/owl-subset.ttl</outputFile>
-                                </inference>
-                            </inferences>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!-- infers qudt:hasFactorUnit RDF molecules and writes them to target/inferred/factorUnits.ttl -->
-                        <id>infer-factorUnits</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>infer</goal>
-                        </goals>
-                        <configuration>
-                            <inferences>
-                                <inference>
-                                    <shapes>
-                                        <include>target/srcgen/factorUnits/infer.ttl</include>
-                                    </shapes>
-                                    <data>
-                                        <include>
-                                            <!-- assuming predefined units have already been merged into the target units -->
-                                            target/dist/vocab/unit/*.ttl
-                                            target/dist/vocab/prefixes/*.ttl
-                                        </include>
-                                    </data>
-                                    <outputFile>target/inferred/factorUnits.ttl</outputFile>
-                                </inference>
-                            </inferences>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!-- infers qudt:scalingOf triples and writes them to target/inferred/scalingOf.ttl -->
-                        <id>infer-scalingOf</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>infer</goal>
-                        </goals>
-                        <configuration>
-                            <inferences>
-                                <inference>
-                                    <shapes>
-                                        <include>target/srcgen/scalingOf/infer.ttl</include>
-                                    </shapes>
-                                    <data>
-                                        <include>
-                                            <!-- assuming predefined units and factor units have already been merged into the target units -->
-                                            target/dist/vocab/unit/*.ttl
-                                            target/dist/vocab/prefixes/*.ttl
-                                        </include>
-                                    </data>
-                                    <outputFile>target/inferred/scalingOf.ttl</outputFile>
-                                </inference>
-                            </inferences>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!-- infers qudt:conversionMultiplier triples and writes them to target/inferred/conversionMultiplier.ttl -->
-                        <id>infer-conversionMultiplier</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>infer</goal>
-                        </goals>
-                        <configuration>
-                            <inferences>
-                                <inference>
-                                    <shapes>
-                                        <include>
-                                            target/srcgen/conversionMultiplier/infer.ttl
-                                            src/main/rdf/validation/qudt-shacl-functions.ttl
-                                        </include>
-                                    </shapes>
-                                    <data>
-                                        <include>
-                                            <!-- assuming predefined units and factor units have already been merged into the target units -->
-                                            target/dist/vocab/unit/*.ttl
-                                            target/dist/vocab/prefixes/*.ttl
-                                        </include>
-                                    </data>
-                                    <outputFile>target/inferred/conversionMultiplier.ttl</outputFile>
-                                </inference>
-                            </inferences>
-                        </configuration>
-                    </execution>
+
                     <execution>
                         <!--
                         SHACL-validates the union of all ttl files in src/vocab and the No-OWL schema
@@ -548,6 +391,7 @@
                                     <data>
                                         <include>
                                             target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                            target/dist/vocab/prefixes/VOCAB_QUDT-PREFIXES.ttl
                                         </include>
                                     </data>
                                     <outputFile>target/validation/validationReport-conversionMultiplier.ttl</outputFile>
@@ -643,224 +487,286 @@
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>rdfio-maven-plugin</artifactId>
-                <version>1.3.2</version>
+                <version>1.3.3-SNAPSHOT</version>
                 <executions>
                     <execution>
-                        <!--
-                        adds the qudt:applicableUnits triples we generated with SHACL to the quantitykinds target file.
-                        -->
-                        <id>merge-applicableUnits-target</id>
-                        <phase>none</phase>
+                        <id>mainPipeline</id>
+                        <phase>compile</phase>
                         <goals>
-                            <goal>make</goal>
+                            <goal>pipeline</goal>
                         </goals>
                         <configuration>
-                            <products>
-                                <singleFile>
-                                    <input>
-                                        <include>
-                                            target/inferred/applicableUnits.ttl
-                                            target/dist/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl
-                                        </include>
-                                    </input>
-                                    <outputFile>target/dist/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</outputFile>
-                                </singleFile>
-                                <singleFile>
-                                    <input>
-                                        <include>
-                                            target/inferred/applicableUnits-currency.ttl
-                                            target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl
-                                        </include>
-                                    </input>
-                                    <outputFile>target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl</outputFile>
-                                </singleFile>
-                                <singleFile>
-                                    <input>
-                                        <include>
-                                            target/inferred/owl-subset.ttl
-                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                        </include>
-                                    </input>
-                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
-                                </singleFile>
-                            </products>
+                            <pipeline>
+                                <id>mainPipeline</id>
+                                <steps>
+                                    <!-- make custom shacl functions available in inference and SPARQL-->
+                                    <shaclFunctions>
+                                        <file>src/main/rdf/validation/qudt-shacl-functions.ttl</file>
+                                    </shaclFunctions>
+
+                                    <add> <!-- load target quantitykinds into <target:quantityKinds> (associating that graph with the file)-->
+                                        <file>src/main/rdf/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</file>
+                                        <toGraph>modified:quantityKinds</toGraph>
+                                    </add>
+                                    <add> <!-- load target units into <modified:units>  (associating that graph with the file) -->
+                                        <file>src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</file>
+                                        <toGraph>modified:units</toGraph>
+                                    </add>
+                                    <add> <!-- load applicableUnits shapes (rules) into <shapes:applicableUnits> because we need them twice (see below) -->
+                                        <file>src/build/inference/inferApplicableUnits.ttl</file>
+                                        <toGraph>shapes:applicableUnits</toGraph>
+                                    </add>
+
+                                    <shaclInfer> <!-- do the quantitykinds inference -->
+                                        <message>Inferring qudt:applicableUnit triples (non-currency units)</message>
+                                        <shapes>
+                                            <graph>shapes:applicableUnits</graph>
+                                        </shapes>
+                                        <data>
+                                            <graph>modified:quantityKinds</graph>
+                                            <graph>modified:units</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:applicableUnits</graph>
+                                            <file>target/inferred/applicableUnits.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+
+                                    <add> <!-- add the results of the quantitykinds inference to the quantityKinds graph -->
+                                        <graph>inferred:applicableUnits</graph>
+                                        <toGraph>modified:quantityKinds</toGraph>
+                                    </add>
+
+                                    <!-- start from here if nothing has changed in the inputs of the earlier steps -->
+                                    <savepoint><id>01-applicableUnits</id></savepoint>
+                                    <add>
+                                        <file>src/main/rdf/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl</file>
+                                        <toGraph>target:currencyUnits</toGraph>
+                                    </add>
+                                    <shaclInfer>  <!-- do the quantitykinds inference for currency units -->
+                                        <message>Inferring qudt:applicableUnit triples (currency units)</message>
+                                        <shapes><graph>shapes:applicableUnits</graph></shapes>
+                                        <data>
+                                            <graph>target:currencyUnits</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:applicableCurrencyUnits</graph>
+                                            <file>target/inferred/applicableUnits-currency.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <write>
+                                        <graph>target:currencyUnits</graph>
+                                        <graph>inferred:applicableCurrencyUnits</graph>
+                                        <toFile>target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl</toFile>
+                                    </write>
+
+                                    <!-- start from here if nothing has changed in the inputs of the earlier steps -->
+                                    <savepoint><id>02-applicableUnits-currencies</id></savepoint>
+
+                                    <shaclInfer> <!-- do the custom OWL subset inference -->
+                                        <message>Performing our custom subset of OWL inferences</message>
+                                        <shapes>
+                                            <file>src/build/inference/owl-subset.shapes.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <files>
+                                                <include>
+                                                    src/main/rdf/schema/SCHEMA_QUDT.ttl
+                                                    src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+                                                </include>
+                                            </files>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:owl-subset-units</graph>
+                                            <file>target/inferred/owl-subset-units.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+
+                                    <add> <!-- add the inferred triples to the units graph -->
+                                        <graph>inferred:owl-subset-units</graph>
+                                        <toGraph>modified:units</toGraph>
+                                    </add>
+
+                                    <!-- start from here if nothing has changed in the inputs of the earlier steps -->
+                                    <savepoint><id>03-owl-subset-units</id></savepoint>
+
+                                    <add>
+                                        <file>src/build/inference/factorUnits/predefined-factors-and-scalings.ttl</file>
+                                        <toGraph>modified:units</toGraph>
+                                    </add>
+                                    <add>
+                                        <files>
+                                            <include>target/dist/vocab/prefixes/*.ttl</include>
+                                        </files>
+                                        <toGraph>target:prefixes</toGraph>
+                                    </add>
+
+                                    <shaclInfer> <!-- infer ther factor units -->
+                                        <message>Inferring qudt:hasFactorUnit</message>
+                                        <shapes>
+                                            <file>target/srcgen/factorUnits/infer.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <graphs>
+                                                <include>
+                                                    modified:units
+                                                    target:prefixes
+                                                </include>
+                                            </graphs>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:factorUnits</graph>
+                                            <file>target/inferred/factorUnits.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:factorUnits</graph>
+                                        <toGraph>modified:units</toGraph>
+                                    </add>
+                                    <savepoint><id>04-infer-factor-units</id></savepoint>
+                                    <shaclInfer>
+                                        <message>Inferring qudt:scalingOf</message>
+                                        <shapes>
+                                            <file>target/srcgen/scalingOf/infer.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <graph>modified:units</graph>
+                                            <graph>target:prefixes</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:scalingOf</graph>
+                                            <file>target/inferred/scalingOf.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:scalingOf</graph>
+                                        <toGraph>modified:units</toGraph>
+                                    </add>
+                                    <savepoint><id>05-infer-scalingOf</id></savepoint>
+                                    <until>
+                                        <message>Replacing invalid conversionMultipliers iteratively until no more are found</message>
+                                        <indexVar>index_cm</indexVar>
+                                        <sparqlAsk>
+                                            ASK {
+                                                BIND(IRI(CONCAT("inferred:conversionMultiplierToDelete_",STR(?index_cm))) as ?graph)
+                                                GRAPH ?graph {
+                                                    ?report
+                                                        a               sh:ValidationReport;
+                                                        sh:conforms     true;
+                                                }
+                                            }
+                                        </sparqlAsk>
+                                        <body>
+                                            <shaclValidate>
+                                                <message>Validating qudt:conversionMultiplier (will delete invalid ones in subsequent step)</message>
+                                                <!-- we don't want to fail, we want to know the errors so we can delete triples-->
+                                                <failOnSeverity>None</failOnSeverity>
+                                                <shapes>
+                                                    <file>target/srcgen/conversionMultiplier/validate.ttl</file>
+                                                </shapes>
+                                                <data>
+                                                    <graph>modified:units</graph>
+                                                    <graph>target:prefixes</graph>
+                                                </data>
+                                                <validationReport>
+                                                    <graph>inferred:conversionMultiplierToDelete_${index_cm}</graph>
+                                                    <file>target/validation/conversionMultiplier-toDelete_${index_cm}.ttl</file>
+                                                </validationReport>
+                                            </shaclValidate>
+                                            <sparqlUpdate>
+                                                <message>Deleting invalid conversion multipliers</message>
+                                                <sparql>
+                                                    <![CDATA[
+                                                DELETE {
+                                                    GRAPH <modified:units> {
+                                                        ?unit qudt:conversionMultiplier ?m .
+                                                        ?unit  qudt:conversionMultiplierSN ?mSN .
+                                                    }
+                                                }
+                                                WHERE {
+                                                    GRAPH <modified:units> {
+                                                        {
+                                                            ?unit qudt:conversionMultiplier ?m .
+                                                        } UNION {
+                                                            ?unit qudt:conversionMultiplierSN ?mSN .
+                                                        }
+                                                    }
+                                                    BIND(IRI(CONCAT("inferred:conversionMultiplierToDelete_",STR(?index_cm))) as ?graph)
+                                                    GRAPH ?graph {
+                                                        ?res
+                                                            rdf:type                      sh:ValidationResult;
+                                                            sh:resultPath                 qudt:conversionMultiplier;
+                                                            sh:resultSeverity             sh:Violation;
+                                                            sh:value                      ?unit
+                                                    }
+                                                }
+                                                ]]>
+                                                </sparql>
+                                            </sparqlUpdate>
+
+                                            <shaclInfer>
+                                                <message>Inferring qudt:conversionMultiplier</message>
+                                                <iterateUntilStable>true</iterateUntilStable>
+                                                <iterationOutputFilePattern>target/inferred/conversionMultiplier-${index_cm}_${index}.ttl</iterationOutputFilePattern>
+                                                <shapes>
+                                                    <file>target/srcgen/conversionMultiplier/infer.ttl</file>
+                                                </shapes>
+                                                <data>
+                                                    <graph>modified:units</graph>
+                                                    <graph>target:prefixes</graph>
+                                                </data>
+                                                <inferred>
+                                                    <graph>inferred:conversionMultiplier_${index_cm}</graph>
+                                                    <file>target/inferred/conversionMultiplier_${index_cm}.ttl</file>
+                                                </inferred>
+                                            </shaclInfer>
+                                            <add>
+                                                <graph>inferred:conversionMultiplier_${index_cm}</graph>
+                                                <toGraph>modified:units</toGraph>
+                                            </add>
+                                        </body>
+
+                                    </until>
+                                    <savepoint><id>08-infer-conversionMultiplier</id></savepoint>
+                                    <sparqlUpdate>
+                                        <message>Generate conversion multipliers in xsd:double format where it's missing</message>
+                                        <sparql>
+                                            <![CDATA[
+                                            INSERT {
+                                                GRAPH <modified:units> {
+                                                    ?unit qudt:conversionMultiplierSN ?cmsn
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <modified:units> {
+                                                    ?unit a qudt:Unit ;
+                                                          qudt:conversionMultiplier ?cm .
+                                                    FILTER NOT EXISTS {
+                                                        ?unit qudt:conversionMultiplierSN ?any .
+                                                    }
+                                                    BIND(qfn:decimalToDouble(?cm) as ?cmsn)
+                                                }
+                                            }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <!-- write the main outputs: units and quantitykinds files (back to the files they were initially read from) -->
+                                    <write>
+                                        <graph>modified:units</graph>
+                                        <toFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</toFile>
+                                    </write>
+
+                                    <write>
+                                        <graph>modified:quantityKinds</graph>
+                                        <toFile>target/dist/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toFile>
+                                    </write>
+                                    <!-- start from here if nothing has changed in the inputs of the earlier steps -->
+                                    <savepoint><id>99-endOfPipeline</id></savepoint>
+                                </steps>
+                            </pipeline>
                         </configuration>
                     </execution>
-                    <execution>
-                        <!--
-                        adds the qudt:applicableUnits triples we generated with SHACL to the quantitykinds target file.
-                        -->
-                        <id>merge-owlSubset-target</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>make</goal>
-                        </goals>
-                        <configuration>
-                            <products>
-                                <singleFile>
-                                    <input>
-                                        <include>
-                                            target/inferred/owl-subset.ttl
-                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                        </include>
-                                    </input>
-                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
-                                </singleFile>
-                            </products>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!--
-                        adds the qudt:applicableUnits triples we generated with SHACL to the quantitykinds target file.
-                        -->
-                        <id>merge-predefinedUnits-target</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>make</goal>
-                        </goals>
-                        <configuration>
-                            <products>
-                                <singleFile>
-                                    <input>
-                                        <include>
-                                            src/build/inference/factorUnits/predefined-factors-and-scalings.ttl
-                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                        </include>
-                                    </input>
-                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
-                                </singleFile>
-                            </products>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!--
-                        adds the qudt:hasFactorUnit triples we generated with SHACL to the units source file.
-                        -->
-                        <id>merge-factorUnits-target</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>make</goal>
-                        </goals>
-                        <configuration>
-                            <products>
-                                <singleFile>
-                                    <input>
-                                        <include>
-                                            target/inferred/factorUnits.ttl
-                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                        </include>
-                                    </input>
-                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
-                                </singleFile>
-                            </products>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!--
-                        adds the qudt:hasFactorUnit triples we generated with SHACL to the units source file.
-                        -->
-                        <id>merge-conversionMultiplier-target</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>make</goal>
-                        </goals>
-                        <configuration>
-                            <products>
-                                <singleFile>
-                                    <input>
-                                        <include>
-                                            target/inferred/conversionMultiplier.ttl
-                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                        </include>
-                                    </input>
-                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
-                                </singleFile>
-                            </products>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!--
-                        executes the query that is used to generate/validate qudt:hasFactorUnit triples
-                        -->
-                        <id>query-factorUnits</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>make</goal>
-                        </goals>
-                        <configuration>
-                            <products>
-                                <singleFile>
-                                    <input>
-                                        <include>
-                                            target/inferred/factorUnits.ttl
-                                            src/build/inference/factorUnits/predefined-factors-and-scalings.ttl
-                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                            src/main/rdf/vocab/prefixes/VOCAB_QUDT-PREFIXES.ttl
-                                        </include>
-                                    </input>
-                                    <filters>
-                                        <sparqlSelectFile>src/build/srcgen/factorUnits/query.rq</sparqlSelectFile>
-                                    </filters>
-                                    <outputFile>target/ignore.txt</outputFile>
-                                </singleFile>
-                            </products>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!--
-                        executes the query that is used to generate/validate qudt:scalingOf triples
-                        -->
-                        <id>query-scalingOf</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>make</goal>
-                        </goals>
-                        <configuration>
-                            <products>
-                                <singleFile>
-                                    <input>
-                                        <include>
-                                            <!--
-                                                we include anything we might have already inferrd, and we
-                                                include the predefined scalings (they are merged into the target units later)
-                                            -->
-                                            src/build/inference/factorUnits/predefined-factors-and-scalings.ttl
-                                            target/inferred/scalingOf.ttl
-                                            src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                            src/main/rdf/vocab/prefixes/VOCAB_QUDT-PREFIXES.ttl
-                                        </include>
-                                    </input>
-                                    <filters>
-                                        <sparqlSelectFile>src/build/srcgen/scalingOf/query.rq</sparqlSelectFile>
-                                    </filters>
-                                    <outputFile>target/ignore.txt</outputFile>
-                                </singleFile>
-                            </products>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!--
-                        adds the qudt:hasFactorUnit triples we generated with SHACL to the units source file.
-                        -->
-                        <id>merge-scalingOf-target</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>make</goal>
-                        </goals>
-                        <configuration>
-                            <products>
-                                <singleFile>
-                                    <input>
-                                        <include>
-                                            target/inferred/scalingOf.ttl
-                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                        </include>
-                                    </input>
-                                    <outputFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</outputFile>
-                                </singleFile>
-                            </products>
-                        </configuration>
-                    </execution>
+
                     <execution>
                         <!--
                         generates links to IEC CDD
@@ -897,37 +803,6 @@
                                         </sparqlUpdate>
                                     </filters>
                                 </eachFile>
-                            </products>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!--
-                        execute any query you like (not used in the build - just edit below an run
-                        ```
-                        mvn rdfio:make@myQuery
-                        ```
-                        -->
-                        <id>myQuery</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>make</goal>
-                        </goals>
-                        <configuration>
-                            <products>
-                                <singleFile>
-                                    <input>
-                                        <include>
-                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                        </include>
-                                    </input>
-                                    <filters>
-                                        <!-- put any query here -->
-                                        <sparqlSelectFile>
-                                            src/build/srcgen/conversionMultiplier/query.rq
-                                        </sparqlSelectFile>
-                                    </filters>
-                                    <outputFile>target/ignore.txt</outputFile>
-                                </singleFile>
                             </products>
                         </configuration>
                     </execution>
@@ -1049,12 +924,24 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
+                            <formats>
+                            <!--
+                            does our placeholder replacements using the maven properties
+                            that were set using the groovy plugin
+                            -->
+                                <format>
+                                    <excludes>
+                                        <exclude>target/**/*.*</exclude>
+                                    </excludes>
+                                </format>
+                            </formats>
+
                             <rdf>
                                 <includes>
                                     <include>src/**/*.ttl</include>
                                 </includes>
                                 <excludes>
-                                    <exclude>**/target/**/*.*</exclude>
+                                    <exclude>target/**/*.*</exclude>
                                     <exclude>src/build/srcgen/**/infer.ttl</exclude>
                                     <exclude>src/build/srcgen/**/validate.ttl</exclude>
                                 </excludes>
