@@ -68,264 +68,158 @@
                 Executions with phase 'none' (invocable directly via command line, not bound to lifecycle):
                       none                     infer-and-format, infer-factorUnits, infer-scalingOf, merge-factorUnits-target, query-factorUnits, query-scalingOf, merge-scalingOf-target, reformat-sources
             -->
+
             <plugin>
-                <groupId>io.github.qudtlib</groupId>
-                <artifactId>seq-maven-plugin</artifactId>
-                <version>1.0.0</version>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>4.1.1</version>
                 <executions>
-                    <execution>
-                        <id>infer-and-format</id>
-                        <phase>compile</phase>
-                        <goals><goal>run</goal></goals>
-                        <configuration>
-                            <label>make all inferences and write to target</label>
-                            <steps>
-                                <step>
-                                    <pluginCoordinates>rdfio:make@merge-predefinedUnits-target</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>shacl:infer@infer-factorUnits</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>rdfio:make@merge-factorUnits-target</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>shacl:infer@infer-scalingOf</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>rdfio:make@merge-scalingOf-target</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>shacl:infer@infer-conversionMultiplier</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>rdfio:make@merge-conversionMultiplier-target</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>shacl:infer@infer-applicableUnits</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>rdfio:make@merge-applicableUnits-target</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>shacl:infer@infer-owlSubset</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>rdfio:make@merge-owlSubset-target</pluginCoordinates>
-                                </step>
-                            </steps>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>infer-factorUnits</id>
-                        <phase>none</phase>
-                        <goals><goal>run</goal></goals>
-                        <configuration>
-                            <label>factor units</label>
-                            <steps>
-                                <step>
-                                    <pluginCoordinates>shacl:infer@infer-factorUnits</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>rdfio:make@merge-factorUnits-target</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>spotless:apply@reformat-sources</pluginCoordinates>
-                                </step>
-                            </steps>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>infer-scalingOf</id>
-                        <phase>none</phase>
-                        <goals><goal>run</goal></goals>
-                        <configuration>
-                            <label>scalingOf</label>
-                            <steps>
-                                <step>
-                                    <pluginCoordinates>shacl:infer@infer-scalingOf</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>rdfio:make@merge-scalingOf-target</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>spotless:apply@reformat-sources</pluginCoordinates>
-                                </step>
-                            </steps>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>infer-derivedUnit-conversionMultiplier</id>
-                        <phase>none</phase>
-                        <goals><goal>run</goal></goals>
-                        <configuration>
-                            <label>derived units multipliers</label>
-                            <steps>
-                                <step>
-                                    <pluginCoordinates>shacl:infer@infer-conversionMultipliers</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>rdfio:make@merge-conversionMultipliers-target</pluginCoordinates>
-                                </step>
-                                <step>
-                                    <pluginCoordinates>spotless:apply@reformat-sources</pluginCoordinates>
-                                </step>
-                            </steps>
+                <!-- Ported execution: defineAdditionalProperties -->
+                <execution>
+                    <id>defineAdditionalProperties</id>
+                    <phase>validate</phase>
+                    <goals>
+                        <goal>execute</goal>
+                    </goals>
+                    <configuration>
+                        <scripts>
+                            <script><![CDATA[
+                                    import java.time.OffsetDateTime
+                                    import java.time.format.DateTimeFormatter
+                                    import java.time.temporal.ChronoField
+
+                                    def majorMinorVersion = "${project.version}".replaceAll('^(\\w+\\.\\w+).*\$', '\$1')
+                                    project.properties.setProperty('project.version.majorminor', majorMinorVersion)
+                                    project.properties.setProperty('qudt.versioned.iri.prefix', "http://qudt.org/${majorMinorVersion}/")
+                                    def now = OffsetDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0)
+                                    project.properties.setProperty('qudt.build.date', "${now}")
+                                    def currentMonth = now.format(DateTimeFormatter.ofPattern("MM"))
+                                    def currentYear = now.format(DateTimeFormatter.ofPattern("YYYY"))
+                                    project.properties.setProperty('qudt.current.month', currentMonth)
+                                    project.properties.setProperty('qudt.current.year', currentYear)
+                                ]]></script>
+                        </scripts>
+                    </configuration>
+                </execution>
+                <!-- New execution: preprocess-shacl-files -->
+                <execution>
+                    <id>preprocess-shacl-files</id>
+                    <phase>validate</phase>
+                    <goals>
+                        <goal>execute</goal>
+                    </goals>
+                    <configuration>
+                        <scripts>
+                            <script><![CDATA[
+                                // Define base directories
+                                def basedir = project.basedir.toString()
+                                def srcgenDir = new File(basedir, "src/build/srcgen")
+                                def targetDir = new File(basedir, "target/srcgen")
+
+                                // Validate source directory
+                                if (!srcgenDir.exists() || !srcgenDir.isDirectory()) {
+                                    throw new Exception("Source generation directory not found: ${srcgenDir}")
+                                }
+
+                                // Ensure target directory exists
+                                targetDir.mkdirs()
+
+                                // Step 1: Collect all aspect directories and their file status
+                                def allAspectDirs = srcgenDir.listFiles().findAll { it.isDirectory() }
+                                def validAspectDirs = []
+                                // Map to store omitted dirs and missing files
+                                def omittedAspectDirsWithReasons = [:]
+
+                                allAspectDirs.each { dir ->
+                                    def aspectName = dir.name
+                                    def queryFile = new File(dir, "query.rq")
+                                    def inferTemplateFile = new File(dir, "infer-template.ttl")
+                                    def validateTemplateFile = new File(dir, "validate-template.ttl")
+
+                                    def requiredFiles = [
+                                        queryFile: queryFile,
+                                        inferTemplateFile: inferTemplateFile,
+                                        validateTemplateFile: validateTemplateFile
+                                    ]
+
+                                    // Find missing files for this directory
+                                    def missingFiles = requiredFiles.findAll { !it.value.exists() }.keySet()
+
+                                    if (missingFiles.isEmpty()) {
+                                        // All files present, add to valid list
+                                        validAspectDirs << dir
+                                        // Record missing files
+                                        } else { omittedAspectDirsWithReasons[dir] = missingFiles
+                                         }
+                                }
+
+                                // Step 2: Process valid directories
+                                validAspectDirs.each { aspectDir ->
+                                    def aspectName = aspectDir.name
+                                    println "Processing aspect: ${aspectName}"
+
+                                    // Load required files
+                                    def queryFile = new File(aspectDir, "query.rq")
+                                    def inferTemplateFile = new File(aspectDir, "infer-template.ttl")
+                                    def validateTemplateFile = new File(aspectDir, "validate-template.ttl")
+
+                                    // Process query file (e.g., remove prefixes)
+                                    def queryText = queryFile.text
+                                    def queryWithoutPrefixes = queryText.replaceAll('(?is)^\\s*(PREFIX\\s+[^\\n]*\\n)*\\s*', '')
+                                                                .replaceAll('(?is)\\s*$', '')
+                                    if (!queryWithoutPrefixes) {
+                                        throw new Exception("No query body found in ${queryFile}")
+                                    }
+                                    queryWithoutPrefixes = queryWithoutPrefixes.replaceAll("\\\\", "\\\\\\\\")
+
+                                    // Create output directory for this aspect
+                                    def aspectOutputDir = new File(targetDir, aspectName)
+                                    aspectOutputDir.mkdirs()
+
+                                    // Define templates to process
+                                    def templates = [
+                                        [source: inferTemplateFile, target: "infer.ttl"],
+                                        [source: validateTemplateFile, target: "validate.ttl"]
+                                    ]
+
+                                    // Generate output files
+                                    templates.each { template ->
+                                        def content = template.source.text
+                                        def outputContent = content.replace('{{QUERY_WITHOUT_PREFIXES}}', queryWithoutPrefixes)
+                                        outputContent = outputContent.replace('{{AUTOGENERATED_WARNING_DO_NOT_EDIT}}',
+                                            " Auto-generated file - ALL EDITS WILL BE LOST! Edit the '-template.ttl' file instead!")
+                                        def outputFile = new File(aspectOutputDir, template.target)
+                                        outputFile.text = outputContent
+                                        println "Generated: ${outputFile}"
+                                    }
+                                }
+
+                                // Step 3: Log omitted directories with missing file details
+                                if (omittedAspectDirsWithReasons) {
+                                    println "The following aspects were omitted due to missing required files:"
+                                    // Simplify to file names
+                                    omittedAspectDirsWithReasons.each { dir, missingFiles ->
+                                        def missingFileNames = missingFiles.collect { it.toString().replaceAll('^.*\\.', '') }
+                                        println " - ${dir.name}: Missing ${missingFileNames.join(', ')}"
+                                    }
+                                } else {
+                                    println "All aspects processed successfully; no missing files detected."
+                                }
+                            ]]>
+                                </script>
+                            </scripts>
                         </configuration>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.groovy</groupId>
+                        <artifactId>groovy-ant</artifactId>
+                        <version>4.0.23</version>
+                        <scope>runtime</scope>
+                    </dependency>
+                </dependencies>
             </plugin>
-            <plugin>
-            <groupId>org.codehaus.gmavenplus</groupId>
-            <artifactId>gmavenplus-plugin</artifactId>
-            <version>4.1.1</version>
-            <executions>
-            <!-- Ported execution: defineAdditionalProperties -->
-            <execution>
-                <id>defineAdditionalProperties</id>
-                <phase>validate</phase>
-                <goals>
-                    <goal>execute</goal>
-                </goals>
-                <configuration>
-                    <scripts>
-                        <script><![CDATA[
-                                import java.time.OffsetDateTime
-                                import java.time.format.DateTimeFormatter
-                                import java.time.temporal.ChronoField
-
-                                def majorMinorVersion = "${project.version}".replaceAll('^(\\w+\\.\\w+).*\$', '\$1')
-                                project.properties.setProperty('project.version.majorminor', majorMinorVersion)
-                                project.properties.setProperty('qudt.versioned.iri.prefix', "http://qudt.org/${majorMinorVersion}/")
-                                def now = OffsetDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0)
-                                project.properties.setProperty('qudt.build.date', "${now}")
-                                def currentMonth = now.format(DateTimeFormatter.ofPattern("MM"))
-                                def currentYear = now.format(DateTimeFormatter.ofPattern("YYYY"))
-                                project.properties.setProperty('qudt.current.month', currentMonth)
-                                project.properties.setProperty('qudt.current.year', currentYear)
-                            ]]></script>
-                    </scripts>
-                </configuration>
-            </execution>
-            <!-- New execution: preprocess-shacl-files -->
-            <execution>
-                <id>preprocess-shacl-files</id>
-                <phase>validate</phase>
-                <goals>
-                    <goal>execute</goal>
-                </goals>
-                <configuration>
-                    <scripts>
-                        <script><![CDATA[
-                            // Define base directories
-                            def basedir = project.basedir.toString()
-                            def srcgenDir = new File(basedir, "src/build/srcgen")
-                            def targetDir = new File(basedir, "target/srcgen")
-
-                            // Validate source directory
-                            if (!srcgenDir.exists() || !srcgenDir.isDirectory()) {
-                                throw new Exception("Source generation directory not found: ${srcgenDir}")
-                            }
-
-                            // Ensure target directory exists
-                            targetDir.mkdirs()
-
-                            // Step 1: Collect all aspect directories and their file status
-                            def allAspectDirs = srcgenDir.listFiles().findAll { it.isDirectory() }
-                            def validAspectDirs = []
-                            // Map to store omitted dirs and missing files
-                            def omittedAspectDirsWithReasons = [:]
-
-                            allAspectDirs.each { dir ->
-                                def aspectName = dir.name
-                                def queryFile = new File(dir, "query.rq")
-                                def inferTemplateFile = new File(dir, "infer-template.ttl")
-                                def validateTemplateFile = new File(dir, "validate-template.ttl")
-
-                                def requiredFiles = [
-                                    queryFile: queryFile,
-                                    inferTemplateFile: inferTemplateFile,
-                                    validateTemplateFile: validateTemplateFile
-                                ]
-
-                                // Find missing files for this directory
-                                def missingFiles = requiredFiles.findAll { !it.value.exists() }.keySet()
-
-                                if (missingFiles.isEmpty()) {
-                                    // All files present, add to valid list
-                                    validAspectDirs << dir
-                                    // Record missing files
-                                    } else { omittedAspectDirsWithReasons[dir] = missingFiles
-                                     }
-                            }
-
-                            // Step 2: Process valid directories
-                            validAspectDirs.each { aspectDir ->
-                                def aspectName = aspectDir.name
-                                println "Processing aspect: ${aspectName}"
-
-                                // Load required files
-                                def queryFile = new File(aspectDir, "query.rq")
-                                def inferTemplateFile = new File(aspectDir, "infer-template.ttl")
-                                def validateTemplateFile = new File(aspectDir, "validate-template.ttl")
-
-                                // Process query file (e.g., remove prefixes)
-                                def queryText = queryFile.text
-                                def queryWithoutPrefixes = queryText.replaceAll('(?is)^\\s*(PREFIX\\s+[^\\n]*\\n)*\\s*', '')
-                                                            .replaceAll('(?is)\\s*$', '')
-                                if (!queryWithoutPrefixes) {
-                                    throw new Exception("No query body found in ${queryFile}")
-                                }
-                                queryWithoutPrefixes = queryWithoutPrefixes.replaceAll("\\\\", "\\\\\\\\")
-
-                                // Create output directory for this aspect
-                                def aspectOutputDir = new File(targetDir, aspectName)
-                                aspectOutputDir.mkdirs()
-
-                                // Define templates to process
-                                def templates = [
-                                    [source: inferTemplateFile, target: "infer.ttl"],
-                                    [source: validateTemplateFile, target: "validate.ttl"]
-                                ]
-
-                                // Generate output files
-                                templates.each { template ->
-                                    def content = template.source.text
-                                    def outputContent = content.replace('{{QUERY_WITHOUT_PREFIXES}}', queryWithoutPrefixes)
-                                    outputContent = outputContent.replace('{{AUTOGENERATED_WARNING_DO_NOT_EDIT}}',
-                                        " Auto-generated file - ALL EDITS WILL BE LOST! Edit the '-template.ttl' file instead!")
-                                    def outputFile = new File(aspectOutputDir, template.target)
-                                    outputFile.text = outputContent
-                                    println "Generated: ${outputFile}"
-                                }
-                            }
-
-                            // Step 3: Log omitted directories with missing file details
-                            if (omittedAspectDirsWithReasons) {
-                                println "The following aspects were omitted due to missing required files:"
-                                // Simplify to file names
-                                omittedAspectDirsWithReasons.each { dir, missingFiles ->
-                                    def missingFileNames = missingFiles.collect { it.toString().replaceAll('^.*\\.', '') }
-                                    println " - ${dir.name}: Missing ${missingFileNames.join(', ')}"
-                                }
-                            } else {
-                                println "All aspects processed successfully; no missing files detected."
-                            }
-                        ]]>
-                        </script>
-                    </scripts>
-                </configuration>
-            </execution>
-        </executions>
-        <dependencies>
-            <dependency>
-                <groupId>org.apache.groovy</groupId>
-                <artifactId>groovy-ant</artifactId>
-                <version>4.0.23</version>
-                <scope>runtime</scope>
-            </dependency>
-        </dependencies>
-        </plugin>
 
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
