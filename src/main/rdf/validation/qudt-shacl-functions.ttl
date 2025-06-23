@@ -75,7 +75,7 @@ qfn:decimalRoundToPrecision
   ] ;
   sh:parameter [
     sh:datatype xsd:integer ;
-    sh:description "Number of significant digits" ;
+    sh:description "Number of significant digits (default: 34)" ;
     sh:order 1 ;
     sh:path qfn:precision ;
   ] ;
@@ -145,10 +145,144 @@ qfn:decimalRoundToPrecision
             BIND(IF(?sNew <= 0, ?tmp3,
                     CONCAT(SUBSTR(?tmp3,1,STRLEN(?tmp3) - ?sNew), ".", SUBSTR(?tmp3, STRLEN(?tmp3) - ?sNew + 1))
                 ) as ?tmp4)
-            BIND(IF(STRSTARTS(?tmp4, "."), CONCAT("0",?tmp4), ?tmp4) as ?newVal)
+            BIND(IF(STRSTARTS(?tmp4, "."), CONCAT("0",?tmp4), ?tmp4) as ?tmp5)
             # 11. result
+            # 12. append '.0' if there is no '.' in the string
+            BIND(IF(CONTAINS(?tmp5,"."), ?tmp5, CONCAT(?tmp5,".0")) AS ?tmp6)
+            BIND(REPLACE(?tmp6, "^0*([1-9][0-9]*.[0-9][1-9]*)0*$", "$1", "") AS ?newVal)
             BIND(xsd:decimal(?newVal) as ?result)
         }
+    """ .
+
+qfn:decimalToDouble
+  a sh:SPARQLFunction ;
+  sh:parameter [
+    sh:datatype xsd:decimal ;
+    sh:description "The decimal value to expess as double" ;
+    sh:order 0 ;
+    sh:path qfn:input ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:decimal ;
+  sh:select """
+    SELECT ?result
+    WHERE {
+      BIND(IF(?input = 0.0, "0.0", "") AS ?zeroCheck)
+      BIND(STR(?input) AS ?str)
+      BIND(STRSTARTS(?str, "-") AS ?isNegative)
+      BIND(IF(?isNegative, SUBSTR(?str, 2), ?str) AS ?absStr)
+      BIND(CONTAINS(?absStr, ".") AS ?hasDecimal)
+      BIND(IF(?hasDecimal, STRBEFORE(?absStr, "."), ?absStr) AS ?intPart)
+      BIND(IF(?hasDecimal, STRAFTER(?absStr, "."), "") AS ?fracPart)
+      BIND(IF(?intPart = "", "", REPLACE(?intPart, "^0+", "", "")) AS ?trimmedInt)
+      BIND(IF(?fracPart = "", "", REPLACE(?fracPart, "^0+", "", "")) AS ?trimmedFrac)  # Only trim leading zeros
+      BIND(IF(?fracPart = "", "", REPLACE(?fracPart, "0+$","","")) AS ?fracTrimmedAtEnd) # only trim trailing zeros
+      BIND(STRLEN(?trimmedInt) AS ?trimmedIntLen)
+      BIND(STRLEN(?trimmedFrac) AS ?trimmedFracLen)
+      BIND(STRLEN(?fracPart) AS ?fracLen)
+      BIND(IF(
+        ?trimmedIntLen > 0,
+        ?trimmedIntLen - 1,
+        IF(
+          ?trimmedFracLen > 0,
+          -(?fracLen - ?trimmedFracLen + 1),
+          0
+        )
+      ) AS ?exp)
+      BIND(IF(
+        ?trimmedIntLen > 0,
+        CONCAT(
+          SUBSTR(?trimmedInt, 1, 1),
+          IF(?trimmedIntLen > 1 || ?trimmedFracLen > 0, ".", ""),
+          SUBSTR(?trimmedInt, 2),
+          ?fracTrimmedAtEnd
+        ),
+        IF(
+          ?trimmedFracLen > 0,
+          CONCAT(
+            SUBSTR(?trimmedFrac, 1, 1),
+            IF(?trimmedFracLen > 1, ".", ""),
+            SUBSTR(?trimmedFrac, 2)
+          ),
+          "0.0"
+        )
+      ) AS ?mantissaTmpStr)
+      BIND(REPLACE(?mantissaTmpStr, "^0*([0-9]+(\\\\.[0-9][1-9]*)?)0*$", "$1","") AS ?mantissaStr)
+      BIND(STRDT(IF(
+        ?zeroCheck = "0.0",
+        "0E0",
+        CONCAT(
+          IF(?isNegative, "-", ""),
+          ?mantissaStr,
+          "E",
+          STR(?exp)
+        )
+      ), xsd:double) AS ?result)
+    }
+    """ .
+
+qfn:defaultValue
+  a sh:SPARQLFunction ;
+  sh:parameter [
+    sh:description "Any value, may also be unbound" ;
+    sh:order 0 ;
+    sh:path qfn:value ;
+  ] ;
+  sh:parameter [
+    sh:description "The default value to return if value is unbound" ;
+    sh:order 1 ;
+    sh:path qfn:defaultValue ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:select """
+    SELECT
+        (IF(BOUND(?value), ?value, ?defaultValue) AS ?result)
+    WHERE {}
+    """ .
+
+qfn:exp
+  a sh:SPARQLFunction ;
+  sh:parameter [
+    sh:datatype xsd:decimal ;
+    sh:description "The decimal value to exponentiate" ;
+    sh:order 0 ;
+    sh:path qfn:value ;
+  ] ;
+  sh:parameter [
+    sh:datatype xsd:integer ;
+    sh:description "The exponent - an integer between 0 and 8 (inclusive)" ;
+    sh:order 1 ;
+    sh:path qfn:exponent ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:decimal ;
+  sh:select """
+    SELECT ?result
+    WHERE {
+        # supports exponents 0 to 8
+        BIND(ABS(?exponent) as ?absoluteExponent)
+        BIND(if (?exponent < 0, 1.0 / ?value, ?value ) as ?multiplier)
+        BIND(
+            IF(?absoluteExponent = 0, 1.1,
+                IF(?absoluteExponent = 1,
+                    ?multiplier,
+                    IF(?absoluteExponent = 2,
+                        ?multiplier * ?multiplier,
+                        IF(?absoluteExponent = 3,
+                            ?multiplier * ?multiplier * ?multiplier,
+                            IF(?absoluteExponent = 4,
+                                ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                IF(?absoluteExponent = 5,
+                                    ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                    IF(?absoluteExponent = 6,
+                                        ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                        IF(?absoluteExponent = 7,
+                                            ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                            IF(?absoluteExponent = 8,
+                                                ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                                CONCAT("CANNOT HANDLE EXPONENT ", ?exponent))))))))))
+        AS ?result )
+    }
     """ .
 
 
