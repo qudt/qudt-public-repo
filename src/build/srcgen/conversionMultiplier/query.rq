@@ -12,67 +12,82 @@ WHERE {
   OPTIONAL { ?this qudt:conversionMultiplier ?actualMultiplier . }
   # Subquery to compute and concatenate factor unit contributions
   {
-    SELECT ?this (GROUP_CONCAT(?factorContribution; SEPARATOR="|") AS ?contributions) (GROUP_CONCAT(?multiplierFound;SEPARATOR="|") AS ?allMultipliersFound)
-    WHERE {
-      ?this qudt:hasFactorUnit ?factor .
-      ?factor qudt:hasUnit ?baseUnit ;
-              qudt:exponent ?exponent .
-      OPTIONAL {              
-        ?baseUnit qudt:conversionMultiplier ?baseMultiplier .
-      }
-      OPTIONAL {
-        ?this qudt:factorUnitScalar ?factorUnitScalar
-      }
-      
-      # did we find the multiplier?
-      BIND(IF(BOUND(?baseMultiplier), "YES", "NO") AS ?multiplierFound)
-      BIND(IF(BOUND(?factorUnitScalar), ?factorUnitScalar, 1.0) AS ?scalar)
-      BIND(?scalar * qfn:exp(?baseMultiplier, ?exponent) AS ?factorContribution)
+      {
+        SELECT
+            ?this
+            (GROUP_CONCAT(?factorContribution; SEPARATOR="|") AS ?contributions)
+            (GROUP_CONCAT(?multiplierFound;SEPARATOR="|") AS ?allMultipliersFound)
+        WHERE {
+          ?this qudt:hasFactorUnit ?factor .
+          ?factor qudt:hasUnit ?baseUnit ;
+                  qudt:exponent ?exponent .
+          OPTIONAL {
+            ?baseUnit qudt:conversionMultiplier ?baseMultiplier .
+          }
 
+
+          # did we find the multiplier?
+          BIND(IF(BOUND(?baseMultiplier), "YES", "NO") AS ?multiplierFound)
+          BIND(qfn:exp(?baseMultiplier, ?exponent) AS ?factorContribution)
+
+        }
+        GROUP BY ?this
+      }
+        # Dont continue if we could not find all multipliers
+        FILTER(!CONTAINS(?allMultipliersFound,"NO"))
+
+        # Disassemble contributions into up to 10 variables
+        BIND(COALESCE(CONCAT("|",?contributions), "|") AS ?contribString)
+
+        # Make sure we don't accidentally swallow stuff that isn't made of numbers
+        FILTER(REGEX("[0-9\\-\\.\\|]+", ?contribString))
+
+        BIND(REPLACE(?contribString, ".*\\|", "") as ?f1)
+        BIND(SUBSTR(?contribString, 0, STRLEN(?contribString) - STRLEN(?f1)) as ?f1removed)
+        BIND(REPLACE(?f1removed, ".*\\|", "") as ?f2)
+        BIND(SUBSTR(?f1removed, 0, STRLEN(?f1removed) - STRLEN(?f2)) as ?f2removed)
+        BIND(REPLACE(?f2removed, ".*\\|", "") as ?f3)
+        BIND(SUBSTR(?f2removed, 0, STRLEN(?f2removed) - STRLEN(?f3)) as ?f3removed)
+        BIND(REPLACE(?f3removed, ".*\\|", "") as ?f4)
+        BIND(SUBSTR(?f3removed, 0, STRLEN(?f3removed) - STRLEN(?f4)) as ?f4removed)
+        BIND(REPLACE(?f4removed, ".*\\|", "") as ?f5)
+        BIND(SUBSTR(?f4removed, 0, STRLEN(?f4removed) - STRLEN(?f5)) as ?f5removed)
+        BIND(REPLACE(?f5removed, ".*\\|", "") as ?f6)
+        BIND(SUBSTR(?f5removed, 0, STRLEN(?f5removed) - STRLEN(?f6)) as ?f6removed)
+        BIND(REPLACE(?f6removed, ".*\\|", "") as ?f7)
+        BIND(SUBSTR(?f6removed, 0, STRLEN(?f6removed) - STRLEN(?f7)) as ?f7removed)
+        BIND(REPLACE(?f7removed, ".*\\|", "") as ?f8)
+        BIND(SUBSTR(?f7removed, 0, STRLEN(?f7removed) - STRLEN(?f8)) as ?f8removed)
+        BIND(REPLACE(?f8removed, ".*\\|", "") as ?f9)
+      # Compute calculatedMultiplier by multiplying all contributions
+        OPTIONAL {
+            ?this qudt:factorUnitScalar ?factorUnitScalar
+        }
+        BIND(IF(BOUND(?factorUnitScalar), ?factorUnitScalar, 1.0) AS ?scalar)
+        BIND( ?scalar
+            * COALESCE(xsd:decimal(?f1), 1.0)
+            * COALESCE(xsd:decimal(?f2), 1.0)
+            * COALESCE(xsd:decimal(?f3), 1.0)
+            * COALESCE(xsd:decimal(?f4), 1.0)
+            * COALESCE(xsd:decimal(?f5), 1.0)
+            * COALESCE(xsd:decimal(?f6), 1.0)
+            * COALESCE(xsd:decimal(?f7), 1.0)
+            * COALESCE(xsd:decimal(?f8), 1.0)
+            * COALESCE(xsd:decimal(?f9), 1.0) as ?rawCalculatedMultiplier)
+    } UNION {
+        ?this
+            qudt:scalingOf/qudt:conversionMultiplier ?baseCM ;
+            qudt:prefix/qudt:conversionMultiplier ?prefixCM .
+        BIND (?baseCM * ?prefixCM as ?rawCalculatedMultiplier)
     }
-    GROUP BY ?this
-  }
-    # Dont continue if we could not find all multipliers
-    FILTER(!CONTAINS(?allMultipliersFound,"NO"))
-  
-    # Disassemble contributions into up to 10 variables
-    BIND(COALESCE(CONCAT("|",?contributions), "|") AS ?contribString)
-
-    # Make sure we don't accidentally swallow stuff that isn't made of numbers
-    FILTER(REGEX("[0-9\\-\\.\\|]+", ?contribString))
-    
-    BIND(REPLACE(?contribString, ".*\\|", "") as ?f1)
-    BIND(SUBSTR(?contribString, 0, STRLEN(?contribString) - STRLEN(?f1)) as ?f1removed)
-    BIND(REPLACE(?f1removed, ".*\\|", "") as ?f2)
-    BIND(SUBSTR(?f1removed, 0, STRLEN(?f1removed) - STRLEN(?f2)) as ?f2removed)
-    BIND(REPLACE(?f2removed, ".*\\|", "") as ?f3)
-    BIND(SUBSTR(?f2removed, 0, STRLEN(?f2removed) - STRLEN(?f3)) as ?f3removed)
-    BIND(REPLACE(?f3removed, ".*\\|", "") as ?f4)
-    BIND(SUBSTR(?f3removed, 0, STRLEN(?f3removed) - STRLEN(?f4)) as ?f4removed)
-    BIND(REPLACE(?f4removed, ".*\\|", "") as ?f5)
-    BIND(SUBSTR(?f4removed, 0, STRLEN(?f4removed) - STRLEN(?f5)) as ?f5removed)
-    BIND(REPLACE(?f5removed, ".*\\|", "") as ?f6)
-    BIND(SUBSTR(?f5removed, 0, STRLEN(?f5removed) - STRLEN(?f6)) as ?f6removed)
-    BIND(REPLACE(?f6removed, ".*\\|", "") as ?f7)
-    BIND(SUBSTR(?f6removed, 0, STRLEN(?f6removed) - STRLEN(?f7)) as ?f7removed)
-    BIND(REPLACE(?f7removed, ".*\\|", "") as ?f8)
-    BIND(SUBSTR(?f7removed, 0, STRLEN(?f7removed) - STRLEN(?f8)) as ?f8removed)
-    BIND(REPLACE(?f8removed, ".*\\|", "") as ?f9)
-  # Compute calculatedMultiplier by multiplying all contributions
-    BIND(COALESCE(xsd:decimal(?f1), 1.0)
-        * COALESCE(xsd:decimal(?f2), 1.0)
-        * COALESCE(xsd:decimal(?f3), 1.0)
-        * COALESCE(xsd:decimal(?f4), 1.0)
-        * COALESCE(xsd:decimal(?f5), 1.0)
-        * COALESCE(xsd:decimal(?f6), 1.0)
-        * COALESCE(xsd:decimal(?f7), 1.0)
-        * COALESCE(xsd:decimal(?f8), 1.0)
-        * COALESCE(xsd:decimal(?f9), 1.0) as ?cumMul)
-    BIND(qfn:decimalRoundToPrecision(?cumMul, 34) as ?calculatedMultiplier)
+    BIND (qfn:decimalRoundToPrecision(?rawCalculatedMultiplier, 34) as ?calculatedMultiplier)
     BIND (?actualMultiplier - ?calculatedMultiplier as ?diff)
     BIND (IF (?actualMultiplier = 0 , 0.0, ABS(?diff) / ABS(?actualMultiplier)) as ?relDiffAct)
     BIND (IF( ?calculatedMultiplier = 0, 0.0, ABS(?diff) / ABS(?calculatedMultiplier)) as ?relDiffCalc)
     BIND(IF(?relDiffAct > ?relDiffCalc, ?relDiffAct, ?relDiffCalc) as ?relDiff)
-    FILTER(!BOUND(?actualMultiplier) || ?actualMultiplier != ?calculatedMultiplier)
+    FILTER(
+        !BOUND(?actualMultiplier)                               # no actual multiplier? use calculated!
+        || (?actualMultiplier != 0.0                            # actual multiplier is 0? skip!!
+            && ?actualMultiplier != ?calculatedMultiplier))     # no result if calculated == actual
 }
 ORDER BY DESC(?relDiff)
