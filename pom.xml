@@ -44,7 +44,7 @@
                 Here are the phases and the execution ids that are linked to them (executed in the order they appear in this file):
                       validate                 defineAdditionalProperties, preprocess-shacl-files
                       initialize               [Profile -Pfix: reformat-sources]
-                      generate-sources
+                      generate-sources         unitTestPipeline
                       process-sources          check-source-format, shacl-validate-src
                       generate-resources       copy-rdf, copy-docs, copy-root-files, validate-shacl-files
                       process-resources        generate-iec-links
@@ -381,7 +381,7 @@
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>rdfio-maven-plugin</artifactId>
-                <version>1.4.1</version>
+                <version>1.4.2</version>
                 <executions>
                     <execution>
                         <id>badness</id>
@@ -430,7 +430,7 @@
                                                         ), xsd:decimal)
                                                     AS ?badness)
                                                 FILTER(BOUND(?badness))
-                                                FILTER(ABS(?badness) > 0.01)
+                                                FILTER(ABS(?badness) > 0.000001)
                                             } order by ABS(?badness)
                                             ]]>
                                         </sparql>
@@ -439,6 +439,88 @@
                             </pipeline>
                         </configuration>
                     </execution>
+                    <execution>
+                        <!-- unit tests for SHACL functions -->
+                        <id>unitTestPipeline</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>pipeline</goal>
+                        </goals>
+                        <configuration>
+                        <pipeline>
+                            <id>unitTestPipeline</id>
+                            <steps>
+                                <!-- make custom shacl functions available in inference and SPARQL-->
+                                <shaclFunctions>
+                                    <file>src/main/rdf/validation/qudt-shacl-functions.ttl</file>
+                                </shaclFunctions>
+                                <assert>
+                                    <message>Test qfn:decimalPrecision()</message>
+                                    <failureMessage>Unit test failed for qfn:decimalPrecision()</failureMessage>
+                                    <sparqlSelect>
+                                        SELECT *
+                                        WHERE {
+                                        VALUES (?input ?expectedOutput) {
+                                        (0            0)
+                                        (0.0          0)
+                                        (1            1)
+                                        (1.0          1)
+                                        (-1           1)
+                                        (-1.0         1)
+                                        (-.1          1)
+                                        (10           1)
+                                        (100          1)
+                                        (100.001      6)
+                                        (100.000      1)
+                                        (00123.456000 6)
+                                        (-0.00000001  1)
+                                        }
+                                        BIND(qfn:decimalPrecision(?input) AS ?precision)
+                                        FILTER(!BOUND(?precision) || ?precision != ?expectedOutput)
+                                        }
+                                    </sparqlSelect>
+                                </assert>
+                                <assert>
+                                    <message>Test qfn:decimalRoundToPrecision()</message>
+                                    <failureMessage>Unit test failed for qfn:decimalRoundToPrecision()</failureMessage>
+                                    <sparqlSelect>
+                                        SELECT *
+                                        WHERE {
+                                        VALUES (?input ?precision ?expectedOutput) {
+                                            (0            1         0.0)
+                                            (0.0          1         0.0)
+                                            (0.1          1         0.1)
+                                            (.1           1         0.1)
+                                            (1            1         1.0)
+                                            (+1           1         1.0)
+                                            (+1.0         1         1.0)
+                                            (+.0          1         0.0)
+                                            (+.1          1         0.1)
+                                            (1.0          1         1.0)
+                                            (-1           1        -1.0)
+                                            (-1.0         1        -1.0)
+                                            (-.1          1        -0.1)
+                                            (10           1        10.0)
+                                            (100          1       100.0)
+                                            (100.001      6       100.001)
+                                            (100.000      1       100.0)
+                                            (00123.456000 6       123.456)
+                                            (-0.00000001  1        -0.00000001)
+                                            (-00123.456000 3     -123.0)
+                                            (00123.456000 3       123.0)
+                                            (0.000000011574074074074074074  10 0.00000001157407407)
+                                            (-0.000000011574074074074074074  10 -0.00000001157407407)
+                                        }
+                                        BIND(qfn:decimalRoundToPrecision(?input, ?precision) AS ?rounded)
+                                        FILTER(!BOUND(?rounded) || ?rounded != ?expectedOutput)
+                                        }
+                                    </sparqlSelect>
+                                </assert>
+                            </steps>
+                            </pipeline>
+                        </configuration>
+                    </execution>
+
                     <execution>
                         <id>mainPipeline</id>
                         <phase>compile</phase>
