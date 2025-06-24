@@ -793,6 +793,53 @@
                                         <toFile>target/dist/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toFile>
                                     </write>
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
+
+                                    <clear/>
+                                    <savepoint><id>09-afterClear</id></savepoint>
+                                    <shaclFunctions>
+                                        <file>src/main/rdf/validation/qudt-shacl-functions.ttl</file>
+                                    </shaclFunctions>
+                                    <add>
+                                        <files>
+                                            <include>target/dist/**/*.ttl</include>
+                                        </files>
+                                        <toGraphsPattern>target:${name}</toGraphsPattern>
+                                    </add>
+                                    <sparqlUpdate>
+                                        <message>Limit any xsd:decimal's precision to 34</message>
+                                        <sparql>
+                                        DELETE {
+                                            GRAPH ?g {
+                                                ?s ?p ?oldVal .
+                                                ?s ?pSN ?oldValSN .
+                                            }
+                                        }
+                                        INSERT {
+                                            GRAPH ?g {
+                                                ?s ?p ?newVal .
+                                                ?s ?pSN ?newValSN .
+                                            }
+                                        }
+                                        WHERE {
+                                           GRAPH ?g {
+                                                ?s ?p ?oldVal .
+                                                FILTER (DATATYPE(?oldVal) = xsd:decimal)
+                                                FILTER(qfn:decimalPrecision(?oldVal) > 34)
+                                                BIND(IRI(CONCAT(STR(?p),"SN")) as ?pSN)
+                                                BIND(qfn:decimalRoundToPrecision(?oldVal, 34) AS ?newVal)
+                                                BIND(qfn:decimalToDouble(?newVal) AS ?newValSN)
+                                                OPTIONAL {
+                                                    ?s ?pSN ?oldValSN .
+                                                }
+                                           }
+                                        }
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <write>
+                                        <graphs>
+                                            <include>target:*</include>
+                                        </graphs>
+                                    </write>
                                     <savepoint><id>99-endOfPipeline</id></savepoint>
                                 </steps>
                             </pipeline>
