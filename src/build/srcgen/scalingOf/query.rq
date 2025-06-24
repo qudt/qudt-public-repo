@@ -4,7 +4,7 @@ PREFIX prefix: <http://qudt.org/vocab/prefix/>
 PREFIX kind: <http://qudt.org/vocab/quantitykind/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT ?this ?baseUnit ?prefix ?scaledUnitConversionMultiplier ?scaledUnitConversionOffset
+SELECT ?this ?baseUnit ?prefix
 where
 {
     {
@@ -62,23 +62,9 @@ where
             FILTER (!CONTAINS(?baseUnitLocalName, "-"))
             FILTER (CONTAINS(?scaledUnitLocalName, STR(?prefixLabel)))
     }
-    OPTIONAL {
-        # if the scaled unit does not have a conversionMultiplier, generate it
-        FILTER NOT EXISTS {
-            ?this qudt:conversionMultiplier ?any .
-        }
-        ?baseUnit qudt:conversionMultiplier ?cm .
-        optional {
-            ?baseUnit qudt:conversionOffset ?co
-        }
-        ?prefix a qudt:Prefix ;
-            qudt:prefixMultiplier ?prefixMultiplier ;
-            rdfs:label ?prefixLabel ;
-            FILTER (!CONTAINS(?baseUnitLocalName, "-"))
-            FILTER (CONTAINS(?scaledUnitLocalName, STR(?prefixLabel)))
-        BIND (?cm * ?prefixMultiplier as ?scaledUnitConversionMultiplier )
-        BIND (?co as ?scaledUnitConversionOffset )
-    }
+
+    # NOTE: conversion multiplier calcluation for scaled units
+    # is done in src/build/srcgen/conversionMultiplier
 
     OPTIONAL {
         ?baseUnit qudt:dimensionVector ?dv .
