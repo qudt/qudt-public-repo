@@ -65,6 +65,37 @@ qfn:
     sh:prefix "sh" ;
   ] .
 
+qfn:decimalPrecision
+  a sh:SPARQLFunction ;
+  rdfs:comment "Determines the precision (number of significant digits) of the decimal number provided as its first argument" ;
+  sh:parameter [
+    sh:datatype xsd:decimal ;
+    sh:description "The decimal value of which to determine the precision " ;
+    sh:order 0 ;
+    sh:path qfn:value ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:decimal ;
+  sh:select """
+        SELECT ?result
+        WHERE {
+            # determines precision of input
+            # simple: remove any '.' if present
+            BIND(STR(?value) as ?tmpVal)
+            BIND(REPLACE(?tmpVal, "([^.]*)\\\\.([^.]*)", "$1$2") as ?tmpVal1)
+            # leading 0 before the dot are insignificant, trailing 0 after the dot are insignificant. strip.
+            BIND(REPLACE(?tmpVal1, "^\\\\s*[+-]?\\\\s*0*([1-9]([0-9]*[1-9])?)0*$","$1") as ?val)
+            # 2. dVal
+            BIND(STRLEN(STRBEFORE(?val,".")) as ?tmp0)
+            BIND(IF(?tmp0 = 0, STRLEN(?val), ?tmp0) as ?dVal)
+            # 3. uVal
+            BIND(REPLACE(REPLACE(?val,"\\\\.",""), "^0+","") as ?uVal)
+            # 4. pVal
+            BIND(STRLEN(?uVal) as ?pVal)
+            BIND(xsd:integer(?pVal) as ?result)
+        }
+    """ .
+
 qfn:decimalRoundToPrecision
   a sh:SPARQLFunction ;
   sh:parameter [
@@ -109,12 +140,15 @@ qfn:decimalRoundToPrecision
             # for testing:
             # VALUES (?value ?precision) { (12345678 4) (0.00123456 3) (.00123456 4) (000123.456000 2) (123456789.0123456789 14) (0.123 5) (12345 3) (2 10) (3 1) (7 0) }
             #
-        \tBIND(IF(bound(?precision), ?precision, 34) as ?p)
+            BIND(IF(bound(?precision), ?precision, 34) as ?p)
             BIND("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000" as ?zeroPad)
+
             # 1: normalize
             BIND(STR(?value) as ?tmpValueStr)
             # leading 0 before the dot are insignificant. strip.
-            BIND(REPLACE(?tmpValueStr, "^0*(0\\\\.|[1-9])","$1") as ?tmpValueStrNoLeading0)
+            BIND(REPLACE(?tmpValueStr, "^[+-]?0*(0?\\\\.|[1-9])","$1") as ?tmpValueStrNoLeading0)
+            # remember sign if negative
+            BIND(IF(REGEX(?tmpValueStr, "^-"), "-","") AS ?sign)
             # if the number starts with '.', prepend '0'
             BIND(IF(STRSTARTS(?tmpValueStrNoLeading0, "."), CONCAT("0", ?tmpValueStrNoLeading0), ?tmpValueStrNoLeading0) as ?val)
             # 2. dVal
@@ -149,7 +183,8 @@ qfn:decimalRoundToPrecision
             # 11. result
             # 12. append '.0' if there is no '.' in the string
             BIND(IF(CONTAINS(?tmp5,"."), ?tmp5, CONCAT(?tmp5,".0")) AS ?tmp6)
-            BIND(REPLACE(?tmp6, "^0*([1-9][0-9]*.[0-9][1-9]*)0*$", "$1", "") AS ?newVal)
+            BIND(REPLACE(?tmp6, "^0*([1-9][0-9]*.[0-9][1-9]*)0*$", "$1", "") AS ?tmp7)
+            BIND(CONCAT(?sign, ?tmp7) AS ?newVal)
             BIND(xsd:decimal(?newVal) as ?result)
         }
     """ .
