@@ -18,6 +18,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Deprecated
 
 - Deprecated unit:CHF-PER-KiloGM in favor of unit:CCY_CHF-PER-KiloGM
+- Deprecated roughly 36 Quantity Kinds in favor of more consistently-named and natural-language-friendly URIs. Specifically, URIs containing
+  underscores are renamed except when the underscore identifies a component (e.g. x, y, z, imaginary, real).
+  Quantity Kinds raised to a power are renamed (e.g. Time_Squared becomes SquareTime)
 
 ### Fixed
 
