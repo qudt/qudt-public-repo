@@ -15,6 +15,14 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
+- Build process
+  - Introduced new maven goal `rdfio:pipeline` that allows for fine-grained rdf file manipulation
+  - introduced `mainPipeline` execution for the bulk of rdf munging
+- All instances of `xsd:decimal` are limited to a maximum precision of 34 significant digits
+- Derived units: recalculation of `qudt:conversionMultiplier` and `qudt:conversionMultiplierSN`
+  - During the build, all derived units' conversion multipliers are checked based on their `qudt:factorUnits`
+    and replaced with the calculated result if necessary
+
 ### Deprecated
 
 - Deprecated unit:CHF-PER-KiloGM in favor of unit:CCY_CHF-PER-KiloGM
@@ -26,6 +34,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Fixed erroneous prefix definition for cross-references to SI Quantity (equivalent to qudt:QuantityKind)
 - Corrected symbol for `unit:IN_H2O` from `inH₂0` to `inH₂O` [Reto Schneebeli](https://github.com/reto-siemens)
+- Removed wrong `qudt:conversionMultipliers` from `src` (they are now generated correctly in `target`, see 'Changed'). Affected units:
+  - `unit:MicroKAT-PER-L, unit:MilliKAT-PER-L, unit:NanoKAT-PER-L, unit:PicoKAT-PER-L, unit:MilliOSM-PER-KiloGM`
 
 ## [3.1.2] - 2025-05-30
 
