@@ -47,7 +47,7 @@
                       generate-sources         unitTestPipeline
                       process-sources          check-source-format, shacl-validate-src
                       generate-resources       copy-rdf, copy-docs, copy-root-files, validate-shacl-files
-                      process-resources        generate-iec-links
+                      process-resources
                       process-classes          mainRdfPipeline
                       generate-test-sources
                       process-test-sources
@@ -386,62 +386,6 @@
                 <version>1.4.2</version>
                 <executions>
                     <execution>
-                        <id>badness</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>pipeline</goal>
-                        </goals>
-                        <configuration>
-                            <pipeline>
-                                <id>badnessPipeline</id>
-                                <steps>
-                                    <add>
-                                        <files>
-                                            <include>
-                                                target/validation/conversionMultiplier-toDelete*.ttl
-                                            </include>
-                                        </files>
-                                    </add>
-                                    <add>
-                                        <file>src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</file>
-                                        <toGraph>units:src</toGraph>
-                                    </add>
-                                    <add>
-                                        <file>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</file>
-                                        <toGraph>units:target</toGraph>
-                                    </add>
-                                    <sparqlQuery>
-                                        <sparql>
-                                            <![CDATA[
-                                            SELECT ?focusNode ?badness ?originalConversionMultiplier ?cmCalculated WHERE {
-                                                ?report sh:resultMessage ?message .
-                                                ?report sh:focusNode ?focusNode .
-                                                GRAPH <units:src> {
-                                                    ?focusNode qudt:conversionMultiplier ?originalConversionMultiplier .
-                                                }
-                                                GRAPH <units:target> {
-                                                    ?focusNode qudt:conversionMultiplier ?cmCalculated .
-                                                }
-                                                BIND(
-                                                    STRDT(
-                                                        REPLACE(
-                                                            ?message,
-                                                            "^(.|\\r\\n)*badness\\s+: ([0-9]+\\.[0-9]+)(.|\\r\\n)*$",
-                                                            "$2",
-                                                            "mi"
-                                                        ), xsd:decimal)
-                                                    AS ?badness)
-                                                FILTER(BOUND(?badness))
-                                                FILTER(ABS(?badness) > 0.000001)
-                                            } order by ABS(?badness)
-                                            ]]>
-                                        </sparql>
-                                    </sparqlQuery>
-                                </steps>
-                            </pipeline>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <!-- unit tests for SHACL functions -->
                         <id>unitTestPipeline</id>
                         <phase>generate-sources</phase>
@@ -537,15 +481,45 @@
                                     <shaclFunctions>
                                         <file>src/main/rdf/validation/qudt-shacl-functions.ttl</file>
                                     </shaclFunctions>
+                                    <!-- first, handle the IEC links -->
+                                    <add>
+                                        <!--
+                                            this reads each file in target into a graph named 'target:{filename}'
+                                            in the dataset and remembers the file association (see <write> at the end)
+                                        -->
+                                        <files>
+                                            <include>target/dist/vocab/**/*.ttl</include>
+                                        </files>
+                                        <toGraphsPattern>target:${name}</toGraphsPattern>
+                                    </add>
+                                    <sparqlUpdate>
+                                        <message>Adding IEC links</message>
+                                        <sparql>
+                                            <![CDATA[
+                                            INSERT {
+                                                GRAPH ?g {
+                                                    ?x qudt:informativeReference ?new}
+                                                }
+                                            WHERE {
+                                                GRAPH ?g {
+                                                    ?x a ?type; qudt:iec61360Code ?irdi.
+                                                    VALUES (?type ?prefix) {
+                                                        (qudt:Unit         "https://cdd.iec.ch/cdd/iec62720/iec62720.nsf/Units/")
+                                                        (qudt:QuantityKind "https://cdd.iec.ch/cdd/iec61987/iec61987.nsf/ListsOfUnitsAllVersions/")
+                                                        (qudt:PhysicalConstant "https://cdd.iec.ch/cdd/iec61987/iec61987.nsf/ListsOfUnitsAllVersions/")
+                                                    }
+                                                    OPTIONAL {
+                                                        ?x qudt:informativeReference ?old filter(strstarts(str(?old),"https://cdd.iec.ch"))
+                                                    }
+                                                    BIND(replace(replace(str(?irdi),"/","-"),"#","%23") as ?irdi_new)
+                                                    BIND(strdt(concat(?prefix,?irdi_new),xsd:anyURI) as ?new)
+                                                }
+                                            }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <savepoint><id>01-iec-links</id></savepoint>
 
-                                    <add> <!-- load target quantitykinds into <target:quantityKinds> (associating that graph with the file)-->
-                                        <file>src/main/rdf/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</file>
-                                        <toGraph>modified:quantityKinds</toGraph>
-                                    </add>
-                                    <add> <!-- load target units into <modified:units>  (associating that graph with the file) -->
-                                        <file>src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</file>
-                                        <toGraph>modified:units</toGraph>
-                                    </add>
                                     <add> <!-- load applicableUnits shapes (rules) into <shapes:applicableUnits> because we need them twice (see below) -->
                                         <file>src/build/inference/inferApplicableUnits.ttl</file>
                                         <toGraph>shapes:applicableUnits</toGraph>
@@ -557,8 +531,8 @@
                                             <graph>shapes:applicableUnits</graph>
                                         </shapes>
                                         <data>
-                                            <graph>modified:quantityKinds</graph>
-                                            <graph>modified:units</graph>
+                                            <graph>target:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                            <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
                                         </data>
                                         <inferred>
                                             <graph>inferred:applicableUnits</graph>
@@ -568,31 +542,26 @@
 
                                     <add> <!-- add the results of the quantitykinds inference to the quantityKinds graph -->
                                         <graph>inferred:applicableUnits</graph>
-                                        <toGraph>modified:quantityKinds</toGraph>
+                                        <toGraph>target:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
                                     </add>
 
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
-                                    <savepoint><id>01-applicableUnits</id></savepoint>
-                                    <add>
-                                        <file>src/main/rdf/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl</file>
-                                        <toGraph>target:currencyUnits</toGraph>
-                                    </add>
+                                    <savepoint><id>02-applicableUnits</id></savepoint>
                                     <shaclInfer>  <!-- do the quantitykinds inference for currency units -->
                                         <message>Inferring qudt:applicableUnit triples (currency units)</message>
                                         <shapes><graph>shapes:applicableUnits</graph></shapes>
                                         <data>
-                                            <graph>target:currencyUnits</graph>
+                                            <graph>target:VOCAB_QUDT-UNITS-CURRENCY.ttl</graph>
                                         </data>
                                         <inferred>
                                             <graph>inferred:applicableCurrencyUnits</graph>
                                             <file>target/inferred/applicableUnits-currency.ttl</file>
                                         </inferred>
                                     </shaclInfer>
-                                    <write>
-                                        <graph>target:currencyUnits</graph>
+                                    <add>
                                         <graph>inferred:applicableCurrencyUnits</graph>
-                                        <toFile>target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl</toFile>
-                                    </write>
+                                        <toGraph>target:VOCAB_QUDT-UNITS-CURRENCY.ttl</toGraph>
+                                    </add>
 
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
                                     <savepoint><id>02-applicableUnits-currencies</id></savepoint>
@@ -606,9 +575,9 @@
                                             <files>
                                                 <include>
                                                     src/main/rdf/schema/SCHEMA_QUDT.ttl
-                                                    src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
                                                 </include>
                                             </files>
+                                            <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
                                         </data>
                                         <inferred>
                                             <graph>inferred:owl-subset-units</graph>
@@ -618,7 +587,7 @@
 
                                     <add> <!-- add the inferred triples to the units graph -->
                                         <graph>inferred:owl-subset-units</graph>
-                                        <toGraph>modified:units</toGraph>
+                                        <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
 
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
@@ -626,13 +595,7 @@
 
                                     <add>
                                         <file>src/build/inference/factorUnits/predefined-factors-and-scalings.ttl</file>
-                                        <toGraph>modified:units</toGraph>
-                                    </add>
-                                    <add>
-                                        <files>
-                                            <include>target/dist/vocab/prefixes/*.ttl</include>
-                                        </files>
-                                        <toGraph>target:prefixes</toGraph>
+                                        <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
 
                                     <shaclInfer> <!-- infer ther factor units -->
@@ -643,8 +606,8 @@
                                         <data>
                                             <graphs>
                                                 <include>
-                                                    modified:units
-                                                    target:prefixes
+                                                    target:VOCAB_QUDT-UNITS-ALL.ttl
+                                                    target:VOCAB_QUDT-PREFIXES.ttl
                                                 </include>
                                             </graphs>
                                         </data>
@@ -655,7 +618,7 @@
                                     </shaclInfer>
                                     <add>
                                         <graph>inferred:factorUnits</graph>
-                                        <toGraph>modified:units</toGraph>
+                                        <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
                                     <savepoint><id>04-infer-factor-units</id></savepoint>
                                     <shaclInfer>
@@ -664,8 +627,8 @@
                                             <file>target/srcgen/scalingOf/infer.ttl</file>
                                         </shapes>
                                         <data>
-                                            <graph>modified:units</graph>
-                                            <graph>target:prefixes</graph>
+                                            <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
                                         </data>
                                         <inferred>
                                             <graph>inferred:scalingOf</graph>
@@ -674,7 +637,7 @@
                                     </shaclInfer>
                                     <add>
                                         <graph>inferred:scalingOf</graph>
-                                        <toGraph>modified:units</toGraph>
+                                        <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
                                     <savepoint><id>05-infer-scalingOf</id></savepoint>
                                     <until>
@@ -699,8 +662,8 @@
                                                     <file>target/srcgen/conversionMultiplier/validate.ttl</file>
                                                 </shapes>
                                                 <data>
-                                                    <graph>modified:units</graph>
-                                                    <graph>target:prefixes</graph>
+                                                    <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                    <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
                                                 </data>
                                                 <validationReport>
                                                     <graph>inferred:conversionMultiplierToDelete_${index_cm}</graph>
@@ -712,13 +675,13 @@
                                                 <sparql>
                                                     <![CDATA[
                                                 DELETE {
-                                                    GRAPH <modified:units> {
+                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ?unit qudt:conversionMultiplier ?m .
                                                         ?unit  qudt:conversionMultiplierSN ?mSN .
                                                     }
                                                 }
                                                 WHERE {
-                                                    GRAPH <modified:units> {
+                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         {
                                                             ?unit qudt:conversionMultiplier ?m .
                                                         } UNION {
@@ -746,8 +709,8 @@
                                                     <file>target/srcgen/conversionMultiplier/infer.ttl</file>
                                                 </shapes>
                                                 <data>
-                                                    <graph>modified:units</graph>
-                                                    <graph>target:prefixes</graph>
+                                                    <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                    <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
                                                 </data>
                                                 <inferred>
                                                     <graph>inferred:conversionMultiplier_${index_cm}</graph>
@@ -756,23 +719,23 @@
                                             </shaclInfer>
                                             <add>
                                                 <graph>inferred:conversionMultiplier_${index_cm}</graph>
-                                                <toGraph>modified:units</toGraph>
+                                                <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                             </add>
                                         </body>
 
                                     </until>
-                                    <savepoint><id>08-infer-conversionMultiplier</id></savepoint>
+
                                     <sparqlUpdate>
                                         <message>Generate conversion multipliers in xsd:double format where it's missing</message>
                                         <sparql>
                                             <![CDATA[
                                             INSERT {
-                                                GRAPH <modified:units> {
+                                                GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                     ?unit qudt:conversionMultiplierSN ?cmsn
                                                 }
                                             }
                                             WHERE {
-                                                GRAPH <modified:units> {
+                                                GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                     ?unit a qudt:Unit ;
                                                           qudt:conversionMultiplier ?cm .
                                                     FILTER NOT EXISTS {
@@ -784,29 +747,8 @@
                                             ]]>
                                         </sparql>
                                     </sparqlUpdate>
-                                    <!-- write the main outputs: units and quantitykinds files (back to the files they were initially read from) -->
-                                    <write>
-                                        <graph>modified:units</graph>
-                                        <toFile>target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</toFile>
-                                    </write>
+                                    <savepoint><id>08-infer-conversionMultiplier</id></savepoint>
 
-                                    <write>
-                                        <graph>modified:quantityKinds</graph>
-                                        <toFile>target/dist/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toFile>
-                                    </write>
-                                    <!-- start from here if nothing has changed in the inputs of the earlier steps -->
-
-                                    <clear/>
-                                    <savepoint><id>09-afterClear</id></savepoint>
-                                    <shaclFunctions>
-                                        <file>src/main/rdf/validation/qudt-shacl-functions.ttl</file>
-                                    </shaclFunctions>
-                                    <add>
-                                        <files>
-                                            <include>target/dist/**/*.ttl</include>
-                                        </files>
-                                        <toGraphsPattern>target:${name}</toGraphsPattern>
-                                    </add>
                                     <sparqlUpdate>
                                         <message>Limit any xsd:decimal's precision to 34</message>
                                         <sparql>
@@ -837,6 +779,7 @@
                                         }
                                         </sparql>
                                     </sparqlUpdate>
+
                                     <write>
                                         <graphs>
                                             <include>target:*</include>
@@ -845,46 +788,6 @@
                                     <savepoint><id>99-endOfPipeline</id></savepoint>
                                 </steps>
                             </pipeline>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <!--
-                        generates links to IEC CDD
-                        -->
-                        <id>generate-iec-links</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>make</goal>
-                        </goals>
-                        <configuration>
-                            <products>
-                                <eachFile>
-                                    <replaceInputFiles>true</replaceInputFiles>
-                                    <input>
-                                        <include>target/dist/vocab/**/*.ttl</include>
-                                    </input>
-                                    <filters>
-                                        <sparqlUpdate>
-                                            prefix qudt:&lt;http://qudt.org/schema/qudt/&gt;
-                                            prefix xsd:&lt;http://www.w3.org/2001/XMLSchema#&gt;
-
-                                            insert {?x qudt:informativeReference ?new}
-                                            where {
-                                                ?x a ?type; qudt:iec61360Code ?irdi.
-                                                values (?type ?prefix) {
-                                                    (qudt:Unit         "https://cdd.iec.ch/cdd/iec62720/iec62720.nsf/Units/")
-                                                    (qudt:QuantityKind "https://cdd.iec.ch/cdd/iec61987/iec61987.nsf/ListsOfUnitsAllVersions/")
-                                                    (qudt:PhysicalConstant "https://cdd.iec.ch/cdd/iec61987/iec61987.nsf/ListsOfUnitsAllVersions/")
-                                                }
-                                                optional {?x qudt:informativeReference ?old filter(strstarts(str(?old),"https://cdd.iec.ch"))}
-                                                bind(replace(replace(str(?irdi),"/","-"),"#","%23") as ?irdi_new)
-                                                bind(strdt(concat(?prefix,?irdi_new),xsd:anyURI) as ?new)
-                                            }
-                                        </sparqlUpdate>
-                                    </filters>
-                                </eachFile>
-                            </products>
                         </configuration>
                     </execution>
                 </executions>
