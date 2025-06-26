@@ -15,17 +15,33 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
+- Build process
+  - New maven goal `rdfio:pipeline` that allows for fine-grained rdf file manipulation
+  - New `mainPipeline` execution for the bulk of rdf munging
+  - New `src/main/rdf/validation/qudt-shacl-functions.ttl` to make some intricate functionality
+    available to SPARQL and SHACL
+  - New `unitTestPipeline` for unit testing the SHACL functions
+- All instances of `xsd:decimal` are limited to a maximum precision of 34 significant digits
+- Derived units: recalculation of `qudt:conversionMultiplier` and `qudt:conversionMultiplierSN`
+  - During the build, all derived units' conversion multipliers are checked based on their `qudt:factorUnits`
+    and replaced with the calculated result if necessary
+
 ### Deprecated
 
 - Deprecated unit:CHF-PER-KiloGM in favor of unit:CCY_CHF-PER-KiloGM
 - Deprecated roughly 36 Quantity Kinds in favor of more consistently-named and natural-language-friendly URIs. Specifically, URIs containing
   underscores are renamed except when the underscore identifies a component (e.g. x, y, z, imaginary, real).
   Quantity Kinds raised to a power are renamed (e.g. Time_Squared becomes SquareTime)
+- Cleaned up some confusion regarding unit:PERM_US and unit:PERM_Metric, resulting in the deprecation of some related units. The summary
+  is that the magnitude of a PERM does not change with temperature, but measurements made on materials will have different measured values
+  at different temperatures.
 
 ### Fixed
 
 - Fixed erroneous prefix definition for cross-references to SI Quantity (equivalent to qudt:QuantityKind)
 - Corrected symbol for `unit:IN_H2O` from `inH₂0` to `inH₂O` [Reto Schneebeli](https://github.com/reto-siemens)
+- Removed wrong `qudt:conversionMultipliers` from `src` (they are now generated correctly in `target`, see 'Changed'). Affected units:
+  - `unit:MicroKAT-PER-L, unit:MilliKAT-PER-L, unit:NanoKAT-PER-L, unit:PicoKAT-PER-L, unit:MilliOSM-PER-KiloGM`
 
 ## [3.1.2] - 2025-05-30
 
@@ -63,6 +79,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Deprecated unit:2PiRAD as a unit, replaced with unit:REV.
 - Deprecated unit:IN-PER-2PiRAD, replaced with unit:IN-PER-REV.
 - Deprecated the ambiguous unit:PIXEL, with seeAlso notes to unit:PIXEL_Area and unit:PIXEL_Count.
+
+### Changed
+
+- conversion multipliers:
+  a SHACL check was added to compare the conversion multipliers of derived units withthe conversion multiplier obtained from the factor units, failing the build if there is a discrepancy. This is a first step toward more stability with regard to conversion multipliers.
 
 ### Fixed
 
