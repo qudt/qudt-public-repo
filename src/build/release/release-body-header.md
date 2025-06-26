@@ -7,5 +7,5 @@ With this Release we have made our treatment of conversion multipliers more cons
 2. Computing conversion multipliers automatically for compound units, based on its components (aka factors).
 
 3. Limiting all conversion multipliers to at most 34 significant digits. Units with exact values for conversion multipliers will typically have fewer digits.
-We plan to treat uncertainty values for conversion multipliers in an upcoming Release.
+   We plan to treat uncertainty values for conversion multipliers in an upcoming Release.
 
