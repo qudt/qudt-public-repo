@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.1.3] - 2025-06-26
+
 ### Added
 
 - Added an updated intro slide deck in the doc folder
@@ -73,17 +75,14 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Changed qualifiers on unit:PIXEL to be uppercase, for consistency with current use
 - Added qudt:Unit to hasUnit, hasDefinedUnit & hasAllowedUnit
 - Added `qudt:hasQuantityKind quantitykind:BatteryCapacity` to `unit:A-HR`, `unit:A-SEC`, `unit:KiloA-HR` and `unit:MilliA-HR`
+- conversion multipliers:
+  a SHACL check was added to compare the conversion multipliers of derived units withthe conversion multiplier obtained from the factor units, failing the build if there is a discrepancy. This is a first step toward more stability with regard to conversion multipliers.
 
 ### Deprecated
 
 - Deprecated unit:2PiRAD as a unit, replaced with unit:REV.
 - Deprecated unit:IN-PER-2PiRAD, replaced with unit:IN-PER-REV.
 - Deprecated the ambiguous unit:PIXEL, with seeAlso notes to unit:PIXEL_Area and unit:PIXEL_Count.
-
-### Changed
-
-- conversion multipliers:
-  a SHACL check was added to compare the conversion multipliers of derived units withthe conversion multiplier obtained from the factor units, failing the build if there is a discrepancy. This is a first step toward more stability with regard to conversion multipliers.
 
 ### Fixed
 
@@ -320,7 +319,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.2...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.3...HEAD
+[3.1.3]: https://github.com/qudt/qudt-public-repo/compare/v3.1.2...v3.1.3
 [3.1.2]: https://github.com/qudt/qudt-public-repo/compare/v3.1.1...v3.1.2
 [3.1.1]: https://github.com/qudt/qudt-public-repo/compare/v3.1.0...v3.1.1
 [3.1.0]: https://github.com/qudt/qudt-public-repo/compare/v3.0.0...v3.1.0
