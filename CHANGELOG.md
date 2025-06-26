@@ -32,6 +32,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Deprecated roughly 36 Quantity Kinds in favor of more consistently-named and natural-language-friendly URIs. Specifically, URIs containing
   underscores are renamed except when the underscore identifies a component (e.g. x, y, z, imaginary, real).
   Quantity Kinds raised to a power are renamed (e.g. Time_Squared becomes SquareTime)
+- Cleaned up some confusion regarding unit:PERM_US and unit:PERM_Metric, resulting in the deprecation of some related units. The summary
+  is that the magnitude of a PERM does not change with temperature, but measurements made on materials will have different measured values
+  at different temperatures.
 
 ### Fixed
 
