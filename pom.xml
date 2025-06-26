@@ -416,11 +416,10 @@
                                         </files>
                                         <toGraphsPattern>target:${name}</toGraphsPattern>
                                     </add>
-
                                     <sparqlQuery>
                                         <sparql>
                                             <![CDATA[
-                                                SELECT ?unit ?cm ?match ?deprecated
+                                                SELECT ?unit ?cm ?match ?broader ?deprecated
                                                 WHERE {
                                                     GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ?unit a qudt:Unit .
@@ -433,12 +432,15 @@
                                                         OPTIONAL {
                                                             ?unit qudt:exactMatch ?match
                                                         }
+                                                        OPTIONAL {
+                                                            ?unit skos:broader ?broader
+                                                        }
                                                         FILTER (!BOUND(?cm))
                                                         FILTER NOT EXISTS {
                                                             ?unit a qudt:CurrencyUnit
                                                         }
                                                     }
-                                                } ORDER BY ?cm ?match ?unit
+                                                } ORDER BY ?deprecated ?match ?unit
                                             ]]>
                                         </sparql>
                                         <toFile>target/inspection/units-without-conversionMultiplier.txt</toFile>
@@ -703,6 +705,49 @@
                                         <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
                                     <savepoint><id>06-infer-scalingOf</id></savepoint>
+                                    <sparqlUpdate>
+                                        <message>Copy conversionMultipliers/offsets from qudt:exactMatch|skos:broader unit where not present</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                INSERT {
+                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit
+                                                            qudt:conversionMultiplier ?cm ;
+                                                            qudt:conversionMultiplierSN ?cmSN ;
+                                                            qudt:conversionOffset ?co ;
+                                                            qudt:conversionOffset ?coSN ;
+                                                            rdfs:comment ?copyComment .
+                                                    }
+                                                }
+                                                WHERE {
+                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl>  {
+                                                        ?unit a qudt:Unit .
+                                                        FILTER NOT EXISTS {
+                                                            ?unit
+                                                                qudt:conversionMultiplier [] ;
+                                                                qudt:conversionMultiplierSN [] ;
+                                                            OPTIONAL {
+                                                                ?unit
+                                                                    qudt:conversionOffset [];
+                                                                    qudt:conversionOffsetSN [] .
+                                                            }
+                                                        }
+                                                        ?unit ?rel ?otherUnit .
+                                                        FILTER(?rel IN (qudt:exactMatch,skos:broader))
+                                                        ?otherUnit
+                                                            qudt:conversionMultiplier ?cm ;
+                                                            qudt:conversionMultiplierSN ?cmSN .
+                                                        OPTIONAL {
+                                                            ?otherUnit
+                                                                qudt:conversionOffset ?co ;
+                                                                qudt:conversionOffsetSN ?coSN .
+                                                        }
+                                                        BIND(CONCAT("qudt:conversionMultiplier copied from unit ", STR(?otherUnit), " via relation ", STR(?rel)) AS ?copyComment)
+                                                    }
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
                                     <until>
                                         <message>Replacing invalid conversionMultipliers iteratively until no more are found</message>
                                         <indexVar>index_cm</indexVar>
@@ -843,46 +888,7 @@
                                         </sparql>
                                     </sparqlUpdate>
 
-                                    <sparqlUpdate>
-                                        <message>Copy conversionMultipliers/offsets from qudt:exactMatch unit where not present</message>
-                                        <sparql>
-                                            <![CDATA[
-                                                INSERT {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        ?unit
-                                                            qudt:conversionMultiplier ?cm ;
-                                                            qudt:conversionMultiplierSN ?cmSN ;
-                                                            qudt:conversionOffset ?co ;
-                                                            qudt:conversionOffset ?coSN .
-                                                    }
-                                                }
-                                                WHERE {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl>  {
-                                                        ?unit qudt:exactMatch ?otherUnit .
-                                                        ?otherUnit
-                                                            qudt:conversionMultiplier ?cm ;
-                                                            qudt:conversionMultiplierSN ?cmSN .
-                                                        OPTIONAL {
-                                                            ?otherUnit
-                                                                qudt:conversionOffset ?co ;
-                                                                qudt:conversionOffsetSN ?coSN .
-                                                        }
-                                                        FILTER NOT EXISTS {
-                                                            ?unit
-                                                                qudt:conversionMultiplier ?cm ;
-                                                                qudt:conversionMultiplierSN ?cmSN ;
-                                                            OPTIONAL {
-                                                                ?unit
-                                                                    qudt:conversionOffset ?co ;
-                                                                    qudt:conversionOffsetSN ?coSN .
-                                                            }
-                                                        }
 
-                                                    }
-                                                }
-                                            ]]>
-                                        </sparql>
-                                    </sparqlUpdate>
                                     <write>
                                         <graphs>
                                             <include>target:*</include>
