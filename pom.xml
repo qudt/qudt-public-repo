@@ -386,6 +386,69 @@
                 <version>1.4.2</version>
                 <executions>
                     <execution>
+                        <!--
+                            interesting inspections,
+
+                            run with:
+                            mvn rdfio:pipeline@inspect
+
+                            writes to target/inspection
+                        -->
+                        <id>inspect</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>pipeline</goal>
+                        </goals>
+                        <configuration>
+                            <pipeline>
+                                <id>inspect</id>
+                                <steps>
+                                    <!-- make custom shacl functions available in inference and SPARQL-->
+                                    <shaclFunctions>
+                                        <file>src/main/rdf/validation/qudt-shacl-functions.ttl</file>
+                                    </shaclFunctions>
+                                    <add>
+                                        <!--
+                                            this reads each file in target into a graph named 'target:{filename}'
+                                        -->
+                                        <files>
+                                            <include>target/dist/vocab/**/*.ttl</include>
+                                        </files>
+                                        <toGraphsPattern>target:${name}</toGraphsPattern>
+                                    </add>
+
+                                    <sparqlQuery>
+                                        <sparql>
+                                            <![CDATA[
+                                                SELECT ?unit ?cm ?match ?deprecated
+                                                WHERE {
+                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit a qudt:Unit .
+                                                        OPTIONAL {
+                                                            ?unit qudt:deprecated ?deprecated .
+                                                        }
+                                                        OPTIONAL {
+                                                            ?unit qudt:conversionMultiplier ?cm
+                                                        }
+                                                        OPTIONAL {
+                                                            ?unit qudt:exactMatch ?match
+                                                        }
+                                                        FILTER (!BOUND(?cm))
+                                                        FILTER NOT EXISTS {
+                                                            ?unit a qudt:CurrencyUnit
+                                                        }
+                                                    }
+                                                } ORDER BY ?cm ?match ?unit
+                                            ]]>
+                                        </sparql>
+                                        <toFile>target/inspection/units-without-conversionMultiplier.txt</toFile>
+                                    </sparqlQuery>
+
+                                </steps>
+                            </pipeline>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <!-- unit tests for SHACL functions -->
                         <id>unitTestPipeline</id>
                         <phase>generate-sources</phase>
