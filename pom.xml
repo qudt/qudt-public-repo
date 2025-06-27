@@ -397,9 +397,10 @@
                                 <singleFile>
                                     <input>
                                         <include>
-                                            src/build/all-in-one/all-in-one-ontology.ttl
+                                            src/build/srcgen/collections/SHACL-Collection.ttl
                                             target/dist/vocab/**/*.ttl
                                             target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
+                                            target/dist/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl
                                             target/dist/validation/COLLECTION_QUDT_USER_TESTS.ttl
                                         </include>
                                     </input>
@@ -417,12 +418,41 @@
                                                     ?ontology vaem:hasGraphMetadata ?graphMetadata .
                                                     ?graphMetadata ?gp ?go .
                                                 }
-                                                FILTER(! REGEX(STR(?ontology), "^.+/qudt/all-in-one$"))
+                                                FILTER(! REGEX(STR(?ontology), "^.+/shacl/qudt-all$"))
                                             }
                                             ]]>
                                         </sparqlUpdate>
                                     </filters>
-                                    <outputFile>target/dist/QUDT-all-in-one.ttl</outputFile>
+                                    <outputFile>target/dist/QUDT-all-in-one-SHACL.ttl</outputFile>
+                                </singleFile>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            src/build/srcgen/collections/OWL-Collection.ttl
+                                            target/dist/vocab/**/*.ttl
+                                            target/dist/schema/SCHEMA_QUDT.ttl
+                                        </include>
+                                    </input>
+                                    <filters>
+                                        <sparqlUpdate>
+                                            <![CDATA[
+                                            DELETE {
+                                                ?ontology ?p ?o .
+                                                ?graphMetadata ?gp ?go
+                                            } WHERE {
+                                                ?ontology
+                                                    a owl:Ontology ;
+                                                    ?p ?o .
+                                                OPTIONAL {
+                                                    ?ontology vaem:hasGraphMetadata ?graphMetadata .
+                                                    ?graphMetadata ?gp ?go .
+                                                }
+                                                FILTER(! REGEX(STR(?ontology), "^.+/qudt-all$"))
+                                            }
+                                            ]]>
+                                        </sparqlUpdate>
+                                    </filters>
+                                    <outputFile>target/dist/QUDT-all-in-one-OWL.ttl</outputFile>
                                 </singleFile>
                             </products>
                         </configuration>
