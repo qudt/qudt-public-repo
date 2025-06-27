@@ -50,7 +50,7 @@
                       process-resources
                       process-classes          mainRdfPipeline
                       generate-test-sources
-                      process-test-sources
+                      process-test-sources     allinone
                       generate-test-resources
                       process-test-resources
                       test-compile
@@ -385,10 +385,10 @@
                 <executions>
                     <execution>
                         <!--
-                        makes one big file in target
+                        makes one big file in target, after the mainPipeline has modified target files
                         -->
                         <id>allinone</id>
-                        <phase>process-classes</phase>
+                        <phase>process-test-sources</phase>
                         <goals>
                             <goal>make</goal>
                         </goals>
@@ -397,12 +397,32 @@
                                 <singleFile>
                                     <input>
                                         <include>
+                                            src/build/allinone/allinone-ontology.ttl
                                             target/dist/vocab/**/*.ttl
                                             target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
                                             target/dist/validation/COLLECTION_QUDT_USER_TESTS.ttl
                                         </include>
                                     </input>
-                                    <outputFile>target/dist/qudt-shacl-allinone.ttl</outputFile>
+                                    <filters>
+                                        <sparqlUpdate>
+                                            <![CDATA[
+                                            DELETE {
+                                                ?ontology ?p ?o .
+                                                ?graphMetadata ?gp ?go
+                                            } WHERE {
+                                                ?ontology
+                                                    a owl:Ontology ;
+                                                    ?p ?o .
+                                                OPTIONAL {
+                                                    ?ontology vaem:hasGraphMetadata ?graphMetadata .
+                                                    ?graphMetadata ?gp ?go .
+                                                }
+                                                FILTER(?ontology != <http://qudt.org/$$QUDT_VERSION$$/qudt/allInOne>)
+                                            }
+                                            ]]>
+                                        </sparqlUpdate>
+                                    </filters>
+                                    <outputFile>target/dist/QUDT-all-in-one.ttl</outputFile>
                                 </singleFile>
                             </products>
                         </configuration>
@@ -966,6 +986,7 @@
                         <format>
                             <includes>
                                 <include>target/dist/**/*.*</include>
+                                <include>target/build/**/*.*</include>
                             </includes>
                             <excludes>
                                 <include>target/**/*.xlsx</include>

@@ -9,9 +9,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
-- New Distribution Files
-    - qudt-allinone.ttl: the union of all vocab files and the shacl schema
-
+- New Distribution File
+  - QUDT-all-in-one.ttl: the union of all vocab files and the shacl schema
 
 ## [3.1.3] - 2025-06-26
 

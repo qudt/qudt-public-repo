@@ -13,7 +13,9 @@
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/soqk> ;
   owl:imports qfn: ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
-  rdfs:label "QUDT Collection - QA TESTS - ALL - v $$QUDT_VERSION$$" ;
+  rdfs:label "QUDT Collection - QA TESTS - ALL - v $$QUDT_VERSION$$" .
+
+<http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes>
   sh:declare [
     a sh:PrefixDeclaration ;
     sh:namespace "http://purl.org/dc/terms/"^^xsd:anyURI ;
@@ -77,7 +79,7 @@ qudt:ClosedWorldShape
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensure that all instances of a class use only the properties defined for that class." ;
     sh:message "Predicate {?p} is not defined for instance {$this}." ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
 SELECT $this ?p ?o
 WHERE {
@@ -120,7 +122,7 @@ qudt:DefinedByConstraint
     a sh:SPARQLConstraint ;
     rdfs:comment "Target class must be have a rdfs:isDefinedBy property" ;
     sh:message "Resource '{$this}' lacks an rdfs:isDefinedBy property." ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """SELECT $this
 WHERE {
 FILTER NOT EXISTS {$this rdfs:isDefinedBy ?y}
@@ -137,7 +139,7 @@ qudt:DefinedByStringConstraint
     a sh:SPARQLConstraint ;
     rdfs:comment "Target class must be have a rdfs:isDefinedBy property containing the string '$$QUDT_VERSION$$'" ;
     sh:message "Resource '{$this}' lacks an rdfs:isDefinedBy property containing the string '$$QUDT_VERSION$$'." ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """SELECT $this
 WHERE {
 $this rdfs:isDefinedBy ?graph .
@@ -209,7 +211,7 @@ qudt:ExactMatchGoesBothWaysConstraint
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensure that if A qudt:exactMatch B then B qudt:exactMatch A" ;
     sh:message "Missing triple: {$t} qudt:exactMatch {$this} ." ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
 SELECT $this ?t
 WHERE {
@@ -228,7 +230,7 @@ qudt:InconsistentDimensionVectorInSKOSHierarchyConstraint
     a sh:SPARQLConstraint ;
     rdfs:comment "Checks that a QuantityKind has the same dimension vector as any skos:broader QuantityKind" ;
     sh:message "Unit {$this} has dimension vector {$udv} which is not the same as the dimension vector of its skos:broader, {$qk} with dimension vector {$qdv}" ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
 SELECT $this ?udv ?qk ?qdv
 WHERE {
@@ -249,7 +251,7 @@ qudt:InconsistentUnitAndDimensionVectorConstraint
     a sh:SPARQLConstraint ;
     rdfs:comment "Checks that a Unit and its QuantityKind have the same dimension vector" ;
     sh:message "Unit {$this} has dimension vector {$udv} which is not the same as the dimension vector of its quantity kind {$qk} with dimension vector {$qdv}" ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
 SELECT $this ?udv ?qk ?qdv
 WHERE {
@@ -273,7 +275,7 @@ qudt:MultipleDescriptionsConstraint
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensures each qudt:Concept instance doesn't have multiple dcterms:description values with the same language tag." ;
     sh:message "{$this} has {?count} dcterms:description triples with language tag @{?langTag}." ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
             SELECT $this (COUNT(?label) AS ?count) ?langTag
             WHERE {
@@ -296,7 +298,7 @@ qudt:MultipleLabelsConstraint
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensures each qudt:Concept instance doesn't have multiple rdfs:labels with the same language tag." ;
     sh:message "{$this} has {?count} rdfs:label triples with language tag @{?langTag}." ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
             SELECT $this (COUNT(?label) AS ?count) ?langTag
             WHERE {
@@ -319,7 +321,7 @@ qudt:QuantityKindShape
     sh:sparql [
       a sh:SPARQLConstraint ;
       sh:message "{$this} is skos:broader and qudt:exactMatch with {?qk}." ;
-      sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+      sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
       sh:select """
                 SELECT DISTINCT $this ?qk
                 WHERE {
@@ -337,7 +339,7 @@ qudt:QuantityKindShape
     sh:sparql [
       a sh:SPARQLConstraint ;
       sh:message "{$this} has a dimension vector that is inconsistent with {?qk} in its skos:broader hierarchy." ;
-      sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+      sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
       sh:select """
                 SELECT $this ?qk
                 WHERE {
@@ -362,7 +364,7 @@ qudt:UniqueSymbolTypeRestrictedPropertyConstraint
     a sh:SPARQLConstraint ;
     rdfs:comment "Checks that a resource has a unique symbol within its type hierarchy below qudt:Concept" ;
     sh:message "Resource, '{$this}' of type '{?myType}', has non-unique symbol, '{?symbol}', that conflicts with '{?another}' of type '{?anotherType}'" ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """SELECT DISTINCT $this ?symbol ?another ?myType ?anotherType
 WHERE {{
 \t$this qudt:symbol ?symbol .
@@ -386,7 +388,7 @@ qudt:UnitPointsToAllExactMatchQuantityKindsConstraint
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensure that if a Unit hasQuantityKind A, and A qudt:exactMatch B, then the Unit hasQuantityKind B " ;
     sh:message "Missing triple: {$this} qudt:hasQuantityKind {?qk2}, because {?qk} qudt:exactMatch {?qk2}" ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
 SELECT $this ?qk ?qk2
 WHERE {
@@ -407,7 +409,7 @@ qudt:UnitShape
     sh:sparql [
       a sh:SPARQLConstraint ;
       sh:message "{$this} has a dimension vector that is inconsistent with its quantity kind, {?qk}" ;
-      sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+      sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
       sh:select """
 SELECT $this ?qk
 WHERE {
@@ -428,7 +430,7 @@ qudt:conversionMultiplierSnShape
   sh:sparql [
     a sh:SPARQLConstraint ;
     sh:message "{$this} qudt:conversionMultiplier is {?valueDecimalNoTrailingZeros}, which does not match the value of qudt:conversionMultiplierSN, {?valueSN}, converted to decimal notation, {?valueSNStringValue} .  " ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
             SELECT $this ?valueDecimal ?valueDecimalNoTrailingZeros ?valueSN ?m ?e ?exponent ?mNoDot ?mDigitCount ?valueSNStringValue ?onePos ?lastMantissaDigit ?leftStart ?leftEnd ?rightStart ?rightEnd ?result
                         WHERE {
@@ -471,7 +473,7 @@ qudt:conversionOffsetSnShape
   sh:sparql [
     a sh:SPARQLConstraint ;
     sh:message "{$this} qudt:conversionOffset is {?valueDecimalNoTrailingZeros}, which does not match the value of qudt:conversionOffsetSN, {?valueSN}, converted to decimal notation, {?valueSNStringValue} .  " ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
             SELECT $this ?valueDecimal ?valueDecimalNoTrailingZeros ?valueSN ?m ?e ?exponent ?mNoDot ?mDigitCount ?valueSNStringValue ?onePos ?lastMantissaDigit ?leftStart ?leftEnd ?rightStart ?rightEnd ?result
                         WHERE {
@@ -514,7 +516,7 @@ qudt:prefixMultiplierSnShape
   sh:sparql [
     a sh:SPARQLConstraint ;
     sh:message "{$this} qudt:prefixMultiplier is {?valueDecimalNoTrailingZeros}, which does not match the value of qudt:prefixMultiplierSN, {?valueSN}, converted to decimal notation, {?valueSNStringValue} .  " ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
             SELECT $this ?valueDecimal ?valueDecimalNoTrailingZeros ?valueSN ?m ?e ?exponent ?mNoDot ?mDigitCount ?valueSNStringValue ?onePos ?lastMantissaDigit ?leftStart ?leftEnd ?rightStart ?rightEnd ?result
                         WHERE {
@@ -557,7 +559,7 @@ qudt:standardUncertaintySnShape
   sh:sparql [
     a sh:SPARQLConstraint ;
     sh:message "{$this} qudt:standardUncertainty is {?valueDecimalNoTrailingZeros}, which does not match the value of qudt:standardUncertaintySN, {?valueSN}, converted to decimal notation, {?valueSNStringValue} .  " ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
             SELECT $this ?valueDecimal ?valueDecimalNoTrailingZeros ?valueSN ?m ?e ?exponent ?mNoDot ?mDigitCount ?valueSNStringValue ?onePos ?lastMantissaDigit ?leftStart ?leftEnd ?rightStart ?rightEnd ?result
                         WHERE {
@@ -600,7 +602,7 @@ qudt:valueSnShape
   sh:sparql [
     a sh:SPARQLConstraint ;
     sh:message "{$this} qudt:value is {?valueDecimalNoTrailingZeros}, which does not match the value of qudt:valueSN, {?valueSN}, converted to decimal notation, {?valueSNStringValue} .  " ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
             SELECT $this ?valueDecimal ?valueDecimalNoTrailingZeros ?valueSN ?m ?e ?exponent ?mNoDot ?mDigitCount ?valueSNStringValue ?onePos ?lastMantissaDigit ?leftStart ?leftEnd ?rightStart ?rightEnd ?result
                         WHERE {
