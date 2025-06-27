@@ -50,7 +50,7 @@
                       process-resources
                       process-classes          mainRdfPipeline
                       generate-test-sources
-                      process-test-sources
+                      process-test-sources     all-in-one
                       generate-test-resources
                       process-test-resources
                       test-compile
@@ -383,6 +383,80 @@
                 <artifactId>rdfio-maven-plugin</artifactId>
                 <version>1.4.2</version>
                 <executions>
+                    <execution>
+                        <!--
+                        makes one big file in target, after the mainPipeline has modified target files
+                        -->
+                        <id>all-in-one</id>
+                        <phase>process-test-sources</phase>
+                        <goals>
+                            <goal>make</goal>
+                        </goals>
+                        <configuration>
+                            <products>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            src/build/srcgen/collections/SHACL-Collection.ttl
+                                            target/dist/vocab/**/*.ttl
+                                            target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
+                                            target/dist/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl
+                                            target/dist/validation/COLLECTION_QUDT_USER_TESTS.ttl
+                                        </include>
+                                    </input>
+                                    <filters>
+                                        <sparqlUpdate>
+                                            <![CDATA[
+                                            DELETE {
+                                                ?ontology ?p ?o .
+                                                ?graphMetadata ?gp ?go
+                                            } WHERE {
+                                                ?ontology
+                                                    a owl:Ontology ;
+                                                    ?p ?o .
+                                                OPTIONAL {
+                                                    ?ontology vaem:hasGraphMetadata ?graphMetadata .
+                                                    ?graphMetadata ?gp ?go .
+                                                }
+                                                FILTER(! REGEX(STR(?ontology), "^.+/shacl/qudt-all$"))
+                                            }
+                                            ]]>
+                                        </sparqlUpdate>
+                                    </filters>
+                                    <outputFile>target/dist/QUDT-all-in-one-SHACL.ttl</outputFile>
+                                </singleFile>
+                                <singleFile>
+                                    <input>
+                                        <include>
+                                            src/build/srcgen/collections/OWL-Collection.ttl
+                                            target/dist/vocab/**/*.ttl
+                                            target/dist/schema/SCHEMA_QUDT.ttl
+                                        </include>
+                                    </input>
+                                    <filters>
+                                        <sparqlUpdate>
+                                            <![CDATA[
+                                            DELETE {
+                                                ?ontology ?p ?o .
+                                                ?graphMetadata ?gp ?go
+                                            } WHERE {
+                                                ?ontology
+                                                    a owl:Ontology ;
+                                                    ?p ?o .
+                                                OPTIONAL {
+                                                    ?ontology vaem:hasGraphMetadata ?graphMetadata .
+                                                    ?graphMetadata ?gp ?go .
+                                                }
+                                                FILTER(! REGEX(STR(?ontology), "^.+/qudt-all$"))
+                                            }
+                                            ]]>
+                                        </sparqlUpdate>
+                                    </filters>
+                                    <outputFile>target/dist/QUDT-all-in-one-OWL.ttl</outputFile>
+                                </singleFile>
+                            </products>
+                        </configuration>
+                    </execution>
                     <execution>
                         <!--
                             interesting inspections,
@@ -942,6 +1016,7 @@
                         <format>
                             <includes>
                                 <include>target/dist/**/*.*</include>
+                                <include>target/build/**/*.*</include>
                             </includes>
                             <excludes>
                                 <include>target/**/*.xlsx</include>

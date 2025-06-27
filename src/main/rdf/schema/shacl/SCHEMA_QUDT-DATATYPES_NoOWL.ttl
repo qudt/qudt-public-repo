@@ -5,6 +5,7 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix qfn: <http://qudt.org/shacl/functions#> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
@@ -16,24 +17,9 @@
   owl:imports <http://www.linkedmodel.org/schema/dtype> ;
   owl:imports <http://www.linkedmodel.org/schema/vaem> ;
   owl:imports <http://www.w3.org/2004/02/skos/core> ;
+  owl:imports qfn: ;
   owl:imports sh: ;
   rdfs:label "QUDT SHACL SCHEMA Datatypes Version $$QUDT_VERSION$$" ;
-  sh:declare [
-    sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
-    sh:prefix "qudt" ;
-  ] ;
-  sh:declare [
-    sh:namespace "http://qudt.org/vocab/quantitykind/"^^xsd:anyURI ;
-    sh:prefix "quantitykind" ;
-  ] ;
-  sh:declare [
-    sh:namespace "http://qudt.org/vocab/unit/"^^xsd:anyURI ;
-    sh:prefix "unit" ;
-  ] ;
-  sh:declare [
-    sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ;
-    sh:prefix "rdf" ;
-  ] ;
   vaem:hasCatalogEntry voag:QUDT-SchemaCatalogEntry ;
   vaem:hasGraphMetadata <http://qudt.org/schema/shacl/datatype/GMD_datatype> ;
   vaem:hasGraphRole vaem:SchemaGraph ;
@@ -3083,6 +3069,24 @@ qudt:zCoordinateDefinition
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Z-Coordinate definition" .
 
+<http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatypePrefixes>
+  sh:declare [
+    sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+    sh:prefix "qudt" ;
+  ] ;
+  sh:declare [
+    sh:namespace "http://qudt.org/vocab/quantitykind/"^^xsd:anyURI ;
+    sh:prefix "quantitykind" ;
+  ] ;
+  sh:declare [
+    sh:namespace "http://qudt.org/vocab/unit/"^^xsd:anyURI ;
+    sh:prefix "unit" ;
+  ] ;
+  sh:declare [
+    sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ;
+    sh:prefix "rdf" ;
+  ] .
+
 <http://qudt.org/schema/shacl/datatype/GMD_datatype>
   a vaem:GraphMetaData ;
   dcterms:description """
@@ -3129,7 +3133,7 @@ qudt:AllValuesMustHaveSameDataTypeShape
   sh:severity sh:Violation ;
   sh:sparql [
     sh:message "Data Item {$this} has type {?valueType}." ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatypePrefixes> ;
     sh:select """
         SELECT $this ?valueType
         WHERE {
@@ -3753,7 +3757,7 @@ qudt:DimensionalityShape
   sh:severity sh:Warning ;
   sh:sparql [
     sh:message "\"{$this}\" has {$actualDimensions} dimensions extent and needs to have {$specifiedDimensions}" ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatypePrefixes> ;
     sh:select """
         SELECT $this $actualDimensions $specifiedDimensions
         WHERE {
@@ -4942,7 +4946,7 @@ qudt:ValidateQuantityHasUnitShape
   sh:severity sh:Warning ;
   sh:sparql [
     sh:message "Quantity \"{$this}\" must have a unit." ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatypePrefixes> ;
     sh:select """
         SELECT $this
         WHERE {
