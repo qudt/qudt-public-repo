@@ -14,6 +14,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - dist/QUDT-all-in-one-OWL.ttl: the union of all vocab files and the OWL schema.
   - Users can load just one of these files as a convenience, without needing to follow transitive owl:imports.
 
+### Changed
+
+- Make rdfs:labels treatment of Titlecase more consistent for units'
+
 ## [3.1.3] - 2025-06-26
 
 ### Added
