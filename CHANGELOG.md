@@ -13,6 +13,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - dist/QUDT-all-in-one-SHACL.ttl: the union of all vocab files and the shacl schema.
   - dist/QUDT-all-in-one-OWL.ttl: the union of all vocab files and the OWL schema.
   - Users can load just one of these files as a convenience, without needing to follow transitive owl:imports.
+- New Units
+  - M2-PER-HR to support the Netherlands water pumping sector
 
 ## [3.1.3] - 2025-06-26
 
