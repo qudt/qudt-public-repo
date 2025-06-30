@@ -920,6 +920,77 @@
                                         <graph>inferred:scalingOf</graph>
                                         <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
+                                    <savepoint><id>06.1-infer-scalingOf-with-errors</id></savepoint>
+                                    <sparqlQuery>
+                                        <message>Show scalings of unit:KiloGM and unit:GM</message>
+                                        <sparql>
+                                            <![CDATA[
+                                            SELECT * where {
+                                                GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    ?unit
+                                                        qudt:scalingOf ?u ;
+                                                        qudt:conversionMultiplier ?cm .
+                                                    FILTER(?u in (unit:KiloGM, unit:GM))
+                                                    OPTIONAL {
+                                                        ?unit qudt:prefix ?prefix .
+                                                    }
+                                                }
+                                            } ORDER BY ?u ?cm ?unit
+                                            ]]>
+                                        </sparql>
+                                    </sparqlQuery>
+                                    <sparqlUpdate>
+                                        <message>Fix wrongly assigned qudt:scalingOf unit:GM</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                DELETE {
+                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit qudt:scalingOf unit:GM
+                                                    }
+                                                } INSERT {
+                                                   GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        unit:GM qudt:scalingOf unit:KiloGM .
+                                                        ?unit qudt:hasFactorUnit [
+                                                                qudt:hasUnit unit:GM ;
+                                                                qudt:exponent 1
+                                                            ] ;
+                                                            qudt:factorUnitScalar ?gramScalar .
+                                                   }
+                                                } WHERE {
+                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit
+                                                            qudt:scalingOf unit:GM;
+                                                            qudt:prefix ?prefix ;
+                                                            qudt:conversionMultiplier ?cm
+                                                            BIND(?cm * 1000.0 AS ?gramScalar)
+                                                    }
+                                                    FILTER(?unit != unit:KiloGM)
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <sparqlQuery>
+                                        <message>Show scalings of unit:KiloGM and unit:GM</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                SELECT * where {
+                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit qudt:conversionMultiplier ?cm.
+                                                        OPTIONAL {
+                                                            ?unit qudt:prefix ?prefix .
+                                                        }
+                                                        {
+                                                            ?unit qudt:scalingOf ?u ;
+                                                        } UNION {
+                                                            ?unit qudt:hasFactorUnit/qudt:hasUnit ?u ;
+                                                                  qudt:factorUnitScalar ?scalar
+                                                        }
+                                                    }
+                                                    FILTER (?u in (unit:KiloGM, unit:GM))
+                                                } ORDER BY ?u ?cm ?unit
+                                            ]]>
+                                        </sparql>
+                                    </sparqlQuery>
                                     <savepoint><id>06-infer-scalingOf</id></savepoint>
                                     <sparqlUpdate>
                                         <message>Copy conversionMultipliers/offsets from qudt:exactMatch|skos:broader unit where not present</message>
