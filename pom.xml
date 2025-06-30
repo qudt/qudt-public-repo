@@ -2556,6 +2556,134 @@
                             </pipeline>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>profilePipeline</id>
+                        <goals><goal>pipeline</goal></goals>
+                        <phase>generate-test-resources</phase>
+                        <configuration>
+                            <pipeline>
+                                <id>profilePipeline</id>
+                                <steps>
+                                    <add>
+                                        <files>
+                                            <include>target/dist/**/*.ttl</include>
+                                            <exclude>target/dist/profile/**/*.ttl</exclude>
+                                        </files>
+                                        <toGraphsPattern>target:${name}</toGraphsPattern>
+                                    </add>
+
+                                    <!-- TODO: iterate over profile names, use in paths/graph names -->
+                                    <foreach>
+                                        <values>
+                                            <in>
+                                                construction
+                                            </in>
+                                        </values>
+                                        <var>profileName</var>
+                                        <body>
+                                            <add>
+                                                <file>src/main/profile/${profileName}/profile-config.ttl</file>
+                                                <toGraph>config:${profileName}</toGraph>
+                                            </add>
+                                            <sparqlQuery>
+                                                <sparql>
+                                                    <![CDATA[
+                                                        SELECT distinct ?targetFile ?targetGraph ?profileTargetFile ?profileTargetGraph
+                                                         WHERE {
+                                                            {
+                                                                {
+                                                                    # finds the graphs we loaded the target/dist files into
+                                                                    SELECT DISTINCT ?targetGraph ?targetFile
+                                                                    WHERE {
+                                                                        GRAPH <rdfio:pipeline:metadata> {
+                                                                            ?targetFile
+                                                                                <http://qudtlib.org/rdfio/loadsInto>
+                                                                                    ?targetGraph .
+                                                                            FILTER(STRSTARTS(STR(?targetGraph),"target:"))
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                                BIND(IRI(CONCAT("config:", ?profileName)) as ?profileGraph)
+                                                                BIND(IRI(CONCAT(?profileName,":",STR(?targetGraph))) as ?profileTargetGraph)
+                                                                BIND(IRI(REPLACE(STR(?targetFile), "file://target/dist/", CONCAT("file://target/dist/profile/",?profileName,"/"))) AS ?profileTargetFile)
+                                                                GRAPH ?profileGraph {
+                                                                    ?prof
+                                                                        a qudt:Profile ;
+                                                                        qudt:includes ?s .
+                                                                }
+                                                            }
+                                                            GRAPH ?targetGraph {
+                                                                ?s ?p ?o
+                                                            }
+
+                                                        }
+                                                    ]]>
+                                                </sparql>
+                                            </sparqlQuery>
+                                            <sparqlUpdate>
+                                                <sparql>
+                                                    <![CDATA[
+                                                        INSERT {
+                                                          GRAPH ?profileTargetGraph {
+                                                            ?res ?p ?o .
+                                                          }
+                                                          GRAPH <rdfio:pipeline:metadata> {
+                                                                    ?profileTargetFile
+                                                                        <http://qudtlib.org/rdfio/loadsInto>
+                                                                            ?profileTargetGraph .
+                                                          }
+                                                        } WHERE {
+                                                            {
+                                                                {
+                                                                    # finds the graphs we loaded the target/dist files into
+                                                                    SELECT DISTINCT ?targetGraph ?targetFile
+                                                                    WHERE {
+                                                                        GRAPH <rdfio:pipeline:metadata> {
+                                                                            ?targetFile
+                                                                                <http://qudtlib.org/rdfio/loadsInto>
+                                                                                    ?targetGraph .
+                                                                            FILTER(STRSTARTS(STR(?targetGraph),"target:"))
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                                BIND(IRI(CONCAT("config:", ?profileName)) as ?profileGraph)
+                                                                BIND(IRI(CONCAT(?profileName,":",STR(?targetGraph))) as ?profileTargetGraph)
+                                                                BIND(IRI(REPLACE(STR(?targetFile), "file://target/dist/", CONCAT("file://target/dist/profile/",?profileName,"/"))) AS ?profileTargetFile)
+                                                                GRAPH ?profileGraph {
+                                                                    ?prof
+                                                                        a qudt:Profile ;
+                                                                        qudt:includes ?res .
+                                                                }
+                                                                FILTER NOT EXISTS {
+                                                                    ?prof
+                                                                        a qudt:Profile ;
+                                                                        qudt:excludes ?res
+                                                                }
+                                                            }
+                                                            GRAPH ?targetGraph {
+                                                                {
+                                                                    ?res ?p ?o
+                                                                }
+                                                            }
+
+                                                        }
+                                                    ]]>
+                                                </sparql>
+                                            </sparqlUpdate>
+                                            <write>
+                                                <graphs>
+                                                    <include>${profileName}:target:*</include>
+                                                </graphs>
+                                            </write>
+                                        </body>
+                                    </foreach>
+                                    <savepoint><id>99-end-of-pipeline</id></savepoint>
+                                </steps>
+                            </pipeline>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -2571,6 +2699,7 @@
                         <rdf>
                             <includes>
                                 <include>src/main/rdf/**/*.ttl</include>
+                                <include>src/main/profile/**/*.ttl</include>
                                 <include>src/build/**/*.ttl</include>
                             </includes>
                             <format>
