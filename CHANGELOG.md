@@ -16,6 +16,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - New Units
   - M2-PER-HR to support the Netherlands water pumping sector
 
+### Fixed
+
+- Fix wrong `qudt:isReplacedBy CCY_CCY_AED` statement in old currency units file `src/main/rdf/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl`.
+
 ## [3.1.3] - 2025-06-26
 
 ### Added
