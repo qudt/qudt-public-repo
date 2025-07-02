@@ -409,6 +409,38 @@ qudt:QuantityKindShape
   ] ;
   sh:targetClass qudt:QuantityKind .
 
+qudt:ScalingOfAndFactorUnitsPresent
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+  rdfs:label "Ensures that no unit has both qudt:scalingOf and qudt:hasFactorUnits" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Ensures that no unit has both qudt:scalingOf and qudt:hasFactorUnits" ;
+    sh:message "{?this} has factor units {?factorUnits} as well as scalingOf {?scalingOf} - that's not allowed" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+      SELECT $this ?factorUnits ?scalingOf
+      WHERE {
+          ?this qudt:scalingOf ?scalingOf
+          {
+            SELECT (GROUP_CONCAT(?fuString; separator=", ") AS ?factorUnits)
+            WHERE {
+                ?this qudt:hasFactorUnit ?fun .
+                ?fun qudt:hasUnit ?fu ;
+                     qudt:exponent ?exp .
+                BIND(CONCAT(qfn:localname(?fu),"^",STR(?exp)) AS ?fuString)
+            }
+          }
+          FILTER(STRLEN(?factorUnits) > 0)
+          FILTER NOT EXISTS {
+              ?this qudt:deprecated true
+          }
+      }
+      """ ;
+  ] ;
+  sh:targetClass qudt:Concept .
+
 qudt:UniqueSymbolTypeRestrictedPropertyConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
