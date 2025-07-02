@@ -14,6 +14,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - dist/QUDT-all-in-one-OWL.ttl: the union of all vocab files and the OWL schema.
   - Users can load just one of these files as a convenience, without needing to follow transitive owl:imports.
 
+### Changed
+
+- Make rdfs:labels treatment of Titlecase more consistent for units'
+
 ### Fixed
 
 - Fix wrong `qudt:isReplacedBy CCY_CCY_AED` statement in old currency units file `src/main/rdf/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl`.
