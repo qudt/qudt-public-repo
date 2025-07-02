@@ -20,9 +20,32 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Make rdfs:labels treatment of Titlecase more consistent for units'
 
+### Changed
+
+- Improved consistency checks
+  - Checks for dimension vectors based on factors / scalingOf
+  - Checks for missing deprecation triples
+  - Checks for mixing of factors and scalingOf
+
 ### Fixed
 
 - Fix wrong `qudt:isReplacedBy CCY_CCY_AED` statement in old currency units file `src/main/rdf/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl`.
+- Corrected dimension vectors of units
+  - `unit:VAR`
+  - `unit:VAR-PER-K`
+  - `unit:KiloVAR-PER-K`
+  - `unit:MicroVAR-PER-K`
+  - `unit:MilliVAR-PER-K`
+  - `unit:W-PER-M2-MicroM` (also required using a different QuantityKind)
+- Add factor units to ´unit:VAR`
+- Corrected mixing factors and scalingOf in `unit:DEG_C`
+- Replaced some units:
+
+  |       Deprecated       |         New Unit          |
+  |------------------------|---------------------------|
+  | `unit:MicroGAL-PER-M`  | `unit:MicroGALILEO-PER-M` |
+  | `unit:MilliGAL`        | `unit:MilliGALILEO`       |
+  | `unit:MilliGAL-PER-MO` | `MilliGALILEO-PER-MO`     |
 
 ## [3.1.3] - 2025-06-26
 
