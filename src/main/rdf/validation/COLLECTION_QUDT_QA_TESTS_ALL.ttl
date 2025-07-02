@@ -203,6 +203,29 @@ qudt:DeprecatedPropertyInfoShape
   ] ;
   sh:targetClass rdf:Property .
 
+qudt:DeprecatedTripleMissing
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+  rdfs:label "Ensures that objects depending on deprecated objects are themselves also deprecated" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Informs whether a resource that depends on a deprecated resource is itself not deprecated." ;
+    sh:message "Resource {?this} depends on deprecated resource {?dep} and must therefore also be deprecated or be changed to depend on a different resource" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+    SELECT $this ?dep ?replacementMessage
+    WHERE {
+        ?dep qudt:deprecated true .
+        ?this ( ( qudt:hasFactorUnit/qudt:hasUnit ) | qudt:scalingOf ) + ?dep .
+        FILTER NOT EXISTS {
+            ?this qudt:deprecated true
+        }
+    }
+    """ ;
+  ] ;
+  sh:targetClass qudt:Concept .
+
 qudt:ExactMatchGoesBothWaysConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
