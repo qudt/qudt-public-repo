@@ -231,6 +231,33 @@ qudt:DeprecatedTripleMissing
   ] ;
   sh:targetClass qudt:Concept .
 
+qudt:DerivableDimensionVectorMissing
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+  rdfs:label "Ensures that no derivable dimension vectors are omitted" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Ensures that no derivable dimension vectors are omitted" ;
+    sh:message """{?this}: dimension vector is missing but can be derived to be
+    {?calculatedDimVec}""" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+    SELECT $this ?calculatedDimVec ?actualDimVec
+    WHERE {
+        BIND(qfn:unit.dimVec.calculate(?this) AS ?calculatedDimVec)
+        FILTER(qfn:bound(?calculatedDimVec))
+        FILTER NOT EXISTS {
+            ?this qudt:deprecated true
+        }
+        FILTER NOT EXISTS {
+            ?this qudt:hasDimensionVector ?actualDimVec
+        }
+    }
+    """ ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
 qudt:ExactMatchGoesBothWaysConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
