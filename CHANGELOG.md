@@ -67,16 +67,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
-- Build process
+- All instances of `xsd:decimal` are limited to a maximum precision of 34 significant digits
+- Build process by [Florian Kleedorfer](https://github.com/fkleedorfer)
   - New maven goal `rdfio:pipeline` that allows for fine-grained rdf file manipulation
   - New `mainPipeline` execution for the bulk of rdf munging
   - New `src/main/rdf/validation/qudt-shacl-functions.ttl` to make some intricate functionality
     available to SPARQL and SHACL
   - New `unitTestPipeline` for unit testing the SHACL functions
-- All instances of `xsd:decimal` are limited to a maximum precision of 34 significant digits
-- Derived units: recalculation of `qudt:conversionMultiplier` and `qudt:conversionMultiplierSN`
-  - During the build, all derived units' conversion multipliers are checked based on their `qudt:factorUnits`
-    and replaced with the calculated result if necessary
+  - Derived units: recalculation of `qudt:conversionMultiplier` and `qudt:conversionMultiplierSN`
+    - During the build, all derived units' conversion multipliers are checked based on their `qudt:factorUnits`
+      and replaced with the calculated result if necessary
 
 ### Deprecated
 
