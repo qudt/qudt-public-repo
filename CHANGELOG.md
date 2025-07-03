@@ -14,7 +14,12 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - dist/QUDT-all-in-one-OWL.ttl: the union of all vocab files and the OWL schema.
   - Users can load just one of these files as a convenience, without needing to follow transitive owl:imports.
 - New Units
-  - M2-PER-HR to support the Netherlands water pumping sector
+  - `M2-PER-HR` to support the Netherlands water pumping sector
+  - `unit:BAR_A` which is implied by `unit:MilliBar_A`
+  - `unit:BasePair` which is implied by `unit:GigaBasePair`
+  - `unit:FLOPS` which is implied by e.g `unit:TeraFLOPS`
+- New Details
+  - new `unit:KiloCubicFT qudt:scalingOf unit:FT3`
 
 ### Changed
 
@@ -22,10 +27,14 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
-- Improved consistency checks
-  - Checks for dimension vectors based on factors / scalingOf
-  - Checks for missing deprecation triples
-  - Checks for mixing of factors and scalingOf
+- Build process
+  - Improved consistency checks
+    - Checks for dimension vectors based on factors / scalingOf
+    - Checks for missing deprecation triples
+    - Checks for mixing of factors and scalingOf
+  - Inference calculations during the build process were sped up by an order of magnitude
+  - Dimension vectors for scaled units and derived units can now be inferred
+- Prefixes and scalingOf are now always consistent: all units with scaling prefix (e.g. `KiloM`) now have `qudt:scalingOf`
 
 ### Fixed
 
@@ -39,13 +48,18 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - `unit:W-PER-M2-MicroM` (also required using a different QuantityKind)
 - Add factor units to ´unit:VAR`
 - Corrected mixing factors and scalingOf in `unit:DEG_C`
-- Replaced some units:
 
-  |       Deprecated       |         New Unit          |
-  |------------------------|---------------------------|
-  | `unit:MicroGAL-PER-M`  | `unit:MicroGALILEO-PER-M` |
-  | `unit:MilliGAL`        | `unit:MilliGALILEO`       |
-  | `unit:MilliGAL-PER-MO` | `MilliGALILEO-PER-MO`     |
+### Deprecated
+
+|            Deprecated             |         New Unit          |
+|-----------------------------------|---------------------------|
+| `unit:MicroGAL-PER-M`             | `unit:MicroGALILEO-PER-M` |
+| `unit:MilliGAL`                   | `unit:MilliGALILEO`       |
+| `unit:MilliGAL-PER-MO`            | `MilliGALILEO-PER-MO`     |
+| `unit:Ci` (added for consistency) | `unit:CI`                 |
+| `unit:KiloCi`                     | `unit:KiloCI`             |
+| `unit:MicroCi`                    | `unit:MicroCI`            |
+| `unit:MilliCi`                    | `unit:MilliCI`            |
 
 ## [3.1.3] - 2025-06-26
 
@@ -54,11 +68,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added an updated intro slide deck in the doc folder
 - New Units
   - `unit:CCY_CHF-PER-HA`
-  - `unit:BAR_A` which is implied by `unit:MilliBar_A`
-  - `unit:BasePair` which is implied by `unit:GigaBasePair`
-  - `unit:FLOPS` which is implied by e.g `unit:TeraFLOPS`
-- New Details
-  - new `unit:KiloCubicFT qudt:scalingOf unit:FT3`
 
 ### Changed
 
@@ -68,9 +77,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - New `src/main/rdf/validation/qudt-shacl-functions.ttl` to make some intricate functionality
     available to SPARQL and SHACL
   - New `unitTestPipeline` for unit testing the SHACL functions
-  - Inference calculations during the build process were sped up by an order of magnitude
-  - Dimension vectors for scaled units and derived units can now be inferred
-- Prefixes and scalingOf are now always consistent: all units with scaling prefix (e.g. `KiloM`) now have `qudt:scalingOf`
 - All instances of `xsd:decimal` are limited to a maximum precision of 34 significant digits
 - Derived units: recalculation of `qudt:conversionMultiplier` and `qudt:conversionMultiplierSN`
   - During the build, all derived units' conversion multipliers are checked based on their `qudt:factorUnits`
@@ -85,7 +91,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Cleaned up some confusion regarding unit:PERM_US and unit:PERM_Metric, resulting in the deprecation of some related units. The summary
   is that the magnitude of a PERM does not change with temperature, but measurements made on materials will have different measured values
   at different temperatures.
-- Deprecated scaled units of `unit:Ci`, which had do be added (with deprecation in place) for consistency. All these units are being replaced by `unit:CI` and its scaled units.
 
 ### Fixed
 
