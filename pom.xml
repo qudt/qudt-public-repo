@@ -964,6 +964,57 @@
                                             ]]>
                                         </sparql>
                                     </sparqlUpdate>
+                                    <shaclValidate>
+                                        <message>Validating qudt:hasDimensionVector (making sure none are missing that cannot be derived)</message>
+                                        <shapes>
+                                            <file>src/build/srcgen/dimensionVector/prerequisite.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                        </data>
+                                        <validationReport>
+                                            <graph>validation:dimensionVector-underivable.ttl</graph>
+                                            <file>target/validation/dimensionVector-underivable.ttl.ttl</file>
+                                        </validationReport>
+                                    </shaclValidate>
+                                    <until>
+                                        <message>Add missing dimension vectors that can be inferred</message>
+                                        <indexVar>index_dv</indexVar>
+                                        <body>
+                                            <shaclInfer>
+                                                <message>Inferring missing qudt:dimensionVector</message>
+                                                <iterateUntilStable>true</iterateUntilStable>
+                                                <iterationOutputFilePattern>target/inferred/dimensionVector-${index_dv}_${index}.ttl</iterationOutputFilePattern>
+                                                <shapes>
+                                                    <file>target/srcgen/dimensionVector/infer.ttl</file>
+                                                </shapes>
+                                                <data>
+                                                    <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                    <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                </data>
+                                                <inferred>
+                                                    <graph>inferred:dimensionVector_${index_dv}</graph>
+                                                    <file>target/inferred/dimensionVector_${index_dv}.ttl</file>
+                                                </inferred>
+                                            </shaclInfer>
+                                            <add>
+                                                <graph>inferred:dimensionVector_${index_dv}</graph>
+                                                <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                            </add>
+                                        </body>
+                                        <sparqlAsk>
+                                            ASK {
+                                                BIND(IRI(CONCAT("inferred:dimensionVector_",STR(?index_dv))) as ?graph)
+                                                FILTER NOT EXISTS {
+                                                    GRAPH ?graph {
+                                                        ?s ?p ?o
+                                                    }
+                                                }
+                                            }
+                                        </sparqlAsk>
+                                    </until>
+
                                     <until>
                                         <message>Replacing invalid conversionMultipliers iteratively until no more are found</message>
                                         <indexVar>index_cm</indexVar>
