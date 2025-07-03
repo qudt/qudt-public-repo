@@ -243,16 +243,18 @@ qudt:DerivableDimensionVectorMissing
     {?calculatedDimVec}""" ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
-    SELECT $this ?calculatedDimVec ?actualDimVec
+    SELECT $this ?calculatedDimVec
     WHERE {
+        {
+            FILTER NOT EXISTS {
+                ?this qudt:deprecated true
+            }
+            FILTER NOT EXISTS {
+                ?this qudt:hasDimensionVector ?actualDimVec
+            }
+        }
         BIND(qfn:unit.dimVec.calculate(?this) AS ?calculatedDimVec)
         FILTER(qfn:bound(?calculatedDimVec))
-        FILTER NOT EXISTS {
-            ?this qudt:deprecated true
-        }
-        FILTER NOT EXISTS {
-            ?this qudt:hasDimensionVector ?actualDimVec
-        }
     }
     """ ;
   ] ;
