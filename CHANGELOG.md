@@ -24,10 +24,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
-- Make rdfs:labels treatment of Titlecase more consistent for units'
-
-### Changed
-
 - Build process
   - Improved consistency checks
     - Checks for dimension vectors based on factors / scalingOf
@@ -35,7 +31,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
     - Checks for mixing of factors and scalingOf
   - Inference calculations during the build process were sped up by an order of magnitude
   - Dimension vectors for scaled units and derived units can now be inferred
-- Prefixes and scalingOf are now always consistent: all units with scaling prefix (e.g. `KiloM`) now have `qudt:scalingOf`
 
 ### Fixed
 
@@ -49,18 +44,18 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - `unit:W-PER-M2-MicroM` (also required using a different QuantityKind)
 - Add factor units to ´unit:VAR`
 - Corrected mixing factors and scalingOf in `unit:DEG_C`
+- Prefixes and scalingOf are now always consistent: all units with scaling prefix (e.g. `KiloM`) now have `qudt:scalingOf`
+- Make rdfs:labels treatment of Titlecase more consistent for units
 
 ### Deprecated
 
-|            Deprecated             |         New Unit          |
-|-----------------------------------|---------------------------|
-| `unit:MicroGAL-PER-M`             | `unit:MicroGALILEO-PER-M` |
-| `unit:MilliGAL`                   | `unit:MilliGALILEO`       |
-| `unit:MilliGAL-PER-MO`            | `MilliGALILEO-PER-MO`     |
-| `unit:Ci` (added for consistency) | `unit:CI`                 |
-| `unit:KiloCi`                     | `unit:KiloCI`             |
-| `unit:MicroCi`                    | `unit:MicroCI`            |
-| `unit:MilliCi`                    | `unit:MilliCI`            |
+- `unit:MicroGAL-PER-M` (new unit: `unit:MicroGALILEO-PER-M`)
+- `unit:MilliGAL` (new unit: `unit:MilliGALILEO`)
+- `unit:MilliGAL-PER-MO` (new unit: `unit:MilliGALILEO-PER-MO`)
+- `unit:Ci` (added for consistency, new unit: `unit:CI`)
+- `unit:KiloCi` (new unit: `unit:KiloCI`)
+- `unit:MicroCi` (new unit: `unit:MicroCI`)
+- `unit:MilliCi` (new unit: `unit:MilliCI`)
 
 ## [3.1.3] - 2025-06-26
 
