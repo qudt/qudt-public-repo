@@ -85,7 +85,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Cleaned up some confusion regarding unit:PERM_US and unit:PERM_Metric, resulting in the deprecation of some related units. The summary
   is that the magnitude of a PERM does not change with temperature, but measurements made on materials will have different measured values
   at different temperatures.
-- Deprecated scaled units of `unit:Ci`, which had do be added (with deprecation in place) for consistency. All these units are being replaced by `unit:CI` and its scaled units. 
+- Deprecated scaled units of `unit:Ci`, which had do be added (with deprecation in place) for consistency. All these units are being replaced by `unit:CI` and its scaled units.
 
 ### Fixed
 
