@@ -19,8 +19,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - `unit:BasePair` which is implied by `unit:GigaBasePair`
   - `unit:FLOPS` which is implied by e.g `unit:TeraFLOPS`
   - `unit:Ci` (deprecated) which is implied by e.g. now-deprecated `unit:KiloCi`
-- New Details
-  - new `unit:KiloCubicFT qudt:scalingOf unit:FT3`
 
 ### Changed
 
@@ -43,9 +41,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - `unit:MilliVAR-PER-K`
   - `unit:W-PER-M2-MicroM` (also required using a different QuantityKind)
 - Add factor units to ´unit:VAR`
+- Add `unit:KiloCubicFT qudt:scalingOf unit:FT3
 - Corrected mixing factors and scalingOf in `unit:DEG_C`
 - Prefixes and scalingOf are now always consistent: all units with scaling prefix (e.g. `KiloM`) now have `qudt:scalingOf`
-- Make rdfs:labels treatment of Titlecase more consistent for units
+- Make `rdfs:label`s treatment of Titlecase more consistent for units
 
 ### Deprecated
 
