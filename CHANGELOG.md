@@ -45,6 +45,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Corrected mixing factors and scalingOf in `unit:DEG_C`
 - Prefixes and scalingOf are now always consistent: all units with scaling prefix (e.g. `KiloM`) now have `qudt:scalingOf`
 - Make `rdfs:label`s treatment of Titlecase more consistent for units
+- Corrected multiplier of `unit:MIL`
 
 ### Deprecated
 
