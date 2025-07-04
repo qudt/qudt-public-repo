@@ -542,7 +542,29 @@
                                     <file>src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</file>
                                     <file>src/build/inference/factorUnits/predefined-factors-and-scalings.ttl</file>
                                 </add>
-
+                                <assert>
+                                    <message>Test qfn:exp()</message>
+                                    <failureMessage>Unit test failed for qfn:exp()</failureMessage>
+                                    <sparqlSelect>
+                                        SELECT *
+                                        WHERE {
+                                        VALUES (?base ?exp ?expectedOutput) {
+                                        (2 0          1)
+                                        (0 1          0)
+                                        (0 -1         0)
+                                        (0 0          1)
+                                        (4 -1         0.25)
+                                        (2 -2         0.25)
+                                        (2 -3         0.125)
+                                        (3 2          9)
+                                        (3 3          27)
+                                        (1.2 2       1.44)
+                                        }
+                                        BIND(qfn:exp(?base, ?exp) AS ?actualOutput)
+                                        FILTER(BOUND(?actualOutput) != BOUND(?expectedOutput) || ?actualOutput != ?expectedOutput)
+                                        }
+                                    </sparqlSelect>
+                                </assert>
                                 <assert>
                                     <message>Test qfn:decimalPrecision()</message>
                                     <failureMessage>Unit test failed for qfn:decimalPrecision()</failureMessage>
