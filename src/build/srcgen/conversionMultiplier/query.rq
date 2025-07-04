@@ -15,6 +15,7 @@ WHERE {
           {
             SELECT
                 ?this
+                ?actualMultiplier
                 (GROUP_CONCAT(?factorContribution; SEPARATOR="|") AS ?contributions)
                 (GROUP_CONCAT(?multiplierFound;SEPARATOR="|") AS ?allMultipliersFound)
             WHERE {
@@ -35,7 +36,7 @@ WHERE {
               BIND(qfn:exp(?baseMultiplier, ?exponent) AS ?factorContribution)
 
             }
-            GROUP BY ?this
+            GROUP BY ?this ?actualMultiplier
           }
             # Dont continue if we could not find all multipliers
             FILTER(!CONTAINS(?allMultipliersFound,"NO"))
@@ -94,6 +95,6 @@ WHERE {
     BIND (IF (?actualMultiplier = 0 , 0.0, ABS(?diff) / ABS(?actualMultiplier)) as ?relDiffAct)
     BIND (IF( ?calculatedMultiplier = 0, 0.0, ABS(?diff) / ABS(?calculatedMultiplier)) as ?relDiffCalc)
     BIND(IF(?relDiffAct > ?relDiffCalc, ?relDiffAct, ?relDiffCalc) as ?relDiff)
-    FILTER(?actualMultiplier != ?calculatedMultiplier)    # no result if calculated == actual
+    FILTER(!BOUND(?actualMultiplier) || ?actualMultiplier != ?calculatedMultiplier)    # no result if calculated == actual
 }
 ORDER BY DESC(?relDiff)
