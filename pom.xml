@@ -46,7 +46,7 @@
                       initialize               [Profile -Pfix: reformat-sources]
                       generate-sources         unitTestPipeline
                       process-sources          check-source-format, shacl-validate-src
-                      generate-resources       copy-rdf, copy-docs, copy-root-files, validate-shacl-files
+                      generate-resources       copy-rdf-to-dist, copy-rdf-to-work, copy-docs, copy-root-files, validate-shacl-files
                       process-resources
                       process-classes          mainRdfPipeline
                       generate-test-sources
@@ -769,7 +769,7 @@
                                             in the dataset and remembers the file association (see <write> at the end)
                                         -->
                                         <files>
-                                            <include>target/dist/vocab/**/*.ttl</include>
+                                            <include>target/work/vocab/**/*.ttl</include>
                                         </files>
                                         <toGraphsPattern>target:${name}</toGraphsPattern>
                                     </add>
@@ -1231,7 +1231,27 @@
                                         </sparql>
                                     </sparqlUpdate>
 
-
+                                    <sparqlUpdate>
+                                        <message>change graph-file associations from target/work to target/dist before writing</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                DELETE {
+                                                    GRAPH <rdfio:pipeline:metadata> {
+                                                        ?file <http://qudtlib.org/rdfio/loadsInto> ?graph .
+                                                    }
+                                                } INSERT {
+                                                    GRAPH <rdfio:pipeline:metadata> {
+                                                        ?newFile <http://qudtlib.org/rdfio/loadsInto> ?graph .
+                                                    }
+                                                } WHERE {
+                                                    GRAPH <rdfio:pipeline:metadata> {
+                                                        ?file <http://qudtlib.org/rdfio/loadsInto> ?graph .
+                                                    }
+                                                    BIND (IRI(REPLACE(STR(?file), "target/work", "target/dist")) AS ?newFile)
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
                                     <write>
                                         <graphs>
                                             <include>target:*</include>
@@ -1435,13 +1455,28 @@
                 <!-- copies all required files from src or root dir to the target folder -->
                 <executions>
                     <execution>
-                        <id>copy-rdf</id>
+                        <id>copy-rdf-to-dist</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
                             <outputDirectory>target/dist</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/rdf</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-rdf-to-work</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/work</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>src/main/rdf</directory>
