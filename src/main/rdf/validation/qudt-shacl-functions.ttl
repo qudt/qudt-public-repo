@@ -455,9 +455,11 @@ qfn:exp
     WHERE {
         # supports exponents 0 to 8
         BIND(ABS(?exponent) as ?absoluteExponent)
-        BIND(if (?exponent < 0, 1.0 / ?value, ?value ) as ?multiplier)
+        BIND(IF (?value = 0.0,
+            0.0,
+            if (?exponent < 0, 1.0 / ?value, ?value )) AS ?multiplier)
         BIND(
-            IF(?absoluteExponent = 0, 1.1,
+            IF(?absoluteExponent = 0, 1.0,
                 IF(?absoluteExponent = 1,
                     ?multiplier,
                     IF(?absoluteExponent = 2,
