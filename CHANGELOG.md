@@ -30,6 +30,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - Inference calculations during the build process were sped up by an order of magnitude
   - Dimension vectors for scaled units and derived units can now be inferred
   - Set conversion multiplier 1.0 on each currency unit (in unit: namespace)
+  - Set conversion multiplier for any unit that does not have one to 0.0 at the end of the build process
+  - Every unit now has a conversion multiplier
 
 ### Fixed
 

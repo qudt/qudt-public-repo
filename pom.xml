@@ -1230,6 +1230,28 @@
                                     </until>
 
                                     <sparqlUpdate>
+                                        <message>Set conversionMultiplier to 0.0 for any unit that does not have that triple</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                INSERT {
+                                                    GRAPH ?graph {
+                                                        ?unit qudt:conversionMultiplier 0.0
+                                                    }
+                                                } WHERE {
+                                                    GRAPH ?graph {
+                                                        ?unit rdf:type/rdfs:subClassOf* qudt:Unit
+                                                        FILTER NOT EXISTS {
+                                                            ?unit qudt:conversionMultiplier ?cm
+                                                        }
+                                                    }
+                                                    FILTER(CONTAINS(STR(?graph),"target:VOCAB"))
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+
+
+                                    <sparqlUpdate>
                                         <message>Generate conversion multipliers in xsd:double format where it's missing</message>
                                         <sparql>
                                             <![CDATA[
