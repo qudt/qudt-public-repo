@@ -49,6 +49,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Prefixes and scalingOf are now always consistent: all units with scaling prefix (e.g. `KiloM`) now have `qudt:scalingOf`
 - Make `rdfs:label`s treatment of Titlecase more consistent for units
 - Corrected multiplier of `unit:MIL`
+- Added `unit:GM qudt:scalingOf unit:KiloGM`, such that the standard algorithm for determining conversion multipliers (following factor units and scalings recursively) applies correctly.
+  E.g, for `unit:DecaGM`: `conversionMultiplier = prefix:Deca.prefixMultiplier * unit:GM.conversionMultiplier = 10.0 * 0.001 = 0.01`
 
 ### Deprecated
 
@@ -59,13 +61,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - `unit:KiloCi` (new unit: `unit:KiloCI`)
 - `unit:MicroCi` (new unit: `unit:MicroCI`)
 - `unit:MilliCi` (new unit: `unit:MilliCI`)
-
-### Fixed
-
-- Prefix-scalings of GM (e.g. `unit:DecaGM`) are no longer `qudt:scalingOf unit:GM` but `qudt:factorUnit/qudt:hasUnit unit:GM`
-  with an appropriate `qudt:factorUnitScalar`. With the new `unit:GM qudt:scalingOf unit:KiloGM`, the standard algorithm
-  for determining conversion multipliers (following factor units and scalings recursively) applies correctly.
-  E.g, for `unit:DecaGM`: `conversionMultiplier = unit:DecaGM.factorUnitScalar * unit:GM.conversionMultiplier = 10.0 * 0.001 = 0.01`
 
 ## [3.1.3] - 2025-06-26
 
