@@ -920,7 +920,7 @@
                                         <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
 
-                                    <shaclInfer> <!-- infer ther factor units -->
+                                    <shaclInfer> <!-- infer the factor units -->
                                         <message>Inferring qudt:hasFactorUnit</message>
                                         <shapes>
                                             <file>target/srcgen/factorUnits/infer.ttl</file>
@@ -1024,6 +1024,26 @@
                                             ]]>
                                         </sparql>
                                         <toFile>target/inspection/scalings-of-unitGM/after.txt</toFile>
+                                    </sparqlQuery>
+                                    <sparqlQuery>
+                                        <message>Show scaled units, base units and multipliers</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                SELECT * where {
+                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit
+                                                            qudt:conversionMultiplier ?cm ;
+                                                            qudt:scalingOf ?base .
+                                                        ?base
+                                                            qudt:conversionMultiplier ?baseCm.
+                                                        OPTIONAL {
+                                                            ?unit qudt:prefix ?prefix .
+                                                        }
+                                                    }
+                                                } ORDER BY ?baseCm ?prefix ?base ?unit
+                                            ]]>
+                                        </sparql>
+                                        <toFile>target/inspection/scalingOf/all.txt</toFile>
                                     </sparqlQuery>
                                     <savepoint><id>06-infer-scalingOf</id></savepoint>
                                     <sparqlUpdate>
@@ -1263,6 +1283,69 @@
                                         }
                                         </sparql>
                                     </sparqlUpdate>
+
+                                    <sparqlQuery>
+                                        <message>Show non-base units that are neither scaled nor factored</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                SELECT distinct ?unit ?possibleBase ?desc ?dv ?cm where {
+                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit
+                                                            a qudt:Unit ;
+                                                            qudt:conversionMultiplier ?cm ;
+                                                            qudt:hasDimensionVector ?dv .
+
+                                                            OPTIONAL {
+                                                                ?unit qudt:plainTextDescription ?desc.
+                                                            }
+                                                            OPTIONAL {
+                                                                    ?possibleBase
+                                                                        qudt:hasDimensionVector ?dv ;
+                                                                        qudt:conversionMultiplier 1.0 .
+                                                            }
+                                                            OPTIONAL {
+                                                                {
+                                                                    ?unit qudt:plainTextDescription ?desc .
+                                                                } UNION {
+                                                                    ?unit  dcterms:description ?desc .
+                                                                }
+                                                            }
+                                                        FILTER (?cm != 1.0 && ?cm != 0.0)
+                                                        FILTER NOT EXISTS {
+                                                            {
+                                                                ?unit qudt:scalingOf ?base .
+                                                            } UNION {
+                                                                ?unit qudt:hasFactorUnit ?fu .
+                                                            } UNION {
+                                                                ?unit qudt:deprecated true .
+                                                            }
+                                                        }
+                                                    }
+                                                } ORDER BY ?dv ?cm ?unit
+                                            ]]>
+                                        </sparql>
+                                        <toFile>target/inspection/scalingOf/missing-bases.txt</toFile>
+                                    </sparqlQuery>
+                                    <sparqlQuery>
+                                        <message>Show scaled units, base units and multipliers</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                SELECT * where {
+                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit
+                                                            qudt:conversionMultiplier ?cm ;
+                                                            qudt:scalingOf ?base .
+                                                        ?base
+                                                            qudt:conversionMultiplier ?baseCm.
+                                                        OPTIONAL {
+                                                            ?unit qudt:prefix ?prefix .
+                                                        }
+                                                    }
+                                                } ORDER BY ?baseCm ?prefix ?base ?unit
+                                            ]]>
+                                        </sparql>
+                                        <toFile>target/inspection/scalingOf/all_scalings-end-of-pipeline.txt</toFile>
+                                    </sparqlQuery>
 
                                     <sparqlUpdate>
                                         <message>change graph-file associations from target/work to target/dist before writing</message>
