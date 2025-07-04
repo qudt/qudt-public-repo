@@ -107,6 +107,38 @@ FILTER NOT EXISTS {$this a/rdfs:subClassOf* ?class .
   ] ;
   sh:targetClass qudt:Concept .
 
+qudt:ConvertibleDerivedUnitOfInconvertibleBase
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+  rdfs:label "Ensures all inconvertible units (conversionMultiplier of 0.0) have only inconvertible derived and scaled units" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Ensures all inconvertible units (conversionMultiplier of 0.0) have only inconvertible derived and scaled units" ;
+    sh:message "{?this} is convertible (nonzero conversion multiplier {?cm}), but it derived via {?rel} from {?base}, which is inconvertible (conversion multiplier 0.0)" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+    SELECT $this ?base ?cm ?rel
+    WHERE {
+        {
+            ?this
+                qudt:conversionMultiplier ?cm .
+            FILTER(?cm != 0.0)
+            {
+                ?this qudt:scalingOf ?base .
+                BIND(qudt:scalingOf as ?rel)
+            } UNION {
+                ?this qudt:hasFactorUnit/qudt:hasUnit ?base .
+                BIND(qudt:hasFactorUnit as ?rel)
+            }
+            ?base qudt:conversionMultiplier ?baseCm .
+            FILTER (?baseCm = 0.0)
+        }
+    }
+    """ ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
 qudt:CurencyNumberShape
   a sh:NodeShape ;
   sh:property [
@@ -222,9 +254,11 @@ qudt:DeprecatedTripleMissing
     SELECT $this ?dep ?replacementMessage
     WHERE {
         ?dep qudt:deprecated true .
-        ?this ( ( qudt:hasFactorUnit/qudt:hasUnit ) | qudt:scalingOf ) + ?dep .
-        FILTER NOT EXISTS {
-            ?this qudt:deprecated true
+        {
+            ?this ( ( qudt:hasFactorUnit/qudt:hasUnit ) | qudt:scalingOf ) + ?dep .
+            FILTER NOT EXISTS {
+                ?this qudt:deprecated true
+            }
         }
     }
     """ ;
@@ -305,7 +339,7 @@ qudt:InconsistentDimensionVector
     }
     """ ;
   ] ;
-  sh:targetClass qudt:Concept .
+  sh:targetClass qudt:Unit .
 
 qudt:InconsistentDimensionVectorInSKOSHierarchyConstraint
   a sh:NodeShape ;
@@ -348,6 +382,36 @@ FILTER (?qdv != qkdv:NotApplicable) .
 FILTER (?udv != ?qdv) .
 }
 """ ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
+qudt:MissingBaseForNonBaseUnit
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+  rdfs:label "Ensures any unit with a conversion multiplier other than 0.0 and 1.0 defines either qudt:factorUnit or qudt:scalingOf" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Ensures any unit with a conversion multiplier other than 0.0 and 1.0 defines either qudt:factorUnit or qudt:scalingOf" ;
+    sh:message "{?this}: factorUnit is neither 0.0 nor 1.0 but neither qudt:factorUnit nor qudt:scalingOf triples are defined or implied that explain its conversion multiplier of {?cm}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+    SELECT $this ?cm
+    WHERE {
+        {
+            ?this
+                qudt:conversionMultiplier ?cm .
+            FILTER(?cm != 0.0 && ?cm != 1.0)
+        }
+        FILTER NOT EXISTS {
+            {
+                ?this qudt:scalingOf ?base .
+            } UNION {
+                ?this qudt:hasFactorUnit ?factor .
+            }
+        }
+    }
+    """ ;
   ] ;
   sh:targetClass qudt:Unit .
 
