@@ -29,6 +29,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
     - Checks for mixing of factors and scalingOf
   - Inference calculations during the build process were sped up by an order of magnitude
   - Dimension vectors for scaled units and derived units can now be inferred
+  - Set conversion multiplier 1.0 on each currency unit (in unit: namespace)
 
 ### Fixed
 

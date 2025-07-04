@@ -871,6 +871,27 @@
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
                                     <savepoint><id>03-applicableUnits-currencies</id></savepoint>
 
+                                    <sparqlUpdate>
+                                        <message>Set conversionMultiplier of 1.0 on each currency unit</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                INSERT {
+                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?cur qudt:conversionMultiplier 1.0
+                                                    }
+                                                } WHERE  {
+                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?cur a qudt:CurrencyUnit
+                                                        FILTER(REGEX(qfn:localname(?cur),"CCY_\\w+"))
+                                                        FILTER NOT EXISTS {
+                                                            ?cur qudt:conversionMultiplier ?cm
+                                                        }
+                                                    }
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+
                                     <shaclInfer> <!-- do the custom OWL subset inference -->
                                         <message>Performing our custom subset of OWL inferences</message>
                                         <shapes>
