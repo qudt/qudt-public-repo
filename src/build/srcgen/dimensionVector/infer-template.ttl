@@ -5,22 +5,26 @@
 @prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 
-qfn:ValidateFactorUnits
+qfn:inferDerivableDimensionvector
   a owl:Ontology ;
   owl:imports qfn: .
 
-qfn:qkRule
+qfn:inferDerivableDimensionvectorRule
   a sh:NodeShape ;
-  sh:severity sh:Violation ;
-  sh:sparql [
-    a sh:SPARQLConstraint ;
-    sh:message "Unit {$this} does not have required qudt:hasFactorUnit reference to {?baseUnit}." ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:construct """
+        CONSTRUCT {
+            $this qudt:hasDimensionVector ?calculatedDimVec .
+        }
+        WHERE
+        {
+            {{QUERY_WITHOUT_PREFIXES}}
+        }
+
+
+        """ ;
     sh:prefixes qfn: ;
-    sh:select """
-
-    {{QUERY_WITHOUT_PREFIXES}}
-
-    """ ;
   ] ;
   sh:targetClass qudt:Unit .
 
