@@ -256,10 +256,11 @@ qfn:decimalToDouble
           "0.0"
         )
       ) AS ?mantissaTmpStr)
-      BIND(REPLACE(?mantissaTmpStr, "^0*([0-9]+(\\\\.[0-9][1-9]*)?)0*$", "$1","") AS ?mantissaStr)
+      BIND(REPLACE(?mantissaTmpStr, "^0*([0-9]+(\\\\.[0-9][1-9]*)?)0*$", "$1","") AS ?mantissaTmpStr2)
+      BIND(IF(!CONTAINS(?mantissaTmpStr2, "."), CONCAT(?mantissaTmpStr2,".0"), ?mantissaTmpStr2) AS ?mantissaStr)
       BIND(STRDT(IF(
         ?zeroCheck = "0.0",
-        "0E0",
+        "0.0E0",
         CONCAT(
           IF(?isNegative, "-", ""),
           ?mantissaStr,

@@ -543,6 +543,26 @@
                                     <file>src/build/inference/factorUnits/predefined-factors-and-scalings.ttl</file>
                                 </add>
                                 <assert>
+                                    <message>Test qfn:decimalToDouble()</message>
+                                    <failureMessage>Unit test failed for qfn:decimalToDouble()</failureMessage>
+                                    <sparqlSelect>
+                                        <![CDATA[
+                                        SELECT *
+                                        WHERE {
+                                            VALUES (?value ?expectedOutput) {
+                                                (0 "0.0E0"    )
+                                                (1 "1.0E0")
+                                                (-1 "-1.0E0")
+                                                (0.0001    "1.0E-4")
+                                                (10000     "1.0E4" )
+                                            }
+                                            BIND(STR(qfn:decimalToDouble(?value)) AS ?actualOutput)
+                                            FILTER(BOUND(?actualOutput) != BOUND(?expectedOutput) || ?actualOutput != ?expectedOutput)
+                                        }
+                                        ]]>
+                                    </sparqlSelect>
+                                </assert>
+                                <assert>
                                     <message>Test qfn:exp()</message>
                                     <failureMessage>Unit test failed for qfn:exp()</failureMessage>
                                     <sparqlSelect>
