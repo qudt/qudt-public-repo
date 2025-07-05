@@ -6,7 +6,7 @@ prefix qfn: <http://qudt.org/shacl/functions#>
 prefix qudt: <http://qudt.org/schema/qudt/>
 prefix sh: <http://www.w3.org/ns/shacl#>
 
-SELECT ?this (qudt:conversionMultiplier as ?path) ?relDiff ?actualMultiplier ?calculatedMultiplier
+SELECT $this (qudt:conversionMultiplier as ?path) ?relDiff ?actualMultiplier ?calculatedMultiplier
 WHERE {
 
   # Subquery to compute and concatenate factor unit contributions
@@ -14,16 +14,16 @@ WHERE {
      {
           {
             SELECT
-                ?this
+                $this
                 ?actualMultiplier
                 (GROUP_CONCAT(?factorContribution; SEPARATOR="|") AS ?contributions)
                 (GROUP_CONCAT(?multiplierFound;SEPARATOR="|") AS ?allMultipliersFound)
             WHERE {
-              ?this a qudt:Unit .
-              OPTIONAL { ?this qudt:conversionMultiplier ?actualMultiplier . }
+              $this a qudt:Unit .
+              OPTIONAL { $this qudt:conversionMultiplier ?actualMultiplier . }
               FILTER(!BOUND(?actualMultiplier)                               # no actual multiplier? use calculated!
                      || (?actualMultiplier != 0.0))                          # actual multiplier is 0? skip!!
-              ?this qudt:hasFactorUnit ?factor .
+              $this qudt:hasFactorUnit ?factor .
               ?factor qudt:hasUnit ?baseUnit ;
                       qudt:exponent ?exponent .
               OPTIONAL {
@@ -36,7 +36,7 @@ WHERE {
               BIND(qfn:exp(?baseMultiplier, ?exponent) AS ?factorContribution)
 
             }
-            GROUP BY ?this ?actualMultiplier
+            GROUP BY $this ?actualMultiplier
           }
             # Dont continue if we could not find all multipliers
             FILTER(!CONTAINS(?allMultipliersFound,"NO"))
@@ -66,7 +66,7 @@ WHERE {
             BIND(REPLACE(?f8removed, ".*\\|", "") as ?f9)
           # Compute calculatedMultiplier by multiplying all contributions
             OPTIONAL {
-                ?this qudt:factorUnitScalar ?factorUnitScalar
+                $this qudt:factorUnitScalar ?factorUnitScalar
             }
             BIND(IF(BOUND(?factorUnitScalar), ?factorUnitScalar, 1.0) AS ?scalar)
             BIND( ?scalar
@@ -80,11 +80,11 @@ WHERE {
                 * COALESCE(xsd:decimal(?f8), 1.0)
                 * COALESCE(xsd:decimal(?f9), 1.0) as ?rawCalculatedMultiplier)
         } UNION {
-            ?this a qudt:Unit .
-            ?this
+            $this a qudt:Unit .
+            $this
                 qudt:scalingOf/qudt:conversionMultiplier ?baseCM ;
                 qudt:prefix/qudt:prefixMultiplier ?prefixCM .
-            OPTIONAL { ?this qudt:conversionMultiplier ?actualMultiplier . }
+            OPTIONAL { $this qudt:conversionMultiplier ?actualMultiplier . }
             FILTER(!BOUND(?actualMultiplier)                               # no actual multiplier? use calculated!
                    || (?actualMultiplier != 0.0))                          # actual multiplier is 0? skip!!
             BIND (?baseCM * ?prefixCM as ?rawCalculatedMultiplier)

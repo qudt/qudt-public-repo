@@ -5,25 +5,25 @@ PREFIX kind: <http://qudt.org/vocab/quantitykind/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-    SELECT DISTINCT ?this ?baseUnit ?exponent
+    SELECT DISTINCT $this ?baseUnit ?exponent
     WHERE
     {
         {
             {
                 {
-                    ?this a qudt:Unit ;
+                    $this a qudt:Unit ;
                     FILTER NOT EXISTS {
-                        ?this qudt:hasFactorUnit [
+                        $this qudt:hasFactorUnit [
                                 qudt:hasUnit ?baseUnit ;
                                 qudt:exponent ?exponent
                             ] .
                     }
 
                     FILTER NOT EXISTS {
-                        ?this qudt:scalingOf ?someOtherUnit
+                        $this qudt:scalingOf ?someOtherUnit
                     }
                 }
-                BIND(REPLACE(STR(?this), "^.+/", "") as ?derivedUnitLocalName)
+                BIND(REPLACE(STR($this), "^.+/", "") as ?derivedUnitLocalName)
                 FILTER(REPLACE(?derivedUnitLocalName, "(PER|2|3|4|5|6|-)\\b", "") != ?derivedUnitLocalName)
                 FILTER(?derivedUnitLocalName NOT IN (
                     "Gold-OunceTroy",
@@ -57,4 +57,4 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
         FILTER( ! CONTAINS(?baseUnitLocalNameExtractedTmp, "-") )
         BIND(IRI(CONCAT("http://qudt.org/vocab/unit/", ?baseUnitLocalNameExtracted)) as ?baseUnit)
     }
-order by ?this ?baseUnit
+order by $this ?baseUnit

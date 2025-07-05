@@ -115,20 +115,20 @@ qudt:ConvertibleDerivedUnitOfInconvertibleBase
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensures all inconvertible units (conversionMultiplier of 0.0) have only inconvertible derived and scaled units" ;
-    sh:message "{?this} is convertible (nonzero conversion multiplier {?cm}), but it derived via {?rel} from {?base}, which is inconvertible (conversion multiplier 0.0)" ;
+    sh:message "{$this} is convertible (nonzero conversion multiplier {?cm}), but it derived via {?rel} from {?base}, which is inconvertible (conversion multiplier 0.0)" ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
     SELECT $this ?base ?cm ?rel
     WHERE {
         {
-            ?this
+            $this
                 qudt:conversionMultiplier ?cm .
             FILTER(?cm != 0.0)
             {
-                ?this qudt:scalingOf ?base .
+                $this qudt:scalingOf ?base .
                 BIND(qudt:scalingOf as ?rel)
             } UNION {
-                ?this qudt:hasFactorUnit/qudt:hasUnit ?base .
+                $this qudt:hasFactorUnit/qudt:hasUnit ?base .
                 BIND(qudt:hasFactorUnit as ?rel)
             }
             ?base qudt:conversionMultiplier ?baseCm .
@@ -195,7 +195,7 @@ qudt:DeprecatedConceptInfoShape
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Informs if a deprecated QUDT resource is present" ;
-    sh:message "Deprecated resource '{?this}' is present, which will be removed in the next major version of QUDT {?replacementMessage}" ;
+    sh:message "Deprecated resource '{$this}' is present, which will be removed in the next major version of QUDT {?replacementMessage}" ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
     SELECT ?s $this ?replacementMessage
@@ -222,12 +222,12 @@ qudt:DeprecatedPropertyInfoShape
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Informs if a deprecated QUDT property is present" ;
-    sh:message "Deprecated property '{?this}' is present, which will be removed in the next major version of QUDT {?replacementMessage}" ;
+    sh:message "Deprecated property '{$this}' is present, which will be removed in the next major version of QUDT {?replacementMessage}" ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
-    SELECT ?s ?this ?replacementMessage
+    SELECT ?s $this ?replacementMessage
         WHERE {
-        ?this qudt:deprecated true .
+        $this qudt:deprecated true .
         OPTIONAL {
             $this dcterms:isReplacedBy ?replacement .
         }
@@ -248,16 +248,16 @@ qudt:DeprecatedTripleMissing
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Informs whether a resource that depends on a deprecated resource is itself not deprecated." ;
-    sh:message "Resource {?this} depends on deprecated resource {?dep} and must therefore also be deprecated or be changed to depend on a different resource" ;
+    sh:message "Resource {$this} depends on deprecated resource {?dep} and must therefore also be deprecated or be changed to depend on a different resource" ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
     SELECT $this ?dep ?replacementMessage
     WHERE {
         ?dep qudt:deprecated true .
         {
-            ?this ( ( qudt:hasFactorUnit/qudt:hasUnit ) | qudt:scalingOf ) + ?dep .
+            $this ( ( qudt:hasFactorUnit/qudt:hasUnit ) | qudt:scalingOf ) + ?dep .
             FILTER NOT EXISTS {
-                ?this qudt:deprecated true
+                $this qudt:deprecated true
             }
         }
     }
@@ -273,7 +273,7 @@ qudt:DerivableDimensionVectorMissing
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensures that no derivable dimension vectors are omitted" ;
-    sh:message """{?this}: dimension vector is missing but can be derived to be
+    sh:message """{$this}: dimension vector is missing but can be derived to be
     {?calculatedDimVec}""" ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
@@ -281,13 +281,13 @@ qudt:DerivableDimensionVectorMissing
     WHERE {
         {
             FILTER NOT EXISTS {
-                ?this qudt:deprecated true
+                $this qudt:deprecated true
             }
             FILTER NOT EXISTS {
-                ?this qudt:hasDimensionVector ?actualDimVec
+                $this qudt:hasDimensionVector ?actualDimVec
             }
         }
-        BIND(qfn:unit.dimVec.calculate(?this) AS ?calculatedDimVec)
+        BIND(qfn:unit.dimVec.calculate($this) AS ?calculatedDimVec)
         FILTER(qfn:bound(?calculatedDimVec))
     }
     """ ;
@@ -322,19 +322,19 @@ qudt:InconsistentDimensionVector
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensures that dimension vectors of derived units are consistent with their factors" ;
-    sh:message """{?this}: dimension vector 
+    sh:message """{$this}: dimension vector 
     {?actualDimVec} is inconsistent with the dimension vector calculated from its factor units
     {?calculatedDimVec}""" ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
     SELECT $this ?calculatedDimVec ?actualDimVec
     WHERE {
-        ?this qudt:hasDimensionVector ?actualDimVec
-        BIND(qfn:unit.dimVec.calculate(?this) AS ?calculatedDimVec)
+        $this qudt:hasDimensionVector ?actualDimVec
+        BIND(qfn:unit.dimVec.calculate($this) AS ?calculatedDimVec)
         FILTER(qfn:bound(?calculatedDimVec))
         FILTER(?actualDimVec != ?calculatedDimVec)
         FILTER NOT EXISTS {
-            ?this qudt:deprecated true
+            $this qudt:deprecated true
         }
     }
     """ ;
@@ -393,21 +393,21 @@ qudt:MissingBaseForNonBaseUnit
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensures any unit with a conversion multiplier other than 0.0 and 1.0 defines either qudt:factorUnit or qudt:scalingOf" ;
-    sh:message "{?this}: factorUnit is neither 0.0 nor 1.0 but neither qudt:factorUnit nor qudt:scalingOf triples are defined or implied that explain its conversion multiplier of {?cm}" ;
+    sh:message "{$this}: factorUnit is neither 0.0 nor 1.0 but neither qudt:factorUnit nor qudt:scalingOf triples are defined or implied that explain its conversion multiplier of {?cm}" ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
     SELECT $this ?cm
     WHERE {
         {
-            ?this
+            $this
                 qudt:conversionMultiplier ?cm .
             FILTER(?cm != 0.0 && ?cm != 1.0)
         }
         FILTER NOT EXISTS {
             {
-                ?this qudt:scalingOf ?base .
+                $this qudt:scalingOf ?base .
             } UNION {
-                ?this qudt:hasFactorUnit ?factor .
+                $this qudt:hasFactorUnit ?factor .
             }
         }
     }
@@ -510,24 +510,25 @@ qudt:ScalingOfAndFactorUnitsPresent
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensures that no unit has both qudt:scalingOf and qudt:hasFactorUnits" ;
-    sh:message "{?this} has factor units {?factorUnits} as well as scalingOf {?scalingOf} - that's not allowed" ;
+    sh:message "{$this} has factor units {?factorUnits} as well as scalingOf {?scalingOf} - that's not allowed" ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
       SELECT $this ?factorUnits ?scalingOf
       WHERE {
-          ?this qudt:scalingOf ?scalingOf
+          $this qudt:scalingOf ?scalingOf
           {
-            SELECT (GROUP_CONCAT(?fuString; separator=", ") AS ?factorUnits)
+            SELECT $this (GROUP_CONCAT(?fuString; separator=", ") AS ?factorUnits)
             WHERE {
-                ?this qudt:hasFactorUnit ?fun .
+                $this qudt:hasFactorUnit ?fun .
                 ?fun qudt:hasUnit ?fu ;
                      qudt:exponent ?exp .
                 BIND(CONCAT(qfn:localname(?fu),"^",STR(?exp)) AS ?fuString)
             }
+            GROUP BY $this
           }
           FILTER(STRLEN(?factorUnits) > 0)
           FILTER NOT EXISTS {
-              ?this qudt:deprecated true
+              $this qudt:deprecated true
           }
       }
       """ ;

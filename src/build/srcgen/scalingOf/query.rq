@@ -4,34 +4,34 @@ PREFIX prefix: <http://qudt.org/vocab/prefix/>
 PREFIX kind: <http://qudt.org/vocab/quantitykind/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT ?this ?baseUnit ?prefix
+SELECT $this ?baseUnit ?prefix
 where
 {
     {
-        { SELECT DISTINCT ?this ?scaledUnitLocalName ?prefixRegex
+        { SELECT DISTINCT $this ?scaledUnitLocalName ?prefixRegex
             WHERE
             {
 
                 # select all base units (not using prefixes)
                 {
-                    ?this a qudt:Unit .
+                    $this a qudt:Unit .
                 } UNION  {
-                    ?factor qudt:hasUnit ?this ;
+                    ?factor qudt:hasUnit $this ;
                     FILTER NOT EXISTS {
-                        ?this a qudt:Unit .
+                        $this a qudt:Unit .
                     }
                 }
                 FILTER NOT EXISTS {
                     {
-                        ?this qudt:scalingOf ?baseUnit .
+                        $this qudt:scalingOf ?baseUnit .
                     } UNION {
-                        ?this qudt:prefix ?prefix
+                        $this qudt:prefix ?prefix
                     } UNION {
-                        ?this qudt:hasFactorUnit ?x . # for derived units, we don't generate a prefix.
+                        $this qudt:hasFactorUnit ?x . # for derived units, we don't generate a prefix.
                     }
                 }
-                FILTER(?this != unit:KiloGM)
-                BIND(REPLACE(STR(?this), "^.+/", "") as ?scaledUnitLocalName)
+                FILTER($this != unit:KiloGM)
+                BIND(REPLACE(STR($this), "^.+/", "") as ?scaledUnitLocalName)
                 FILTER(!CONTAINS(?scaledUnitLocalName,"DeciB"))
                 FILTER(REPLACE(?scaledUnitLocalName, ?prefixRegex, "") != ?scaledUnitLocalName)
                 {
@@ -83,4 +83,4 @@ where
     # is done in src/build/srcgen/conversionMultiplier
 
 }
-order by ?baseUnit ?this
+order by ?baseUnit $this
