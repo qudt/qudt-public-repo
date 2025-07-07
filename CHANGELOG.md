@@ -14,15 +14,53 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - dist/QUDT-all-in-one-OWL.ttl: the union of all vocab files and the OWL schema.
   - Users can load just one of these files as a convenience, without needing to follow transitive owl:imports.
 - New Units
-  - M2-PER-HR to support the Netherlands water pumping sector
+  - `M2-PER-HR` to support the Netherlands water pumping sector
+  - `unit:BAR_A` which is implied by `unit:MilliBar_A`
+  - `unit:BasePair` which is implied by `unit:GigaBasePair`
+  - `unit:FLOPS` which is implied by e.g `unit:TeraFLOPS`
+  - `unit:Ci` (deprecated) which is implied by e.g. now-deprecated `unit:KiloCi`
 
 ### Changed
 
-- Make rdfs:labels treatment of Titlecase more consistent for units'
+- Build process
+  - Improved consistency checks
+    - Checks for dimension vectors based on factors / scalingOf
+    - Checks for missing deprecation triples
+    - Checks for mixing of factors and scalingOf
+  - Inference calculations during the build process were sped up by an order of magnitude
+  - Dimension vectors for scaled units and derived units can now be inferred
+  - Set conversion multiplier 1.0 on each currency unit (in unit: namespace)
+  - Set conversion multiplier for any unit that does not have one to 0.0 at the end of the build process
+  - Every unit now has a conversion multiplier
 
 ### Fixed
 
 - Fix wrong `qudt:isReplacedBy CCY_CCY_AED` statement in old currency units file `src/main/rdf/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl`.
+- Corrected dimension vectors of units
+  - `unit:VAR`
+  - `unit:VAR-PER-K`
+  - `unit:KiloVAR-PER-K`
+  - `unit:MicroVAR-PER-K`
+  - `unit:MilliVAR-PER-K`
+  - `unit:W-PER-M2-MicroM` (also required using a different QuantityKind)
+- Add factor units to `unit:VAR`
+- Add `unit:KiloCubicFT qudt:scalingOf unit:FT3
+- Corrected mixing factors and scalingOf in `unit:DEG_C`
+- Prefixes and scalingOf are now always consistent: all units with scaling prefix (e.g. `KiloM`) now have `qudt:scalingOf`
+- Make `rdfs:label`s treatment of Titlecase more consistent for units
+- Corrected multiplier of `unit:MIL`
+- Added `unit:GM qudt:scalingOf unit:KiloGM`, such that the standard algorithm for determining conversion multipliers (following factor units and scalings recursively) applies correctly.
+  E.g, for `unit:DecaGM`: `conversionMultiplier = prefix:Deca.prefixMultiplier * unit:GM.conversionMultiplier = 10.0 * 0.001 = 0.01`
+
+### Deprecated
+
+- `unit:MicroGAL-PER-M` (new unit: `unit:MicroGALILEO-PER-M`)
+- `unit:MilliGAL` (new unit: `unit:MilliGALILEO`)
+- `unit:MilliGAL-PER-MO` (new unit: `unit:MilliGALILEO-PER-MO`)
+- `unit:Ci` (added for consistency, new unit: `unit:CI`)
+- `unit:KiloCi` (new unit: `unit:KiloCI`)
+- `unit:MicroCi` (new unit: `unit:MicroCI`)
+- `unit:MilliCi` (new unit: `unit:MilliCI`)
 
 ## [3.1.3] - 2025-06-26
 
@@ -30,20 +68,20 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Added an updated intro slide deck in the doc folder
 - New Units
-  - unit:CCY_CHF-PER-HA
+  - `unit:CCY_CHF-PER-HA`
 
 ### Changed
 
-- Build process
+- All instances of `xsd:decimal` are limited to a maximum precision of 34 significant digits
+- Build process by [Florian Kleedorfer](https://github.com/fkleedorfer)
   - New maven goal `rdfio:pipeline` that allows for fine-grained rdf file manipulation
   - New `mainPipeline` execution for the bulk of rdf munging
   - New `src/main/rdf/validation/qudt-shacl-functions.ttl` to make some intricate functionality
     available to SPARQL and SHACL
   - New `unitTestPipeline` for unit testing the SHACL functions
-- All instances of `xsd:decimal` are limited to a maximum precision of 34 significant digits
-- Derived units: recalculation of `qudt:conversionMultiplier` and `qudt:conversionMultiplierSN`
-  - During the build, all derived units' conversion multipliers are checked based on their `qudt:factorUnits`
-    and replaced with the calculated result if necessary
+  - Derived units: recalculation of `qudt:conversionMultiplier` and `qudt:conversionMultiplierSN`
+    - During the build, all derived units' conversion multipliers are checked based on their `qudt:factorUnits`
+      and replaced with the calculated result if necessary
 
 ### Deprecated
 

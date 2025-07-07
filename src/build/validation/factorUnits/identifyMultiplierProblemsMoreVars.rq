@@ -4,14 +4,14 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 SELECT *
 WHERE {
-  ?this a qudt:Unit .
-  OPTIONAL { ?this qudt:conversionMultiplier ?actualMultiplier . }
+  $this a qudt:Unit .
+  OPTIONAL { $this qudt:conversionMultiplier ?actualMultiplier . }
 
   # Subquery to compute and concatenate factor unit contributions
   {
-    SELECT ?this (GROUP_CONCAT(?factorContribution; SEPARATOR="|") AS ?contributions)
+    SELECT $this (GROUP_CONCAT(?factorContribution; SEPARATOR="|") AS ?contributions)
     WHERE {
-      ?this qudt:hasFactorUnit ?factor .
+      $this qudt:hasFactorUnit ?factor .
       ?factor qudt:hasUnit ?baseUnit ;
               qudt:exponent ?exponent .
       ?baseUnit qudt:conversionMultiplier ?baseMultiplier .
@@ -32,7 +32,7 @@ WHERE {
 
 
     }
-    GROUP BY ?this
+    GROUP BY $this
   }
     # Disassemble contributions into up to 10 variables
     BIND(COALESCE(CONCAT("|",?contributions), "|") AS ?contribString)
