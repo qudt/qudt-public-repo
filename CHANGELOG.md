@@ -32,6 +32,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - Set conversion multiplier 1.0 on each currency unit (in unit: namespace)
   - Set conversion multiplier for any unit that does not have one to 0.0 at the end of the build process
   - Every unit now has a conversion multiplier
+- Descriptions
+  - Changed "Thermal heat capacity" to "total energy per unit mass, commonly known as specific enthalpy" for unit:BTU_TH-PER-LB
+  - Changed "Thermal heat capacity" to "total energy per unit mass, commonly known as specific enthalpy" for unit:J-PER-KiloGM
 
 ### Fixed
 
