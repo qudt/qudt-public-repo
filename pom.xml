@@ -543,6 +543,37 @@
                                     <file>src/build/inference/factorUnits/predefined-factors-and-scalings.ttl</file>
                                 </add>
                                 <assert>
+                                    <message>Test qfn:exponentSuperscript()</message>
+                                    <failureMessage>Unit test failed for qfn:exponentSuperscript()</failureMessage>
+                                    <sparqlSelect>
+                                        <![CDATA[
+                                        SELECT *
+                                        WHERE {
+                                            VALUES (?value ?absolute ?expectedOutput) {
+                                                (0 false "⁰")
+                                                (1  false "")
+                                                (4  false "⁴")
+                                                (-1  false "⁻¹")
+                                                (1.0  false "")
+                                                (4.0  false "⁴")
+                                                (-1.0  false "⁻¹")
+                                                (-14.0  false "⁻¹⁴")
+                                                (0 true "⁰")
+                                                (1  true "")
+                                                (4  true "⁴")
+                                                (-1  true "")
+                                                (1.0  true "")
+                                                (4.0  true "⁴")
+                                                (-1.0  true "")
+                                                (-14.0  true "¹⁴")
+                                            }
+                                            BIND(STR(qfn:exponentSuperscript(?value, ?absolute)) AS ?actualOutput)
+                                            FILTER(BOUND(?actualOutput) != BOUND(?expectedOutput) || ?actualOutput != ?expectedOutput)
+                                        }
+                                        ]]>
+                                    </sparqlSelect>
+                                </assert>
+                                <assert>
                                     <message>Test qfn:decimalToDouble()</message>
                                     <failureMessage>Unit test failed for qfn:decimalToDouble()</failureMessage>
                                     <sparqlSelect>
