@@ -1,0 +1,116 @@
+SELECT
+    ?unit
+    ?actualSymbol
+    ?calculatedSymbol
+    (?calculatedSymbol = ?actualSymbol AS ?same)
+WHERE {
+    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+        ?unit
+            a qudt:Unit ;
+            optional {
+                ?unit qudt:symbol ?actualSymbol
+            }
+        {
+            SELECT
+                ?unit
+                (SAMPLE(?denominatorLocalname) as ?denomName)
+                (SAMPLE(?numeratorLocalname) as ?numerName)
+                (IF(BOUND(?denomName),
+                    IF(BOUND(?numerName),
+                        CONCAT(?numerName,"-PER-",?denomName),
+                        CONCAT("PER",?denomName)
+                    ),
+                    ?numerName)
+                AS ?unitLocalnameReconstructed)
+                (SAMPLE(?denominatorSymbol) as ?denomSymbTmp)
+                (IF(
+                    CONTAINS(?denomSymbTmp, "·"),
+                    CONCAT("(",?denomSymbTmp, ")"),
+                    ?denomSymbTmp)
+                AS ?denomSymb)
+                (SAMPLE(?numeratorSymbol) as ?numerSymb)
+                (IF(BOUND(?denomSymb),
+                    IF(BOUND(?numerSymb),
+                        CONCAT(?numerSymb,"/",?denomSymb),
+                        CONCAT("/",?denomSymb)
+                    ),
+                    ?numerSymb)
+                AS ?calculatedSymbol)
+            WHERE
+            {
+
+                {
+                    SELECT ?unit
+                        (GROUP_CONCAT(?baseSymbol; separator="·") as ?numeratorSymbol)
+                        (GROUP_CONCAT(?baseLocalname; separator="-") as ?numeratorLocalname)
+                    {
+                        SELECT DISTINCT ?unit ?base ?baseLocalname ?posInNumerator ?baseSymbol
+                        {
+
+                            ?unit
+                            a qudt:Unit ;
+                            BIND(qfn:localname(?unit) as ?unitLocalname )
+                            BIND(
+                                IF(
+                                    CONTAINS(?unitLocalname, "PER"),
+                                    STRBEFORE(?unitLocalname, "-PER-"),
+                                    ?unitLocalname)
+                                AS ?unitLocalnameNumerator)
+
+                            ?unit qudt:hasFactorUnit ?fu .
+                            ?fu   qudt:exponent ?exp .
+                            ?fu qudt:hasUnit ?base .
+                            ?base qudt:symbol ?symbol .
+                            BIND(qfn:localname(?base) AS ?baseLocalnameTmp)
+                            BIND(
+                                IF(
+                                    ABS(?exp) = 1,
+                                    ?baseLocalnameTmp,
+                                    CONCAT(?baseLocalnameTmp, STR(abs(?exp))))
+                                AS ?baseLocalname)
+                            BIND(CONCAT("(?<=(-|^))",?baseLocalname,"(?=(-|$)).*$") as ?regexBaseLocalname)
+                            BIND(STRLEN(REPLACE(?unitLocalnameNumerator, ?regexBaseLocalname, "")) AS ?posInNumeratorTmp)
+                            BIND(IF(?posInNumeratorTmp = STRLEN(?unitLocalnameNumerator), -1, ?posInNumeratorTmp) AS ?posInNumerator)
+                            BIND(CONCAT(?symbol, qfn:exponentSuperscript(?exp, true)) AS ?baseSymbol)
+                            FILTER(?posInNumerator > -1)
+                        } ORDER BY ?unit ?posInNumerator
+                    } GROUP BY ?unit
+                }
+                UNION
+                {
+                    SELECT ?unit
+                        (GROUP_CONCAT(?baseSymbol; separator="·") as ?denominatorSymbol)
+                        (GROUP_CONCAT(?baseLocalname; separator="-") as ?denominatorLocalname)
+                    {
+                        SELECT DISTINCT ?unit ?base ?baseLocalname ?posInDenominator ?baseSymbol
+                        {
+
+                            ?unit
+                            a qudt:Unit ;
+                            BIND(qfn:localname(?unit) as ?unitLocalname )
+                            BIND(STRAFTER(?unitLocalname, "PER-") AS ?unitLocalnameDenominator)
+
+                            ?unit qudt:hasFactorUnit ?fu .
+                            ?fu   qudt:exponent ?exp .
+                            ?fu qudt:hasUnit ?base .
+                            ?base qudt:symbol ?symbol .
+                            BIND(qfn:localname(?base) AS ?baseLocalnameTmp)
+                            BIND(
+                                IF(
+                                    ABS(?exp) = 1,
+                                    ?baseLocalnameTmp,
+                                    CONCAT(?baseLocalnameTmp, STR(abs(?exp))))
+                                AS ?baseLocalname)
+                            BIND(CONCAT("(?<=(-|^))",?baseLocalname,"(?=(-|$)).*$") as ?regexBaseLocalname)
+                            BIND(STRLEN(REPLACE(?unitLocalnameDenominator, ?regexBaseLocalname, "")) AS ?posInDenominatorTmp)
+                            BIND(IF(?posInDenominatorTmp = STRLEN(?unitLocalnameDenominator), -1, ?posInDenominatorTmp) AS ?posInDenominator)
+                            BIND(CONCAT(?symbol, qfn:exponentSuperscript(?exp, true)) AS ?baseSymbol)
+                            FILTER(?posInDenominator > -1)
+                        } ORDER BY ?unit ?posInDenominator
+                    } GROUP BY ?unit
+                }
+            } GROUP BY ?unit
+            HAVING(qfn:localname(?unit) = ?unitLocalnameReconstructed)
+        }
+    }
+} ORDER BY ?looksOk ?same ?unit
