@@ -381,7 +381,7 @@
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>rdfio-maven-plugin</artifactId>
-                <version>1.4.3</version>
+                <version>1.4.5</version>
                 <executions>
                     <execution>
                         <!--
@@ -941,6 +941,27 @@
                                         </files>
                                         <toGraphsPattern>target:${name}</toGraphsPattern>
                                     </add>
+                                    <sparqlUpdate>
+                                        <message>change graph-file associations from target/work to target/dist</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                DELETE {
+                                                    GRAPH <rdfio:pipeline:metadata> {
+                                                        ?file <http://qudtlib.org/rdfio/loadsInto> ?graph .
+                                                    }
+                                                } INSERT {
+                                                    GRAPH <rdfio:pipeline:metadata> {
+                                                        ?newFile <http://qudtlib.org/rdfio/loadsInto> ?graph .
+                                                    }
+                                                } WHERE {
+                                                    GRAPH <rdfio:pipeline:metadata> {
+                                                        ?file <http://qudtlib.org/rdfio/loadsInto> ?graph .
+                                                    }
+                                                    BIND (IRI(REPLACE(STR(?file), "target/work", "target/dist")) AS ?newFile)
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
                                     <sparqlUpdate>
                                         <message>Adding IEC links</message>
                                         <sparql>
