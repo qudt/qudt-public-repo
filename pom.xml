@@ -1131,26 +1131,6 @@
                                         <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
                                     <savepoint><id>06.1-infer-scalingOf-with-errors</id></savepoint>
-                                    <sparqlQuery>
-                                        <message>Show scalings of unit:KiloGM and unit:GM</message>
-                                        <sparql>
-                                            <![CDATA[
-                                            SELECT * where {
-                                                GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                    ?unit
-                                                        qudt:scalingOf ?u ;
-                                                        qudt:conversionMultiplier ?cm .
-                                                    FILTER(?u in (unit:KiloGM, unit:GM))
-                                                    OPTIONAL {
-                                                        ?unit qudt:prefix ?prefix .
-                                                    }
-                                                    BIND("scalingOf" as ?relation)
-                                                }
-                                            } ORDER BY ?u ?cm ?unit
-                                            ]]>
-                                        </sparql>
-                                        <toFile>target/inspection/scalings-of-unitGM/before.txt</toFile>
-                                    </sparqlQuery>
                                     <sparqlUpdate>
                                         <message>Fix unit:GM/unit:KiloGM qudt:scalingOf situation</message>
                                         <sparql>
@@ -1167,51 +1147,6 @@
                                             ]]>
                                         </sparql>
                                     </sparqlUpdate>
-                                    <sparqlQuery>
-                                        <message>Show scalings of unit:KiloGM and unit:GM</message>
-                                        <sparql>
-                                            <![CDATA[
-                                                SELECT * where {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        ?unit qudt:conversionMultiplier ?cm.
-                                                        OPTIONAL {
-                                                            ?unit qudt:prefix ?prefix .
-                                                        }
-                                                        {
-                                                            ?unit qudt:scalingOf ?u ;
-                                                            BIND("scalingOf" as ?relation)
-                                                        } UNION {
-                                                            ?unit qudt:hasFactorUnit/qudt:hasUnit ?u ;
-                                                                  qudt:factorUnitScalar ?scalar
-                                                            BIND("factorUnit" as ?relation)
-                                                        }
-                                                    }
-                                                    FILTER (?u in (unit:KiloGM, unit:GM))
-                                                } ORDER BY ?u ?cm ?unit
-                                            ]]>
-                                        </sparql>
-                                        <toFile>target/inspection/scalings-of-unitGM/after.txt</toFile>
-                                    </sparqlQuery>
-                                    <sparqlQuery>
-                                        <message>Show scaled units, base units and multipliers</message>
-                                        <sparql>
-                                            <![CDATA[
-                                                SELECT * where {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        ?unit
-                                                            qudt:conversionMultiplier ?cm ;
-                                                            qudt:scalingOf ?base .
-                                                        ?base
-                                                            qudt:conversionMultiplier ?baseCm.
-                                                        OPTIONAL {
-                                                            ?unit qudt:prefix ?prefix .
-                                                        }
-                                                    }
-                                                } ORDER BY ?baseCm ?prefix ?base ?unit
-                                            ]]>
-                                        </sparql>
-                                        <toFile>target/inspection/scalingOf/all.txt</toFile>
-                                    </sparqlQuery>
                                     <savepoint><id>06-infer-scalingOf</id></savepoint>
                                     <sparqlUpdate>
                                         <message>Copy conversionMultipliers/offsets from qudt:exactMatch|skos:broader unit where not present</message>
