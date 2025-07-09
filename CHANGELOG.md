@@ -64,6 +64,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - `unit:KiloCi` (new unit: `unit:KiloCI`)
 - `unit:MicroCi` (new unit: `unit:MicroCI`)
 - `unit:MilliCi` (new unit: `unit:MilliCI`)
+- `unit:CAL_15_DEG_C` (new unit: `unit:CAL_15DEG_C`)
 
 ## [3.1.3] - 2025-06-26
 
