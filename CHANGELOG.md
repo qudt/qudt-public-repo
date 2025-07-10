@@ -32,6 +32,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - Set conversion multiplier 1.0 on each currency unit (in unit: namespace)
   - Set conversion multiplier for any unit that does not have one to 0.0 at the end of the build process
   - Every unit now has a conversion multiplier
+  - Certain consistency problems can now be fixed in the source with the `fixSrc` pipeline (`mvn rdfio:pipeline@fixSrc`)
 - Descriptions
   - Changed "Thermal heat capacity" to "total energy per unit mass, commonly known as specific enthalpy" for unit:BTU_TH-PER-LB
   - Changed "Thermal heat capacity" to "total energy per unit mass, commonly known as specific enthalpy" for unit:J-PER-KiloGM
@@ -54,6 +55,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Corrected multiplier of `unit:MIL`
 - Added `unit:GM qudt:scalingOf unit:KiloGM`, such that the standard algorithm for determining conversion multipliers (following factor units and scalings recursively) applies correctly.
   E.g, for `unit:DecaGM`: `conversionMultiplier = prefix:Deca.prefixMultiplier * unit:GM.conversionMultiplier = 10.0 * 0.001 = 0.01`
+- Corrected 136 unit symbols
 
 ### Deprecated
 
