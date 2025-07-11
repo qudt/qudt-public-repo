@@ -63,6 +63,16 @@ qfn:
     a sh:PrefixDeclaration ;
     sh:namespace "http://www.w3.org/ns/shacl#"^^xsd:anyURI ;
     sh:prefix "sh" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "https://github.com/qudtlib/numericFunctions/"^^xsd:anyURI ;
+    sh:prefix "nf" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "https://github.com/qudtlib/rdfio/"^^xsd:anyURI ;
+    sh:prefix "rdfio" ;
   ] .
 
 qfn:bound
@@ -435,53 +445,6 @@ qfn:dimVec.pow
             }
         """ .
 
-qfn:exp
-  a sh:SPARQLFunction ;
-  sh:parameter [
-    sh:datatype xsd:decimal ;
-    sh:description "The decimal value to exponentiate" ;
-    sh:order 0 ;
-    sh:path qfn:value ;
-  ] ;
-  sh:parameter [
-    sh:datatype xsd:integer ;
-    sh:description "The exponent - an integer between 0 and 8 (inclusive)" ;
-    sh:order 1 ;
-    sh:path qfn:exponent ;
-  ] ;
-  sh:prefixes qfn: ;
-  sh:returnType xsd:decimal ;
-  sh:select """
-    SELECT ?result
-    WHERE {
-        # supports exponents 0 to 8
-        BIND(ABS(?exponent) as ?absoluteExponent)
-        BIND(IF (?value = 0.0,
-            0.0,
-            if (?exponent < 0, 1.0 / ?value, ?value )) AS ?multiplier)
-        BIND(
-            IF(?absoluteExponent = 0, 1.0,
-                IF(?absoluteExponent = 1,
-                    ?multiplier,
-                    IF(?absoluteExponent = 2,
-                        ?multiplier * ?multiplier,
-                        IF(?absoluteExponent = 3,
-                            ?multiplier * ?multiplier * ?multiplier,
-                            IF(?absoluteExponent = 4,
-                                ?multiplier * ?multiplier * ?multiplier * ?multiplier,
-                                IF(?absoluteExponent = 5,
-                                    ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
-                                    IF(?absoluteExponent = 6,
-                                        ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
-                                        IF(?absoluteExponent = 7,
-                                            ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
-                                            IF(?absoluteExponent = 8,
-                                                ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
-                                                CONCAT("CANNOT HANDLE EXPONENT ", ?exponent))))))))))
-        AS ?result )
-    }
-    """ .
-
 qfn:exponentSuperscript
   a sh:SPARQLFunction ;
   sh:parameter [
@@ -537,6 +500,53 @@ qfn:localname
   sh:returnType xsd:string ;
   sh:select """
         SELECT (REPLACE(STR(?input), "^.+[/#]", "") as ?result) WHERE {}
+    """ .
+
+qfn:pow
+  a sh:SPARQLFunction ;
+  sh:parameter [
+    sh:datatype xsd:decimal ;
+    sh:description "The decimal value to exponentiate" ;
+    sh:order 0 ;
+    sh:path qfn:value ;
+  ] ;
+  sh:parameter [
+    sh:datatype xsd:integer ;
+    sh:description "The exponent - an integer between 0 and 8 (inclusive)" ;
+    sh:order 1 ;
+    sh:path qfn:exponent ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:decimal ;
+  sh:select """
+    SELECT ?result
+    WHERE {
+        # supports exponents 0 to 8
+        BIND(ABS(?exponent) as ?absoluteExponent)
+        BIND(IF (?value = 0.0,
+            0.0,
+            if (?exponent < 0, nf:decimal.div(1.0, ?value, 34), ?value )) AS ?multiplier)
+        BIND(
+            IF(?absoluteExponent = 0, 1.0,
+                IF(?absoluteExponent = 1,
+                    ?multiplier,
+                    IF(?absoluteExponent = 2,
+                        ?multiplier * ?multiplier,
+                        IF(?absoluteExponent = 3,
+                            ?multiplier * ?multiplier * ?multiplier,
+                            IF(?absoluteExponent = 4,
+                                ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                IF(?absoluteExponent = 5,
+                                    ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                    IF(?absoluteExponent = 6,
+                                        ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                        IF(?absoluteExponent = 7,
+                                            ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                            IF(?absoluteExponent = 8,
+                                                ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                                CONCAT("CANNOT HANDLE EXPONENT ", ?exponent))))))))))
+        AS ?result )
+    }
     """ .
 
 qfn:unit.dimVec.calculate
