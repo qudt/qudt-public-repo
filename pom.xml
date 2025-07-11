@@ -692,8 +692,53 @@
                                     </sparqlSelect>
                                 </assert>
                                 <assert>
-                                    <message>Test qfn:exp()</message>
-                                    <failureMessage>Unit test failed for qfn:exp()</failureMessage>
+                                    <message>Test nf:decimal.pow()</message>
+                                    <failureMessage>Unit test failed for nf:decimal.pow()</failureMessage>
+                                    <sparqlSelect>
+                                        <![CDATA[
+                                        PREFIX nf: <https://github.com/qudtlib/numericFunctions/>
+                                        SELECT *
+                                        WHERE {
+                                            VALUES (?base ?exp ?expectedOutput) {
+                                                (2 0          1)
+                                                (0 1          0)
+                                                (1 0          1)
+                                                (0 0          1)
+                                                (4 -1         0.25)
+                                                (2 -2         0.25)
+                                                (2 -3         0.125)
+                                                (3 2          9)
+                                                (3 3          27)
+                                                (1.2 2       1.44)
+                                            }
+                                            BIND(nf:decimal.pow(?base, ?exp,34) AS ?actualOutput)
+                                            FILTER(BOUND(?actualOutput) != BOUND(?expectedOutput) || ?actualOutput != ?expectedOutput)
+                                        }
+                                        ]]>
+                                    </sparqlSelect>
+                                </assert>
+                                <assert>
+                                    <message>Test nf:decimal.div()</message>
+                                    <failureMessage>Unit test failed for nf:decimal.div()</failureMessage>
+                                    <sparqlSelect>
+                                        <![CDATA[
+                                        PREFIX nf: <https://github.com/qudtlib/numericFunctions/>
+                                        SELECT *
+                                        WHERE {
+                                            VALUES (?value ?divisor ?precision ?expectedOutput) {
+                                                (2 2 34 1)
+                                                (2 3 34 0.6666666666666666666666666666666667)
+                                                (1 4 34 0.25)
+                                            }
+                                            BIND(nf:decimal.div(?value, ?divisor, ?precision) AS ?actualOutput)
+                                            FILTER(BOUND(?actualOutput) != BOUND(?expectedOutput) || ?actualOutput != ?expectedOutput)
+                                        }
+                                        ]]>
+                                    </sparqlSelect>
+                                </assert>
+                                <assert>
+                                    <message>Test qfn:pow()</message>
+                                    <failureMessage>Unit test failed for qfn:pow()</failureMessage>
                                     <sparqlSelect>
                                         SELECT *
                                         WHERE {
@@ -709,7 +754,7 @@
                                         (3 3          27)
                                         (1.2 2       1.44)
                                         }
-                                        BIND(qfn:exp(?base, ?exp) AS ?actualOutput)
+                                        BIND(qfn:pow(?base, ?exp) AS ?actualOutput)
                                         FILTER(BOUND(?actualOutput) != BOUND(?expectedOutput) || ?actualOutput != ?expectedOutput)
                                         }
                                     </sparqlSelect>
@@ -741,9 +786,11 @@
                                     </sparqlSelect>
                                 </assert>
                                 <assert>
-                                    <message>Test qfn:decimalRoundToPrecision()</message>
-                                    <failureMessage>Unit test failed for qfn:decimalRoundToPrecision()</failureMessage>
+                                    <message>Test nf:decimal.roundToPrecision()</message>
+                                    <failureMessage>Unit test failed for nf:decimal.roundToPrecision()</failureMessage>
                                     <sparqlSelect>
+                                        <![CDATA[
+                                        PREFIX nf: <https://github.com/qudtlib/numericFunctions/>
                                         SELECT *
                                         WHERE {
                                             VALUES (?input ?precision ?expectedOutput) {
@@ -770,10 +817,14 @@
                                                 (00123.456000 3       123.0)
                                                 (0.000000011574074074074074074  10 0.00000001157407407)
                                                 (-0.000000011574074074074074074  10 -0.00000001157407407)
+                                                (0.0002777777777777777777777777777777778 34 0.0002777777777777777777777777777777778)
+                                                (0.0002777777777777777777777777777777778 24 0.000277777777777777777777778)
+                                                (0.0002777777777777777777777777777777778 4 0.0002778)
                                             }
-                                        BIND(qfn:decimalRoundToPrecision(?input, ?precision) AS ?rounded)
-                                        FILTER(!BOUND(?rounded) || ?rounded != ?expectedOutput)
+                                        BIND(nf:decimal.roundToPrecision(?input, ?precision) AS ?actual)
+                                        FILTER(BOUND(?actual) != BOUND(?expectedOutput) || ?actual != ?expectedOutput)
                                         }
+                                        ]]>
                                     </sparqlSelect>
                                 </assert>
                                 <add>
@@ -1501,7 +1552,7 @@
                                                 FILTER (DATATYPE(?oldVal) = xsd:decimal)
                                                 FILTER(qfn:decimalPrecision(?oldVal) > 34)
                                                 BIND(IRI(CONCAT(STR(?p),"SN")) as ?pSN)
-                                                BIND(qfn:decimalRoundToPrecision(?oldVal, 34) AS ?newVal)
+                                                BIND(nf:decimal.roundToPrecision(?oldVal, 34) AS ?newVal)
                                                 BIND(qfn:decimalToDouble(?newVal) AS ?newValSN)
                                                 OPTIONAL {
                                                     ?s ?pSN ?oldValSN .
