@@ -908,6 +908,39 @@
                                     </files>
                                     <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                 </add>
+                                <when>
+                                    <message>Checking if we have at least the dist units file</message>
+                                    <sparqlAsk>
+                                        <![CDATA[
+                                            ASK WHERE {
+                                                FILTER NOT EXISTS {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?s ?p ?o
+                                                    }
+                                                }
+                                            }
+                                        ]]>
+                                    </sparqlAsk>
+                                    <body>
+                                        <stop>
+                                            <message>
+
+                                                the fix-src pipeline cannot be run without the results
+                                                of a previous build being available in the target folder.
+
+                                                Run
+
+                                                mvn install
+
+                                                and when that fails, run
+
+                                                mvn -Pfix install
+
+                                                (as you'll be instructed, hopefully)
+                                            </message>
+                                        </stop>
+                                    </body>
+                                </when>
 
 
                                 <sparqlUpdate>
@@ -1788,9 +1821,12 @@
                                                 <message>
                                                     Data errors in src/main/rdf/dist!
 
-                                                    to fix the errors in `src` and start another build, run
+                                                    to fix the errors in `src`, do NOT run mvn clean - the
+                                                    current build output is needed!
+                                                    Just run:
 
-                                                    mvn rdfio:pipeline@fix-src spotless:apply@reformat-src install
+                                                    mvn -Pfix install
+
 
                                                     Please review the changes that are made to the sources.
                                                     There may be more information on individual changes in
@@ -2253,6 +2289,16 @@
                         <executions>
                             <execution>
                                 <id>reformat-src</id>
+                                <phase>initialize</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>io.github.qudtlib</groupId>
+                        <artifactId>rdfio-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>fix-src</id>
                                 <phase>validate</phase>
                             </execution>
                         </executions>
