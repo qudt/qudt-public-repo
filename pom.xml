@@ -44,18 +44,18 @@
                 Here are the phases and the execution ids that are linked to them (executed in the order they appear in this file):
                       validate                 defineAdditionalProperties, preprocess-shacl-files
                       initialize
-                      generate-sources         unitTestPipeline
-                      process-sources          check-source-format, shacl-validate-src
+                      generate-sources         unit-test
+                      process-sources          check-src-format, shacl-validate-src
                       generate-resources       copy-rdf-to-dist, copy-rdf-to-work, copy-docs, copy-root-files, validate-shacl-files
                       process-resources
-                      process-classes          mainRdfPipeline
+                      process-classes          main
                       generate-test-sources
                       process-test-sources     all-in-one
                       generate-test-resources
                       process-test-resources
                       test-compile
                       process-test-classes     format-dist
-                      test                     shacl-validate-target
+                      test                     validate-dist
                       prepare-package
                       package
                       pre-integration-test
@@ -66,7 +66,10 @@
                       deploy
 
                 Executions with phase 'none' (invocable directly via command line, not bound to lifecycle):
-                      none                     infer-and-format, infer-factorUnits, infer-scalingOf, merge-factorUnits-target, query-factorUnits, query-scalingOf, merge-scalingOf-target, reformat-sources
+                      none                     rdfio:pipeline@fix-src       replaces certain triples in src if they are dfferent in target
+                                               rdfio:pipeline@inspect       runs a number of interesting queries, mostly on target
+                                               spotless:apply@reformat-src  reformats the sources (not target)
+
             -->
 
             <plugin>
@@ -385,7 +388,7 @@
                 <executions>
                     <execution>
                         <!--
-                        makes one big file in target, after the mainPipeline has modified target files
+                        makes one big file in target, after the main pipeline has modified target files
                         -->
                         <id>all-in-one</id>
                         <phase>process-test-sources</phase>
@@ -619,14 +622,14 @@
                     </execution>
                     <execution>
                         <!-- unit tests for SHACL functions -->
-                        <id>unitTestPipeline</id>
+                        <id>unit-test</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>pipeline</goal>
                         </goals>
                         <configuration>
                         <pipeline>
-                            <id>unitTestPipeline</id>
+                            <id>unit-test</id>
                             <steps>
                                 <!-- make custom shacl functions available in inference and SPARQL-->
                                 <shaclFunctions>
@@ -917,14 +920,14 @@
                     </execution>
 
                     <execution>
-                        <id>fixSrcPipeline</id>
+                        <id>fix-src</id>
                         <phase>none</phase>
                         <goals>
                             <goal>pipeline</goal>
                         </goals>
                         <configuration>
                         <pipeline>
-                            <id>fixSrcPipeline</id>
+                            <id>fix-src</id>
                             <steps>
                                 <shaclFunctions>
                                     <file>src/main/rdf/validation/qudt-shacl-functions.ttl</file>
@@ -1015,14 +1018,14 @@
 
 
                     <execution>
-                        <id>mainPipeline</id>
+                        <id>main</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>pipeline</goal>
                         </goals>
                         <configuration>
                             <pipeline>
-                                <id>mainPipeline</id>
+                                <id>main</id>
                                 <steps>
                                     <!-- make custom shacl functions available in inference and SPARQL-->
                                     <shaclFunctions>
@@ -1660,7 +1663,7 @@
                             merge/rebase to our main branch would lead to having unformatted files in
                             the main branch.
                         -->
-                        <id>check-source-format</id>
+                        <id>check-src-format</id>
                         <phase>process-sources</phase>
                         <goals>
                             <goal>check</goal>
@@ -1692,7 +1695,7 @@
                     </execution>
                     <execution>
                         <!-- formats source files that were generated during the build up to the compile phase -->
-                        <id>reformat-sources</id>
+                        <id>reformat-src</id>
                         <phase>none</phase>
                         <goals>
                             <goal>apply</goal>
@@ -1871,7 +1874,7 @@
         </profile>
         <profile>
             <!--
-                runs all source modifications (inferences and formatting) before anything else in the build
+                runs all src modifications (inferences and formatting) before anything else in the build
              -->
             <id>fix</id>
             <build>
@@ -1881,7 +1884,7 @@
                         <artifactId>spotless-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>reformat-sources</id>
+                                <id>reformat-src</id>
                                 <phase>validate</phase>
                             </execution>
                         </executions>
