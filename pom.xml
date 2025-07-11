@@ -948,7 +948,7 @@
                                     <files>
                                         <include>target/dist/vocab/**/*.ttl</include>
                                     </files>
-                                    <toGraphsPattern>target:${name}</toGraphsPattern>
+                                    <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                 </add>
 
                                 <sparqlUpdate>
@@ -1040,7 +1040,7 @@
                                         <files>
                                             <include>target/work/vocab/**/*.ttl</include>
                                         </files>
-                                        <toGraphsPattern>target:${name}</toGraphsPattern>
+                                        <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                     </add>
                                     <sparqlUpdate>
                                         <message>change graph-file associations from target/work to target/dist</message>
@@ -1103,8 +1103,8 @@
                                         </shapes>
                                         <data>
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>target:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
-                                            <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
                                         </data>
                                         <inferred>
                                             <graph>inferred:applicableUnits</graph>
@@ -1114,7 +1114,7 @@
 
                                     <add> <!-- add the results of the quantitykinds inference to the quantityKinds graph -->
                                         <graph>inferred:applicableUnits</graph>
-                                        <toGraph>target:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
                                     </add>
 
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
@@ -1124,7 +1124,7 @@
                                         <shapes><graph>shapes:applicableUnits</graph></shapes>
                                         <data>
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>target:VOCAB_QUDT-UNITS-CURRENCY.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl</graph>
                                         </data>
                                         <inferred>
                                             <graph>inferred:applicableCurrencyUnits</graph>
@@ -1133,7 +1133,7 @@
                                     </shaclInfer>
                                     <add>
                                         <graph>inferred:applicableCurrencyUnits</graph>
-                                        <toGraph>target:VOCAB_QUDT-UNITS-CURRENCY.ttl</toGraph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl</toGraph>
                                     </add>
 
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
@@ -1144,11 +1144,11 @@
                                         <sparql>
                                             <![CDATA[
                                                 INSERT {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ?cur qudt:conversionMultiplier 1.0
                                                     }
                                                 } WHERE  {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ?cur a qudt:CurrencyUnit
                                                         FILTER(REGEX(qfn:localname(?cur),"CCY_\\w+"))
                                                         FILTER NOT EXISTS {
@@ -1167,7 +1167,7 @@
                                         </shapes>
                                         <data>
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
                                         </data>
                                         <inferred>
                                             <graph>inferred:owl-subset-units</graph>
@@ -1177,7 +1177,7 @@
 
                                     <add> <!-- add the inferred triples to the units graph -->
                                         <graph>inferred:owl-subset-units</graph>
-                                        <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
 
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
@@ -1185,7 +1185,7 @@
 
                                     <add>
                                         <file>src/build/inference/factorUnits/predefined-factors-and-scalings.ttl</file>
-                                        <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
 
                                     <shaclInfer> <!-- infer the factor units -->
@@ -1197,8 +1197,8 @@
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
                                             <graphs>
                                                 <include>
-                                                    target:VOCAB_QUDT-UNITS-ALL.ttl
-                                                    target:VOCAB_QUDT-PREFIXES.ttl
+                                                    dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl
+                                                    dist:vocab:VOCAB_QUDT-PREFIXES.ttl
                                                 </include>
                                             </graphs>
                                         </data>
@@ -1209,7 +1209,7 @@
                                     </shaclInfer>
                                     <add>
                                         <graph>inferred:factorUnits</graph>
-                                        <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
                                     <savepoint><id>05-infer-factor-units</id></savepoint>
                                     <shaclInfer>
@@ -1219,8 +1219,8 @@
                                         </shapes>
                                         <data>
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                            <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
                                         </data>
                                         <inferred>
                                             <graph>inferred:scalingOf</graph>
@@ -1229,7 +1229,7 @@
                                     </shaclInfer>
                                     <add>
                                         <graph>inferred:scalingOf</graph>
-                                        <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
                                     <savepoint><id>06.1-infer-scalingOf-with-errors</id></savepoint>
                                     <sparqlUpdate>
@@ -1237,11 +1237,11 @@
                                         <sparql>
                                             <![CDATA[
                                                 DELETE {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         unit:KiloGM qudt:scalingOf unit:GM
                                                     }
                                                 } INSERT {
-                                                   GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                   GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         unit:GM qudt:scalingOf unit:KiloGM
                                                    }
                                                 } WHERE {}
@@ -1254,7 +1254,7 @@
                                         <sparql>
                                             <![CDATA[
                                                 INSERT {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ?unit
                                                             qudt:conversionMultiplier ?cm ;
                                                             qudt:conversionMultiplierSN ?cmSN ;
@@ -1264,7 +1264,7 @@
                                                     }
                                                 }
                                                 WHERE {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl>  {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl>  {
                                                         ?unit a qudt:Unit .
                                                         FILTER NOT EXISTS {
                                                             ?unit
@@ -1299,8 +1299,8 @@
                                         </shapes>
                                         <data>
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                            <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
                                         </data>
                                         <validationReport>
                                             <graph>validation:dimensionVector-underivable.ttl</graph>
@@ -1320,8 +1320,8 @@
                                                 </shapes>
                                                 <data>
                                                     <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                                    <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                                    <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                    <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                    <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
                                                 </data>
                                                 <inferred>
                                                     <graph>inferred:dimensionVector_${index_dv}</graph>
@@ -1330,7 +1330,7 @@
                                             </shaclInfer>
                                             <add>
                                                 <graph>inferred:dimensionVector_${index_dv}</graph>
-                                                <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                                <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                             </add>
                                         </body>
                                         <sparqlAsk>
@@ -1368,8 +1368,9 @@
                                                 </shapes>
                                                 <data>
                                                     <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                                    <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                                    <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                    <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                    <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                    <file>src/build/srcgen/symbol/units-overriding-inferred-symbol.ttl</file>
                                                 </data>
                                                 <validationReport>
                                                     <graph>validation:conversionMultiplierToDelete_${index_cm}</graph>
@@ -1447,7 +1448,7 @@
                                                             ?unit qudt:conversionMultiplier ?cm
                                                         }
                                                     }
-                                                    FILTER(CONTAINS(STR(?graph),"target:VOCAB"))
+                                                    FILTER(CONTAINS(STR(?graph),"dist:vocab:VOCAB"))
                                                 }
                                             ]]>
                                         </sparql>
@@ -1459,12 +1460,12 @@
                                         <sparql>
                                             <![CDATA[
                                             INSERT {
-                                                GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                     ?unit qudt:conversionMultiplierSN ?cmsn
                                                 }
                                             }
                                             WHERE {
-                                                GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                     ?unit a qudt:Unit ;
                                                           qudt:conversionMultiplier ?cm .
                                                     FILTER NOT EXISTS {
@@ -1515,7 +1516,7 @@
                                     <write>
                                         <message>Writing dist files so we can use triples we have inferred so far for fixSrc in case qudt:symbol checks fail</message>
                                         <graphs>
-                                            <include>target:*</include>
+                                            <include>dist:vocab:*</include>
                                         </graphs>
                                     </write>
                                     <shaclValidate>
@@ -1526,9 +1527,9 @@
                                             <file>target/srcgen/symbol/validate.ttl</file>
                                         </shapes>
                                         <data>
-                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                            <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                            <graph>dist:schema:SCHEMA_QUDT.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
                                             <file>src/build/srcgen/symbol/units-overriding-inferred-symbol.ttl</file>
                                         </data>
                                         <validationReport>
