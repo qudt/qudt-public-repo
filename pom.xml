@@ -904,72 +904,75 @@
                                 </add>
                                 <add>
                                     <files>
-                                        <include>target/validation/**/*.ttl</include>
-                                    </files>
-                                    <toGraphsPattern>validation:${name}</toGraphsPattern>
-                                </add>
-                                <add>
-                                    <files>
                                         <include>target/dist/vocab/**/*.ttl</include>
                                     </files>
                                     <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                 </add>
 
+
                                 <sparqlUpdate>
-                                    <message>Deleting invalid symbols</message>
                                     <sparql>
                                         <![CDATA[
-                                                DELETE {
-                                                    GRAPH <src:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        ?unit qudt:symbol ?incorrectSymbol .
-                                                    }
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        ?unit qudt:symbol ?incorrectSymbol .
-                                                    }
+                                            DELETE {
+                                                GRAPH <src:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    ?unit
+                                                        qudt:conversionMultiplier ?cm ;
+                                                        qudt:conversionMultiplierSN ?cmSN ;
+                                                        qudt:symbol ?symbol ;
+                                                        qudt:dimensionVector ?dv ;
                                                 }
-                                                WHERE {
-                                                    GRAPH <src:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        {
-                                                            ?unit qudt:symbol ?incorrectSymbol .
-                                                        }
-                                                    }
-                                                    GRAPH ?graph {
-                                                        ?res
-                                                            rdf:type                      sh:ValidationResult;
-                                                            sh:resultPath                 qudt:symbol;
-                                                            sh:resultSeverity             sh:Violation;
-                                                            sh:value                      ?unit
-                                                    }
-                                                    FILTER(REGEX(STR(?graph),"validation:symbol_toDelete.ttl"))
+                                            }
+                                            INSERT {
+                                                GRAPH <src:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    ?unit
+                                                        qudt:conversionMultiplier ?new_cm;
+                                                        qudt:conversionMultiplierSN ?new_cmSN ;
+                                                        qudt:symbol ?new_symbol ;
+                                                        qudt:hasDimensionVector ?new_dv ;
                                                 }
-                                                ]]>
+                                            }
+                                            WHERE {
+                                                GRAPH <src:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    OPTIONAL{
+                                                        ?unit qudt:conversionMultiplier ?cm
+                                                    }
+                                                    OPTIONAL {
+                                                        ?unit qudt:conversionMultiplierSN ?cmSN
+                                                    }
+                                                    OPTIONAL {
+                                                        ?unit qudt:symbol ?symbol
+                                                    }
+                                                    OPTIONAL {
+                                                        ?unit qudt:hasDimensionVector ?dv
+                                                    }
+                                                    FILTER(BOUND(?unit))
+                                                }
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    OPTIONAL{
+                                                        ?unit qudt:conversionMultiplier ?new_cm
+                                                    }
+                                                    OPTIONAL {
+                                                        ?unit qudt:conversionMultiplierSN ?new_cmSN
+                                                    }
+                                                    OPTIONAL {
+                                                        ?unit qudt:symbol ?new_symbol
+                                                    }
+                                                    OPTIONAL {
+                                                        ?unit qudt:hasDimensionVector ?new_dv
+                                                    }
+                                                    FILTER(BOUND(?unit))
+                                                }
+                                            }
+                                        ]]>
                                     </sparql>
                                 </sparqlUpdate>
-                                <shaclInfer>
-                                    <message>Inferring missing qudt:symbol</message>
-                                    <!-- it would be nice to iterate, but if we do that, we end up adding triples without
-                                        deleting the incorrect versions. we have to go through main-fixSrc-main-fixSrc...
-                                        as often as it takes.
-                                    -->
-                                    <iterateUntilStable>false</iterateUntilStable>
-                                    <shapes>
-                                        <file>target/srcgen/symbol/infer.ttl</file>
-                                    </shapes>
-                                    <data>
-                                        <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                        <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                        <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
-                                        <file>src/build/srcgen/symbol/units-overriding-inferred-symbol.ttl</file>
-                                    </data>
-                                    <inferred>
-                                        <graph>inferred:fixSrc:symbol</graph>
-                                        <file>target/inferred/fixSrc_symbol.ttl</file>
-                                    </inferred>
-                                </shaclInfer>
-                                <add>
-                                    <graph>inferred:fixSrc:symbol</graph>
-                                    <toGraph>src:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
-                                </add>
+
+
+
+
+
+
+
                                 <write>
                                     <graphs>
                                         <include>src:*</include>
