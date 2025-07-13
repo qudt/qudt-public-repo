@@ -402,14 +402,73 @@
                                         <files>
                                             <include>target/dist/vocab/**/*.ttl</include>
                                         </files>
-                                        <toGraphsPattern>target:${name}</toGraphsPattern>
+                                        <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                     </add>
+                                    <add>
+                                        <files>
+                                            <include>src/main/rdf/vocab/**/*.ttl</include>
+                                        </files>
+                                        <toGraphsPattern>src:vocab:${name}</toGraphsPattern>
+                                    </add>
+                                    <add>
+                                        <files>
+                                            <include>target/dist/schema/**/*.ttl</include>
+                                        </files>
+                                        <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
+                                    </add>
+                                    <sparqlQuery>
+                                        <sparql>
+                                            <![CDATA[
+                                                SELECT * WHERE {
+                                                    GRAPH <dist:schema:SCHEMA_QUDT_NoOWL.ttl> {
+                                                        ?type rdfs:subClassOf+ qudt:Unit
+                                                    }
+                                                    GRAPH <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit a ?type .
+                                                        OPTIONAL{
+                                                            ?unit qudt:conversionMultiplier ?cm
+                                                        }
+                                                        OPTIONAL {
+                                                            ?unit qudt:conversionMultiplierSN ?cmSN
+                                                        }
+                                                        OPTIONAL {
+                                                            ?unit qudt:symbol ?symbol
+                                                        }
+                                                        OPTIONAL {
+                                                            ?unit qudt:hasDimensionVector ?dv
+                                                        }
+                                                    }
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        OPTIONAL{
+                                                           ?unit qudt:conversionMultiplier ?new_cm
+                                                        }
+                                                        OPTIONAL {
+                                                            ?unit qudt:conversionMultiplierSN ?new_cmSN
+                                                        }
+                                                        OPTIONAL {
+                                                            ?unit qudt:symbol ?new_symbol
+                                                        }
+                                                        OPTIONAL {
+                                                            ?unit qudt:hasDimensionVector ?new_dv
+                                                        }
+                                                    }
+                                                    FILTER(
+                                                        COALESCE(?cm,"NOT BOUND") != COALESCE(?new_cm, "NOT BOUND")
+                                                        || COALESCE(?cmSN,"NOT BOUND") != COALESCE(?new_cmSN, "NOT BOUND")
+                                                        || COALESCE(?symbol,"NOT BOUND") != COALESCE(?new_symbol, "NOT BOUND")
+                                                        || COALESCE(?dv,"NOT BOUND") != COALESCE(?new_dv, "NOT BOUND")
+                                                    )
+                                                }
+                                            ]]>
+                                        </sparql>
+                                        <toFile>target/inspection/src-dist-diff.txt</toFile>
+                                    </sparqlQuery>
                                     <sparqlQuery>
                                         <sparql>
                                             <![CDATA[
                                                 SELECT ?unit ?cm ?match ?broader ?deprecated
                                                 WHERE {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ?unit a qudt:Unit .
                                                         OPTIONAL {
                                                             ?unit qudt:deprecated ?deprecated .
@@ -438,7 +497,7 @@
                                         <sparql>
                                             <![CDATA[
                                                 SELECT distinct ?unit ?possibleBase ?desc ?dv ?cm where {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ?unit
                                                             a qudt:Unit ;
                                                             qudt:conversionMultiplier ?cm ;
@@ -480,7 +539,7 @@
                                         <sparql>
                                             <![CDATA[
                                                 SELECT * where {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ?unit
                                                             qudt:conversionMultiplier ?cm ;
                                                             qudt:scalingOf ?base .
@@ -500,7 +559,7 @@
                                         <sparql>
                                             <![CDATA[
                                                 SELECT * where {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ?unit
                                                             qudt:conversionMultiplier ?cm ;
                                                             qudt:scalingOf ?base .
@@ -908,6 +967,12 @@
                                     </files>
                                     <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                 </add>
+                                <add>
+                                    <files>
+                                        <include>target/dist/schema/**/*.ttl</include>
+                                    </files>
+                                    <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
+                                </add>
                                 <when>
                                     <message>Checking if we have at least the dist units file</message>
                                     <sparqlAsk>
@@ -965,7 +1030,11 @@
                                                 }
                                             }
                                             WHERE {
+                                                GRAPH <dist:schema:SCHEMA_QUDT_NoOWL.ttl> {
+                                                        ?type rdfs:subClassOf+ qudt:Unit
+                                                }
                                                 GRAPH <src:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    ?unit a ?type .
                                                     OPTIONAL{
                                                         ?unit qudt:conversionMultiplier ?cm
                                                     }
@@ -978,7 +1047,6 @@
                                                     OPTIONAL {
                                                         ?unit qudt:hasDimensionVector ?dv
                                                     }
-                                                    FILTER(BOUND(?unit))
                                                 }
                                                 GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                     OPTIONAL{
@@ -993,7 +1061,6 @@
                                                     OPTIONAL {
                                                         ?unit qudt:hasDimensionVector ?new_dv
                                                     }
-                                                    FILTER(BOUND(?unit))
                                                 }
                                             }
                                         ]]>
@@ -1041,6 +1108,12 @@
                                             <include>target/work/vocab/**/*.ttl</include>
                                         </files>
                                         <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
+                                    </add>
+                                    <add>
+                                        <files>
+                                            <include>target/work/schema/**/*.ttl</include>
+                                        </files>
+                                        <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
                                     </add>
 
                                     <sparqlUpdate>
@@ -1772,7 +1845,11 @@
                                         <sparqlAsk>
                                             <![CDATA[
                                                 ASK WHERE {
+                                                    GRAPH <dist:schema:SCHEMA_QUDT_NoOWL.ttl> {
+                                                            ?type rdfs:subClassOf+ qudt:Unit
+                                                    }
                                                     GRAPH <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit a ?type .
                                                         OPTIONAL{
                                                             ?unit qudt:conversionMultiplier ?cm
                                                         }
@@ -1785,7 +1862,6 @@
                                                         OPTIONAL {
                                                             ?unit qudt:hasDimensionVector ?dv
                                                         }
-                                                        FILTER(BOUND(?unit))
                                                     }
                                                     GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         OPTIONAL{
@@ -1800,17 +1876,12 @@
                                                         OPTIONAL {
                                                             ?unit qudt:hasDimensionVector ?new_dv
                                                         }
-                                                        FILTER(BOUND(?unit))
                                                     }
                                                     FILTER(
-                                                        BOUND(?cm) != BOUND(?new_cm) 
-                                                        || ( BOUND(?cm) && BOUND(?new_cm) && ?cm != ?new_cm )
-                                                        || BOUND(?cmSN) != BOUND(?new_cmSN)
-                                                        || ( BOUND(?cmSN) && BOUND(?new_cmSN) && ?cmSN != ?new_cmSN )
-                                                        || BOUND(?symbol) != BOUND(?new_symbol) 
-                                                        || ( BOUND(?symbol) && BOUND(?new_symbol) && ?symbol != ?new_symbol )
-                                                        || BOUND(?dv) != BOUND(?new_dv) 
-                                                        || ( BOUND(?dv) && BOUND(?new_dv) && ?dv != ?new_dv )
+                                                        COALESCE(?cm,"NOT BOUND") != COALESCE(?new_cm, "NOT BOUND")
+                                                        || COALESCE(?cmSN,"NOT BOUND") != COALESCE(?new_cmSN, "NOT BOUND")
+                                                        || COALESCE(?symbol,"NOT BOUND") != COALESCE(?new_symbol, "NOT BOUND")
+                                                        || COALESCE(?dv,"NOT BOUND") != COALESCE(?new_dv, "NOT BOUND")
                                                     )
                                                 }
                                             ]]>
