@@ -44,9 +44,24 @@ jobs:
             echo "Sources need formatting, we'll do that now"
           fi
 
-      # Apply formatting (changelog was touched)
+      # run mvn install,
+      # if there are problems, try mvn -Pfix install
+      # then run mvn install again
+      # try that up to three times
       - name: Apply formatting
-        run: mvn -Pfix install
+        run: |
+          attempt=0
+          while true; do
+            if mvn install; then
+              break
+            fi
+            if [ $attempt -ge 3 ]; then
+              echo "Failed to fix formatting after 3 attempts."
+              exit 1
+            fi
+            mvn -Pfix install
+            attempt=$((attempt + 1))
+          done
 
       # Commit changes
       - name: Commit changes
