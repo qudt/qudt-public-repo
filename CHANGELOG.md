@@ -42,6 +42,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - Set conversion multiplier for any unit that does not have one to 0.0 at the end of the build process
   - Every unit now has a conversion multiplier
   - Certain consistency problems can now be fixed in the source with the `fixSrc` pipeline (`mvn rdfio:pipeline@fixSrc`)
+  - Replaced references to deprecated concepts with the replacement concepts
 - Descriptions
   - Changed "Thermal heat capacity" to "total energy per unit mass, commonly known as specific enthalpy" for unit:BTU_TH-PER-LB
   - Changed "Thermal heat capacity" to "total energy per unit mass, commonly known as specific enthalpy" for unit:J-PER-KiloGM
@@ -76,6 +77,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - `unit:MicroCi` (new unit: `unit:MicroCI`)
 - `unit:MilliCi` (new unit: `unit:MilliCI`)
 - `unit:CAL_15_DEG_C` (new unit: `unit:CAL_15DEG_C`)
+- `quantitykind:ConductivityVariance_NEON` (replacement: `quantitykind:ConductivityVariance`)
+- `quantitykind:MolarFluxDensityVariance_NEON` (replacement: `quantitykind:MolarFluxDensityVariance`)
+- `quantitykind:TemperatureVariance_NEON` (replacement: `quantitykind:TemperatureVariance`)
 
 ## [3.1.3] - 2025-06-26
 
