@@ -89,7 +89,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - `unit:FLOPS` which is implied by e.g `unit:TeraFLOPS`
   - `unit:Ci` (deprecated) which is implied by e.g. now-deprecated `unit:KiloCi`
 - New Profile System
-    - Early WIP at this point. **TODO**: update this description when done
+  - Early WIP at this point. **TODO**: update this description when done
 
 ### Changed
 

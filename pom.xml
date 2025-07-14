@@ -2557,19 +2557,19 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>profilePipeline</id>
+                        <id>profile</id>
                         <goals><goal>pipeline</goal></goals>
                         <phase>generate-test-resources</phase>
                         <configuration>
                             <pipeline>
-                                <id>profilePipeline</id>
+                                <id>profile</id>
                                 <steps>
                                     <add>
                                         <files>
                                             <include>target/dist/**/*.ttl</include>
                                             <exclude>target/dist/profile/**/*.ttl</exclude>
                                         </files>
-                                        <toGraphsPattern>target:${name}</toGraphsPattern>
+                                        <toGraphsPattern>dist:${name}</toGraphsPattern>
                                     </add>
 
                                     <!-- TODO: iterate over profile names, use in paths/graph names -->
@@ -2582,79 +2582,201 @@
                                         <var>profileName</var>
                                         <body>
                                             <add>
+                                                <file>src/build/profile/default-profile-inference-config.ttl</file>
                                                 <file>src/main/profile/${profileName}/profile-config.ttl</file>
                                                 <toGraph>config:${profileName}</toGraph>
                                             </add>
-                                            <sparqlQuery>
-                                                <message>
-                                                        NOTE: This query is used for debugging/designing the update in the next step and will
-                                                              be removed in the final version of this pipeline
-                                                </message>
-                                                <sparql>
-                                                    <![CDATA[
-                                                        SELECT distinct ?targetFile ?targetGraph ?profileTargetFile ?profileTargetGraph
+                                            <until>
+                                                <indexVar>iteration</indexVar>
+                                                <message>Inferring implied included resources according to the profile's inference configuration</message>
+                                                <body>
+                                                    <clear>
+                                                        <graph>inferred:profileIncludes</graph>
+                                                        <graph>validation:resourcesToExclude</graph>
+                                                    </clear>
+                                                    <sparqlQuery>
+                                                        <message>Inferring included profile resources</message>
+                                                        <sparql>
+                                                            <![CDATA[
+                                                        PREFIX rdfio: <https://github.com/qudtlib/rdfio/>
+                                                        SELECT DISTINCT *
                                                          WHERE {
-                                                            {
+                                                            BIND(IRI(CONCAT("config:", ?profileName)) as ?profileGraph)
+                                                            GRAPH ?profileGraph {
+                                                                ?profile
+                                                                    a qudt:Profile ;
+                                                                    qudt:includes ?includedResource ;
+                                                                    qudt:hasInferenceConfiguration ?inferenceConfig .
                                                                 {
-                                                                    # finds the graphs we loaded the target/dist files into
-                                                                    SELECT DISTINCT ?targetGraph ?targetFile
-                                                                    WHERE {
-                                                                        GRAPH <rdfio:pipeline:metadata> {
-                                                                            ?targetFile
-                                                                                <http://qudtlib.org/rdfio/loadsInto>
-                                                                                    ?targetGraph .
-                                                                            FILTER(STRSTARTS(STR(?targetGraph),"target:"))
-                                                                        }
-
-                                                                    }
-                                                                }
-                                                                BIND(IRI(CONCAT("config:", ?profileName)) as ?profileGraph)
-                                                                BIND(IRI(CONCAT(?profileName,":",STR(?targetGraph))) as ?profileTargetGraph)
-                                                                BIND(IRI(REPLACE(STR(?targetFile), "file://target/dist/", CONCAT("file://target/dist/profile/",?profileName,"/"))) AS ?profileTargetFile)
-                                                                GRAPH ?profileGraph {
-                                                                    ?prof
-                                                                        a qudt:Profile ;
-                                                                        qudt:includes ?s .
+                                                                    # support single-property path
+                                                                    ?inferenceConfig qudt:includesViaPath ?includingPath .
+                                                                    FILTER (isIRI(?includingPath))
+                                                                } UNION {
+                                                                    # support property-sequence-of-2 path
+                                                                    ?inferenceConfig qudt:includesViaPath ?includingPath .
+                                                                    ?includingPath
+                                                                        rdf:first ?includingProp1 ;
+                                                                        rdf:rest ?_r1 .
+                                                                    ?_r1
+                                                                        rdf:first ?includingProp2 ;
+                                                                        rdf:rest rdf:nil .
                                                                 }
                                                             }
-                                                            GRAPH ?targetGraph {
-                                                                ?s ?p ?o
+
+                                                            FILTER NOT EXISTS {
+                                                                GRAPH ?profileGraph {
+                                                                # don't infer if already included
+                                                                    ?profile qudt:includes ?inferredResource
+                                                                }
+                                                            }
+
+                                                            GRAPH ?someGraph {
+                                                                ?includedResource ?includingPath ?inferredResource
                                                             }
 
                                                         }
                                                     ]]>
-                                                </sparql>
-                                            </sparqlQuery>
+                                                        </sparql>
+                                                        <toFile>target/profilegen/${profileName}/inspection/inferring-${iteration}.txt</toFile>
+                                                    </sparqlQuery>
+                                                    <sparqlUpdate>
+                                                        <message>Inferring included profile resources</message>
+                                                        <sparql>
+                                                            <![CDATA[
+                                                        PREFIX rdfio: <https://github.com/qudtlib/rdfio/>
+                                                        INSERT {
+                                                          GRAPH <inferred:profileIncludes> {
+                                                            ?profile qudt:includes ?inferredResource
+                                                          }
+                                                        } WHERE {
+                                                            BIND(IRI(CONCAT("config:", ?profileName)) as ?profileGraph)
+                                                            GRAPH ?profileGraph {
+                                                                ?profile
+                                                                    a qudt:Profile ;
+                                                                    qudt:includes ?includedResource ;
+                                                                    qudt:hasInferenceConfiguration ?inferenceConfig .
+                                                                {
+                                                                    # support single-property path
+                                                                    ?inferenceConfig qudt:includesViaPath ?includingPath .
+                                                                    FILTER (isIRI(?includingPath))
+                                                                } UNION {
+                                                                    # support property-sequence-of-2 path
+                                                                    ?inferenceConfig qudt:includesViaPath ?includingPath .
+                                                                    ?includingPath
+                                                                        rdf:first ?includingProp1 ;
+                                                                        rdf:rest ?_r1 .
+                                                                    ?_r1
+                                                                        rdf:first ?includingProp2 ;
+                                                                        rdf:rest rdf:nil .
+                                                                }
+                                                            }
+
+                                                            FILTER NOT EXISTS {
+                                                                GRAPH ?profileGraph {
+                                                                    # don't infer if already included
+                                                                    ?profile qudt:includes ?inferredResource
+                                                                }
+                                                            }
+
+                                                            FILTER NOT EXISTS {
+                                                                GRAPH ?profileGraph {
+                                                                    # don't infer if actively blocked
+                                                                    ?profile qudt:hasInferenceConfiguration/qudt:blocksIncludesViaPath ?includingPath.
+                                                                }
+                                                            }
+
+                                                            GRAPH ?someGraph {
+                                                                ?includedResource ?includingPath ?inferredResource
+                                                            }
+
+                                                        }
+                                                    ]]>
+                                                        </sparql>
+                                                    </sparqlUpdate>
+
+                                                    <sparqlValidate>
+                                                        <message>Removing entities that do not match the profile's SHACL shapes</message>
+                                                        <shapes>
+                                                            <graph>config:${profileName}</graph>
+                                                        </shapes>
+                                                        <data>
+                                                            <!-- TODO: somehow compute profile overlay that contains the currently selected data only -->
+                                                            CONTINUE HERE
+                                                            <graphs>
+                                                                <include>dist:schema</include>
+                                                            </graphs>
+                                                        </data>
+                                                        <validationReport>
+                                                            <graph>validation:resourcesToExclude</graph>
+                                                            <file>target/profilegen/${profileName}/resources-to-exclude-${iteration}.ttl</file>
+                                                        </validationReport>
+                                                    </sparqlValidate>
+
+                                                    <write>
+                                                        <graph>inferred:profileIncludes</graph>
+                                                        <toFile>target/profilegen/${profileName}/inferred-profile-includes-${iteration}.ttl</toFile>
+                                                    </write>
+                                                    <add>
+                                                        <graph>inferred:profileIncludes</graph>
+                                                        <toGraph>config:${profileName}</toGraph>
+                                                    </add>
+                                                    <sparqlUpdate>
+                                                        <![CDATA[
+                                                            DELETE {
+
+                                                            }
+                                                            INSERT {
+
+                                                            }
+                                                            WHERE {
+                                                                GRAPH <inferred:profile
+                                                            }
+                                                        ]]>
+                                                    </sparqlUpdate>
+
+                                                </body>
+                                                <sparqlAsk>
+                                                    <![CDATA[
+                                                        ASK WHERE {
+                                                            FILTER NOT EXISTS {
+                                                                GRAPH <inferred:profileIncludes> {
+                                                                    ?s ?p ?o
+                                                                }
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparqlAsk>
+                                            </until>
                                             <sparqlUpdate>
+                                                <message>copy included resources to profile graphs and configure their output files</message>
                                                 <sparql>
                                                     <![CDATA[
+                                                        PREFIX rdfio: <https://github.com/qudtlib/rdfio/>
                                                         INSERT {
-                                                          GRAPH ?profileTargetGraph {
+                                                          GRAPH ?profileDistGraph {
                                                             ?res ?p ?o .
+                                                            ?res ?p2 ?blank .
+                                                            ?blank ?bp ?bo .
                                                           }
                                                           GRAPH <rdfio:pipeline:metadata> {
-                                                                    ?profileTargetFile
-                                                                        <http://qudtlib.org/rdfio/loadsInto>
-                                                                            ?profileTargetGraph .
+                                                                    ?profileDistFile rdfio:loadsInto ?profileDistGraph .
                                                           }
                                                         } WHERE {
                                                             {
                                                                 {
                                                                     # finds the graphs we loaded the target/dist files into
-                                                                    SELECT DISTINCT ?targetGraph ?targetFile
+                                                                    SELECT DISTINCT ?distGraph ?distFile
                                                                     WHERE {
                                                                         GRAPH <rdfio:pipeline:metadata> {
-                                                                            ?targetFile
-                                                                                <http://qudtlib.org/rdfio/loadsInto>
-                                                                                    ?targetGraph .
-                                                                            FILTER(STRSTARTS(STR(?targetGraph),"target:"))
+                                                                            ?distFile rdfio:loadsInto ?distGraph .
+                                                                            FILTER(STRSTARTS(STR(?distGraph),"dist:"))
                                                                         }
 
                                                                     }
                                                                 }
                                                                 BIND(IRI(CONCAT("config:", ?profileName)) as ?profileGraph)
-                                                                BIND(IRI(CONCAT(?profileName,":",STR(?targetGraph))) as ?profileTargetGraph)
-                                                                BIND(IRI(REPLACE(STR(?targetFile), "file://target/dist/", CONCAT("file://target/dist/profile/",?profileName,"/"))) AS ?profileTargetFile)
+                                                                BIND(IRI(CONCAT(?profileName,":",STR(?distGraph))) as ?profileDistGraph)
+                                                                BIND(IRI(REPLACE(STR(?distFile), "file://target/dist/", CONCAT("file://target/dist/profile/",?profileName,"/"))) AS ?profileDistFile)
                                                                 GRAPH ?profileGraph {
                                                                     ?prof
                                                                         a qudt:Profile ;
@@ -2666,9 +2788,15 @@
                                                                         qudt:excludes ?res
                                                                 }
                                                             }
-                                                            GRAPH ?targetGraph {
+                                                            GRAPH ?distGraph {
                                                                 {
-                                                                    ?res ?p ?o
+                                                                    {
+                                                                        ?res ?p ?o
+                                                                    } UNION {
+                                                                        ?res ?p2 ?blank .
+                                                                        ?blank ?bp ?bo .
+                                                                        FILTER (ISBLANK(?blank))
+                                                                    }
                                                                 }
                                                             }
 
@@ -2676,9 +2804,24 @@
                                                     ]]>
                                                 </sparql>
                                             </sparqlUpdate>
+                                            <sparqlQuery>
+                                                <sparql>
+                                                    SELECT DISTINCT ?includedEntity ?type WHERE {
+                                                        BIND(IRI(CONCAT("config:", ?profileName)) as ?profileGraph)
+                                                        GRAPH ?profileGraph {
+                                                            ?profile a qudt:Profile ;
+                                                                qudt:includes ?includedEntity .
+                                                        }
+                                                        GRAPH ?any {
+                                                            ?includedEntity a ?type
+                                                        }
+                                                    } ORDER BY ?type ?includedEntity
+                                                </sparql>
+                                                <toFile>target/profilegen/${profileName}/inspection/included-entities.txt</toFile>
+                                            </sparqlQuery>
                                             <write>
                                                 <graphs>
-                                                    <include>${profileName}:target:*</include>
+                                                    <include>${profileName}:dist:*</include>
                                                 </graphs>
                                             </write>
                                         </body>
