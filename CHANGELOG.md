@@ -85,6 +85,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - `quantitykind:ConductivityVariance_NEON` (replacement: `quantitykind:ConductivityVariance`)
 - `quantitykind:MolarFluxDensityVariance_NEON` (replacement: `quantitykind:MolarFluxDensityVariance`)
 - `quantitykind:TemperatureVariance_NEON` (replacement: `quantitykind:TemperatureVariance`)
+- Deprecated quantity kinds that represented the union of several other quantity kinds. Treatment of alternatives should be handled by applications.
 
 ## [3.1.3] - 2025-06-26
 
