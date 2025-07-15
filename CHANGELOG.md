@@ -32,6 +32,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
     - `qudt:conversionMulitplierSN`
     - `qudt:hasDimensionVector`
     - `qudt:symbol`
+    - `qudt:hasQuantityKind`
+    - `qudt:hasReferenceQuantityKind`
+    - `qudt:systemDerivedQuantityKind`
+    - `skos:broader`
+    - `rdfs:seeAlso`
   - Improved consistency checks
     - Checks for dimension vectors based on factors / scalingOf
     - Checks for missing deprecation triples
@@ -41,7 +46,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - Set conversion multiplier 1.0 on each currency unit (in `unit:` namespace)
   - Set conversion multiplier for any unit that does not have one to 0.0 at the end of the build process
   - Every unit now has a conversion multiplier
-  - Certain consistency problems can now be fixed in the source with the `fixSrc` pipeline (`mvn rdfio:pipeline@fixSrc`)
+  - Certain consistency problems can now be fixed in the source with the `fix-src` pipeline (`mvn rdfio:pipeline@fix-src`)
   - Replaced references to deprecated concepts with the replacement concepts
 - Descriptions
   - Changed "Thermal heat capacity" to "total energy per unit mass, commonly known as specific enthalpy" for unit:BTU_TH-PER-LB
