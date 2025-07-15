@@ -297,7 +297,7 @@
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>rdfio-maven-plugin</artifactId>
-                <version>1.5.1</version>
+                <version>1.5.3</version>
                 <executions>
                     <execution>
                         <!--
@@ -682,6 +682,13 @@
                                                 (3 2          9)
                                                 (3 3          27)
                                                 (1.2 2       1.44)
+                                                (1234567890123456789012345678901234567890 2  1524157875323883675049535156256668000000000000000000000000000000000000000000000.0)
+                                                (0.000000000000000000000000000000000000000000000000000001 3 0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001)
+                                                (0 -0 1)
+                                                (-0 -0 1)
+                                                (0 -1 0)
+                                                (2 -1 0.5)
+
                                             }
                                             BIND(nf:decimal.pow(?base, ?exp,34) AS ?actualOutput)
                                             FILTER(BOUND(?actualOutput) != BOUND(?expectedOutput) || ?actualOutput != ?expectedOutput)
@@ -957,9 +964,9 @@
                                 </shaclFunctions>
                                 <add>
                                     <files>
-                                        <include>src/main/rdf/vocab/unit/*.ttl</include>
+                                        <include>src/main/rdf/vocab/**/*.ttl</include>
                                     </files>
-                                    <toGraphsPattern>src:${name}</toGraphsPattern>
+                                    <toGraphsPattern>src:vocab:${name}</toGraphsPattern>
                                 </add>
                                 <add>
                                     <files>
@@ -1009,59 +1016,93 @@
 
 
                                 <sparqlUpdate>
+                                    <message>deleting selected property values from src that do not exist in dist</message>
                                     <sparql>
                                         <![CDATA[
                                             DELETE {
-                                                GRAPH <src:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                    ?unit
-                                                        qudt:conversionMultiplier ?cm ;
-                                                        qudt:conversionMultiplierSN ?cmSN ;
-                                                        qudt:symbol ?symbol ;
-                                                        qudt:dimensionVector ?dv ;
-                                                }
-                                            }
-                                            INSERT {
-                                                GRAPH <src:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                    ?unit
-                                                        qudt:conversionMultiplier ?new_cm;
-                                                        qudt:conversionMultiplierSN ?new_cmSN ;
-                                                        qudt:symbol ?new_symbol ;
-                                                        qudt:hasDimensionVector ?new_dv ;
-                                                }
+                                              GRAPH ?srcGraph {
+                                                ?entity ?propertyToUpdate ?value
+                                              }
                                             }
                                             WHERE {
-                                                GRAPH <dist:schema:SCHEMA_QUDT_NoOWL.ttl> {
-                                                        ?type rdfs:subClassOf+ qudt:Unit
+                                              VALUES ?propertyToUpdate {
+                                                qudt:conversionMultiplier
+                                                qudt:conversionMultiplierSN
+                                                qudt:symbol
+                                                qudt:hasDimensionVector
+                                                qudt:hasQuantityKind
+                                                qudt:hasReferenceQuantityKind
+                                                qudt:systemDerivedQuantityKind
+                                                skos:broader
+                                                rdfs:seeAlso
+                                              }
+                                              VALUES (?srcGraph ?distGraph) {
+                                                ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                              }
+
+                                              GRAPH ?srcGraph {
+                                                ?entity ?propertyToUpdate ?value
+                                              }
+                                              FILTER NOT EXISTS {
+                                                GRAPH ?distGraph {
+                                                  ?entity ?propertyToUpdate ?value
                                                 }
-                                                GRAPH <src:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                    ?unit a ?type .
-                                                    OPTIONAL{
-                                                        ?unit qudt:conversionMultiplier ?cm
-                                                    }
-                                                    OPTIONAL {
-                                                        ?unit qudt:conversionMultiplierSN ?cmSN
-                                                    }
-                                                    OPTIONAL {
-                                                        ?unit qudt:symbol ?symbol
-                                                    }
-                                                    OPTIONAL {
-                                                        ?unit qudt:hasDimensionVector ?dv
-                                                    }
+                                              }
+                                            }
+                                        ]]>
+                                    </sparql>
+                                </sparqlUpdate>
+                                <sparqlUpdate>
+                                    <message>copying selected property values from dest to src that do not exist in src</message>
+                                    <sparql>
+                                        <![CDATA[
+                                            INSERT {
+                                              GRAPH ?srcGraph {
+                                                ?entity ?propertyToUpdate ?value
+                                              }
+                                            }
+                                            WHERE {
+                                              VALUES ?propertyToUpdate {
+                                                qudt:conversionMultiplier
+                                                qudt:conversionMultiplierSN
+                                                qudt:symbol
+                                                qudt:hasDimensionVector
+                                                qudt:hasQuantityKind
+                                                qudt:hasReferenceQuantityKind
+                                                qudt:systemDerivedQuantityKind
+                                                skos:broader
+                                                rdfs:seeAlso
+                                              }
+                                              VALUES (?srcGraph ?distGraph) {
+                                                ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                              }
+
+                                              GRAPH ?distGraph {
+                                                ?entity ?propertyToUpdate ?value
+                                              }
+                                              FILTER NOT EXISTS {
+                                                GRAPH ?srcGraph {
+                                                  ?entity ?propertyToUpdate ?value
                                                 }
-                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                    OPTIONAL{
-                                                        ?unit qudt:conversionMultiplier ?new_cm
-                                                    }
-                                                    OPTIONAL {
-                                                        ?unit qudt:conversionMultiplierSN ?new_cmSN
-                                                    }
-                                                    OPTIONAL {
-                                                        ?unit qudt:symbol ?new_symbol
-                                                    }
-                                                    OPTIONAL {
-                                                        ?unit qudt:hasDimensionVector ?new_dv
-                                                    }
-                                                }
+                                              }
                                             }
                                         ]]>
                                     </sparql>
@@ -1072,10 +1113,9 @@
 
 
 
-
                                 <write>
                                     <graphs>
-                                        <include>src:*</include>
+                                        <include>src:vocab:*</include>
                                     </graphs>
                                 </write>
                             </steps>
@@ -1827,6 +1867,31 @@
                                         ]]>
                                         </sparql>
                                     </sparqlUpdate>
+
+                                    <sparqlUpdate>
+                                        <message>Replace deprecated entities</message>
+                                        <sparql>
+                                            DELETE {
+                                                GRAPH ?graph {
+                                                    ?s ?p $this .
+                                                }
+                                            }
+                                            INSERT {
+                                                GRAPH ?graph {
+                                                    ?s ?p ?replacement .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH ?defGraph {
+                                                    $this qudt:deprecated true .
+                                                    $this dcterms:isReplacedBy ?replacement .
+                                                }
+                                                GRAPH ?graph {
+                                                    ?s ?p $this .
+                                                }
+                                            }
+                                        </sparql>
+                                    </sparqlUpdate>
                                     <add>
                                         <files>
                                             <include>src/main/rdf/vocab/**/*.ttl</include>
@@ -1845,67 +1910,196 @@
                                         <message>Fail the build if the src has to be updated</message>
                                         <sparqlAsk>
                                             <![CDATA[
-                                                ASK WHERE {
-                                                    GRAPH <dist:schema:SCHEMA_QUDT_NoOWL.ttl> {
-                                                            ?type rdfs:subClassOf+ qudt:Unit
-                                                    }
-                                                    GRAPH <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        ?unit a ?type .
-                                                        OPTIONAL{
-                                                            ?unit qudt:conversionMultiplier ?cm
+                                                ASK
+                                                WHERE
+                                                {
+                                                  {
+                                                      VALUES ?propertyToUpdate {
+                                                        qudt:conversionMultiplier
+                                                        qudt:conversionMultiplierSN
+                                                        qudt:symbol
+                                                        qudt:hasDimensionVector
+                                                        qudt:hasQuantityKind
+                                                        qudt:hasReferenceQuantityKind
+                                                        qudt:systemDerivedQuantityKind
+                                                        skos:broader
+                                                        rdfs:seeAlso
+                                                      }
+                                                      VALUES (?srcGraph ?distGraph) {
+                                                        ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                      }
+
+                                                      GRAPH ?distGraph {
+                                                        ?entity ?propertyToUpdate ?value
+                                                      }
+                                                      FILTER NOT EXISTS {
+                                                        GRAPH ?srcGraph {
+                                                          ?entity ?propertyToUpdate ?value
                                                         }
-                                                        OPTIONAL {
-                                                            ?unit qudt:conversionMultiplierSN ?cmSN
+                                                      }
+                                                  }
+                                                  UNION
+                                                  {
+                                                      VALUES ?propertyToUpdate {
+                                                        qudt:conversionMultiplier
+                                                        qudt:conversionMultiplierSN
+                                                        qudt:symbol
+                                                        qudt:hasDimensionVector
+                                                        qudt:hasQuantityKind
+                                                        qudt:hasReferenceQuantityKind
+                                                        qudt:systemDerivedQuantityKind
+                                                        skos:broader
+                                                        rdfs:seeAlso
+                                                      }
+                                                      VALUES (?srcGraph ?distGraph) {
+                                                        ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                      }
+
+                                                      GRAPH ?srcGraph {
+                                                        ?entity ?propertyToUpdate ?value
+                                                      }
+                                                      FILTER NOT EXISTS {
+                                                        GRAPH ?distGraph {
+                                                          ?entity ?propertyToUpdate ?value
                                                         }
-                                                        OPTIONAL {
-                                                            ?unit qudt:symbol ?symbol
-                                                        }
-                                                        OPTIONAL {
-                                                            ?unit qudt:hasDimensionVector ?dv
-                                                        }
-                                                    }
-                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        OPTIONAL{
-                                                            ?unit qudt:conversionMultiplier ?new_cm
-                                                        }
-                                                        OPTIONAL {
-                                                            ?unit qudt:conversionMultiplierSN ?new_cmSN
-                                                        }
-                                                        OPTIONAL {
-                                                            ?unit qudt:symbol ?new_symbol
-                                                        }
-                                                        OPTIONAL {
-                                                            ?unit qudt:hasDimensionVector ?new_dv
-                                                        }
-                                                    }
-                                                    FILTER(
-                                                        COALESCE(?cm,"NOT BOUND") != COALESCE(?new_cm, "NOT BOUND")
-                                                        || COALESCE(?cmSN,"NOT BOUND") != COALESCE(?new_cmSN, "NOT BOUND")
-                                                        || COALESCE(?symbol,"NOT BOUND") != COALESCE(?new_symbol, "NOT BOUND")
-                                                        || COALESCE(?dv,"NOT BOUND") != COALESCE(?new_dv, "NOT BOUND")
-                                                    )
+                                                      }
+                                                  }
                                                 }
                                             ]]>
                                         </sparqlAsk>
 
                                         <body>
-                                            <stop>
-                                                <message>
-                                                    Data errors in src/main/rdf/dist!
+                                            <sparqlQuery>
+                                                <message>Data errors detected in src - writing errors to target/src-errors/errors.txt</message>
+                                                <toFile>target/src-errors/errors.txt</toFile>
+                                                <sparql>
+                                                    <![CDATA[
+                                                          SELECT ?srcGraph ?entity ?propertyToUpdate ?value ?action
+                                                          WHERE {
+                                                          {
+                                                              BIND("add to src" as ?action)
+                                                              VALUES ?propertyToUpdate {
+                                                                qudt:conversionMultiplier
+                                                                qudt:conversionMultiplierSN
+                                                                qudt:symbol
+                                                                qudt:hasDimensionVector
+                                                                qudt:hasQuantityKind
+                                                                qudt:hasReferenceQuantityKind
+                                                                qudt:systemDerivedQuantityKind
+                                                                skos:broader
+                                                                rdfs:seeAlso
+                                                              }
+                                                              VALUES (?srcGraph ?distGraph) {
+                                                                ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                              }
 
-                                                    to fix the errors in `src`, do NOT run mvn clean - the
-                                                    current build output is needed!
-                                                    Just run:
+                                                              GRAPH ?distGraph {
+                                                                ?entity ?propertyToUpdate ?value
+                                                              }
+                                                              FILTER NOT EXISTS {
+                                                                GRAPH ?srcGraph {
+                                                                  ?entity ?propertyToUpdate ?value
+                                                                }
+                                                              }
+                                                          }
+                                                          UNION
+                                                          {
+                                                              BIND("delete from src" as ?action)
+                                                              VALUES ?propertyToUpdate {
+                                                                qudt:conversionMultiplier
+                                                                qudt:conversionMultiplierSN
+                                                                qudt:symbol
+                                                                qudt:hasDimensionVector
+                                                                qudt:hasQuantityKind
+                                                                qudt:hasReferenceQuantityKind
+                                                                qudt:systemDerivedQuantityKind
+                                                                skos:broader
+                                                                rdfs:seeAlso
+                                                              }
+                                                              VALUES (?srcGraph ?distGraph) {
+                                                                ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                              }
 
-                                                    mvn -Pfix install
+                                                              GRAPH ?srcGraph {
+                                                                ?entity ?propertyToUpdate ?value
+                                                              }
+                                                              FILTER NOT EXISTS {
+                                                                GRAPH ?distGraph {
+                                                                  ?entity ?propertyToUpdate ?value
+                                                                }
+                                                              }
+                                                          }
+                                                      } order by ?srcGraph ?entity ?propertyToUpdate ?action
+                                                    ]]>
+                                                </sparql>
+
+                                            </sparqlQuery>
+                                            <when>
+                                                <message>Data errors detected in src - failing the build unless we are running with 'fix' profile</message>
+                                                <sparqlAsk>
+                                                    ASK WHERE {
+                                                        BIND("${fix.profile.is.inactive}" as ?fixProfileStatus)
+                                                        FILTER(?fixProfileStatus != "fix.profile.is.active")
+                                                    }
+                                                </sparqlAsk>
+                                                <body>
+                                                    <stop>
+                                                        <message>
+
+                                                            Data errors in src/main/rdf/dist!
+
+                                                            to fix the errors in `src`, do NOT run mvn clean - the
+                                                            current build output is needed!
+                                                            Just run:
+
+                                                            mvn -Pfix install
 
 
-                                                    Please review the changes that are made to the sources.
-                                                    There may be more information on individual changes in
+                                                            Please review the changes that are made to the sources.
+                                                            There may be more information on individual changes in
 
-                                                    target/fix/[topic]/delete-[iteration].ttl
-                                                </message>
-                                            </stop>
+                                                            target/fix/[topic]/delete-[iteration].ttl
+                                                        </message>
+                                                    </stop>
+                                                </body>
+
+                                            </when>
                                         </body>
                                     </when>
 
@@ -2069,6 +2263,17 @@
                     </markdown>
 
                     <formats>
+                        <format>
+                            <includes>
+                                <include>src/main/rdf/**/*.ttl</include>
+                                <include>target/dist/**/*.ttl</include>
+                            </includes>
+                            <replaceRegex>
+                                <name>fix turtle-formatter newlines on windows and mac</name>
+                                <searchRegex>(\\r)+$</searchRegex>
+                                <replacement></replacement>
+                            </replaceRegex>
+                        </format>
                         <!--
                         does our placeholder replacements using the maven properties
                         that were set using the groovy plugin
@@ -2353,25 +2558,28 @@
                 runs all src modifications (inferences and formatting) before anything else in the build
              -->
             <id>fix</id>
+            <properties>
+                <fix.profile.is.inactive>fix.profile.is.active</fix.profile.is.inactive>
+            </properties>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>com.diffplug.spotless</groupId>
-                        <artifactId>spotless-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>reformat-src</id>
-                                <phase>initialize</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
                         <executions>
                             <execution>
                                 <id>fix-src</id>
-                                <phase>validate</phase>
+                                <phase>generate-test-sources</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.diffplug.spotless</groupId>
+                        <artifactId>spotless-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>reformat-src</id>
+                                <phase>generate-test-sources</phase>
                             </execution>
                         </executions>
                     </plugin>
