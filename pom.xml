@@ -1885,67 +1885,196 @@
                                         <message>Fail the build if the src has to be updated</message>
                                         <sparqlAsk>
                                             <![CDATA[
-                                                ASK WHERE {
-                                                    GRAPH <dist:schema:SCHEMA_QUDT_NoOWL.ttl> {
-                                                            ?type rdfs:subClassOf+ qudt:Unit
-                                                    }
-                                                    GRAPH <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        ?unit a ?type .
-                                                        OPTIONAL{
-                                                            ?unit qudt:conversionMultiplier ?cm
+                                                ASK
+                                                WHERE
+                                                {
+                                                  {
+                                                      VALUES ?propertyToUpdate {
+                                                        qudt:conversionMultiplier
+                                                        qudt:conversionMultiplierSN
+                                                        qudt:symbol
+                                                        qudt:hasDimensionVector
+                                                        qudt:hasQuantityKind
+                                                        qudt:hasReferenceQuantityKind
+                                                        qudt:systemDerivedQuantityKind
+                                                        skos:broader
+                                                        rdfs:seeAlso
+                                                      }
+                                                      VALUES (?srcGraph ?distGraph) {
+                                                        ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                      }
+
+                                                      GRAPH ?distGraph {
+                                                        ?entity ?propertyToUpdate ?value
+                                                      }
+                                                      FILTER NOT EXISTS {
+                                                        GRAPH ?srcGraph {
+                                                          ?entity ?propertyToUpdate ?value
                                                         }
-                                                        OPTIONAL {
-                                                            ?unit qudt:conversionMultiplierSN ?cmSN
+                                                      }
+                                                  }
+                                                  UNION
+                                                  {
+                                                      VALUES ?propertyToUpdate {
+                                                        qudt:conversionMultiplier
+                                                        qudt:conversionMultiplierSN
+                                                        qudt:symbol
+                                                        qudt:hasDimensionVector
+                                                        qudt:hasQuantityKind
+                                                        qudt:hasReferenceQuantityKind
+                                                        qudt:systemDerivedQuantityKind
+                                                        skos:broader
+                                                        rdfs:seeAlso
+                                                      }
+                                                      VALUES (?srcGraph ?distGraph) {
+                                                        ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                      }
+
+                                                      GRAPH ?srcGraph {
+                                                        ?entity ?propertyToUpdate ?value
+                                                      }
+                                                      FILTER NOT EXISTS {
+                                                        GRAPH ?distGraph {
+                                                          ?entity ?propertyToUpdate ?value
                                                         }
-                                                        OPTIONAL {
-                                                            ?unit qudt:symbol ?symbol
-                                                        }
-                                                        OPTIONAL {
-                                                            ?unit qudt:hasDimensionVector ?dv
-                                                        }
-                                                    }
-                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        OPTIONAL{
-                                                            ?unit qudt:conversionMultiplier ?new_cm
-                                                        }
-                                                        OPTIONAL {
-                                                            ?unit qudt:conversionMultiplierSN ?new_cmSN
-                                                        }
-                                                        OPTIONAL {
-                                                            ?unit qudt:symbol ?new_symbol
-                                                        }
-                                                        OPTIONAL {
-                                                            ?unit qudt:hasDimensionVector ?new_dv
-                                                        }
-                                                    }
-                                                    FILTER(
-                                                        COALESCE(?cm,"NOT BOUND") != COALESCE(?new_cm, "NOT BOUND")
-                                                        || COALESCE(?cmSN,"NOT BOUND") != COALESCE(?new_cmSN, "NOT BOUND")
-                                                        || COALESCE(?symbol,"NOT BOUND") != COALESCE(?new_symbol, "NOT BOUND")
-                                                        || COALESCE(?dv,"NOT BOUND") != COALESCE(?new_dv, "NOT BOUND")
-                                                    )
+                                                      }
+                                                  }
                                                 }
                                             ]]>
                                         </sparqlAsk>
 
                                         <body>
-                                            <stop>
-                                                <message>
-                                                    Data errors in src/main/rdf/dist!
+                                            <sparqlQuery>
+                                                <message>Data errors detected in src - writing errors to target/src-errors/errors.txt</message>
+                                                <toFile>target/src-errors/errors.txt</toFile>
+                                                <sparql>
+                                                    <![CDATA[
+                                                          SELECT ?srcGraph ?entity ?propertyToUpdate ?value ?action
+                                                          WHERE {
+                                                          {
+                                                              BIND("add to src" as ?action)
+                                                              VALUES ?propertyToUpdate {
+                                                                qudt:conversionMultiplier
+                                                                qudt:conversionMultiplierSN
+                                                                qudt:symbol
+                                                                qudt:hasDimensionVector
+                                                                qudt:hasQuantityKind
+                                                                qudt:hasReferenceQuantityKind
+                                                                qudt:systemDerivedQuantityKind
+                                                                skos:broader
+                                                                rdfs:seeAlso
+                                                              }
+                                                              VALUES (?srcGraph ?distGraph) {
+                                                                ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                              }
 
-                                                    to fix the errors in `src`, do NOT run mvn clean - the
-                                                    current build output is needed!
-                                                    Just run:
+                                                              GRAPH ?distGraph {
+                                                                ?entity ?propertyToUpdate ?value
+                                                              }
+                                                              FILTER NOT EXISTS {
+                                                                GRAPH ?srcGraph {
+                                                                  ?entity ?propertyToUpdate ?value
+                                                                }
+                                                              }
+                                                          }
+                                                          UNION
+                                                          {
+                                                              BIND("delete from src" as ?action)
+                                                              VALUES ?propertyToUpdate {
+                                                                qudt:conversionMultiplier
+                                                                qudt:conversionMultiplierSN
+                                                                qudt:symbol
+                                                                qudt:hasDimensionVector
+                                                                qudt:hasQuantityKind
+                                                                qudt:hasReferenceQuantityKind
+                                                                qudt:systemDerivedQuantityKind
+                                                                skos:broader
+                                                                rdfs:seeAlso
+                                                              }
+                                                              VALUES (?srcGraph ?distGraph) {
+                                                                ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                              }
 
-                                                    mvn -Pfix install
+                                                              GRAPH ?srcGraph {
+                                                                ?entity ?propertyToUpdate ?value
+                                                              }
+                                                              FILTER NOT EXISTS {
+                                                                GRAPH ?distGraph {
+                                                                  ?entity ?propertyToUpdate ?value
+                                                                }
+                                                              }
+                                                          }
+                                                      } order by ?srcGraph ?entity ?propertyToUpdate ?action
+                                                    ]]>
+                                                </sparql>
+
+                                            </sparqlQuery>
+                                            <when>
+                                                <message>Data errors detected in src - failing the build unless we are running with 'fix' profile</message>
+                                                <sparqlAsk>
+                                                    ASK WHERE {
+                                                        BIND("${fix.profile.is.inactive}" as ?fixProfileStatus)
+                                                        FILTER(?fixProfileStatus != "fix.profile.is.active")
+                                                    }
+                                                </sparqlAsk>
+                                                <body>
+                                                    <stop>
+                                                        <message>
+
+                                                            Data errors in src/main/rdf/dist!
+
+                                                            to fix the errors in `src`, do NOT run mvn clean - the
+                                                            current build output is needed!
+                                                            Just run:
+
+                                                            mvn -Pfix install
 
 
-                                                    Please review the changes that are made to the sources.
-                                                    There may be more information on individual changes in
+                                                            Please review the changes that are made to the sources.
+                                                            There may be more information on individual changes in
 
-                                                    target/fix/[topic]/delete-[iteration].ttl
-                                                </message>
-                                            </stop>
+                                                            target/fix/[topic]/delete-[iteration].ttl
+                                                        </message>
+                                                    </stop>
+                                                </body>
+
+                                            </when>
                                         </body>
                                     </when>
 
