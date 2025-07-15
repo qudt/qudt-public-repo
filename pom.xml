@@ -1867,6 +1867,31 @@
                                         ]]>
                                         </sparql>
                                     </sparqlUpdate>
+
+                                    <sparqlUpdate>
+                                        <message>Replace deprecated entities</message>
+                                        <sparql>
+                                            DELETE {
+                                                GRAPH ?graph {
+                                                    ?s ?p $this .
+                                                }
+                                            }
+                                            INSERT {
+                                                GRAPH ?graph {
+                                                    ?s ?p ?replacement .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH ?defGraph {
+                                                    $this qudt:deprecated true .
+                                                    $this dcterms:isReplacedBy ?replacement .
+                                                }
+                                                GRAPH ?graph {
+                                                    ?s ?p $this .
+                                                }
+                                            }
+                                        </sparql>
+                                    </sparqlUpdate>
                                     <add>
                                         <files>
                                             <include>src/main/rdf/vocab/**/*.ttl</include>
