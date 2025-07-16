@@ -33,7 +33,7 @@ WHERE {
 
               # did we find the multiplier?
               BIND(IF(BOUND(?baseMultiplier), "YES", "NO") AS ?multiplierFound)
-              BIND(qfn:exp(?baseMultiplier, ?exponent) AS ?factorContribution)
+              BIND(nf:decimal.pow(?baseMultiplier, ?exponent, 34) AS ?factorContribution)
 
             }
             GROUP BY $this ?actualMultiplier
@@ -90,7 +90,7 @@ WHERE {
             BIND (?baseCM * ?prefixCM as ?rawCalculatedMultiplier)
         }
     }
-    BIND (qfn:decimalRoundToPrecision(?rawCalculatedMultiplier, 34) as ?calculatedMultiplier)
+    BIND (nf:decimal.roundToPrecision(?rawCalculatedMultiplier, 34) as ?calculatedMultiplier)
     BIND (?actualMultiplier - ?calculatedMultiplier as ?diff)
     BIND (IF (?actualMultiplier = 0 , 0.0, ABS(?diff) / ABS(?actualMultiplier)) as ?relDiffAct)
     BIND (IF( ?calculatedMultiplier = 0, 0.0, ABS(?diff) / ABS(?calculatedMultiplier)) as ?relDiffCalc)

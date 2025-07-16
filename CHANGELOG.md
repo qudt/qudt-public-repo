@@ -23,15 +23,34 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Changed
 
 - Build process
+  - Recoverable data errors in `src` are now automatically fixed with the `fix` profile, ie using `mvn -Pfix install`
+    Autocorrection is only possible for units that are either derived or scaled. Derived units are those for which
+    `qudt:hasFactorUnit` triples are generated during the build. Scaled units are those for which `qudt:scalingOf`
+    triples are generated.
+    The following properties will be auto-generated or corrected for such units:
+    - `qudt:conversionMulitplier`
+    - `qudt:conversionMulitplierSN`
+    - `qudt:hasDimensionVector`
+    - `qudt:symbol`
+    - `qudt:hasQuantityKind`
+    - `qudt:hasReferenceQuantityKind`
+    - `qudt:systemDerivedQuantityKind`
+    - `skos:broader`
+    - `rdfs:seeAlso`
   - Improved consistency checks
     - Checks for dimension vectors based on factors / scalingOf
     - Checks for missing deprecation triples
     - Checks for mixing of factors and scalingOf
   - Inference calculations during the build process were sped up by an order of magnitude
   - Dimension vectors for scaled units and derived units can now be inferred
-  - Set conversion multiplier 1.0 on each currency unit (in unit: namespace)
+  - Set conversion multiplier 1.0 on each currency unit (in `unit:` namespace)
   - Set conversion multiplier for any unit that does not have one to 0.0 at the end of the build process
   - Every unit now has a conversion multiplier
+  - Certain consistency problems can now be fixed in the source with the `fix-src` pipeline (`mvn rdfio:pipeline@fix-src`)
+  - Replaced references to deprecated concepts with the replacement concepts
+- Descriptions
+  - Changed "Thermal heat capacity" to "total energy per unit mass, commonly known as specific enthalpy" for unit:BTU_TH-PER-LB
+  - Changed "Thermal heat capacity" to "total energy per unit mass, commonly known as specific enthalpy" for unit:J-PER-KiloGM
 
 ### Fixed
 
@@ -52,6 +71,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Corrected multiplier of `unit:MIL`
 - Added `unit:GM qudt:scalingOf unit:KiloGM`, such that the standard algorithm for determining conversion multipliers (following factor units and scalings recursively) applies correctly.
   E.g, for `unit:DecaGM`: `conversionMultiplier = prefix:Deca.prefixMultiplier * unit:GM.conversionMultiplier = 10.0 * 0.001 = 0.01`
+- Corrected 136 unit symbols
 
 ### Deprecated
 
@@ -62,6 +82,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - `unit:KiloCi` (new unit: `unit:KiloCI`)
 - `unit:MicroCi` (new unit: `unit:MicroCI`)
 - `unit:MilliCi` (new unit: `unit:MilliCI`)
+- `unit:CAL_15_DEG_C` (new unit: `unit:CAL_15DEG_C`)
+- `quantitykind:ConductivityVariance_NEON` (replacement: `quantitykind:ConductivityVariance`)
+- `quantitykind:MolarFluxDensityVariance_NEON` (replacement: `quantitykind:MolarFluxDensityVariance`)
+- `quantitykind:TemperatureVariance_NEON` (replacement: `quantitykind:TemperatureVariance`)
+- Deprecated quantity kinds that represented the union of several other quantity kinds. Treatment of alternatives should be handled by applications.
 
 ## [3.1.3] - 2025-06-26
 

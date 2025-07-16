@@ -43,19 +43,19 @@
                 Each plugin has an <execution> section that binds its execution to a lifecycle phase (or it has a default lifecycle phase in which it runs, or 'none' for direct invocation).
                 Here are the phases and the execution ids that are linked to them (executed in the order they appear in this file):
                       validate                 defineAdditionalProperties, preprocess-shacl-files
-                      initialize               [Profile -Pfix: reformat-sources]
-                      generate-sources         unitTestPipeline
-                      process-sources          check-source-format, shacl-validate-src
+                      initialize
+                      generate-sources         unit-test
+                      process-sources          check-src-format, shacl-validate-src
                       generate-resources       copy-rdf-to-dist, copy-rdf-to-work, copy-docs, copy-root-files, validate-shacl-files
                       process-resources
-                      process-classes          mainRdfPipeline
+                      process-classes          main
                       generate-test-sources
                       process-test-sources     all-in-one
                       generate-test-resources
                       process-test-resources
                       test-compile
                       process-test-classes     format-dist
-                      test                     shacl-validate-target
+                      test                     validate-dist
                       prepare-package
                       package
                       pre-integration-test
@@ -66,7 +66,10 @@
                       deploy
 
                 Executions with phase 'none' (invocable directly via command line, not bound to lifecycle):
-                      none                     infer-and-format, infer-factorUnits, infer-scalingOf, merge-factorUnits-target, query-factorUnits, query-scalingOf, merge-scalingOf-target, reformat-sources
+                      none                     rdfio:pipeline@fix-src       replaces certain triples in src if they are dfferent in target
+                                               rdfio:pipeline@inspect       runs a number of interesting queries, mostly on target
+                                               spotless:apply@reformat-src  reformats the sources (not target)
+
             -->
 
             <plugin>
@@ -260,93 +263,6 @@
                     </execution>
                     <execution>
                         <!--
-                        SHACL-validates the union of all ttl files in dist/vocab and the No-OWL schema
-                        against the union of QA-Tests and No-OWL schema
-                        writes the validation report target/validation/validationReport.ttl
-                        -->
-                        <id>shacl-validate-target</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>validate</goal>
-                        </goals>
-                        <configuration>
-                            <validations>
-                                <validation>
-                                    <message>Validating QUDT conversionMultiplier</message>
-                                    <failureMessage>Problems found</failureMessage>
-                                    <shapes>
-                                        <include>
-                                            target/srcgen/conversionMultiplier/validate.ttl
-                                            src/main/rdf/validation/qudt-shacl-functions.ttl
-                                        </include>
-                                    </shapes>
-                                    <data>
-                                        <include>
-                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                            target/dist/vocab/prefixes/VOCAB_QUDT-PREFIXES.ttl
-                                        </include>
-                                    </data>
-                                    <outputFile>target/validation/validationReport-conversionMultiplier.ttl</outputFile>
-                                </validation>
-                                <validation>
-                                    <message>Validating QUDT build output (target/dist/)</message>
-                                    <!--skip>true</skip-->
-                                    <shapes>
-                                        <include>
-                                            src/main/rdf/validation/COLLECTION_QUDT_QA_TESTS_ALL.ttl
-                                            src/main/rdf/validation/COLLECTION_QUDT_USER_TESTS.ttl
-                                            src/main/rdf/validation/qudt-shacl-functions.ttl
-                                            src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
-                                            src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl
-                                        </include>
-                                    </shapes>
-                                    <data>
-                                        <include>
-                                            target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
-                                            target/dist/vocab/**/*.ttl
-                                        </include>
-                                    </data>
-                                    <outputFile>target/validation/validationReport.ttl</outputFile>
-                                </validation>
-                                <validation>
-                                    <message>Validating QUDT factor units</message>
-                                    <failureMessage>Problems found</failureMessage>
-                                    <!--skip>true</skip-->
-                                    <shapes>
-                                        <include>
-                                            src/main/rdf/validation/qudt-shacl-functions.ttl
-                                            target/srcgen/factorUnits/validate.ttl
-                                        </include>
-                                    </shapes>
-                                    <data>
-                                        <include>
-                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                        </include>
-                                    </data>
-                                    <outputFile>target/validation/validationReport-factorUnits.ttl</outputFile>
-                                </validation>
-                                <validation>
-                                    <message>Validating QUDT scalingOf</message>
-                                    <failureMessage>Problems found</failureMessage>
-                                    <!--skip>true</skip-->
-                                    <shapes>
-                                        <include>
-                                            src/main/rdf/validation/qudt-shacl-functions.ttl
-                                            target/srcgen/scalingOf/validate.ttl
-                                        </include>
-                                    </shapes>
-                                    <data>
-                                        <include>
-                                            target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-                                        </include>
-                                    </data>
-                                    <outputFile>target/validation/validationReport-scalingOf.ttl</outputFile>
-                                </validation>
-                            </validations>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!--
                         SHACL-that the SHACL definition conform to SHACL
                         writes the validation report target/validation/validationReportShacl.ttl
                         -->
@@ -381,11 +297,11 @@
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>rdfio-maven-plugin</artifactId>
-                <version>1.4.3</version>
+                <version>1.5.3</version>
                 <executions>
                     <execution>
                         <!--
-                        makes one big file in target, after the mainPipeline has modified target files
+                        makes one big file in target, after the main pipeline has modified target files
                         -->
                         <id>all-in-one</id>
                         <phase>process-test-sources</phase>
@@ -486,14 +402,73 @@
                                         <files>
                                             <include>target/dist/vocab/**/*.ttl</include>
                                         </files>
-                                        <toGraphsPattern>target:${name}</toGraphsPattern>
+                                        <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                     </add>
+                                    <add>
+                                        <files>
+                                            <include>src/main/rdf/vocab/**/*.ttl</include>
+                                        </files>
+                                        <toGraphsPattern>src:vocab:${name}</toGraphsPattern>
+                                    </add>
+                                    <add>
+                                        <files>
+                                            <include>target/dist/schema/**/*.ttl</include>
+                                        </files>
+                                        <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
+                                    </add>
+                                    <sparqlQuery>
+                                        <sparql>
+                                            <![CDATA[
+                                                SELECT * WHERE {
+                                                    GRAPH <dist:schema:SCHEMA_QUDT_NoOWL.ttl> {
+                                                        ?type rdfs:subClassOf+ qudt:Unit
+                                                    }
+                                                    GRAPH <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit a ?type .
+                                                        OPTIONAL{
+                                                            ?unit qudt:conversionMultiplier ?cm
+                                                        }
+                                                        OPTIONAL {
+                                                            ?unit qudt:conversionMultiplierSN ?cmSN
+                                                        }
+                                                        OPTIONAL {
+                                                            ?unit qudt:symbol ?symbol
+                                                        }
+                                                        OPTIONAL {
+                                                            ?unit qudt:hasDimensionVector ?dv
+                                                        }
+                                                    }
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        OPTIONAL{
+                                                           ?unit qudt:conversionMultiplier ?new_cm
+                                                        }
+                                                        OPTIONAL {
+                                                            ?unit qudt:conversionMultiplierSN ?new_cmSN
+                                                        }
+                                                        OPTIONAL {
+                                                            ?unit qudt:symbol ?new_symbol
+                                                        }
+                                                        OPTIONAL {
+                                                            ?unit qudt:hasDimensionVector ?new_dv
+                                                        }
+                                                    }
+                                                    FILTER(
+                                                        COALESCE(?cm,"NOT BOUND") != COALESCE(?new_cm, "NOT BOUND")
+                                                        || COALESCE(?cmSN,"NOT BOUND") != COALESCE(?new_cmSN, "NOT BOUND")
+                                                        || COALESCE(?symbol,"NOT BOUND") != COALESCE(?new_symbol, "NOT BOUND")
+                                                        || COALESCE(?dv,"NOT BOUND") != COALESCE(?new_dv, "NOT BOUND")
+                                                    )
+                                                }
+                                            ]]>
+                                        </sparql>
+                                        <toFile>target/inspection/src-dist-diff.txt</toFile>
+                                    </sparqlQuery>
                                     <sparqlQuery>
                                         <sparql>
                                             <![CDATA[
                                                 SELECT ?unit ?cm ?match ?broader ?deprecated
                                                 WHERE {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ?unit a qudt:Unit .
                                                         OPTIONAL {
                                                             ?unit qudt:deprecated ?deprecated .
@@ -517,6 +492,101 @@
                                         </sparql>
                                         <toFile>target/inspection/units-without-conversionMultiplier.txt</toFile>
                                     </sparqlQuery>
+                                    <sparqlQuery>
+                                        <message>Show non-base units that are neither scaled nor factored</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                SELECT distinct ?unit ?possibleBase ?desc ?dv ?cm where {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit
+                                                            a qudt:Unit ;
+                                                            qudt:conversionMultiplier ?cm ;
+                                                            qudt:hasDimensionVector ?dv .
+
+                                                            OPTIONAL {
+                                                                ?unit qudt:plainTextDescription ?desc.
+                                                            }
+                                                            OPTIONAL {
+                                                                    ?possibleBase
+                                                                        qudt:hasDimensionVector ?dv ;
+                                                                        qudt:conversionMultiplier 1.0 .
+                                                            }
+                                                            OPTIONAL {
+                                                                {
+                                                                    ?unit qudt:plainTextDescription ?desc .
+                                                                } UNION {
+                                                                    ?unit  dcterms:description ?desc .
+                                                                }
+                                                            }
+                                                        FILTER (?cm != 1.0 && ?cm != 0.0)
+                                                        FILTER NOT EXISTS {
+                                                            {
+                                                                ?unit qudt:scalingOf ?base .
+                                                            } UNION {
+                                                                ?unit qudt:hasFactorUnit ?fu .
+                                                            } UNION {
+                                                                ?unit qudt:deprecated true .
+                                                            }
+                                                        }
+                                                    }
+                                                } ORDER BY ?dv ?cm ?unit
+                                            ]]>
+                                        </sparql>
+                                        <toFile>target/inspection/scalingOf/missing-bases.txt</toFile>
+                                    </sparqlQuery>
+                                    <sparqlQuery>
+                                        <message>Show scaled units, base units and multipliers</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                SELECT * where {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit
+                                                            qudt:conversionMultiplier ?cm ;
+                                                            qudt:scalingOf ?base .
+                                                        ?base
+                                                            qudt:conversionMultiplier ?baseCm.
+                                                        OPTIONAL {
+                                                            ?unit qudt:prefix ?prefix .
+                                                        }
+                                                    }
+                                                } ORDER BY ?baseCm ?prefix ?base ?unit
+                                            ]]>
+                                        </sparql>
+                                        <toFile>target/inspection/scalingOf/all_scalings-end-of-pipeline.txt</toFile>
+                                    </sparqlQuery>
+                                    <sparqlQuery>
+                                        <message>Show scaled units, base units and multipliers</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                SELECT * where {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit
+                                                            qudt:conversionMultiplier ?cm ;
+                                                            qudt:scalingOf ?base .
+                                                        ?base
+                                                            qudt:conversionMultiplier ?baseCm.
+                                                        OPTIONAL {
+                                                            ?unit qudt:prefix ?prefix .
+                                                        }
+                                                    }
+                                                } ORDER BY ?baseCm ?prefix ?base ?unit
+                                            ]]>
+                                        </sparql>
+                                        <toFile>target/inspection/scalingOf/all.txt</toFile>
+                                    </sparqlQuery>
+
+                                    <sparqlQuery>
+                                        <file>src/build/inspection/symbol/symbols-via-factor-units.rq</file>
+                                        <toFile>target/inspection/symbol/symbols-via-factor-units.txt</toFile>
+                                    </sparqlQuery>
+                                    <sparqlQuery>
+                                        <file>src/build/inspection/symbol/symbols-via-scaling-of.rq</file>
+                                        <toFile>target/inspection/symbol/symbols-via-scaling-of.txt</toFile>
+                                    </sparqlQuery>
+                                    <sparqlQuery>
+                                        <file>src/build/inspection/symbol/symbol.rq</file>
+                                        <toFile>target/inspection/symbol/symbol.txt</toFile>
+                                    </sparqlQuery>
 
                                 </steps>
                             </pipeline>
@@ -524,14 +594,14 @@
                     </execution>
                     <execution>
                         <!-- unit tests for SHACL functions -->
-                        <id>unitTestPipeline</id>
+                        <id>unit-test</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>pipeline</goal>
                         </goals>
                         <configuration>
                         <pipeline>
-                            <id>unitTestPipeline</id>
+                            <id>unit-test</id>
                             <steps>
                                 <!-- make custom shacl functions available in inference and SPARQL-->
                                 <shaclFunctions>
@@ -542,6 +612,37 @@
                                     <file>src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl</file>
                                     <file>src/build/inference/factorUnits/predefined-factors-and-scalings.ttl</file>
                                 </add>
+                                <assert>
+                                    <message>Test qfn:exponentSuperscript()</message>
+                                    <failureMessage>Unit test failed for qfn:exponentSuperscript()</failureMessage>
+                                    <sparqlSelect>
+                                        <![CDATA[
+                                        SELECT *
+                                        WHERE {
+                                            VALUES (?value ?absolute ?expectedOutput) {
+                                                (0 false "⁰")
+                                                (1  false "")
+                                                (4  false "⁴")
+                                                (-1  false "⁻¹")
+                                                (1.0  false "")
+                                                (4.0  false "⁴")
+                                                (-1.0  false "⁻¹")
+                                                (-14.0  false "⁻¹⁴")
+                                                (0 true "⁰")
+                                                (1  true "")
+                                                (4  true "⁴")
+                                                (-1  true "")
+                                                (1.0  true "")
+                                                (4.0  true "⁴")
+                                                (-1.0  true "")
+                                                (-14.0  true "¹⁴")
+                                            }
+                                            BIND(STR(qfn:exponentSuperscript(?value, ?absolute)) AS ?actualOutput)
+                                            FILTER(BOUND(?actualOutput) != BOUND(?expectedOutput) || ?actualOutput != ?expectedOutput)
+                                        }
+                                        ]]>
+                                    </sparqlSelect>
+                                </assert>
                                 <assert>
                                     <message>Test qfn:decimalToDouble()</message>
                                     <failureMessage>Unit test failed for qfn:decimalToDouble()</failureMessage>
@@ -563,8 +664,60 @@
                                     </sparqlSelect>
                                 </assert>
                                 <assert>
-                                    <message>Test qfn:exp()</message>
-                                    <failureMessage>Unit test failed for qfn:exp()</failureMessage>
+                                    <message>Test nf:decimal.pow()</message>
+                                    <failureMessage>Unit test failed for nf:decimal.pow()</failureMessage>
+                                    <sparqlSelect>
+                                        <![CDATA[
+                                        PREFIX nf: <https://github.com/qudtlib/numericFunctions/>
+                                        SELECT *
+                                        WHERE {
+                                            VALUES (?base ?exp ?expectedOutput) {
+                                                (2 0          1)
+                                                (0 1          0)
+                                                (1 0          1)
+                                                (0 0          1)
+                                                (4 -1         0.25)
+                                                (2 -2         0.25)
+                                                (2 -3         0.125)
+                                                (3 2          9)
+                                                (3 3          27)
+                                                (1.2 2       1.44)
+                                                (1234567890123456789012345678901234567890 2  1524157875323883675049535156256668000000000000000000000000000000000000000000000.0)
+                                                (0.000000000000000000000000000000000000000000000000000001 3 0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001)
+                                                (0 -0 1)
+                                                (-0 -0 1)
+                                                (0 -1 0)
+                                                (2 -1 0.5)
+
+                                            }
+                                            BIND(nf:decimal.pow(?base, ?exp,34) AS ?actualOutput)
+                                            FILTER(BOUND(?actualOutput) != BOUND(?expectedOutput) || ?actualOutput != ?expectedOutput)
+                                        }
+                                        ]]>
+                                    </sparqlSelect>
+                                </assert>
+                                <assert>
+                                    <message>Test nf:decimal.div()</message>
+                                    <failureMessage>Unit test failed for nf:decimal.div()</failureMessage>
+                                    <sparqlSelect>
+                                        <![CDATA[
+                                        PREFIX nf: <https://github.com/qudtlib/numericFunctions/>
+                                        SELECT *
+                                        WHERE {
+                                            VALUES (?value ?divisor ?precision ?expectedOutput) {
+                                                (2 2 34 1)
+                                                (2 3 34 0.6666666666666666666666666666666667)
+                                                (1 4 34 0.25)
+                                            }
+                                            BIND(nf:decimal.div(?value, ?divisor, ?precision) AS ?actualOutput)
+                                            FILTER(BOUND(?actualOutput) != BOUND(?expectedOutput) || ?actualOutput != ?expectedOutput)
+                                        }
+                                        ]]>
+                                    </sparqlSelect>
+                                </assert>
+                                <assert>
+                                    <message>Test qfn:pow()</message>
+                                    <failureMessage>Unit test failed for qfn:pow()</failureMessage>
                                     <sparqlSelect>
                                         SELECT *
                                         WHERE {
@@ -580,7 +733,7 @@
                                         (3 3          27)
                                         (1.2 2       1.44)
                                         }
-                                        BIND(qfn:exp(?base, ?exp) AS ?actualOutput)
+                                        BIND(qfn:pow(?base, ?exp) AS ?actualOutput)
                                         FILTER(BOUND(?actualOutput) != BOUND(?expectedOutput) || ?actualOutput != ?expectedOutput)
                                         }
                                     </sparqlSelect>
@@ -612,9 +765,11 @@
                                     </sparqlSelect>
                                 </assert>
                                 <assert>
-                                    <message>Test qfn:decimalRoundToPrecision()</message>
-                                    <failureMessage>Unit test failed for qfn:decimalRoundToPrecision()</failureMessage>
+                                    <message>Test nf:decimal.roundToPrecision()</message>
+                                    <failureMessage>Unit test failed for nf:decimal.roundToPrecision()</failureMessage>
                                     <sparqlSelect>
+                                        <![CDATA[
+                                        PREFIX nf: <https://github.com/qudtlib/numericFunctions/>
                                         SELECT *
                                         WHERE {
                                             VALUES (?input ?precision ?expectedOutput) {
@@ -641,10 +796,14 @@
                                                 (00123.456000 3       123.0)
                                                 (0.000000011574074074074074074  10 0.00000001157407407)
                                                 (-0.000000011574074074074074074  10 -0.00000001157407407)
+                                                (0.0002777777777777777777777777777777778 34 0.0002777777777777777777777777777777778)
+                                                (0.0002777777777777777777777777777777778 24 0.000277777777777777777777778)
+                                                (0.0002777777777777777777777777777777778 4 0.0002778)
                                             }
-                                        BIND(qfn:decimalRoundToPrecision(?input, ?precision) AS ?rounded)
-                                        FILTER(!BOUND(?rounded) || ?rounded != ?expectedOutput)
+                                        BIND(nf:decimal.roundToPrecision(?input, ?precision) AS ?actual)
+                                        FILTER(BOUND(?actual) != BOUND(?expectedOutput) || ?actual != ?expectedOutput)
                                         }
+                                        ]]>
                                     </sparqlSelect>
                                 </assert>
                                 <add>
@@ -791,14 +950,189 @@
                     </execution>
 
                     <execution>
-                        <id>mainPipeline</id>
+                        <id>fix-src</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>pipeline</goal>
+                        </goals>
+                        <configuration>
+                        <pipeline>
+                            <id>fix-src</id>
+                            <steps>
+                                <shaclFunctions>
+                                    <file>src/main/rdf/validation/qudt-shacl-functions.ttl</file>
+                                </shaclFunctions>
+                                <add>
+                                    <files>
+                                        <include>src/main/rdf/vocab/**/*.ttl</include>
+                                    </files>
+                                    <toGraphsPattern>src:vocab:${name}</toGraphsPattern>
+                                </add>
+                                <add>
+                                    <files>
+                                        <include>target/dist/vocab/**/*.ttl</include>
+                                    </files>
+                                    <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
+                                </add>
+                                <add>
+                                    <files>
+                                        <include>target/dist/schema/**/*.ttl</include>
+                                    </files>
+                                    <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
+                                </add>
+                                <when>
+                                    <message>Checking if we have at least the dist units file</message>
+                                    <sparqlAsk>
+                                        <![CDATA[
+                                            ASK WHERE {
+                                                FILTER NOT EXISTS {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?s ?p ?o
+                                                    }
+                                                }
+                                            }
+                                        ]]>
+                                    </sparqlAsk>
+                                    <body>
+                                        <stop>
+                                            <message>
+
+                                                the fix-src pipeline cannot be run without the results
+                                                of a previous build being available in the target folder.
+
+                                                Run
+
+                                                mvn install
+
+                                                and when that fails, run
+
+                                                mvn -Pfix install
+
+                                                (as you'll be instructed, hopefully)
+                                            </message>
+                                        </stop>
+                                    </body>
+                                </when>
+
+
+                                <sparqlUpdate>
+                                    <message>deleting selected property values from src that do not exist in dist</message>
+                                    <sparql>
+                                        <![CDATA[
+                                            DELETE {
+                                              GRAPH ?srcGraph {
+                                                ?entity ?propertyToUpdate ?value
+                                              }
+                                            }
+                                            WHERE {
+                                              VALUES ?propertyToUpdate {
+                                                qudt:conversionMultiplier
+                                                qudt:conversionMultiplierSN
+                                                qudt:symbol
+                                                qudt:hasDimensionVector
+                                                qudt:hasQuantityKind
+                                                qudt:hasReferenceQuantityKind
+                                                qudt:systemDerivedQuantityKind
+                                                skos:broader
+                                                rdfs:seeAlso
+                                              }
+                                              VALUES (?srcGraph ?distGraph) {
+                                                ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                              }
+
+                                              GRAPH ?srcGraph {
+                                                ?entity ?propertyToUpdate ?value
+                                              }
+                                              FILTER NOT EXISTS {
+                                                GRAPH ?distGraph {
+                                                  ?entity ?propertyToUpdate ?value
+                                                }
+                                              }
+                                            }
+                                        ]]>
+                                    </sparql>
+                                </sparqlUpdate>
+                                <sparqlUpdate>
+                                    <message>copying selected property values from dest to src that do not exist in src</message>
+                                    <sparql>
+                                        <![CDATA[
+                                            INSERT {
+                                              GRAPH ?srcGraph {
+                                                ?entity ?propertyToUpdate ?value
+                                              }
+                                            }
+                                            WHERE {
+                                              VALUES ?propertyToUpdate {
+                                                qudt:conversionMultiplier
+                                                qudt:conversionMultiplierSN
+                                                qudt:symbol
+                                                qudt:hasDimensionVector
+                                                qudt:hasQuantityKind
+                                                qudt:hasReferenceQuantityKind
+                                                qudt:systemDerivedQuantityKind
+                                                skos:broader
+                                                rdfs:seeAlso
+                                              }
+                                              VALUES (?srcGraph ?distGraph) {
+                                                ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                              }
+
+                                              GRAPH ?distGraph {
+                                                ?entity ?propertyToUpdate ?value
+                                              }
+                                              FILTER NOT EXISTS {
+                                                GRAPH ?srcGraph {
+                                                  ?entity ?propertyToUpdate ?value
+                                                }
+                                              }
+                                            }
+                                        ]]>
+                                    </sparql>
+                                </sparqlUpdate>
+
+
+
+
+
+
+                                <write>
+                                    <graphs>
+                                        <include>src:vocab:*</include>
+                                    </graphs>
+                                </write>
+                            </steps>
+                        </pipeline>
+                        </configuration>
+                    </execution>
+
+
+                    <execution>
+                        <id>main</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>pipeline</goal>
                         </goals>
                         <configuration>
                             <pipeline>
-                                <id>mainPipeline</id>
+                                <id>main</id>
                                 <steps>
                                     <!-- make custom shacl functions available in inference and SPARQL-->
                                     <shaclFunctions>
@@ -813,8 +1147,37 @@
                                         <files>
                                             <include>target/work/vocab/**/*.ttl</include>
                                         </files>
-                                        <toGraphsPattern>target:${name}</toGraphsPattern>
+                                        <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                     </add>
+                                    <add>
+                                        <files>
+                                            <include>target/work/schema/**/*.ttl</include>
+                                        </files>
+                                        <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
+                                    </add>
+
+                                    <sparqlUpdate>
+                                        <message>change graph-file associations from target/work to target/dist</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                prefix rdfio: <https://github.com/qudtlib/rdfio/>
+                                                DELETE {
+                                                    GRAPH <rdfio:pipeline:metadata> {
+                                                        ?file rdfio:loadsInto ?graph .
+                                                    }
+                                                } INSERT {
+                                                    GRAPH <rdfio:pipeline:metadata> {
+                                                        ?newFile rdfio:loadsInto ?graph .
+                                                    }
+                                                } WHERE {
+                                                    GRAPH <rdfio:pipeline:metadata> {
+                                                        ?file rdfio:loadsInto ?graph .
+                                                    }
+                                                    BIND (IRI(REPLACE(STR(?file), "target/work", "target/dist")) AS ?newFile)
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
                                     <sparqlUpdate>
                                         <message>Adding IEC links</message>
                                         <sparql>
@@ -855,8 +1218,8 @@
                                         </shapes>
                                         <data>
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>target:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
-                                            <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
                                         </data>
                                         <inferred>
                                             <graph>inferred:applicableUnits</graph>
@@ -866,7 +1229,7 @@
 
                                     <add> <!-- add the results of the quantitykinds inference to the quantityKinds graph -->
                                         <graph>inferred:applicableUnits</graph>
-                                        <toGraph>target:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
                                     </add>
 
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
@@ -876,7 +1239,7 @@
                                         <shapes><graph>shapes:applicableUnits</graph></shapes>
                                         <data>
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>target:VOCAB_QUDT-UNITS-CURRENCY.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl</graph>
                                         </data>
                                         <inferred>
                                             <graph>inferred:applicableCurrencyUnits</graph>
@@ -885,7 +1248,7 @@
                                     </shaclInfer>
                                     <add>
                                         <graph>inferred:applicableCurrencyUnits</graph>
-                                        <toGraph>target:VOCAB_QUDT-UNITS-CURRENCY.ttl</toGraph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl</toGraph>
                                     </add>
 
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
@@ -896,11 +1259,11 @@
                                         <sparql>
                                             <![CDATA[
                                                 INSERT {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ?cur qudt:conversionMultiplier 1.0
                                                     }
                                                 } WHERE  {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ?cur a qudt:CurrencyUnit
                                                         FILTER(REGEX(qfn:localname(?cur),"CCY_\\w+"))
                                                         FILTER NOT EXISTS {
@@ -919,7 +1282,7 @@
                                         </shapes>
                                         <data>
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
                                         </data>
                                         <inferred>
                                             <graph>inferred:owl-subset-units</graph>
@@ -929,7 +1292,7 @@
 
                                     <add> <!-- add the inferred triples to the units graph -->
                                         <graph>inferred:owl-subset-units</graph>
-                                        <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
 
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
@@ -937,7 +1300,7 @@
 
                                     <add>
                                         <file>src/build/inference/factorUnits/predefined-factors-and-scalings.ttl</file>
-                                        <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
 
                                     <shaclInfer> <!-- infer the factor units -->
@@ -949,8 +1312,8 @@
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
                                             <graphs>
                                                 <include>
-                                                    target:VOCAB_QUDT-UNITS-ALL.ttl
-                                                    target:VOCAB_QUDT-PREFIXES.ttl
+                                                    dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl
+                                                    dist:vocab:VOCAB_QUDT-PREFIXES.ttl
                                                 </include>
                                             </graphs>
                                         </data>
@@ -961,7 +1324,7 @@
                                     </shaclInfer>
                                     <add>
                                         <graph>inferred:factorUnits</graph>
-                                        <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
                                     <savepoint><id>05-infer-factor-units</id></savepoint>
                                     <shaclInfer>
@@ -971,8 +1334,8 @@
                                         </shapes>
                                         <data>
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                            <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
                                         </data>
                                         <inferred>
                                             <graph>inferred:scalingOf</graph>
@@ -981,97 +1344,32 @@
                                     </shaclInfer>
                                     <add>
                                         <graph>inferred:scalingOf</graph>
-                                        <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
                                     <savepoint><id>06.1-infer-scalingOf-with-errors</id></savepoint>
-                                    <sparqlQuery>
-                                        <message>Show scalings of unit:KiloGM and unit:GM</message>
-                                        <sparql>
-                                            <![CDATA[
-                                            SELECT * where {
-                                                GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                    ?unit
-                                                        qudt:scalingOf ?u ;
-                                                        qudt:conversionMultiplier ?cm .
-                                                    FILTER(?u in (unit:KiloGM, unit:GM))
-                                                    OPTIONAL {
-                                                        ?unit qudt:prefix ?prefix .
-                                                    }
-                                                    BIND("scalingOf" as ?relation)
-                                                }
-                                            } ORDER BY ?u ?cm ?unit
-                                            ]]>
-                                        </sparql>
-                                        <toFile>target/inspection/scalings-of-unitGM/before.txt</toFile>
-                                    </sparqlQuery>
                                     <sparqlUpdate>
                                         <message>Fix unit:GM/unit:KiloGM qudt:scalingOf situation</message>
                                         <sparql>
                                             <![CDATA[
                                                 DELETE {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         unit:KiloGM qudt:scalingOf unit:GM
                                                     }
                                                 } INSERT {
-                                                   GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                   GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         unit:GM qudt:scalingOf unit:KiloGM
                                                    }
                                                 } WHERE {}
                                             ]]>
                                         </sparql>
                                     </sparqlUpdate>
-                                    <sparqlQuery>
-                                        <message>Show scalings of unit:KiloGM and unit:GM</message>
-                                        <sparql>
-                                            <![CDATA[
-                                                SELECT * where {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        ?unit qudt:conversionMultiplier ?cm.
-                                                        OPTIONAL {
-                                                            ?unit qudt:prefix ?prefix .
-                                                        }
-                                                        {
-                                                            ?unit qudt:scalingOf ?u ;
-                                                            BIND("scalingOf" as ?relation)
-                                                        } UNION {
-                                                            ?unit qudt:hasFactorUnit/qudt:hasUnit ?u ;
-                                                                  qudt:factorUnitScalar ?scalar
-                                                            BIND("factorUnit" as ?relation)
-                                                        }
-                                                    }
-                                                    FILTER (?u in (unit:KiloGM, unit:GM))
-                                                } ORDER BY ?u ?cm ?unit
-                                            ]]>
-                                        </sparql>
-                                        <toFile>target/inspection/scalings-of-unitGM/after.txt</toFile>
-                                    </sparqlQuery>
-                                    <sparqlQuery>
-                                        <message>Show scaled units, base units and multipliers</message>
-                                        <sparql>
-                                            <![CDATA[
-                                                SELECT * where {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        ?unit
-                                                            qudt:conversionMultiplier ?cm ;
-                                                            qudt:scalingOf ?base .
-                                                        ?base
-                                                            qudt:conversionMultiplier ?baseCm.
-                                                        OPTIONAL {
-                                                            ?unit qudt:prefix ?prefix .
-                                                        }
-                                                    }
-                                                } ORDER BY ?baseCm ?prefix ?base ?unit
-                                            ]]>
-                                        </sparql>
-                                        <toFile>target/inspection/scalingOf/all.txt</toFile>
-                                    </sparqlQuery>
                                     <savepoint><id>06-infer-scalingOf</id></savepoint>
                                     <sparqlUpdate>
                                         <message>Copy conversionMultipliers/offsets from qudt:exactMatch|skos:broader unit where not present</message>
                                         <sparql>
                                             <![CDATA[
                                                 INSERT {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ?unit
                                                             qudt:conversionMultiplier ?cm ;
                                                             qudt:conversionMultiplierSN ?cmSN ;
@@ -1081,7 +1379,7 @@
                                                     }
                                                 }
                                                 WHERE {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl>  {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl>  {
                                                         ?unit a qudt:Unit .
                                                         FILTER NOT EXISTS {
                                                             ?unit
@@ -1116,8 +1414,8 @@
                                         </shapes>
                                         <data>
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                            <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
                                         </data>
                                         <validationReport>
                                             <graph>validation:dimensionVector-underivable.ttl</graph>
@@ -1137,8 +1435,8 @@
                                                 </shapes>
                                                 <data>
                                                     <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                                    <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                                    <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                    <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                    <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
                                                 </data>
                                                 <inferred>
                                                     <graph>inferred:dimensionVector_${index_dv}</graph>
@@ -1147,7 +1445,7 @@
                                             </shaclInfer>
                                             <add>
                                                 <graph>inferred:dimensionVector_${index_dv}</graph>
-                                                <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                                <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                             </add>
                                         </body>
                                         <sparqlAsk>
@@ -1161,23 +1459,237 @@
                                             }
                                         </sparqlAsk>
                                     </until>
-
+                                    <savepoint><id>07-infer-dimensionVector</id></savepoint>
                                     <until>
-                                        <message>Replacing invalid conversionMultipliers and missing dimension vectors iteratively until no more are found</message>
-                                        <indexVar>index_cm</indexVar>
+                                        <message>Checking for missing/wrong symbols that can be corrected/inferred</message>
+                                        <indexVar>iteration</indexVar>
+                                        <body>
+                                            <clear>
+                                                <graph>inferred:symbol</graph>
+                                                <graph>delete:symbol</graph>
+                                            </clear>
+                                            <shaclValidate>
+                                                <failOnSeverity>None</failOnSeverity>
+                                                <message>Preventing qudt:symbol that does not match the symbol calculated from base unit(s)</message>
+                                                <shapes>
+                                                    <file>target/srcgen/symbol/validate.ttl</file>
+                                                </shapes>
+                                                <data>
+                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                    <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                    <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                    <file>src/build/srcgen/symbol/units-overriding-inferred-symbol.ttl</file>
+                                                </data>
+                                                <validationReport>
+                                                    <graph>delete:symbol</graph>
+                                                    <file>target/fix/symbol/delete-${iteration}.ttl</file>
+                                                </validationReport>
+                                            </shaclValidate>
+                                            <when>
+                                                <sparqlAsk>
+                                                    <![CDATA[
+                                                        ASK WHERE {
+                                                            GRAPH <delete:symbol> {
+                                                                [] a sh:ValidationReport ;
+                                                                   sh:conforms false .
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparqlAsk>
+                                                <body>
+                                                    <sparqlUpdate>
+                                                        <message>Deleting invalid symbols</message>
+                                                        <sparql>
+                                                            <![CDATA[
+                                                        DELETE {
+                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                ?unit qudt:symbol ?incorrectSymbol .
+                                                            }
+                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                ?unit qudt:symbol ?incorrectSymbol .
+                                                            }
+                                                        }
+                                                        WHERE {
+                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                {
+                                                                    ?unit qudt:symbol ?incorrectSymbol .
+                                                                }
+                                                            }
+                                                            GRAPH <delete:symbol> {
+                                                                ?res
+                                                                    rdf:type                      sh:ValidationResult;
+                                                                    sh:resultPath                 qudt:symbol;
+                                                                    sh:resultSeverity             sh:Violation;
+                                                                    sh:value                      ?unit
+                                                            }
+                                                        }
+                                                        ]]>
+                                                        </sparql>
+                                                    </sparqlUpdate>
+                                                    <shaclInfer>
+                                                        <message>Inferring missing qudt:symbol</message>
+                                                        <!-- it would be nice to iterate, but if we do that, we end up adding triples without
+                                                            deleting the incorrect versions. we have to go through main-fixSrc-main-fixSrc...
+                                                            as often as it takes.
+                                                        -->
+                                                        <iterateUntilStable>false</iterateUntilStable>
+                                                        <shapes>
+                                                            <file>target/srcgen/symbol/infer.ttl</file>
+                                                        </shapes>
+                                                        <data>
+                                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                            <file>src/build/srcgen/symbol/units-overriding-inferred-symbol.ttl</file>
+                                                        </data>
+                                                        <inferred>
+                                                            <graph>inferred:symbol</graph>
+                                                            <file>target/fix/symbol/inferred-${iteration}.ttl</file>
+                                                        </inferred>
+                                                    </shaclInfer>
+                                                    <add>
+                                                        <graph>inferred:symbol</graph>
+                                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                                    </add>
+                                                </body>
+                                            </when>
+                                        </body>
                                         <sparqlAsk>
-                                            ASK {
-                                                BIND(IRI(CONCAT("validation:conversionMultiplierToDelete_",STR(?index_cm))) as ?graph)
-                                                GRAPH ?graph {
-                                                    ?report
-                                                        a               sh:ValidationReport;
-                                                        sh:conforms     true;
+                                            <![CDATA[
+                                            ASK WHERE {
+                                              FILTER NOT EXISTS {
+                                                    GRAPH <inferred:symbol> {
+                                                        ?s ?p ?o
+                                                    }
                                                 }
                                             }
+                                        ]]>
                                         </sparqlAsk>
+                                    </until>
+                                    <savepoint><id>08-infer-symbol</id></savepoint>
+                                    <until>
+                                        <message>Checking for conversion multipliers with wrong precision</message>
+                                        <indexVar>iteration</indexVar>
                                         <body>
+                                            <clear>
+                                                <graph>delete:conversionMultiplierPrecision</graph>
+                                                <graph>inferred:conversionMultiplierPrecision</graph>
+                                            </clear>
                                             <shaclValidate>
-                                                <message>Validating qudt:conversionMultiplier (will delete invalid ones in subsequent step)</message>
+                                                <message>Validating qudt:conversionMultiplier precision</message>
+                                                <!-- we don't want to fail, we want to know the errors so we can delete triples-->
+                                                <failOnSeverity>None</failOnSeverity>
+                                                <shapes>
+                                                    <file>target/srcgen/conversionMultiplierPrecision/validate.ttl</file>
+                                                </shapes>
+                                                <data>
+                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                    <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                    <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                </data>
+                                                <validationReport>
+                                                    <graph>delete:conversionMultiplierPrecision</graph>
+                                                    <file>target/fix/precision/delete-${iteration}.ttl</file>
+                                                </validationReport>
+                                            </shaclValidate>
+
+                                            <when>
+                                                <message>If there are problems with conversion multiplier precision, fix them</message>
+                                                <sparqlAsk>
+                                                    <![CDATA[
+                                                        ASK WHERE {
+                                                            GRAPH <delete:conversionMultiplierPrecision> {
+                                                                [] a sh:ValidationReport ;
+                                                                    sh:conforms false .
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparqlAsk>
+
+
+                                                <body>
+                                                    <shaclInfer>
+                                                        <!-- first infer correct from incorrect, then delete incorrect! -->
+                                                        <message>Inferring qudt:conversionMultiplier with correct precision</message>
+                                                        <shapes>
+                                                            <file>target/srcgen/conversionMultiplierPrecision/infer.ttl</file>
+                                                        </shapes>
+                                                        <data>
+                                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                        </data>
+                                                        <inferred>
+                                                            <graph>inferred:conversionMultiplierPrecision</graph>
+                                                            <file>target/fix/precision/inferred-${iteration}.ttl</file>
+                                                        </inferred>
+                                                    </shaclInfer>
+
+                                                    <sparqlUpdate>
+                                                        <!-- delete incorrect after inferring correct! -->
+                                                        <message>Deleting conversion multipliers with wrong precision</message>
+                                                        <sparql>
+                                                            <![CDATA[
+                                                        DELETE {
+                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                ?unit
+                                                                    qudt:conversionMultiplier ?m ;
+                                                                    qudt:conversionMultiplierSN ?mSN .
+                                                            }
+                                                        }
+                                                        WHERE {
+                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                {
+                                                                    ?unit qudt:conversionMultiplier ?m .
+                                                                } UNION {
+                                                                    ?unit qudt:conversionMultiplierSN ?mSN .
+                                                                }
+                                                            }
+                                                            GRAPH <delete:conversionMultiplierPrecision> {
+                                                                ?res
+                                                                    rdf:type                      sh:ValidationResult;
+                                                                    sh:resultPath                 qudt:conversionMultiplier;
+                                                                    sh:resultSeverity             sh:Violation;
+                                                                    sh:value                      ?unit
+                                                            }
+                                                        }
+                                                        ]]>
+                                                        </sparql>
+                                                    </sparqlUpdate>
+
+                                                    <add>
+                                                        <graph>inferred:conversionMultiplierPrecision</graph>
+                                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                                    </add>
+                                                </body>
+
+                                            </when>
+
+                                        </body>
+                                        <sparqlAsk>
+                                            <![CDATA[
+                                                ASK WHERE {
+                                                  FILTER NOT EXISTS {
+                                                        GRAPH <inferred:conversionMultiplierPrecision> {
+                                                            ?s ?p ?o
+                                                        }
+                                                    }
+                                                }
+                                            ]]>
+                                        </sparqlAsk>
+                                    </until>
+                                    <savepoint><id>09-infer-precision</id></savepoint>
+
+                                    <until>
+                                        <message>Checking for wrong conversion multipliers compared with factors/bases</message>
+                                        <indexVar>iteration</indexVar>
+                                        <body>
+                                            <clear>
+                                                <graph>delete:conversionMultiplier</graph>
+                                                <graph>inferred:conversionMultiplier</graph>
+                                            </clear>
+                                            <shaclValidate>
+                                                <message>Validating qudt:conversionMultiplier</message>
                                                 <!-- we don't want to fail, we want to know the errors so we can delete triples-->
                                                 <failOnSeverity>None</failOnSeverity>
                                                 <shapes>
@@ -1185,69 +1697,96 @@
                                                 </shapes>
                                                 <data>
                                                     <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                                    <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                                    <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                    <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                    <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
                                                 </data>
                                                 <validationReport>
-                                                    <graph>validation:conversionMultiplierToDelete_${index_cm}</graph>
-                                                    <file>target/validation/conversionMultiplier-toDelete_${index_cm}.ttl</file>
+                                                    <graph>delete:conversionMultiplier</graph>
+                                                    <file>target/fix/conversionMultiplier/delete-${iteration}.ttl</file>
                                                 </validationReport>
                                             </shaclValidate>
-                                            <sparqlUpdate>
-                                                <message>Deleting invalid conversion multipliers</message>
-                                                <sparql>
+                                            <when>
+                                                <message>If there are problems with conversion multipliers, fix them</message>
+                                                <sparqlAsk>
                                                     <![CDATA[
-                                                DELETE {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        ?unit qudt:conversionMultiplier ?m .
-                                                        ?unit  qudt:conversionMultiplierSN ?mSN .
-                                                    }
-                                                }
-                                                WHERE {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        {
-                                                            ?unit qudt:conversionMultiplier ?m .
-                                                        } UNION {
-                                                            ?unit qudt:conversionMultiplierSN ?mSN .
+                                                        ASK WHERE {
+                                                            GRAPH <delete:conversionMultiplier> {
+                                                                [] a sh:ValidationReport ;
+                                                                    sh:conforms false .
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparqlAsk>
+                                                <body>
+                                                    <sparqlUpdate>
+                                                        <message>Deleting invalid conversion multipliers</message>
+                                                        <sparql>
+                                                            <![CDATA[
+                                                            DELETE {
+                                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                    ?unit qudt:conversionMultiplier ?m .
+                                                                    ?unit  qudt:conversionMultiplierSN ?mSN .
+                                                                }
+                                                            }
+                                                            WHERE {
+                                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                    {
+                                                                        ?unit qudt:conversionMultiplier ?m .
+                                                                    } UNION {
+                                                                        ?unit qudt:conversionMultiplierSN ?mSN .
+                                                                    }
+                                                                }
+                                                                GRAPH <delete:conversionMultiplier> {
+                                                                    ?res
+                                                                        rdf:type                      sh:ValidationResult;
+                                                                        sh:resultPath                 qudt:conversionMultiplier;
+                                                                        sh:resultSeverity             sh:Violation;
+                                                                        sh:value                      ?unit
+                                                                }
+                                                            }
+                                                            ]]>
+                                                        </sparql>
+                                                    </sparqlUpdate>
+
+                                                    <shaclInfer>
+                                                        <message>Inferring qudt:conversionMultiplier where missing</message>
+                                                        <iterateUntilStable>false</iterateUntilStable>
+                                                        <shapes>
+                                                            <file>target/srcgen/conversionMultiplier/infer.ttl</file>
+                                                        </shapes>
+                                                        <data>
+                                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                        </data>
+                                                        <inferred>
+                                                            <graph>inferred:conversionMultiplier</graph>
+                                                            <file>target/fix/conversionMultiplier/inferred-${iteration}.ttl</file>
+                                                        </inferred>
+                                                    </shaclInfer>
+                                                    <add>
+                                                        <graph>inferred:conversionMultiplier</graph>
+                                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                                    </add>
+
+                                                </body>
+                                            </when>
+                                        </body>
+                                        <sparqlAsk>
+                                            <![CDATA[
+                                                ASK WHERE {
+                                                  FILTER NOT EXISTS {
+                                                        GRAPH <inferred:conversionMultiplier> {
+                                                            ?s ?p ?o
                                                         }
                                                     }
-                                                    BIND(IRI(CONCAT("validation:conversionMultiplierToDelete_",STR(?index_cm))) as ?graph)
-                                                    GRAPH ?graph {
-                                                        ?res
-                                                            rdf:type                      sh:ValidationResult;
-                                                            sh:resultPath                 qudt:conversionMultiplier;
-                                                            sh:resultSeverity             sh:Violation;
-                                                            sh:value                      ?unit
-                                                    }
                                                 }
-                                                ]]>
-                                                </sparql>
-                                            </sparqlUpdate>
-
-                                            <shaclInfer>
-                                                <message>Inferring qudt:conversionMultiplier</message>
-                                                <iterateUntilStable>true</iterateUntilStable>
-                                                <iterationOutputFilePattern>target/inferred/conversionMultiplier-${index_cm}_${index}.ttl</iterationOutputFilePattern>
-                                                <shapes>
-                                                    <file>target/srcgen/conversionMultiplier/infer.ttl</file>
-                                                </shapes>
-                                                <data>
-                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                                    <graph>target:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                                    <graph>target:VOCAB_QUDT-PREFIXES.ttl</graph>
-                                                </data>
-                                                <inferred>
-                                                    <graph>inferred:conversionMultiplier_${index_cm}</graph>
-                                                    <file>target/inferred/conversionMultiplier_${index_cm}.ttl</file>
-                                                </inferred>
-                                            </shaclInfer>
-                                            <add>
-                                                <graph>inferred:conversionMultiplier_${index_cm}</graph>
-                                                <toGraph>target:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
-                                            </add>
-                                        </body>
-
+                                            ]]>
+                                        </sparqlAsk>
                                     </until>
+
+
+
 
                                     <sparqlUpdate>
                                         <message>Set conversionMultiplier to 0.0 for any unit that does not have that triple</message>
@@ -1264,7 +1803,7 @@
                                                             ?unit qudt:conversionMultiplier ?cm
                                                         }
                                                     }
-                                                    FILTER(CONTAINS(STR(?graph),"target:VOCAB"))
+                                                    FILTER(CONTAINS(STR(?graph),"dist:vocab:VOCAB"))
                                                 }
                                             ]]>
                                         </sparql>
@@ -1276,12 +1815,12 @@
                                         <sparql>
                                             <![CDATA[
                                             INSERT {
-                                                GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                     ?unit qudt:conversionMultiplierSN ?cmsn
                                                 }
                                             }
                                             WHERE {
-                                                GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                     ?unit a qudt:Unit ;
                                                           qudt:conversionMultiplier ?cm .
                                                     FILTER NOT EXISTS {
@@ -1293,11 +1832,13 @@
                                             ]]>
                                         </sparql>
                                     </sparqlUpdate>
-                                    <savepoint><id>07-infer-conversionMultiplier</id></savepoint>
+                                    <savepoint><id>10-infer-conversionMultiplier</id></savepoint>
 
                                     <sparqlUpdate>
                                         <message>Limit any xsd:decimal's precision to 34</message>
                                         <sparql>
+                                        <![CDATA[
+                                        PREFIX nf: <https://github.com/qudtlib/numericFunctions/>
                                         DELETE {
                                             GRAPH ?g {
                                                 ?s ?p ?oldVal .
@@ -1314,108 +1855,375 @@
                                            GRAPH ?g {
                                                 ?s ?p ?oldVal .
                                                 FILTER (DATATYPE(?oldVal) = xsd:decimal)
-                                                FILTER(qfn:decimalPrecision(?oldVal) &gt; 34)
+                                                FILTER(qfn:decimalPrecision(?oldVal) > 34)
                                                 BIND(IRI(CONCAT(STR(?p),"SN")) as ?pSN)
-                                                BIND(qfn:decimalRoundToPrecision(?oldVal, 34) AS ?newVal)
+                                                BIND(nf:decimal.roundToPrecision(?oldVal, 34) AS ?newVal)
                                                 BIND(qfn:decimalToDouble(?newVal) AS ?newValSN)
                                                 OPTIONAL {
                                                     ?s ?pSN ?oldValSN .
                                                 }
                                            }
                                         }
+                                        ]]>
                                         </sparql>
                                     </sparqlUpdate>
-
-                                    <sparqlQuery>
-                                        <message>Show non-base units that are neither scaled nor factored</message>
-                                        <sparql>
-                                            <![CDATA[
-                                                SELECT distinct ?unit ?possibleBase ?desc ?dv ?cm where {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        ?unit
-                                                            a qudt:Unit ;
-                                                            qudt:conversionMultiplier ?cm ;
-                                                            qudt:hasDimensionVector ?dv .
-
-                                                            OPTIONAL {
-                                                                ?unit qudt:plainTextDescription ?desc.
-                                                            }
-                                                            OPTIONAL {
-                                                                    ?possibleBase
-                                                                        qudt:hasDimensionVector ?dv ;
-                                                                        qudt:conversionMultiplier 1.0 .
-                                                            }
-                                                            OPTIONAL {
-                                                                {
-                                                                    ?unit qudt:plainTextDescription ?desc .
-                                                                } UNION {
-                                                                    ?unit  dcterms:description ?desc .
-                                                                }
-                                                            }
-                                                        FILTER (?cm != 1.0 && ?cm != 0.0)
-                                                        FILTER NOT EXISTS {
-                                                            {
-                                                                ?unit qudt:scalingOf ?base .
-                                                            } UNION {
-                                                                ?unit qudt:hasFactorUnit ?fu .
-                                                            } UNION {
-                                                                ?unit qudt:deprecated true .
-                                                            }
-                                                        }
-                                                    }
-                                                } ORDER BY ?dv ?cm ?unit
-                                            ]]>
-                                        </sparql>
-                                        <toFile>target/inspection/scalingOf/missing-bases.txt</toFile>
-                                    </sparqlQuery>
-                                    <sparqlQuery>
-                                        <message>Show scaled units, base units and multipliers</message>
-                                        <sparql>
-                                            <![CDATA[
-                                                SELECT * where {
-                                                    GRAPH <target:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                        ?unit
-                                                            qudt:conversionMultiplier ?cm ;
-                                                            qudt:scalingOf ?base .
-                                                        ?base
-                                                            qudt:conversionMultiplier ?baseCm.
-                                                        OPTIONAL {
-                                                            ?unit qudt:prefix ?prefix .
-                                                        }
-                                                    }
-                                                } ORDER BY ?baseCm ?prefix ?base ?unit
-                                            ]]>
-                                        </sparql>
-                                        <toFile>target/inspection/scalingOf/all_scalings-end-of-pipeline.txt</toFile>
-                                    </sparqlQuery>
 
                                     <sparqlUpdate>
-                                        <message>change graph-file associations from target/work to target/dist before writing</message>
+                                        <message>Replace deprecated entities</message>
                                         <sparql>
-                                            <![CDATA[
-                                                DELETE {
-                                                    GRAPH <rdfio:pipeline:metadata> {
-                                                        ?file <http://qudtlib.org/rdfio/loadsInto> ?graph .
-                                                    }
-                                                } INSERT {
-                                                    GRAPH <rdfio:pipeline:metadata> {
-                                                        ?newFile <http://qudtlib.org/rdfio/loadsInto> ?graph .
-                                                    }
-                                                } WHERE {
-                                                    GRAPH <rdfio:pipeline:metadata> {
-                                                        ?file <http://qudtlib.org/rdfio/loadsInto> ?graph .
-                                                    }
-                                                    BIND (IRI(REPLACE(STR(?file), "target/work", "target/dist")) AS ?newFile)
+                                            DELETE {
+                                                GRAPH ?graph {
+                                                    ?s ?p $this .
                                                 }
-                                            ]]>
+                                            }
+                                            INSERT {
+                                                GRAPH ?graph {
+                                                    ?s ?p ?replacement .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH ?defGraph {
+                                                    $this qudt:deprecated true .
+                                                    $this dcterms:isReplacedBy ?replacement .
+                                                }
+                                                GRAPH ?graph {
+                                                    ?s ?p $this .
+                                                }
+                                            }
                                         </sparql>
                                     </sparqlUpdate>
+                                    <add>
+                                        <files>
+                                            <include>src/main/rdf/vocab/**/*.ttl</include>
+                                        </files>
+                                        <toGraphsPattern>src:vocab:${name}</toGraphsPattern>
+                                    </add>
+
+                                    <savepoint><id>99-endOfPipeline</id></savepoint>
                                     <write>
                                         <graphs>
-                                            <include>target:*</include>
+                                            <include>dist:vocab:*</include>
                                         </graphs>
                                     </write>
-                                    <savepoint><id>99-endOfPipeline</id></savepoint>
+
+                                    <when>
+                                        <message>Fail the build if the src has to be updated</message>
+                                        <sparqlAsk>
+                                            <![CDATA[
+                                                ASK
+                                                WHERE
+                                                {
+                                                  {
+                                                      VALUES ?propertyToUpdate {
+                                                        qudt:conversionMultiplier
+                                                        qudt:conversionMultiplierSN
+                                                        qudt:symbol
+                                                        qudt:hasDimensionVector
+                                                        qudt:hasQuantityKind
+                                                        qudt:hasReferenceQuantityKind
+                                                        qudt:systemDerivedQuantityKind
+                                                        skos:broader
+                                                        rdfs:seeAlso
+                                                      }
+                                                      VALUES (?srcGraph ?distGraph) {
+                                                        ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                      }
+
+                                                      GRAPH ?distGraph {
+                                                        ?entity ?propertyToUpdate ?value
+                                                      }
+                                                      FILTER NOT EXISTS {
+                                                        GRAPH ?srcGraph {
+                                                          ?entity ?propertyToUpdate ?value
+                                                        }
+                                                      }
+                                                  }
+                                                  UNION
+                                                  {
+                                                      VALUES ?propertyToUpdate {
+                                                        qudt:conversionMultiplier
+                                                        qudt:conversionMultiplierSN
+                                                        qudt:symbol
+                                                        qudt:hasDimensionVector
+                                                        qudt:hasQuantityKind
+                                                        qudt:hasReferenceQuantityKind
+                                                        qudt:systemDerivedQuantityKind
+                                                        skos:broader
+                                                        rdfs:seeAlso
+                                                      }
+                                                      VALUES (?srcGraph ?distGraph) {
+                                                        ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                      }
+
+                                                      GRAPH ?srcGraph {
+                                                        ?entity ?propertyToUpdate ?value
+                                                      }
+                                                      FILTER NOT EXISTS {
+                                                        GRAPH ?distGraph {
+                                                          ?entity ?propertyToUpdate ?value
+                                                        }
+                                                      }
+                                                  }
+                                                }
+                                            ]]>
+                                        </sparqlAsk>
+
+                                        <body>
+                                            <sparqlQuery>
+                                                <message>Data errors detected in src - writing errors to target/src-errors/errors.txt</message>
+                                                <toFile>target/src-errors/errors.txt</toFile>
+                                                <sparql>
+                                                    <![CDATA[
+                                                          SELECT ?srcGraph ?entity ?propertyToUpdate ?value ?action
+                                                          WHERE {
+                                                          {
+                                                              BIND("add to src" as ?action)
+                                                              VALUES ?propertyToUpdate {
+                                                                qudt:conversionMultiplier
+                                                                qudt:conversionMultiplierSN
+                                                                qudt:symbol
+                                                                qudt:hasDimensionVector
+                                                                qudt:hasQuantityKind
+                                                                qudt:hasReferenceQuantityKind
+                                                                qudt:systemDerivedQuantityKind
+                                                                skos:broader
+                                                                rdfs:seeAlso
+                                                              }
+                                                              VALUES (?srcGraph ?distGraph) {
+                                                                ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                              }
+
+                                                              GRAPH ?distGraph {
+                                                                ?entity ?propertyToUpdate ?value
+                                                              }
+                                                              FILTER NOT EXISTS {
+                                                                GRAPH ?srcGraph {
+                                                                  ?entity ?propertyToUpdate ?value
+                                                                }
+                                                              }
+                                                          }
+                                                          UNION
+                                                          {
+                                                              BIND("delete from src" as ?action)
+                                                              VALUES ?propertyToUpdate {
+                                                                qudt:conversionMultiplier
+                                                                qudt:conversionMultiplierSN
+                                                                qudt:symbol
+                                                                qudt:hasDimensionVector
+                                                                qudt:hasQuantityKind
+                                                                qudt:hasReferenceQuantityKind
+                                                                qudt:systemDerivedQuantityKind
+                                                                skos:broader
+                                                                rdfs:seeAlso
+                                                              }
+                                                              VALUES (?srcGraph ?distGraph) {
+                                                                ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                              }
+
+                                                              GRAPH ?srcGraph {
+                                                                ?entity ?propertyToUpdate ?value
+                                                              }
+                                                              FILTER NOT EXISTS {
+                                                                GRAPH ?distGraph {
+                                                                  ?entity ?propertyToUpdate ?value
+                                                                }
+                                                              }
+                                                          }
+                                                      } order by ?srcGraph ?entity ?propertyToUpdate ?action
+                                                    ]]>
+                                                </sparql>
+
+                                            </sparqlQuery>
+                                            <when>
+                                                <message>Data errors detected in src - failing the build unless we are running with 'fix' profile</message>
+                                                <sparqlAsk>
+                                                    ASK WHERE {
+                                                        BIND("${fix.profile.is.inactive}" as ?fixProfileStatus)
+                                                        FILTER(?fixProfileStatus != "fix.profile.is.active")
+                                                    }
+                                                </sparqlAsk>
+                                                <body>
+                                                    <stop>
+                                                        <message>
+
+                                                            Data errors in src/main/rdf/dist!
+
+                                                            to fix the errors in `src`, do NOT run mvn clean - the
+                                                            current build output is needed!
+                                                            Just run:
+
+                                                            mvn -Pfix install
+
+
+                                                            Please review the changes that are made to the sources.
+                                                            There may be more information on individual changes in
+
+                                                            target/fix/[topic]/delete-[iteration].ttl
+                                                        </message>
+                                                    </stop>
+                                                </body>
+
+                                            </when>
+                                        </body>
+                                    </when>
+
+
+
+                                </steps>
+                            </pipeline>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <!--
+                        SHACL-validates the union of all ttl files in dist/vocab and the No-OWL schema
+                        against the union of QA-Tests and No-OWL schema
+                        writes the validation report target/validation/validationReport.ttl
+                        -->
+                        <id>validate-dist</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>pipeline</goal>
+                        </goals>
+                        <configuration>
+                            <pipeline>
+                                <id>validate-dist</id>
+                                <steps>
+                                    <shaclFunctions>
+                                        <file>src/main/rdf/validation/qudt-shacl-functions.ttl</file>
+                                    </shaclFunctions>
+                                    <add>
+                                        <files>
+                                            <include>target/dist/vocab/**/*.ttl</include>
+                                        </files>
+                                        <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
+                                    </add>
+                                    <add>
+                                        <files>
+                                            <include>target/dist/schema/**/*.ttl</include>
+                                        </files>
+                                        <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
+                                    </add>
+                                    <shaclValidate>
+                                        <message>Validating QUDT build output (target/dist/)</message>
+                                        <!--skip>true</skip-->
+                                        <shapes>
+                                            <files>
+                                                <include>
+                                                    src/main/rdf/validation/COLLECTION_QUDT_QA_TESTS_ALL.ttl
+                                                    src/main/rdf/validation/COLLECTION_QUDT_USER_TESTS.ttl
+                                                    src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
+                                                    src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl
+                                                </include>
+                                            </files>
+                                        </shapes>
+                                        <data>
+                                            <graphs>
+                                                <include>
+                                                    dist:schema:SCHEMA_QUDT_NoOWL.ttl
+                                                    dist:vocab:*
+                                                </include>
+                                            </graphs>
+                                        </data>
+                                        <validationReport>
+                                            <file>target/validation/validationReport.ttl</file>
+                                        </validationReport>
+                                    </shaclValidate>
+                                    <shaclValidate>
+                                        <message>Validating QUDT conversion multipliers</message>
+                                        <shapes>
+                                            <file>target/srcgen/factorUnits/validate.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <graph>dist:schema:SCHEMA_QUDT.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                        </data>
+                                        <validationReport>
+                                            <file>target/validation/validationReport-factorUnits.ttl</file>
+                                        </validationReport>
+                                    </shaclValidate>
+                                    <shaclValidate>
+                                        <message>Validating QUDT factor units</message>
+                                        <shapes>
+                                            <file>target/srcgen/factorUnits/validate.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <graph>dist:schema:SCHEMA_QUDT.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                        </data>
+                                        <validationReport>
+                                            <file>target/validation/validationReport-factorUnits.ttl</file>
+                                        </validationReport>
+                                    </shaclValidate>
+                                    <shaclValidate>
+                                        <message>Validating QUDT scalingOf</message>
+                                        <shapes>
+                                            <file>target/srcgen/scalingOf/validate.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <graph>dist:schema:SCHEMA_QUDT.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                        </data>
+                                        <validationReport>
+                                            <file>target/validation/validationReport-scalingOf.ttl</file>
+                                        </validationReport>
+                                    </shaclValidate>
+                                    <shaclValidate>
+                                        <!-- if this validation fails, fixSrc can fix the problem -->
+                                        <failOnSeverity>Violation</failOnSeverity>
+                                        <message>Preventing qudt:symbol that does not match the symbol calculated from base unit(s)</message>
+                                        <shapes>
+                                            <file>target/srcgen/symbol/validate.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <graph>dist:schema:SCHEMA_QUDT.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                            <file>src/build/srcgen/symbol/units-overriding-inferred-symbol.ttl</file>
+                                        </data>
+                                        <validationReport>
+                                            <file>target/validation/symbol.ttl</file>
+                                        </validationReport>
+                                    </shaclValidate>
                                 </steps>
                             </pipeline>
                         </configuration>
@@ -1434,16 +2242,13 @@
                             <includes>
                                 <include>src/main/rdf/**/*.ttl</include>
                                 <include>src/build/**/*.ttl</include>
-                                <include>target/**/*.ttl</include>
-                            </includes>
-                            <excludes>
-                                <exclude>target/inferred/</exclude>
+                                <include>target/dist/**/*.ttl</include>
                                 <exclude>target/validation/</exclude>
-                            </excludes>
+                            </includes>
                             <format>
                                 <failOnWarning>false</failOnWarning>
                                 <verify>true</verify>
-                                <turtleFormatterVersion>1.2.14</turtleFormatterVersion>
+                                <turtleFormatterVersion>1.2.16</turtleFormatterVersion>
                                 <turtle>
                                     <predicateOrder>rdf:type,owl:imports</predicateOrder>
                                     <firstPredicateInNewLine>true</firstPredicateInNewLine>
@@ -1458,6 +2263,17 @@
                     </markdown>
 
                     <formats>
+                        <format>
+                            <includes>
+                                <include>src/main/rdf/**/*.ttl</include>
+                                <include>target/dist/**/*.ttl</include>
+                            </includes>
+                            <replaceRegex>
+                                <name>fix turtle-formatter newlines on windows and mac</name>
+                                <searchRegex>(\\r)+$</searchRegex>
+                                <replacement></replacement>
+                            </replaceRegex>
+                        </format>
                         <!--
                         does our placeholder replacements using the maven properties
                         that were set using the groovy plugin
@@ -1465,7 +2281,6 @@
                         <format>
                             <includes>
                                 <include>target/dist/**/*.*</include>
-                                <include>target/build/**/*.*</include>
                             </includes>
                             <excludes>
                                 <include>target/**/*.xlsx</include>
@@ -1533,7 +2348,7 @@
                             merge/rebase to our main branch would lead to having unformatted files in
                             the main branch.
                         -->
-                        <id>check-source-format</id>
+                        <id>check-src-format</id>
                         <phase>process-sources</phase>
                         <goals>
                             <goal>check</goal>
@@ -1565,7 +2380,7 @@
                     </execution>
                     <execution>
                         <!-- formats source files that were generated during the build up to the compile phase -->
-                        <id>reformat-sources</id>
+                        <id>reformat-src</id>
                         <phase>none</phase>
                         <goals>
                             <goal>apply</goal>
@@ -1596,12 +2411,8 @@
                             <rdf>
                                 <!-- redefine rdf includes to only include target/dist -->
                                 <includes>
-                                    <include>target/**/*.ttl</include>
+                                    <include>target/dist/**/*.ttl</include>
                                 </includes>
-                                <excludes>
-                                    <exclude>target/validation/*.ttl</exclude>
-                                    <exclude>target/inferred/*.ttl</exclude>
-                                </excludes>
                             </rdf>
                         </configuration>
                     </execution>
@@ -1744,18 +2555,31 @@
         </profile>
         <profile>
             <!--
-                runs all source modifications (inferences and formatting) before anything else in the build
+                runs all src modifications (inferences and formatting) before anything else in the build
              -->
             <id>fix</id>
+            <properties>
+                <fix.profile.is.inactive>fix.profile.is.active</fix.profile.is.inactive>
+            </properties>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>io.github.qudtlib</groupId>
+                        <artifactId>rdfio-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>fix-src</id>
+                                <phase>generate-test-sources</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>com.diffplug.spotless</groupId>
                         <artifactId>spotless-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>reformat-sources</id>
-                                <phase>validate</phase>
+                                <id>reformat-src</id>
+                                <phase>generate-test-sources</phase>
                             </execution>
                         </executions>
                     </plugin>

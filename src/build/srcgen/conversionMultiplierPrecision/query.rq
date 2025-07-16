@@ -1,0 +1,18 @@
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix qfn: <http://qudt.org/shacl/functions#>
+prefix nf: <https://github.com/qudtlib/numericFunctions/>
+prefix qudt: <http://qudt.org/schema/qudt/>
+prefix sh: <http://www.w3.org/ns/shacl#>
+
+SELECT $this (qudt:conversionMultiplier as ?path)  ?actualMultiplier ?calculatedMultiplier
+WHERE {
+    {
+        ?this qudt:conversionMultiplier ?actualMultiplier ;
+
+    }
+    BIND(nf:decimal.roundToPrecision(?actualMultiplier, 34) AS ?calculatedMultiplier)
+    FILTER(?actualMultiplier != ?calculatedMultiplier)
+}

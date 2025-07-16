@@ -63,6 +63,16 @@ qfn:
     a sh:PrefixDeclaration ;
     sh:namespace "http://www.w3.org/ns/shacl#"^^xsd:anyURI ;
     sh:prefix "sh" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "https://github.com/qudtlib/numericFunctions/"^^xsd:anyURI ;
+    sh:prefix "nf" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "https://github.com/qudtlib/rdfio/"^^xsd:anyURI ;
+    sh:prefix "rdfio" ;
   ] .
 
 qfn:bound
@@ -435,7 +445,64 @@ qfn:dimVec.pow
             }
         """ .
 
-qfn:exp
+qfn:exponentSuperscript
+  a sh:SPARQLFunction ;
+  sh:parameter [
+    sh:datatype xsd:decimal ;
+    sh:order 0 ;
+    sh:path qfn:exponent ;
+  ] ;
+  sh:parameter [
+    sh:datatype xsd:boolean ;
+    sh:optional true ;
+    sh:order 1 ;
+    sh:path qfn:absolute ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:string ;
+  sh:select """
+    SELECT ?superscript
+    WHERE {
+      BIND(COALESCE(?absolute,false) as ?useAbsoluteValue)
+      BIND(IF(?useAbsoluteValue, ABS(?exponent), ?exponent) AS ?expValue)
+      BIND(STR(?expValue) as ?exprStr)
+      BIND(REPLACE(?exprStr, "\\\\.0+$", "") AS ?sp)
+      BIND(IF(?sp = "1", "", ?sp) AS ?notOne)
+      # Replace minus sign with superscript minus
+      BIND(REPLACE(?notOne, "-", "⁻") AS ?sm)
+      # Replace digits 0-9 with superscript equivalents
+      BIND(REPLACE(?sm, "0", "⁰") AS ?s0)
+      BIND(REPLACE(?s0, "1", "¹") AS ?s1)
+      BIND(REPLACE(?s1, "2", "²") AS ?s2)
+      BIND(REPLACE(?s2, "3", "³") AS ?s3)
+      BIND(REPLACE(?s3, "4", "⁴") AS ?s4)
+      BIND(REPLACE(?s4, "5", "⁵") AS ?s5)
+      BIND(REPLACE(?s5, "6", "⁶") AS ?s6)
+      BIND(REPLACE(?s6, "7", "⁷") AS ?s7)
+      BIND(REPLACE(?s7, "8", "⁸") AS ?s8)
+      BIND(REPLACE(?s8, "9", "⁹") AS ?s9)
+      # Replace decimal point with . + Combining Dot Above (U+0307)
+      BIND(REPLACE(?s9, "\\\\.", ".\\\\u0307") AS ?superscript)
+      # Remove trailing .0 (common in doubles like 2.0) to clean up output
+    }
+  """ .
+
+qfn:localname
+  a sh:SPARQLFunction ;
+  rdfs:comment "Extracts the localname part of an IRI" ;
+  sh:parameter [
+    sh:datatype xsd:anyURI ;
+    sh:description "an IRI" ;
+    sh:order 0 ;
+    sh:path qfn:input ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:string ;
+  sh:select """
+        SELECT (REPLACE(STR(?input), "^.+[/#]", "") as ?result) WHERE {}
+    """ .
+
+qfn:pow
   a sh:SPARQLFunction ;
   sh:parameter [
     sh:datatype xsd:decimal ;
@@ -458,7 +525,7 @@ qfn:exp
         BIND(ABS(?exponent) as ?absoluteExponent)
         BIND(IF (?value = 0.0,
             0.0,
-            if (?exponent < 0, 1.0 / ?value, ?value )) AS ?multiplier)
+            if (?exponent < 0, nf:decimal.div(1.0, ?value, 34), ?value )) AS ?multiplier)
         BIND(
             IF(?absoluteExponent = 0, 1.0,
                 IF(?absoluteExponent = 1,
@@ -480,21 +547,6 @@ qfn:exp
                                                 CONCAT("CANNOT HANDLE EXPONENT ", ?exponent))))))))))
         AS ?result )
     }
-    """ .
-
-qfn:localname
-  a sh:SPARQLFunction ;
-  rdfs:comment "Extracts the localname part of an IRI" ;
-  sh:parameter [
-    sh:datatype xsd:anyURI ;
-    sh:description "an IRI" ;
-    sh:order 0 ;
-    sh:path qfn:input ;
-  ] ;
-  sh:prefixes qfn: ;
-  sh:returnType xsd:string ;
-  sh:select """
-        SELECT (REPLACE(STR(?input), "^.+[/#]", "") as ?result) WHERE {}
     """ .
 
 qfn:unit.dimVec.calculate

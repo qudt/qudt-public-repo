@@ -5,29 +5,32 @@
 @prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 
-qfn:inferConversionMultiplier
+qfn:inferSymbols
   a owl:Ontology ;
   owl:imports qfn: .
 
-qfn:conversionMultiplierRule
+qfn:inferSymbolsRule
   a sh:NodeShape ;
   sh:rule [
     a sh:SPARQLRule ;
     sh:construct """
         CONSTRUCT {
-            $this
-                qudt:conversionMultiplier ?calculatedMultiplier ;
-                qudt:conversionMultiplierSN ?calculatedMultiplierSN .
-
-        }
+                 $this qudt:symbol ?calculatedSymbol ;
+                }
         WHERE
         {
             {
-                {{QUERY_WITHOUT_PREFIXES}}
-            }
-            BIND(qfn:decimalToDouble(?calculatedMultiplier) AS ?calculatedMultiplierSN)
-        }
 
+
+{{QUERY_WITHOUT_PREFIXES}}
+
+
+            }
+
+            FILTER NOT EXISTS {
+                qudt:UnitsOverridingInferredSymbol qudt:includes ?this .
+            }
+        }
 
         """ ;
     sh:prefixes qfn: ;
