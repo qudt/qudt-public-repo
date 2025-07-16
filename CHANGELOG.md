@@ -54,6 +54,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Added `qudt:hasQuantityKind quantitykind:AmountOfSubstanceFraction` to `unit:PPM`, `unit:PPB`, `unit:PPT`, `unit:PPQ`, `unit:PPTM`, `unit:PPTH`, and removed it from `unit:UNITLESS`
 - Fix wrong `qudt:isReplacedBy CCY_CCY_AED` statement in old currency units file `src/main/rdf/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl`.
 - Corrected dimension vectors of units
   - `unit:VAR`
