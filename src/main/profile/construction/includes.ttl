@@ -3,16 +3,21 @@
 @prefix profile: <http://qudt.org/schema/vocab/profile/> .
 @prefix qk: <http://qudt.org/vocab/quantitykind/> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
-@prefix unit: <http://qudt.org/vocab/unit/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
 
+profile:blocksIncludesShape
+  a sh:NodeShape ;
+  sh:property [
+    sh:path qudt:blocksInclude ;
+    sh:values [
+      sh:path ( qudt:includes qudt:hasQuantityKind ) ;
+    ] ;
+  ] ;
+  sh:targetNode profile:construction .
 
 profile:construction
   a qudt:Profile ;
-  qudt:hasInferenceConfiguration profile:defaultProfileInferenceConfig ;
-  qudt:hasInferenceConfiguration [
-    qudt:blocksIncludesViaPath qudt:hasQuantityKind
-  ] ;
   qudt:includes pfx:Atto ;
   qudt:includes pfx:Centi ;
   qudt:includes pfx:Deca ;
@@ -149,24 +154,3 @@ profile:construction
   qudt:includes unit:WB .
 
 
-
-profile:constructionUnitConversionMultiplierWithinRangeShape
-  a sh:NodeShape ;
-  sh:sparql [
-    a sh:SPARQLConstraint ;
-    rdfs:comment "Units in the construction domain must have conversion multipliers in a reasonable range" ;
-    sh:message "Unit {?this}: conversionMultiplier {?cm} is out of range (min (abs): {?min}, max (abs): {?max}" ;
-    sh:prefixes qfn:;
-    sh:select """
-    SELECT $this ?cm ?min ?max
-        WHERE {
-            ?this qudt:conversionMultiplier ?cm
-            BIND(ABS(?cm) as ?absCm)
-            BIND(1.0E15 as ?max)
-            BIND(1.0E-12 as ?min)
-            FILTER(?absCm > ?max || ?absCm < ?min || ?cm = 0)
-        }
-    }
-""" ;
-  ] ;
-  sh:targetClass qudt:Unit .

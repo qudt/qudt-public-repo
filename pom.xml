@@ -52,7 +52,7 @@
                       generate-test-sources
                       process-test-sources     all-in-one
                       generate-test-resources
-                      process-test-resources
+                      process-test-resources   profile
                       test-compile
                       process-test-classes     format-dist
                       test                     validate-dist
@@ -2564,6 +2564,9 @@
                             <pipeline>
                                 <id>profile</id>
                                 <steps>
+                                    <shaclFunctions>
+                                        <file>src/main/rdf/validation/qudt-shacl-functions.ttl</file>
+                                    </shaclFunctions>
                                     <add>
                                         <files>
                                             <include>target/dist/**/*.ttl</include>
@@ -2581,172 +2584,250 @@
                                         </values>
                                         <var>profileName</var>
                                         <body>
+                                            <clear>
+                                                <graph>profile:config:includes</graph>
+                                                <graph>profile:config:excludes</graph>
+                                                <graph>profile:currentState</graph>
+                                            </clear>
                                             <add>
-                                                <file>src/build/profile/default-profile-inference-config.ttl</file>
-                                                <file>src/main/profile/${profileName}/profile-config.ttl</file>
-                                                <toGraph>config:${profileName}</toGraph>
+                                                <files>
+                                                    <include>
+                                                        src/build/profile/default-includes.ttl
+                                                        src/build/profile/default-excludes.ttl
+                                                        src/main/profile/${profileName}/includes.ttl
+                                                        src/main/profile/${profileName}/excludes.ttl
+                                                    </include>
+                                                </files>
+                                                <toGraphsPattern>profile:config:${name}</toGraphsPattern>
                                             </add>
+                                            <sparqlUpdate>
+                                                <message>initializing graph profile:currentState with includes.ttl</message>
+                                                <sparql>
+                                                    <![CDATA[
+                                                        INSERT {
+                                                            GRAPH <profile:currentState> {
+                                                                ?profile
+                                                                    a qudt:Profile ;
+                                                                    qudt:includes ?included .
+                                                            }
+                                                        } WHERE {
+                                                            GRAPH <profile:config:includes.ttl> {
+                                                                ?profile
+                                                                    a qudt:Profile ;
+                                                                    qudt:includes ?included .
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparql>
+                                            </sparqlUpdate>
                                             <until>
                                                 <indexVar>iteration</indexVar>
-                                                <message>Inferring implied included resources according to the profile's inference configuration</message>
+                                                <message>Iteratively collecting qudt:includes via SHACL inference with includes.ttl and default-includes.ttl until no more are found</message>
                                                 <body>
                                                     <clear>
-                                                        <graph>inferred:profileIncludes</graph>
-                                                        <graph>validation:resourcesToExclude</graph>
+                                                        <graph>profile:newIncludes</graph>
                                                     </clear>
-                                                    <sparqlQuery>
-                                                        <message>Inferring included profile resources</message>
-                                                        <sparql>
-                                                            <![CDATA[
-                                                        PREFIX rdfio: <https://github.com/qudtlib/rdfio/>
-                                                        SELECT DISTINCT *
-                                                         WHERE {
-                                                            BIND(IRI(CONCAT("config:", ?profileName)) as ?profileGraph)
-                                                            GRAPH ?profileGraph {
-                                                                ?profile
-                                                                    a qudt:Profile ;
-                                                                    qudt:includes ?includedResource ;
-                                                                    qudt:hasInferenceConfiguration ?inferenceConfig .
-                                                                {
-                                                                    # support single-property path
-                                                                    ?inferenceConfig qudt:includesViaPath ?includingPath .
-                                                                    FILTER (isIRI(?includingPath))
-                                                                } UNION {
-                                                                    # support property-sequence-of-2 path
-                                                                    ?inferenceConfig qudt:includesViaPath ?includingPath .
-                                                                    ?includingPath
-                                                                        rdf:first ?includingProp1 ;
-                                                                        rdf:rest ?_r1 .
-                                                                    ?_r1
-                                                                        rdf:first ?includingProp2 ;
-                                                                        rdf:rest rdf:nil .
-                                                                }
-                                                            }
-
-                                                            FILTER NOT EXISTS {
-                                                                GRAPH ?profileGraph {
-                                                                # don't infer if already included
-                                                                    ?profile qudt:includes ?inferredResource
-                                                                }
-                                                            }
-
-                                                            GRAPH ?someGraph {
-                                                                ?includedResource ?includingPath ?inferredResource
-                                                            }
-
-                                                        }
-                                                    ]]>
-                                                        </sparql>
-                                                        <toFile>target/profilegen/${profileName}/inspection/inferring-${iteration}.txt</toFile>
-                                                    </sparqlQuery>
+                                                    <shaclInfer>
+                                                        <message>Inferring qudt:includes into graph profile:newIncludes</message>
+                                                        <data>
+                                                            <graphs>
+                                                                <include>dist:*</include>
+                                                            </graphs>
+                                                            <graph>profile:currentState</graph>
+                                                        </data>
+                                                        <shapes>
+                                                            <graph>profile:config:includes.ttl</graph>
+                                                            <graph>profile:config:default-includes.ttl</graph>
+                                                        </shapes>
+                                                        <inferred>
+                                                            <graph>profile:newIncludes</graph>
+                                                        </inferred>
+                                                    </shaclInfer>
                                                     <sparqlUpdate>
-                                                        <message>Inferring included profile resources</message>
+                                                        <message>graph profile:newIncludes - Removing qudt:includes if already included or blocked via qudt:blocksInclude</message>
                                                         <sparql>
                                                             <![CDATA[
-                                                        PREFIX rdfio: <https://github.com/qudtlib/rdfio/>
-                                                        INSERT {
-                                                          GRAPH <inferred:profileIncludes> {
-                                                            ?profile qudt:includes ?inferredResource
-                                                          }
-                                                        } WHERE {
-                                                            BIND(IRI(CONCAT("config:", ?profileName)) as ?profileGraph)
-                                                            GRAPH ?profileGraph {
-                                                                ?profile
-                                                                    a qudt:Profile ;
-                                                                    qudt:includes ?includedResource ;
-                                                                    qudt:hasInferenceConfiguration ?inferenceConfig .
-                                                                {
-                                                                    # support single-property path
-                                                                    ?inferenceConfig qudt:includesViaPath ?includingPath .
-                                                                    FILTER (isIRI(?includingPath))
-                                                                } UNION {
-                                                                    # support property-sequence-of-2 path
-                                                                    ?inferenceConfig qudt:includesViaPath ?includingPath .
-                                                                    ?includingPath
-                                                                        rdf:first ?includingProp1 ;
-                                                                        rdf:rest ?_r1 .
-                                                                    ?_r1
-                                                                        rdf:first ?includingProp2 ;
-                                                                        rdf:rest rdf:nil .
+                                                                DELETE {
+                                                                    GRAPH <profile:newIncludes> {
+                                                                        ?profile qudt:includes ?prevented .
+                                                                    }
+                                                                } WHERE {
+                                                                    {
+                                                                        # dont infer if actively blocked
+                                                                        GRAPH <profile:newIncludes> {
+                                                                            ?profile qudt:blocksInclude ?prevented .
+                                                                        }
+                                                                    } UNION {
+                                                                        # dont infer if already included
+                                                                        GRAPH <profile:currentState> {
+                                                                            ?profile qudt:includes ?prevented
+                                                                        }
+                                                                    }
+
                                                                 }
-                                                            }
-
-                                                            FILTER NOT EXISTS {
-                                                                GRAPH ?profileGraph {
-                                                                    # don't infer if already included
-                                                                    ?profile qudt:includes ?inferredResource
-                                                                }
-                                                            }
-
-                                                            FILTER NOT EXISTS {
-                                                                GRAPH ?profileGraph {
-                                                                    # don't infer if actively blocked
-                                                                    ?profile qudt:hasInferenceConfiguration/qudt:blocksIncludesViaPath ?includingPath.
-                                                                }
-                                                            }
-
-                                                            GRAPH ?someGraph {
-                                                                ?includedResource ?includingPath ?inferredResource
-                                                            }
-
-                                                        }
-                                                    ]]>
+                                                            ]]>
                                                         </sparql>
                                                     </sparqlUpdate>
-
-                                                    <sparqlValidate>
-                                                        <message>Removing entities that do not match the profile's SHACL shapes</message>
-                                                        <shapes>
-                                                            <graph>config:${profileName}</graph>
-                                                        </shapes>
-                                                        <data>
-                                                            <!-- TODO: somehow compute profile overlay that contains the currently selected data only -->
-                                                            CONTINUE HERE
-                                                            <graphs>
-                                                                <include>dist:schema</include>
-                                                            </graphs>
-                                                        </data>
-                                                        <validationReport>
-                                                            <graph>validation:resourcesToExclude</graph>
-                                                            <file>target/profilegen/${profileName}/resources-to-exclude-${iteration}.ttl</file>
-                                                        </validationReport>
-                                                    </sparqlValidate>
-
                                                     <write>
-                                                        <graph>inferred:profileIncludes</graph>
-                                                        <toFile>target/profilegen/${profileName}/inferred-profile-includes-${iteration}.ttl</toFile>
+                                                        <graph>profile:newIncludes</graph>
+                                                        <toFile>target/profilegen/${profileName}/new-includes-${iteration}.ttl</toFile>
                                                     </write>
                                                     <add>
-                                                        <graph>inferred:profileIncludes</graph>
-                                                        <toGraph>config:${profileName}</toGraph>
+                                                        <graph>profile:newIncludes</graph>
+                                                        <toGraph>profile:currentState</toGraph>
                                                     </add>
-                                                    <sparqlUpdate>
-                                                        <![CDATA[
-                                                            DELETE {
-
-                                                            }
-                                                            INSERT {
-
-                                                            }
-                                                            WHERE {
-                                                                GRAPH <inferred:profile
-                                                            }
-                                                        ]]>
-                                                    </sparqlUpdate>
-
                                                 </body>
                                                 <sparqlAsk>
                                                     <![CDATA[
                                                         ASK WHERE {
                                                             FILTER NOT EXISTS {
-                                                                GRAPH <inferred:profileIncludes> {
-                                                                    ?s ?p ?o
+                                                                GRAPH <profile:newIncludes> {
+                                                                    ?profile
+                                                                        a qudt:Profile ;
+                                                                        qudt:includes ?newInclude .
                                                                 }
                                                             }
                                                         }
                                                     ]]>
                                                 </sparqlAsk>
                                             </until>
+                                            <sparqlUpdate>
+                                                <message>graph qudt:currentState - adding qudt:excludes from exclude.ttl</message>
+                                                <sparql>
+                                                    <![CDATA[
+                                                        INSERT {
+                                                            GRAPH <profile:currentState> {
+                                                                ?profile qudt:excludes ?excluded
+                                                            }
+                                                        }
+                                                        WHERE {
+                                                            GRAPH <profile:config:exclude.ttl> {
+                                                                ?profile
+                                                                    a qudt:Profile ;
+                                                                    qudt:excludes ?excluded
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparql>
+                                            </sparqlUpdate>
+                                            <clear><graph>profile:shapeViolations</graph></clear>
+                                            <shaclValidate>
+                                                <message>Searching for entities to exclude using shapes in excludes.ttl</message>
+                                                <failOnSeverity>None</failOnSeverity>
+                                                <shapes>
+                                                    <graph>profile:config:excludes.ttl</graph>
+                                                </shapes>
+                                                <data>
+                                                    <graph>profile:currentState</graph>
+                                                    <graphs>
+                                                        <include>dist:*</include>
+                                                    </graphs>
+                                                </data>
+                                                <validationReport>
+                                                    <graph>profile:shapeViolations</graph>
+                                                    <file>target/profilegen/${profileName}/exclude-ttl-shape-violations.ttl</file>
+                                                </validationReport>
+                                            </shaclValidate>
+                                            <sparqlUpdate>
+                                                <message>graph qudt:currentState - adding qudt:excludes for entities that do not match the profile's SHACL shapes in excludes.ttl</message>
+                                                <sparql>
+                                                   <![CDATA[
+                                                        INSERT  {
+                                                            GRAPH <profile:currentState> {
+                                                                ?profile qudt:excludes ?resourceToExclude
+                                                            }
+                                                        }
+                                                        WHERE {
+                                                            GRAPH <profile:currentState> {
+                                                                ?profile a qudt:Profile
+                                                            }
+                                                            GRAPH <profile:shapeViolations> {
+                                                                ?validationResult
+                                                                    rdf:type                      sh:ValidationResult;
+                                                                    sh:resultSeverity             sh:Violation;
+                                                                    sh:value                      ?resourceToExclude
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparql>
+                                            </sparqlUpdate>
+
+
+                                            <until>
+                                                <indexVar>iteration</indexVar>
+                                                <message>Iteratively collecting qudt:excludes via SHACL inference with excludes.ttl and default-excludes.ttl until no more are found</message>
+                                                <body>
+                                                    <clear>
+                                                        <graph>profile:newExcludes</graph>
+                                                    </clear>
+                                                    <shaclInfer>
+                                                        <message>Inferring qudt:excludes into graph profile:newExcludes</message>
+                                                        <data>
+                                                            <graphs>
+                                                                <include>dist:*</include>
+                                                            </graphs>
+                                                            <graph>profile:currentState</graph>
+                                                        </data>
+                                                        <shapes>
+                                                            <graph>profile:config:excludes.ttl</graph>
+                                                            <graph>profile:config:default-excludes.ttl</graph>
+                                                        </shapes>
+                                                        <inferred>
+                                                            <graph>profile:newExcludes</graph>
+                                                        </inferred>
+                                                    </shaclInfer>
+                                                    <sparqlUpdate>
+                                                        <message>graph profile:newExcludes - Removing qudt:excludes if already included or blocked via qudt:blocksExclude</message>
+                                                        <sparql>
+                                                            <![CDATA[
+                                                                DELETE {
+                                                                    GRAPH <profile:newExcludes> {
+                                                                        ?profile qudt:excludes ?prevented .
+                                                                    }
+                                                                } WHERE {
+                                                                    {
+                                                                        # dont infer if actively blocked
+                                                                        GRAPH <profile:newExcludes> {
+                                                                            ?profile qudt:blocksExclude ?prevented .
+                                                                        }
+                                                                    } UNION {
+                                                                        # dont infer if already excluded
+                                                                        GRAPH <profile:currentState> {
+                                                                            ?profile qudt:excludes ?prevented
+                                                                        }
+                                                                    }
+
+                                                                }
+                                                            ]]>
+                                                        </sparql>
+                                                    </sparqlUpdate>
+                                                    <write>
+                                                        <graph>profile:newExcludes</graph>
+                                                        <toFile>target/profilegen/${profileName}/new-excludes-${iteration}.ttl</toFile>
+                                                    </write>
+                                                    <add>
+                                                        <graph>profile:newExcludes</graph>
+                                                        <toGraph>profile:currentState</toGraph>
+                                                    </add>
+                                                </body>
+                                                <sparqlAsk>
+                                                    <![CDATA[
+                                                        ASK WHERE {
+                                                            FILTER NOT EXISTS {
+                                                                GRAPH <profile:newExcludes> {
+                                                                    ?profile
+                                                                        a qudt:Profile ;
+                                                                        qudt:excludes ?newExclude .
+                                                                }
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparqlAsk>
+                                            </until>
+
+
+
+
                                             <sparqlUpdate>
                                                 <message>copy included resources to profile graphs and configure their output files</message>
                                                 <sparql>
@@ -2774,18 +2855,19 @@
 
                                                                     }
                                                                 }
-                                                                BIND(IRI(CONCAT("config:", ?profileName)) as ?profileGraph)
                                                                 BIND(IRI(CONCAT(?profileName,":",STR(?distGraph))) as ?profileDistGraph)
                                                                 BIND(IRI(REPLACE(STR(?distFile), "file://target/dist/", CONCAT("file://target/dist/profile/",?profileName,"/"))) AS ?profileDistFile)
-                                                                GRAPH ?profileGraph {
+                                                                GRAPH <profile:currentState> {
                                                                     ?prof
                                                                         a qudt:Profile ;
                                                                         qudt:includes ?res .
                                                                 }
                                                                 FILTER NOT EXISTS {
-                                                                    ?prof
-                                                                        a qudt:Profile ;
-                                                                        qudt:excludes ?res
+                                                                    GRAPH <profile:currentState> {
+                                                                        ?prof
+                                                                            a qudt:Profile ;
+                                                                            qudt:excludes ?res
+                                                                    }
                                                                 }
                                                             }
                                                             GRAPH ?distGraph {
@@ -2804,20 +2886,39 @@
                                                     ]]>
                                                 </sparql>
                                             </sparqlUpdate>
+                                            <write>
+                                                <graph>profile:currentState</graph>
+                                                <toFile>target/profilegen/${profileName}/final-profile-state.ttl</toFile>
+                                            </write>
                                             <sparqlQuery>
                                                 <sparql>
-                                                    SELECT DISTINCT ?includedEntity ?type WHERE {
-                                                        BIND(IRI(CONCAT("config:", ?profileName)) as ?profileGraph)
-                                                        GRAPH ?profileGraph {
-                                                            ?profile a qudt:Profile ;
-                                                                qudt:includes ?includedEntity .
+                                                    <![CDATA[
+                                                    SELECT ?includedEntity (GROUP_CONCAT(STR(?type)) as ?types)
+                                                    WHERE
+                                                    {
+                                                        {
+                                                            SELECT DISTINCT ?includedEntity ?type
+                                                            WHERE
+                                                            {
+                                                                GRAPH <profile:currentState> {
+                                                                    ?profile a qudt:Profile ;
+                                                                        qudt:includes ?includedEntity .
+                                                                    FILTER NOT EXISTS {
+                                                                        ?profile qudt:excludes ?includedEntity .
+                                                                    }
+                                                                }
+                                                                GRAPH ?any {
+                                                                    ?includedEntity a ?type ;
+                                                                }
+                                                            }
+                                                            ORDER BY ?type
                                                         }
-                                                        GRAPH ?any {
-                                                            ?includedEntity a ?type
-                                                        }
-                                                    } ORDER BY ?type ?includedEntity
+                                                    }
+                                                    GROUP BY ?includedEntity
+                                                    ORDER BY ?includedEntity
+                                                    ]]>
                                                 </sparql>
-                                                <toFile>target/profilegen/${profileName}/inspection/included-entities.txt</toFile>
+                                                <toFile>target/profilegen/${profileName}/included-entities.txt</toFile>
                                             </sparqlQuery>
                                             <write>
                                                 <graphs>
