@@ -74,4 +74,27 @@ Algorithm:
    and not `?profile ?qudt:excludes ?resource` in `<profile:currentState>`, the resource and its direct triples
    (including blank nodes and their triples) are added to the coresponding file in the profile
 
-Profile-specific files are found under `target/dist/profile/[profilename]`.
+## Guide for Profile Developers
+
+Profile-specific files are put in `target/dist/profile/[profilename]`. Each profile must be listed in the `pom.xml` file. Look for
+
+```
+<foreach>
+    <values>
+        <in>
+           construction
+```
+
+... and add the profile folder name.
+
+Add two files in that folder:
+1. write an `includes.ttl` file:
+1. containing a `?profile a qudt:Profile` triple
+2. optionally containing `?profile qudt:includes ?resource` triples
+3. optionally containing `?profile qudt:blocksIncludes ?resource` triples or a SHACL-AF rule that generates these triples - thus `?resource` can never be inferred as being included
+1. write an `excludes.ttl` file:
+2. containing a `?profile a qudt:Profile` triple
+2. optionally containing `?profile qudt:excludes ?resource` triples
+3. optionally containing `?profile qudt:blocksExcludes ?resource` triples or a SHACL-AF rule that generates these triples - thus `?resource` can never be inferred as being excluded
+
+For `?profile` please use the IRI `profile:[profilename]`, e.g. `<http://qudt.org/schema/vocab/profile/construction> or `profile:construction` if the `profile` prefix is defined.
