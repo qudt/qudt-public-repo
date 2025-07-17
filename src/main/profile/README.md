@@ -28,8 +28,10 @@ Example: [Construction Domain Profile](./construction)
 
 ### Profile Algorithm
 
-`?profile`: an RDF resource identifying the profile, defined in `includes.ttl` and `excludes.ttl`
-`?resource`: placeholder for any RDF resource in QUDT that is either included in or excluded from the profile
+Variables used:
+
+- `?profile`: an RDF resource identifying the profile, defined in `includes.ttl` and `excludes.ttl`
+- `?resource`: placeholder for any RDF resource in QUDT that is either included in or excluded from the profile
 
 Basic idea:
 1. collect included entities (one statement per entity `?profile qudt:includes ?resource` in a graph that is
