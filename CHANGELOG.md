@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.1.4] - 2025-07-18
+
 ### Added
 
 - New Distribution Files
@@ -52,6 +54,21 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - Changed "Thermal heat capacity" to "total energy per unit mass, commonly known as specific enthalpy" for unit:BTU_TH-PER-LB
   - Changed "Thermal heat capacity" to "total energy per unit mass, commonly known as specific enthalpy" for unit:J-PER-KiloGM
 
+### Deprecated
+
+- `unit:MicroGAL-PER-M` (new unit: `unit:MicroGALILEO-PER-M`)
+- `unit:MilliGAL` (new unit: `unit:MilliGALILEO`)
+- `unit:MilliGAL-PER-MO` (new unit: `unit:MilliGALILEO-PER-MO`)
+- `unit:Ci` (added for consistency, new unit: `unit:CI`)
+- `unit:KiloCi` (new unit: `unit:KiloCI`)
+- `unit:MicroCi` (new unit: `unit:MicroCI`)
+- `unit:MilliCi` (new unit: `unit:MilliCI`)
+- `unit:CAL_15_DEG_C` (new unit: `unit:CAL_15DEG_C`)
+- `quantitykind:ConductivityVariance_NEON` (replacement: `quantitykind:ConductivityVariance`)
+- `quantitykind:MolarFluxDensityVariance_NEON` (replacement: `quantitykind:MolarFluxDensityVariance`)
+- `quantitykind:TemperatureVariance_NEON` (replacement: `quantitykind:TemperatureVariance`)
+- Deprecated quantity kinds that represented the union of several other quantity kinds. Treatment of alternatives should be handled by applications.
+
 ### Fixed
 
 - Added `qudt:hasQuantityKind quantitykind:AmountOfSubstanceFraction` to `unit:PPM`, `unit:PPB`, `unit:PPT`, `unit:PPQ`, `unit:PPTM`, `unit:PPTH`, and removed it from `unit:UNITLESS`
@@ -72,21 +89,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `unit:GM qudt:scalingOf unit:KiloGM`, such that the standard algorithm for determining conversion multipliers (following factor units and scalings recursively) applies correctly.
   E.g, for `unit:DecaGM`: `conversionMultiplier = prefix:Deca.prefixMultiplier * unit:GM.conversionMultiplier = 10.0 * 0.001 = 0.01`
 - Corrected 136 unit symbols
-
-### Deprecated
-
-- `unit:MicroGAL-PER-M` (new unit: `unit:MicroGALILEO-PER-M`)
-- `unit:MilliGAL` (new unit: `unit:MilliGALILEO`)
-- `unit:MilliGAL-PER-MO` (new unit: `unit:MilliGALILEO-PER-MO`)
-- `unit:Ci` (added for consistency, new unit: `unit:CI`)
-- `unit:KiloCi` (new unit: `unit:KiloCI`)
-- `unit:MicroCi` (new unit: `unit:MicroCI`)
-- `unit:MilliCi` (new unit: `unit:MilliCI`)
-- `unit:CAL_15_DEG_C` (new unit: `unit:CAL_15DEG_C`)
-- `quantitykind:ConductivityVariance_NEON` (replacement: `quantitykind:ConductivityVariance`)
-- `quantitykind:MolarFluxDensityVariance_NEON` (replacement: `quantitykind:MolarFluxDensityVariance`)
-- `quantitykind:TemperatureVariance_NEON` (replacement: `quantitykind:TemperatureVariance`)
-- Deprecated quantity kinds that represented the union of several other quantity kinds. Treatment of alternatives should be handled by applications.
 
 ## [3.1.3] - 2025-06-26
 
@@ -400,7 +402,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.3...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.4...HEAD
+[3.1.4]: https://github.com/qudt/qudt-public-repo/compare/v3.1.3...v3.1.4
 [3.1.3]: https://github.com/qudt/qudt-public-repo/compare/v3.1.2...v3.1.3
 [3.1.2]: https://github.com/qudt/qudt-public-repo/compare/v3.1.1...v3.1.2
 [3.1.1]: https://github.com/qudt/qudt-public-repo/compare/v3.1.0...v3.1.1
