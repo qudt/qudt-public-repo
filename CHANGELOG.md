@@ -21,6 +21,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - `unit:BasePair` which is implied by `unit:GigaBasePair`
   - `unit:FLOPS` which is implied by e.g `unit:TeraFLOPS`
   - `unit:Ci` (deprecated) which is implied by e.g. now-deprecated `unit:KiloCi`
+  - `unit:NCM` to support the Dutch hydrocarbons sector
+  - `unit:NCM_1ATM_0DEG_C_NL` which is quantified further by `unit:NCM`
+  - `unit:SCM_1ATM_0DEG_C` which is a contextual unit of `unit:SCM`
+  - `unit:SCM_1ATM_15DEG_C_ISO` which is a contextual unit of `unit:SCM`
+  - `unit:SCM_1ATM_15DEG_C_NL` which is a Dutch hydrocarbons sector quantification of `unit:SCM`
 
 ### Changed
 
@@ -53,6 +58,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Descriptions
   - Changed "Thermal heat capacity" to "total energy per unit mass, commonly known as specific enthalpy" for unit:BTU_TH-PER-LB
   - Changed "Thermal heat capacity" to "total energy per unit mass, commonly known as specific enthalpy" for unit:J-PER-KiloGM
+  - Further specified sources for, and applications of, unit:SCM and derivatives, including linking to unit:NCM
 
 ### Deprecated
 
