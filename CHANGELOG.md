@@ -7,6 +7,22 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+ - `unit:NCM` to support the Dutch hydrocarbons sector
+  - `unit:NCM_1ATM_0DEG_C_NL` which is quantified further by `unit:NCM`
+  - `unit:SCM_1ATM_0DEG_C` which is a contextual unit of `unit:SCM`
+  - `unit:SCM_1ATM_15DEG_C_ISO` which is a contextual unit of `unit:SCM`
+  - `unit:SCM_1ATM_15DEG_C_NL` which is a Dutch hydrocarbons sector quantification of `unit:SCM`
+
+### Changed
+
+### Deprecated
+
+### Fixed
+
+- Fixed datatype definitions missing rdfs:isDefinedBy triples
+
 ## [3.1.4] - 2025-07-18
 
 ### Added
@@ -21,11 +37,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - `unit:BasePair` which is implied by `unit:GigaBasePair`
   - `unit:FLOPS` which is implied by e.g `unit:TeraFLOPS`
   - `unit:Ci` (deprecated) which is implied by e.g. now-deprecated `unit:KiloCi`
-  - `unit:NCM` to support the Dutch hydrocarbons sector
-  - `unit:NCM_1ATM_0DEG_C_NL` which is quantified further by `unit:NCM`
-  - `unit:SCM_1ATM_0DEG_C` which is a contextual unit of `unit:SCM`
-  - `unit:SCM_1ATM_15DEG_C_ISO` which is a contextual unit of `unit:SCM`
-  - `unit:SCM_1ATM_15DEG_C_NL` which is a Dutch hydrocarbons sector quantification of `unit:SCM`
 
 ### Changed
 
