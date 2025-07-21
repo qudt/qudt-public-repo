@@ -9,11 +9,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
- - `unit:NCM` to support the Dutch hydrocarbons sector
-  - `unit:NCM_1ATM_0DEG_C_NL` which is quantified further by `unit:NCM`
-  - `unit:SCM_1ATM_0DEG_C` which is a contextual unit of `unit:SCM`
-  - `unit:SCM_1ATM_15DEG_C_ISO` which is a contextual unit of `unit:SCM`
-  - `unit:SCM_1ATM_15DEG_C_NL` which is a Dutch hydrocarbons sector quantification of `unit:SCM`
+- `unit:NCM` to support the Dutch hydrocarbons sector
+- `unit:NCM_1ATM_0DEG_C_NL` which is quantified further by `unit:NCM`
+- `unit:SCM_1ATM_0DEG_C` which is a contextual unit of `unit:SCM`
+- `unit:SCM_1ATM_15DEG_C_ISO` which is a contextual unit of `unit:SCM`
+- `unit:SCM_1ATM_15DEG_C_NL` which is a Dutch hydrocarbons sector quantification of `unit:SCM`
 
 ### Changed
 
