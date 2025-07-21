@@ -14,6 +14,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - `unit:SCM_1ATM_0DEG_C` which is a contextual unit of `unit:SCM`
 - `unit:SCM_1ATM_15DEG_C_ISO` which is a contextual unit of `unit:SCM`
 - `unit:SCM_1ATM_15DEG_C_NL` which is a Dutch hydrocarbons sector quantification of `unit:SCM`
+- Explicitly declared all the xsd datatypes to be instances of rdfs:Datatype in the SHACL datatypes schema file
 
 ### Changed
 
