@@ -1,4 +1,4 @@
-name: run `mvn -Pfix install`
+name: run `mvn spotless:apply`
 on:
   workflow_dispatch:
 
@@ -49,19 +49,7 @@ jobs:
       # then run mvn install again
       # try that up to three times
       - name: Apply formatting
-        run: |
-          attempt=0
-          while true; do
-            if mvn install; then
-              break
-            fi
-            if [ $attempt -ge 3 ]; then
-              echo "Failed to fix formatting after 3 attempts."
-              exit 1
-            fi
-            mvn -Pfix install
-            attempt=$((attempt + 1))
-          done
+        run: mvn spotless:apply
 
       # Commit changes
       - name: Commit changes
@@ -77,4 +65,4 @@ jobs:
 
       # print the summary
       - name: Print summary
-        run: echo "Successfully built with -Pfix and made a commit." >> $GITHUB_STEP_SUMMARY
+        run: echo "Successfully formatted the source files and made a commit." >> $GITHUB_STEP_SUMMARY
