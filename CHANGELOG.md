@@ -23,6 +23,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Fixed datatype definitions missing rdfs:isDefinedBy triples
+- Corrected `quantitykind:BohrMagneton` to `constant:BohrMagneton`
+- Corrected `quantitykind:MagneticFluxQuantum` to `constant:MagneticFluxQuantum`
+- Fixed some typos
 
 ## [3.1.4] - 2025-07-18
 
