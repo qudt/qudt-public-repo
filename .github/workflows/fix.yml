@@ -34,21 +34,11 @@ jobs:
           git config user.name ${{ github.actor }}
           git config user.email "<>"
 
-      # Check formatting and exit early (with success) if format is ok
-      - name: Check formatting
-        run: |
-          if mvn spotless:check; then
-            echo "Source was already formatted, nothing was touched." >> $GITHUB_STEP_SUMMARY
-            exit 0
-          else
-            echo "Sources need formatting, we'll do that now"
-          fi
-
       # run mvn install,
       # if there are problems, try mvn -Pfix install
       # then run mvn install again
       # try that up to three times
-      - name: Apply formatting
+      - name: Apply formatting and fix recoverable data errors in src
         run: |
           attempt=0
           while true; do

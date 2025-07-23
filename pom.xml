@@ -43,9 +43,9 @@
                 Each plugin has an <execution> section that binds its execution to a lifecycle phase (or it has a default lifecycle phase in which it runs, or 'none' for direct invocation).
                 Here are the phases and the execution ids that are linked to them (executed in the order they appear in this file):
                       validate                 defineAdditionalProperties, preprocess-shacl-files
-                      initialize
+                      initialize               check-src-format
                       generate-sources         unit-test
-                      process-sources          check-src-format, shacl-validate-src
+                      process-sources          shacl-validate-src
                       generate-resources       copy-rdf-to-dist, copy-rdf-to-work, copy-docs, copy-root-files, validate-shacl-files
                       process-resources
                       process-classes          main
@@ -2233,16 +2233,16 @@
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
                 <version>2.44.0.BETA3</version>
+                <!-- DO NOT specify multiple formats for the same file! The results are unpredictable! -->
                 <configuration>
                         <!-- default configuration - this is the one that is used if the plugin is
                         invoked directly using `mvn spotless:apply` or `mvn spotless:check`
+                        only formats src
                         -->
                         <rdf>
                             <includes>
                                 <include>src/main/rdf/**/*.ttl</include>
                                 <include>src/build/**/*.ttl</include>
-                                <include>target/dist/**/*.ttl</include>
-                                <exclude>target/validation/</exclude>
                             </includes>
                             <format>
                                 <failOnWarning>false</failOnWarning>
@@ -2253,26 +2253,22 @@
                                     <firstPredicateInNewLine>true</firstPredicateInNewLine>
                                 </turtle>
                             </format>
+                            <replaceRegex>
+                                <name>fix turtle-formatter newlines on windows and mac</name>
+                                <searchRegex>(\\r)+$</searchRegex>
+                                <replacement></replacement>
+                            </replaceRegex>
                         </rdf>
                     <markdown>
                         <includes>
                             <include>**/*.md</include>
                         </includes>
+                        <excludes>
+                            <include>target/**/*.*</include>
+                        </excludes>
                         <flexmark />
                     </markdown>
-
                     <formats>
-                        <format>
-                            <includes>
-                                <include>src/main/rdf/**/*.ttl</include>
-                                <include>target/dist/**/*.ttl</include>
-                            </includes>
-                            <replaceRegex>
-                                <name>fix turtle-formatter newlines on windows and mac</name>
-                                <searchRegex>(\\r)+$</searchRegex>
-                                <replacement />
-                            </replaceRegex>
-                        </format>
                         <!--
                         does our placeholder replacements using the maven properties
                         that were set using the groovy plugin
@@ -2282,6 +2278,7 @@
                                 <include>target/dist/**/*.*</include>
                             </includes>
                             <excludes>
+                                <include>target/**/*.ttl</include>
                                 <include>target/**/*.xlsx</include>
                                 <include>target/**/*.xls</include>
                                 <include>target/**/*.gif</include>
@@ -2348,7 +2345,7 @@
                             the main branch.
                         -->
                         <id>check-src-format</id>
-                        <phase>process-sources</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
@@ -2412,6 +2409,54 @@
                                 <includes>
                                     <include>target/dist/**/*.ttl</include>
                                 </includes>
+                                <excludes>
+                                    <include>src/**/*.*</include>
+                                </excludes>
+                                <replaceRegex>
+                                    <name>fix turtle-formatter newlines on windows and mac</name>
+                                    <searchRegex>(\\r)+$</searchRegex>
+                                    <replacement></replacement>
+                                </replaceRegex>
+                                <replaceRegex>
+                                    <name>full version replacement</name>
+                                    <searchRegex>\$\$QUDT_VERSION\$\$</searchRegex>
+                                    <replacement>${project.version}</replacement>
+                                </replaceRegex>
+                                <replaceRegex>
+                                    <name>major.minor version replacement</name>
+                                    <searchRegex>\$\$QUDT_MAJOR_MINOR_VERSION\$\$</searchRegex>
+                                    <replacement>${project.version.majorminor}</replacement>
+                                </replaceRegex>
+                                <replace>
+                                    <name>publish date replacement</name>
+                                    <search>1234-12-12T12:34:56Z</search>
+                                    <replacement>${qudt.build.date}</replacement>
+                                </replace>
+                                <replaceRegex>
+                                    <name>versioned IRI replacement</name>
+                                    <searchRegex>http://qudt.org/\d+.\d+/</searchRegex>
+                                    <replacement>${qudt.versioned.iri.prefix}</replacement>
+                                </replaceRegex>
+                                <replace>
+                                    <name>current year</name>
+                                    <search>$$$$CURRENT_YEAR$$$$</search>
+                                    <replacement>${qudt.current.year}</replacement>
+                                </replace>
+                                <replace>
+                                    <name>current month</name>
+                                    <search>$$$$CURRENT_MONTH$$$$</search>
+                                    <replacement>${qudt.current.month}</replacement>
+                                </replace>
+                                <replace>
+                                    <name>current year</name>
+                                    <search>$$$$QUDT_PREV_RELEASE_YEAR$$$$</search>
+                                    <replacement>${qudtPrevReleaseYear}</replacement>
+                                </replace>
+                                <replace>
+                                    <name>current month</name>
+                                    <search>$$$$QUDT_PREV_RELEASE_MONTH$$$$</search>
+                                    <replacement>${qudtPrevReleaseMonth}</replacement>
+                                </replace>
                             </rdf>
                         </configuration>
                     </execution>
