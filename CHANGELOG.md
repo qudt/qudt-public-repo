@@ -27,6 +27,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Corrected `quantitykind:MagneticFluxQuantum` to `constant:MagneticFluxQuantum`
 - Fixed some typos
 - Fixed source formatting with `mvn spotless:apply`, which was broken by a recent change.
+- Fixed a variety of entities that were referred to but not defined (thanks to @ektrah).
 
 ## [3.1.4] - 2025-07-18
 
