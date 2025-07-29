@@ -23,6 +23,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Fixed datatype definitions missing rdfs:isDefinedBy triples
+- Fixed the case of qudt:SIGNED and UNSIGNED to be qudt:Signed and qudt:Unsigned
 - Corrected `quantitykind:BohrMagneton` to `constant:BohrMagneton`
 - Corrected `quantitykind:MagneticFluxQuantum` to `constant:MagneticFluxQuantum`
 - Fixed some typos
