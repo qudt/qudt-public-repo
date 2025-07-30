@@ -4,15 +4,15 @@ QUDT - ***Q***uantities, ***U***nits, ***D***imensions and Data***T***ypes
 ## Quick-Start Guide
 
 There are three ways to bring the QUDT ontology into your environment.
-1. Download the latest GitHub Release [here](https://github.com/qudt/qudt-public-repo/releases) and load one of: 
-    -    QUDT-all-in-one-SHACL.ttl
-    -    QUDT-all-in-one-OWL.ttl
+1. Download the latest GitHub Release [here](https://github.com/qudt/qudt-public-repo/releases) and load one of:
+-    QUDT-all-in-one-SHACL.ttl
+-    QUDT-all-in-one-OWL.ttl
 
-    depending on whether you are using OWL or SHACL as your modeling approach.
+        depending on whether you are using OWL or SHACL as your modeling approach.
 
 2. Use the resolved graph and instance URIs, one of:
-    - http://qudt.org/shacl/qudt-all
-    - http://qudt.org/qudt-all
+   - http://qudt.org/shacl/qudt-all
+   - http://qudt.org/qudt-all
 3. Use GitHub fork to get the sources and build them using the instructions [here](https://github.com/qudt/qudt-public-repo/wiki/Installing-QUDT-for-Contributors).
 
 Overview
@@ -37,11 +37,10 @@ Installation instructions
 
 [Installing QUDT for Contributors](https://github.com/qudt/qudt-public-repo/wiki/Installing-QUDT-for-Contributors)
 
-
 SHACL Validation for QUDT Users versus QUDT Developers
----------------------------------------------------
+------------------------------------------------------
 
-QUDT SHACL for users is supported by a set of validation rules that check for references to deprecated instances or properties and recommend the updated instance or property. 
+QUDT SHACL for users is supported by a set of validation rules that check for references to deprecated instances or properties and recommend the updated instance or property.
 
 QUDT SHACL for contributors (accessed by using the individual graphs rather than QUDT-all-in-one-SHACL.ttl in the Release or fork) is supported by a much larger set of validation rules that check the integrity of the QUDT ontologies themselves.
 
@@ -50,7 +49,7 @@ Protege Users
 
 The QUDT ontologies have been tested to load without error in Protege 5.6.4.
 
-To load QUDT into Protege, choose "Open from URI" from the file menu, and enter http://qudt.org/qudt-all 
+To load QUDT into Protege, choose "Open from URI" from the file menu, and enter http://qudt.org/qudt-all
 
 This will load the latest version of the distribution file containing the OWL schema and all vocabularies for QUDT. You can also load a specific version by including the semantic version number, such as http://qudt.org/3.1.4/qudt-all
 
