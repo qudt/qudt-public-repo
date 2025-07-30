@@ -13,6 +13,8 @@ The QUDT project uses Maven (a build tool) to:
 - **Package** everything into a ZIP file for distribution (optional).
 The process is driven by a `pom.xml` file, which is like a blueprint for Maven. You’ll run commands to trigger specific steps, and we’ll explain the key ones below.
 
+(A detailed description can be seen [here](https://github.com/qudt/qudt-public-repo/wiki/QUDT_Build_Execution_Flow))
+
 ## Prerequisites
 
 - **Java**: Version 11 or higher (Maven needs this to run).
@@ -115,6 +117,8 @@ The build process is split into stages (Maven calls them "phases"). Here’s wha
 - **Test**: Validates the final output in `target/dist/` against stricter SHACL tests.
 - **Install** (with `-Pzip`): Optionally creates the ZIP.
 The special commands above like `mvn seq:run@infer-factorUnits` let you run inference and merging steps manually, updating the source files directly instead of waiting for the full build.
+
+(A detailed description can be seen [here](https://github.com/qudt/qudt-public-repo/wiki/QUDT_Build_Execution_Flow))
 
 ## Troubleshooting
 
