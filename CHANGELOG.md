@@ -34,6 +34,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed a variety of entities that were referred to but not defined (thanks to @ektrah).
 - Updated src/main/rdf/schema/SCHEMA-FACADE_QUDT.ttl to remove obsolete imports
 - Moved and renamed some files in src/build for future collection files
+- Renamed folder `src/build/srcgen` to `src/build/sparql2shacl` to reflect the folder's purpose more precisely
 
 ## [3.1.4] - 2025-07-18
 
