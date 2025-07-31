@@ -110,7 +110,7 @@ mvn seq:run@infer-and-format
 ## How It Works: Key Steps
 
 The build process is split into stages (Maven calls them "phases"). Here’s what happens, in terms an RDF expert might appreciate:
-- **Validate**: Sets up properties like the version `3.0.1-SNAPSHOT` and prepares SHACL templates from `src/build/srcgen/`.
+- **Validate**: Sets up properties like the version `3.0.1-SNAPSHOT` and prepares SHACL templates from `src/build/sparql2shacl/`.
 - **Process Sources**: Checks that all `.ttl` files in `src/` are formatted and valid against SHACL shapes (e.g., `QUDT_SRC_QA_TESTS.ttl`).
 - **Compile**: Infers triples like `qudt:applicableUnit` and merges them into `target/dist/` files.
 - **Process Resources**: Adds links to IEC standards e.g., `qudt:informativeReference` for units.
