@@ -20,6 +20,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Deprecated
 
+- Removed schema/extensions/FUNCTIONS_QUDT.spin.ttl that is no longer used in the calculation of applicable units
+- Removed src/build/all-in-one/all-in-one-ontology.ttl that is no longer used in creating the all-in-one files
+
 ### Fixed
 
 - Fixed datatype definitions missing rdfs:isDefinedBy triples
@@ -29,6 +32,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed some typos
 - Fixed source formatting with `mvn spotless:apply`, which was broken by a recent change.
 - Fixed a variety of entities that were referred to but not defined (thanks to @ektrah).
+- Updated src/main/rdf/schema/SCHEMA-FACADE_QUDT.ttl to remove obsolete imports
+- Moved and renamed some files in src/build for future collection files
 
 ## [3.1.4] - 2025-07-18
 
