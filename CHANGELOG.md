@@ -37,6 +37,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Updated src/main/rdf/schema/SCHEMA-FACADE_QUDT.ttl to remove obsolete imports
 - Moved and renamed some files in src/build for future collection files
 - Renamed folder `src/build/srcgen` to `src/build/sparql2shacl` to reflect the folder's purpose more precisely
+- Fixed a typo in the `quantitykind:Length` description
 
 ## [3.1.4] - 2025-07-18
 
