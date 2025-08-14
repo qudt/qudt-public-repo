@@ -24,6 +24,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Removed schema/extensions/FUNCTIONS_QUDT.spin.ttl that is no longer used in the calculation of applicable units
 - Removed src/build/all-in-one/all-in-one-ontology.ttl that is no longer used in creating the all-in-one files
+- Depecated quantitykind:DensityOfStates in favor of quantitykind:VibrationalDensityOfStates, to clarify its distinction from quantitykind:EnergyDensityOfStates
 
 ### Fixed
 
