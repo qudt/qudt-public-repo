@@ -27,6 +27,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - `unit:MO-PER-NUM`
   - `unit:YR-PER-NUM`
 - Added `qk:PowerPerVolume` and equivalent `qk:PowerDensity`
+- Added
+  - `unit:KiloN-PER-CentiM2`
+  - `unit:KiloN-PER-MillM2`
+  - `unit:MegaN-PER-M2`
+  - `unit:MegaN-PER-M3`
 
 ### Changed
 
