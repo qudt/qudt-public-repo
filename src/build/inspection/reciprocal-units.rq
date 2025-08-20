@@ -1,0 +1,33 @@
+SELECT
+    *
+WHERE {
+    {
+        SELECT ?unit ?reciprocalUnit (GROUP_CONCAT(?match) AS ?allComponentsMatch)
+        WHERE {
+            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                ?unit
+                    qudt:hasFactorUnit [
+                        qudt:exponent ?exp ;
+                        qudt:hasUnit ?fu ;
+                    ] .
+                    OPTIONAL {
+                        ?reciprocalUnit
+                             qudt:hasFactorUnit [
+                                 qudt:exponent ?rexp ;
+                                 qudt:hasUnit ?fu ;
+                             ] .
+                        FILTER(?rexp = -?exp)
+                        BIND("yes" as ?optMatch)
+                    }
+                    FILTER NOT EXISTS {
+                        ?reciprocalUnit qudt:hasFactorUnit/qudt:hasUnit ?rfu
+
+                    }
+            }
+            BIND(IF(BOUND(?optMatch), "yes","no") as ?match)
+        } GROUP BY ?unit ?reciprocalUnit
+    }
+    FILTER(!CONTAINS(?allComponentsMatch, "no"))
+
+}
+order by ?unit ?reciprocalUnit
