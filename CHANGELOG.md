@@ -18,8 +18,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Explicitly declared all the xsd datatypes to be instances of rdfs:Datatype in the SHACL datatypes schema file
 - Added links to the matching Wikidata entities that point to QUDT entities
 
-### Changed
-
 ### Deprecated
 
 - Removed schema/extensions/FUNCTIONS_QUDT.spin.ttl that is no longer used in the calculation of applicable units
@@ -40,6 +38,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Renamed folder `src/build/srcgen` to `src/build/sparql2shacl` to reflect the folder's purpose more precisely
 - Fixed a typo in the `quantitykind:Length` description
 - Cleaned up treatment of Imperial Gallons and exact matches
+- Moved `qudt-shacl-functions.ttl` and `COLLECTION_QUDT_QA_TESTS_ALL.ttl` from `src/main/rdf/validation` to
+  `src/build/validation` because these files are only used during the build and are not to be distibuted with the release.
 
 ## [3.1.4] - 2025-07-18
 
