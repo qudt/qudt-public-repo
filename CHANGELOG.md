@@ -19,6 +19,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added links to the matching Wikidata entities that point to QUDT entities
 - Added altSymbol mM to MillMOL-PER-L
 - Added new relation qudt:hasReciprocalUnit to link units that are reciprocal, such as `unit:W-PER-K` and `unit:K-PER-W`.
+- Added `qk:TimePerCount` and units `unit:SEC-PER-NUM`, with scaled versions
+  - `unit:MIN-PER-NUM`
+  - `unit:HR-PER-NUM`
+  - `unit:DAY-PER-NUM`
+  - `unit:WK-PER-NUM`
+  - `unit:MO-PER-NUM`
+  - `unit:YR-PER-NUM`
+- Added `qk:PowerPerVolume` and equivalent `qk:PowerDensity`
+
+### Changed
 
 ### Deprecated
 
@@ -46,6 +56,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Removed all import references to `COLLECTION_QUDT_QA_TESTS_ALL.ttl`, but left it in the src/main/rdf/validation folder for development users (especially those using environments like TopBraid that follow transitive import closures). Validating that file will validate the entire QUDT vocabulary & ontology graph set against the development tests, as well as the user tests.
 - Moved the triples from `src/build/inference/factorUnits/predefined-factor-units-and-scalings.ttl` to the units file
 - Fixed symbol of `unit:BFT`
+- `unit:W-PER-M3` used to be `qk:ForcePerAreaTime` which is weird, it is assciated with new `qk:PowerPerVolume`,  `qk:PowerDensity`
 
 ## [3.1.4] - 2025-07-18
 
