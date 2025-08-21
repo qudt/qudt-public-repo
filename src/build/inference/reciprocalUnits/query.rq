@@ -1,22 +1,27 @@
-
-SELECT ?unit ?reciprocalUnit
+# using a custom query approach instead of the SHACL-based sparql2shacl approach
+# because with SHACL it just takes too long to compute the reciprocal units :
+# - based on SHACL we need one query execution per unit
+# - with this approach, we need one query execution to get everything
+CONSTRUCT {
+    ?this qudt:hasReciprocalUnit ?reciprocalUnit .
+}
 WHERE {
     {
-        SELECT ?unit (GROUP_CONCAT(?singleSig) as ?sig)
+        SELECT ?this (GROUP_CONCAT(?singleSig) as ?sig)
         WHERE {
             {
-                SELECT ?unit (CONCAT(qfn:localname(?base),"^",STR(?exp)) AS ?singleSig)
+                SELECT ?this (CONCAT(qfn:localname(?base),"^",STR(?exp)) AS ?singleSig)
                 WHERE {
                     GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                        ?unit qudt:hasFactorUnit [
+                        ?this qudt:hasFactorUnit [
                             qudt:hasUnit ?base ;
                             qudt:exponent ?exp
                         ]
                     }
                  }
-                ORDER BY ?unit ?base ?exp
+                ORDER BY ?this ?base ?exp
             }
-        } GROUP BY ?unit
+        } GROUP BY ?this
     }
     {
         SELECT ?reciprocalUnit (GROUP_CONCAT(?singleSig) as ?reciprocalSig)
@@ -37,6 +42,8 @@ WHERE {
         } GROUP BY ?reciprocalUnit
     }
     FILTER(?sig = ?reciprocalSig)
-    FILTER(?unit != ?reciprocalUnit)
-
-} ORDER BY ?unit
+    FILTER(?this != ?reciprocalUnit)
+    FILTER NOT EXISTS {
+        ?this qudt:hasReciprocalUnit ?reciprocalUnit
+    }
+} ORDER BY ?this

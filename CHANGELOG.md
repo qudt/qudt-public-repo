@@ -18,6 +18,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Explicitly declared all the xsd datatypes to be instances of rdfs:Datatype in the SHACL datatypes schema file
 - Added links to the matching Wikidata entities that point to QUDT entities
 - Added altSymbol mM to MillMOL-PER-L
+- Added new relation qudt:hasReciprocalUnit to link units that are reciprocal, such as `unit:W-PER-K` and `unit:K-PER-W`.
 
 ### Deprecated
 

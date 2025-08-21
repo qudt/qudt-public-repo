@@ -416,6 +416,10 @@
                                         <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
                                     </add>
                                     <sparqlQuery>
+                                        <file>src/build/sparql2shacl/reciprocalUnit/query.rq</file>
+                                        <toFile>target/inspection/reciprocal-units.txt</toFile>
+                                    </sparqlQuery>
+                                    <sparqlQuery>
                                         <sparql>
                                             <![CDATA[
                                                 SELECT * WHERE {
@@ -586,10 +590,7 @@
                                         <file>src/build/inspection/symbol/symbol.rq</file>
                                         <toFile>target/inspection/symbol/symbol.txt</toFile>
                                     </sparqlQuery>
-                                    <sparqlQuery>
-                                        <file>src/build/inspection/reciprocal-units.rq</file>
-                                        <toFile>target/inspection/reciprocal-units.txt</toFile>
-                                    </sparqlQuery>
+
 
                                 </steps>
                             </pipeline>
@@ -1033,6 +1034,7 @@
                                                 qudt:conversionMultiplierSN
                                                 qudt:symbol
                                                 qudt:hasDimensionVector
+                                                qudt:hasReciprocalUnit
                                                 qudt:hasQuantityKind
                                                 qudt:hasReferenceQuantityKind
                                                 qudt:systemDerivedQuantityKind
@@ -1079,6 +1081,7 @@
                                                 qudt:conversionMultiplierSN
                                                 qudt:symbol
                                                 qudt:hasDimensionVector
+                                                qudt:hasReciprocalUnit
                                                 qudt:hasQuantityKind
                                                 qudt:hasReferenceQuantityKind
                                                 qudt:systemDerivedQuantityKind
@@ -1570,6 +1573,73 @@
                                         </sparqlAsk>
                                     </until>
                                     <savepoint><id>08-infer-symbol</id></savepoint>
+
+
+
+
+                                    <sparqlQuery>
+                                        <message>Calculating expected qudt:hasReciprocalUnit triples</message>
+                                        <file>src/build/inference/reciprocalUnits/query.rq</file>
+                                        <toGraph>inferred:reciprocalUnits</toGraph>
+                                        <toFile>target/inferred/reciprocalUnits.ttl</toFile>
+                                    </sparqlQuery>
+                                    <sparqlUpdate>
+                                        <message>Deleting invalid reciprocalUnits and adding missing ones</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                        DELETE {
+                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                ?unit qudt:hasReciprocalUnit ?incorrectReciprocalUnit .
+                                                            }
+                                                        }
+                                                        INSERT {
+                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                ?unit qudt:hasReciprocalUnit ?missingReciprocalUnit .
+                                                            }
+                                                            GRAPH <fix:reciprocalUnits:toDelete> {
+                                                                ?unit qudt:hasReciprocalUnit ?incorrectReciprocalUnit .
+                                                            }
+                                                            GRAPH <fix:reciprocalUnits:toAdd> {
+                                                                ?unit qudt:hasReciprocalUnit ?missingReciprocalUnit .
+                                                            }
+                                                        }
+                                                        WHERE {
+                                                            {
+                                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                        ?unit qudt:hasReciprocalUnit ?incorrectReciprocalUnit .
+                                                                }
+                                                                FILTER NOT EXISTS {
+                                                                    GRAPH <inferred:reciprocalUnits> {
+                                                                        ?unit qudt:hasReciprocalUnit ?incorrectReciprocalUnit
+                                                                    }
+                                                                }
+                                                            } UNION {
+                                                                GRAPH <inferred:reciprocalUnits> {
+                                                                        ?unit qudt:hasReciprocalUnit ?missingReciprocalUnit
+                                                                }
+                                                                FILTER NOT EXISTS {
+                                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                        ?unit qudt:hasReciprocalUnit ?missingReciprocalUnit .
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <write>
+                                        <graph>fix:reciprocalUnits:toDelete</graph>
+                                        <toFile>target/fix/reciprocalUnits/toDelete.ttl</toFile>
+                                    </write>
+                                    <write>
+                                        <graph>fix:reciprocalUnits:toAdd</graph>
+                                        <toFile>target/fix/reciprocalUnits/toAdd.ttl</toFile>
+                                    </write>
+
+
+                                    <savepoint><id>09-infer-reciprocal-unit</id></savepoint>
+
+
                                     <until>
                                         <message>Checking for conversion multipliers with wrong precision</message>
                                         <indexVar>iteration</indexVar>
@@ -1681,7 +1751,7 @@
                                             ]]>
                                         </sparqlAsk>
                                     </until>
-                                    <savepoint><id>09-infer-precision</id></savepoint>
+                                    <savepoint><id>10-infer-precision</id></savepoint>
 
                                     <until>
                                         <message>Checking for wrong conversion multipliers compared with factors/bases</message>
@@ -1835,7 +1905,7 @@
                                             ]]>
                                         </sparql>
                                     </sparqlUpdate>
-                                    <savepoint><id>10-infer-conversionMultiplier</id></savepoint>
+                                    <savepoint><id>11-infer-conversionMultiplier</id></savepoint>
 
                                     <sparqlUpdate>
                                         <message>Limit any xsd:decimal's precision to 34</message>
@@ -1922,6 +1992,7 @@
                                                         qudt:conversionMultiplierSN
                                                         qudt:symbol
                                                         qudt:hasDimensionVector
+                                                        qudt:hasReciprocalUnit
                                                         qudt:hasQuantityKind
                                                         qudt:hasReferenceQuantityKind
                                                         qudt:systemDerivedQuantityKind
@@ -1957,6 +2028,7 @@
                                                         qudt:conversionMultiplierSN
                                                         qudt:symbol
                                                         qudt:hasDimensionVector
+                                                        qudt:hasReciprocalUnit
                                                         qudt:hasQuantityKind
                                                         qudt:hasReferenceQuantityKind
                                                         qudt:systemDerivedQuantityKind
@@ -2004,6 +2076,7 @@
                                                                 qudt:conversionMultiplierSN
                                                                 qudt:symbol
                                                                 qudt:hasDimensionVector
+                                                                qudt:hasReciprocalUnit
                                                                 qudt:hasQuantityKind
                                                                 qudt:hasReferenceQuantityKind
                                                                 qudt:systemDerivedQuantityKind
@@ -2040,6 +2113,7 @@
                                                                 qudt:conversionMultiplierSN
                                                                 qudt:symbol
                                                                 qudt:hasDimensionVector
+                                                                qudt:hasReciprocalUnit
                                                                 qudt:hasQuantityKind
                                                                 qudt:hasReferenceQuantityKind
                                                                 qudt:systemDerivedQuantityKind
