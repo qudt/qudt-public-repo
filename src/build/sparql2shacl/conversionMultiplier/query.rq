@@ -19,8 +19,7 @@ WHERE {
                 (GROUP_CONCAT(?factorContribution; SEPARATOR="|") AS ?contributions)
                 (GROUP_CONCAT(?multiplierFound;SEPARATOR="|") AS ?allMultipliersFound)
             WHERE {
-              $this a ?type .
-              ?type rdfs:subClassOf* qudt:Unit ;
+              $this a qudt:Unit .
               OPTIONAL { $this qudt:conversionMultiplier ?actualMultiplier . }
               FILTER(!BOUND(?actualMultiplier)                               # no actual multiplier? use calculated!
                      || (?actualMultiplier != 0.0))                          # actual multiplier is 0? skip!!
@@ -81,8 +80,7 @@ WHERE {
                 * COALESCE(xsd:decimal(?f8), 1.0)
                 * COALESCE(xsd:decimal(?f9), 1.0) as ?rawCalculatedMultiplier)
         } UNION {
-            $this a ?type .
-            ?type rdfs:subClassOf* qudt:Unit ;
+            $this a qudt:Unit .
             $this
                 qudt:scalingOf/qudt:conversionMultiplier ?baseCM ;
                 qudt:prefix/qudt:prefixMultiplier ?prefixCM .
