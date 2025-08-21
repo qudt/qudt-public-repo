@@ -1,0 +1,141 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+<http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema>
+  a owl:Ontology ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema> ;
+  rdfs:label "QUDT Checks for units graph without loading any schema information - v $$QUDT_VERSION$$" .
+
+<http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema/prefixes>
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://purl.org/dc/terms/"^^xsd:anyURI ;
+    sh:prefix "dcterms" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+    sh:prefix "qudt" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://qudt.org/vocab/dimensionvector/"^^xsd:anyURI ;
+    sh:prefix "qkdv" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://qudt.org/vocab/quantitykind/"^^xsd:anyURI ;
+    sh:prefix "quantitykind" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://qudt.org/vocab/unit/"^^xsd:anyURI ;
+    sh:prefix "unit" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ;
+    sh:prefix "rdf" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI ;
+    sh:prefix "rdfs" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://www.w3.org/2001/XMLSchema#"^^xsd:anyURI ;
+    sh:prefix "xsd" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ;
+    sh:prefix "owl" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
+    sh:prefix "skos" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://www.w3.org/ns/shacl#"^^xsd:anyURI ;
+    sh:prefix "sh" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://qudt.org/shacl/functions#"^^xsd:anyURI ;
+    sh:prefix "qfn" ;
+  ] .
+
+qudt:EnsureNoOWLSchemaNotLoaded
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema> ;
+  rdfs:label "Ensures that no schema information is loaded when evaluating the shapes in this graph" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Ensures that no schema information is loaded" ;
+    sh:message "{$this}: Found an rdfs class definition - the checks in this graph are meant to be done on the units graph alone!" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema/prefixes> ;
+    sh:select """
+        SELECT $this
+        WHERE {}
+        """ ;
+  ] ;
+  sh:targetClass rdfs:Class .
+
+qudt:EnsureOWLSchemaNotLoaded
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema> ;
+  rdfs:label "Ensures that no schema information is loaded when evaluating the shapes in this graph" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Ensures that no schema information is loaded" ;
+    sh:message "{$this}: Found an OWL class definition - the checks in this graph are meant to be done on the units graph alone!" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema/prefixes> ;
+    sh:select """
+      SELECT $this
+      WHERE {}
+      """ ;
+  ] ;
+  sh:targetClass owl:Class .
+
+qudt:UnitsHaveClassQudtUnitExplicitly
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema> ;
+  rdfs:label "Ensures that all units have `rdf:type qudt:Unit` explicitly (not only through inference)" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Ensures that all units have `rdf:type qudt:Unit`" ;
+    sh:message "{$this}: Found a unit that lacks the `rdf:type qudt:Unit` triple" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema/prefixes> ;
+    sh:select """
+        SELECT DISTINCT $this
+        WHERE {
+            ?this a ?type .
+            FILTER NOT EXISTS {
+                ?this a qudt:Unit .
+            }
+        }
+        """ ;
+  ] ;
+  sh:target [
+    a sh:SPARQLTarget ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema/prefixes> ;
+    sh:select """
+        SELECT DISTINCT ?this
+        WHERE {
+              ?this a ?type
+              FILTER(STRSTARTS(STR(?this), "http://qudt.org/vocab/unit/"))
+            }
+        """ ;
+  ] .
+
+
