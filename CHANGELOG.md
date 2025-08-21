@@ -40,7 +40,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Cleaned up treatment of Imperial Gallons and exact matches
 - Moved `qudt-shacl-functions.ttl` from `src/main/rdf/validation` to
   `src/build/validation` because these files are only used during the build and are not to be distibuted with the release.
-- Removed all import references to `COLLECTION_QUDT_QA_TESTS_ALL.ttl`, but left it in the src/main/rdf/validation folder for development users (especially those using environments like TopBraid that follow transitive import closures). Validating that file will validate the entire QUDT vocabulary & ontology graph set against the development tests, as well as the user tests. 
+- Removed all import references to `COLLECTION_QUDT_QA_TESTS_ALL.ttl`, but left it in the src/main/rdf/validation folder for development users (especially those using environments like TopBraid that follow transitive import closures). Validating that file will validate the entire QUDT vocabulary & ontology graph set against the development tests, as well as the user tests.
 
 ## [3.1.4] - 2025-07-18
 
