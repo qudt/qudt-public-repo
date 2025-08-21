@@ -17,6 +17,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - `unit:MicroM-PER-SEC2`, originally requested by @nicholascar
 - Explicitly declared all the xsd datatypes to be instances of rdfs:Datatype in the SHACL datatypes schema file
 - Added links to the matching Wikidata entities that point to QUDT entities
+- Added altSymbol mM to MillMOL-PER-L
 
 ### Deprecated
 
@@ -38,8 +39,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Renamed folder `src/build/srcgen` to `src/build/sparql2shacl` to reflect the folder's purpose more precisely
 - Fixed a typo in the `quantitykind:Length` description
 - Cleaned up treatment of Imperial Gallons and exact matches
+- Fixed typo in MilliL & MilliMOL-PER-L
 - Moved `qudt-shacl-functions.ttl` from `src/main/rdf/validation` to
-  `src/build/validation` because these files are only used during the build and are not to be distibuted with the release.
+  `src/build/validation` because this file is only used during the build and are not to be distibuted with the release.
 - Removed all import references to `COLLECTION_QUDT_QA_TESTS_ALL.ttl`, but left it in the src/main/rdf/validation folder for development users (especially those using environments like TopBraid that follow transitive import closures). Validating that file will validate the entire QUDT vocabulary & ontology graph set against the development tests, as well as the user tests.
 
 ## [3.1.4] - 2025-07-18
