@@ -5,45 +5,60 @@
 CONSTRUCT {
     ?this qudt:hasReciprocalUnit ?reciprocalUnit .
 }
+#SELECT ?this ?thisScalar ?reciprocalUnit ?reciprocalScalar
 WHERE {
     {
-        SELECT ?this (GROUP_CONCAT(?singleSig) as ?sig)
-        WHERE {
+        {
             {
-                SELECT ?this (CONCAT(qfn:localname(?base),"^",STR(?exp)) AS ?singleSig)
+                SELECT ?this (GROUP_CONCAT(?singleSig) as ?sig)
                 WHERE {
-                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                        ?this qudt:hasFactorUnit [
-                            qudt:hasUnit ?base ;
-                            qudt:exponent ?exp
-                        ]
+                    {
+                        SELECT ?this (CONCAT(qfn:localname(?base),"^",STR(?exp)) AS ?singleSig)
+                        WHERE {
+                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                ?this qudt:hasFactorUnit [
+                                    qudt:hasUnit ?base ;
+                                    qudt:exponent ?exp
+                                ]
+                            }
+                         }
+                        ORDER BY ?this ?base ?exp
                     }
-                 }
-                ORDER BY ?this ?base ?exp
+                } GROUP BY ?this
             }
-        } GROUP BY ?this
-    }
-    {
-        SELECT ?reciprocalUnit (GROUP_CONCAT(?singleSig) as ?reciprocalSig)
-        WHERE {
             {
-                SELECT (?unit as ?reciprocalUnit)  (CONCAT(qfn:localname(?base),"^",STR(?negExp)) AS ?singleSig)
+                SELECT ?reciprocalUnit (GROUP_CONCAT(?singleSig) as ?reciprocalSig)
                 WHERE {
-                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                        ?unit qudt:hasFactorUnit [
-                            qudt:hasUnit ?base ;
-                            qudt:exponent ?exp
-                        ]
+                    {
+                        SELECT (?unit as ?reciprocalUnit)  (CONCAT(qfn:localname(?base),"^",STR(?negExp)) AS ?singleSig)
+                        WHERE {
+                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                ?unit qudt:hasFactorUnit [
+                                    qudt:hasUnit ?base ;
+                                    qudt:exponent ?exp
+                                ]
+                            }
+                            BIND(?exp * -1 as ?negExp)
+                         }
+                        ORDER BY ?unit ?base ?negExp
                     }
-                    BIND(?exp * -1 as ?negExp)
-                 }
-                ORDER BY ?unit ?base ?negExp
+                } GROUP BY ?reciprocalUnit
             }
-        } GROUP BY ?reciprocalUnit
+        }
+        FILTER(?sig = ?reciprocalSig)
+        FILTER(?this != ?reciprocalUnit)
     }
-    FILTER(?sig = ?reciprocalSig)
-    FILTER(?this != ?reciprocalUnit)
-    FILTER NOT EXISTS {
-        ?this qudt:hasReciprocalUnit ?reciprocalUnit
+    OPTIONAL {
+        GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+            ?this qudt:factorUnitScalar ?thisScalarOpt .
+        }
     }
+    OPTIONAL {
+        GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+            ?reciprocalUnit qudt:factorUnitScalar ?reciprocalScalarOpt .
+        }
+    }
+    BIND(COALESCE(?thisScalarOpt, 1.0) AS ?thisScalar)
+    BIND(COALESCE(?reciprocalScalarOpt, 1.0) as ?reciprocalScalar)
+    FILTER(?thisScalar = 1 / ?reciprocalScalar)
 } ORDER BY ?this
