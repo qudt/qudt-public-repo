@@ -606,6 +606,38 @@ FILTER (?udv != ?qdv) .
   ] ;
   sh:targetClass qudt:Unit .
 
+qudt:UnitsHaveRdfClassQudtUnitTriple
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema> ;
+  rdfs:label "Ensures that all units have `rdf:type qudt:Unit` explicitly (not only through inference)" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Ensures that all units have `rdf:type qudt:Unit`" ;
+    sh:message "{$this}: Found a unit that lacks the `rdf:type qudt:Unit` triple" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+        SELECT DISTINCT $this
+        WHERE {
+            ?this a ?type .
+            FILTER NOT EXISTS {
+                ?this a qudt:Unit .
+            }
+        }
+        """ ;
+  ] ;
+  sh:target [
+    a sh:SPARQLTarget ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema/prefixes> ;
+    sh:select """
+        SELECT DISTINCT ?this
+        WHERE {
+              ?this a ?type
+              FILTER(STRSTARTS(STR(?this), "http://qudt.org/vocab/unit/"))
+            }
+        """ ;
+  ] .
+
 qudt:conversionMultiplierSnShape
   rdfs:comment "qudt:conversionMultiplier must match qudt:conversionMultiplierSN if present" ;
   sh:sparql [
