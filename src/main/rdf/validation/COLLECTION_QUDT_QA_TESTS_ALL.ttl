@@ -393,7 +393,7 @@ qudt:MissingBaseForNonBaseUnit
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Ensures any unit with a conversion multiplier other than 0.0 and 1.0 defines either qudt:factorUnit or qudt:scalingOf" ;
-    sh:message "{$this}: factorUnit is neither 0.0 nor 1.0 but neither qudt:factorUnit nor qudt:scalingOf triples are defined or implied that explain its conversion multiplier of {?cm}" ;
+    sh:message "{$this}: conversionMultiplier is neither 0.0 nor 1.0 but neither qudt:factorUnit nor qudt:scalingOf triples are defined or implied that explain its conversion multiplier of {?cm}" ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
     SELECT $this ?cm
@@ -605,6 +605,38 @@ FILTER (?udv != ?qdv) .
     ] ;
   ] ;
   sh:targetClass qudt:Unit .
+
+qudt:UnitsHaveRdfClassQudtUnitTriple
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema> ;
+  rdfs:label "Ensures that all units have `rdf:type qudt:Unit` explicitly (not only through inference)" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Ensures that all units have `rdf:type qudt:Unit`" ;
+    sh:message "{$this}: Found a unit that lacks the `rdf:type qudt:Unit` triple" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+        SELECT DISTINCT $this
+        WHERE {
+            ?this a ?type .
+            FILTER NOT EXISTS {
+                ?this a qudt:Unit .
+            }
+        }
+        """ ;
+  ] ;
+  sh:target [
+    a sh:SPARQLTarget ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema/prefixes> ;
+    sh:select """
+        SELECT DISTINCT ?this
+        WHERE {
+              ?this a ?type
+              FILTER(STRSTARTS(STR(?this), "http://qudt.org/vocab/unit/"))
+            }
+        """ ;
+  ] .
 
 qudt:conversionMultiplierSnShape
   rdfs:comment "qudt:conversionMultiplier must match qudt:conversionMultiplierSN if present" ;
