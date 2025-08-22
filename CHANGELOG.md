@@ -18,6 +18,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Explicitly declared all the xsd datatypes to be instances of rdfs:Datatype in the SHACL datatypes schema file
 - Added links to the matching Wikidata entities that point to QUDT entities
 - Added altSymbol mM to MillMOL-PER-L
+- Added new relation qudt:hasReciprocalUnit to link units that are reciprocal, such as `unit:W-PER-K` and `unit:K-PER-W`.
 
 ### Deprecated
 
@@ -43,6 +44,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Moved `qudt-shacl-functions.ttl` from `src/main/rdf/validation` to
   `src/build/validation` because this file is only used during the build and are not to be distibuted with the release.
 - Removed all import references to `COLLECTION_QUDT_QA_TESTS_ALL.ttl`, but left it in the src/main/rdf/validation folder for development users (especially those using environments like TopBraid that follow transitive import closures). Validating that file will validate the entire QUDT vocabulary & ontology graph set against the development tests, as well as the user tests.
+- Moved the triples from `src/build/inference/factorUnits/predefined-factor-units-and-scalings.ttl` to the units file
+- Fixed symbol of `unit:BFT`
 
 ## [3.1.4] - 2025-07-18
 
