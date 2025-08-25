@@ -1,0 +1,29 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix profile: <http://qudt.org/schema/vocab/profile/> .
+@prefix qfn: <http://qudt.org/shacl/functions#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+profile:unit_conversionMultiplier_withinRange
+  a sh:NodeShape ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Units in the construction domain must have conversion multipliers in a reasonable range" ;
+    sh:message "{?this}: conversionMultiplier {?cm} is out of range (min (abs): {?min}, max (abs): {?max}" ;
+    sh:prefixes qfn: ;
+    sh:select """
+    SELECT $this ?cm ?min ?max (?this as ?value)
+    WHERE {
+        ?this qudt:conversionMultiplier ?cm
+        BIND(ABS(?cm) as ?absCm)
+        BIND(1.0E15 as ?max)
+        BIND(1.0E-12 as ?min)
+        FILTER((?absCm < ?min || ?absCm > ?max) && ?cm != 0)
+    }
+""" ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
+
