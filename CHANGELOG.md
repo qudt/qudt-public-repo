@@ -33,6 +33,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - `unit:MegaN-PER-M2`
   - `unit:MegaN-PER-M3`
 - Added a check enforcing a `rdf:type qudt:Unit` triple for each unit.
+- Added
+  - `unit:MIN-PER-KiloM`, `unit:MIN-PER-MI` and `qk:Pace`
 
 ### Changed
 
