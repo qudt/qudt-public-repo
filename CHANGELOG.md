@@ -151,6 +151,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `unit:GM qudt:scalingOf unit:KiloGM`, such that the standard algorithm for determining conversion multipliers (following factor units and scalings recursively) applies correctly.
   E.g, for `unit:DecaGM`: `conversionMultiplier = prefix:Deca.prefixMultiplier * unit:GM.conversionMultiplier = 10.0 * 0.001 = 0.01`
 - Corrected 136 unit symbols
+- Prevent title case violations in `rdfs:label` values of `qudt:Unit, qudt:QuantityKind, qudt:Prefix, qudt:PhysicalConstant, qudt:ConstantValue`.
 
 ## [3.1.3] - 2025-06-26
 
