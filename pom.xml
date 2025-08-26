@@ -409,11 +409,31 @@
                                         <toGraphsPattern>src:vocab:${name}</toGraphsPattern>
                                     </add>
                                     <add>
+                                        <file>src/build/inference/labels/lang-label-config.ttl</file>
+                                        <toGraphsPattern>cnf:lang-label-config.ttl</toGraphsPattern>
+                                    </add>
+                                    <add>
                                         <files>
                                             <include>target/dist/schema/**/*.ttl</include>
                                         </files>
                                         <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
                                     </add>
+                                    <sparqlQuery>
+                                        <file>src/build/inspection/label/per-in-all-langs.rq</file>
+                                        <toFile>target/inspection/label/per-in-all-langs.txt</toFile>
+                                    </sparqlQuery>
+                                    <sparqlQuery>
+                                        <file>src/build/inspection/label/exp-in-all-langs.rq</file>
+                                        <toFile>target/inspection/label/exp-in-all-langs.txt</toFile>
+                                    </sparqlQuery>
+                                    <sparqlQuery>
+                                        <file>src/build/inspection/label/generate-labels-scaled.rq</file>
+                                        <toFile>target/inspection/label/generate-labels-scaled.txt</toFile>
+                                    </sparqlQuery>
+                                    <sparqlQuery>
+                                        <file>src/build/inspection/label/generate-labels-factors.rq</file>
+                                        <toFile>target/inspection/label/generate-labels-factors.txt</toFile>
+                                    </sparqlQuery>
                                     <sparqlQuery>
                                         <file>src/build/inspection/reciprocalUnits/units-and-qks.rq</file>
                                         <toFile>target/inspection/reciprocalUnits/units-and-qks.txt</toFile>
@@ -1038,6 +1058,7 @@
                                                 qudt:hasReferenceQuantityKind
                                                 qudt:systemDerivedQuantityKind
                                                 skos:broader
+                                                rdfs:label
                                                 rdfs:seeAlso
                                               }
                                               VALUES (?srcGraph ?distGraph) {
@@ -1085,6 +1106,7 @@
                                                 qudt:hasReferenceQuantityKind
                                                 qudt:systemDerivedQuantityKind
                                                 skos:broader
+                                                rdfs:label
                                                 rdfs:seeAlso
                                               }
                                               VALUES (?srcGraph ?distGraph) {
@@ -1159,6 +1181,10 @@
                                             <include>target/work/schema/**/*.ttl</include>
                                         </files>
                                         <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
+                                    </add>
+                                    <add>
+                                        <file>src/build/inference/labels/lang-label-config.ttl</file>
+                                        <toGraphsPattern>cnf:lang-label-config.ttl</toGraphsPattern>
                                     </add>
 
                                     <sparqlUpdate>
@@ -1567,6 +1593,160 @@
                                         </sparqlAsk>
                                     </until>
                                     <savepoint><id>08-infer-symbol</id></savepoint>
+
+
+
+                                    <sparqlQuery>
+                                        <message>Calculating labels of scaled units based on qudt:prefix</message>
+                                        <file>src/build/inference/labels/generate-labels-scaled.rq</file>
+                                        <toGraph>inferred:labels:scaled</toGraph>
+                                        <toFile>target/inferred/labels-scaled.ttl</toFile>
+                                    </sparqlQuery>
+                                    <sparqlUpdate>
+                                        <message>Deleting invalid labels of scaled units and adding missing ones</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                        DELETE {
+                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                ?unit rdfs:label ?incorrectLabel .
+                                                            }
+                                                        }
+                                                        INSERT {
+                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                ?unit rdfs:label ?missingLabel .
+                                                            }
+                                                            GRAPH <fix:labels:scaled:toDelete> {
+                                                                ?unit rdfs:label ?incorrectLabel .
+                                                            }
+                                                            GRAPH <fix:labels:scaled:toAdd> {
+                                                                ?unit rdfs:label ?missingLabel .
+                                                            }
+                                                        }
+                                                        WHERE {
+                                                            {
+                                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                        ?unit rdfs:label ?incorrectLabel .
+                                                                }
+                                                                FILTER EXISTS {
+                                                                    GRAPH <inferred:labels:scaled> {
+                                                                        ?unit rdfs:label ?missingLabel .
+                                                                        FILTER (
+                                                                            LANGMATCHES(
+                                                                                LANG(?missingLabel),
+                                                                                LANG(?incorrectLabel)
+                                                                            )
+                                                                        )
+                                                                    }
+                                                                }
+                                                                FILTER NOT EXISTS {
+                                                                    GRAPH <inferred:labels:scaled> {
+                                                                        ?unit rdfs:label ?incorrectLabel .
+                                                                    }
+                                                                }
+                                                            } UNION {
+                                                                GRAPH <inferred:labels:scaled> {
+                                                                        ?unit rdfs:label ?missingLabel .
+                                                                }
+                                                                FILTER NOT EXISTS {
+                                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                        ?unit rdfs:label ?missingLabel .
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <write>
+                                        <graph>fix:labels:scaled:toDelete</graph>
+                                        <toFile>target/fix/labels/scaled/toDelete.ttl</toFile>
+                                    </write>
+                                    <write>
+                                        <graph>fix:labels:scaled:toAdd</graph>
+                                        <toFile>target/fix/labels/scaled/toAdd.ttl</toFile>
+                                    </write>
+
+
+                                    <savepoint><id>10-infer-labels-scaled</id></savepoint>
+
+
+                                    <sparqlQuery>
+                                        <message>Calculating labels of derived units based on qudt:hasFactorUnit</message>
+                                        <file>src/build/inference/labels/generate-labels-factors.rq</file>
+                                        <toGraph>inferred:labels:factors</toGraph>
+                                        <toFile>target/inferred/labels-factors.ttl</toFile>
+                                    </sparqlQuery>
+                                    <sparqlUpdate>
+                                        <message>Deleting invalid labels of derived units and adding missing ones</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                        DELETE {
+                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                ?unit rdfs:label ?incorrectLabel .
+                                                            }
+                                                        }
+                                                        INSERT {
+                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                ?unit rdfs:label ?missingLabel .
+                                                            }
+                                                            GRAPH <fix:labels:factors:toDelete> {
+                                                                ?unit rdfs:label ?incorrectLabel .
+                                                            }
+                                                            GRAPH <fix:labels:factors:toAdd> {
+                                                                ?unit rdfs:label ?missingLabel .
+                                                            }
+                                                        }
+                                                        WHERE {
+                                                            {
+                                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                        ?unit rdfs:label ?incorrectLabel .
+                                                                }
+                                                                FILTER EXISTS {
+                                                                    GRAPH <inferred:labels:factors> {
+                                                                        ?unit rdfs:label ?missingLabel .
+                                                                        FILTER (
+                                                                            LANGMATCHES(
+                                                                                LANG(?missingLabel),
+                                                                                LANG(?incorrectLabel)
+                                                                            )
+                                                                        )
+                                                                    }
+                                                                }
+                                                                FILTER NOT EXISTS {
+                                                                    GRAPH <inferred:labels:factors> {
+                                                                        ?unit rdfs:label ?incorrectLabel .
+                                                                    }
+                                                                }
+                                                            } UNION {
+                                                                GRAPH <inferred:labels:factors> {
+                                                                        ?unit rdfs:label ?missingLabel .
+                                                                }
+                                                                FILTER NOT EXISTS {
+                                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                        ?unit rdfs:label ?missingLabel .
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <write>
+                                        <graph>fix:labels:factors:toDelete</graph>
+                                        <toFile>target/fix/labels/factors/toDelete.ttl</toFile>
+                                    </write>
+                                    <write>
+                                        <graph>fix:labels:factors:toAdd</graph>
+                                        <toFile>target/fix/labels/factors/toAdd.ttl</toFile>
+                                    </write>
+
+
+                                    <savepoint><id>10-infer-labels-factors</id></savepoint>
+
+
+
+
+
 
 
 
@@ -1991,6 +2171,7 @@
                                                         qudt:hasReferenceQuantityKind
                                                         qudt:systemDerivedQuantityKind
                                                         skos:broader
+                                                        rdfs:label
                                                         rdfs:seeAlso
                                                       }
                                                       VALUES (?srcGraph ?distGraph) {
@@ -2027,6 +2208,7 @@
                                                         qudt:hasReferenceQuantityKind
                                                         qudt:systemDerivedQuantityKind
                                                         skos:broader
+                                                        rdfs:label
                                                         rdfs:seeAlso
                                                       }
                                                       VALUES (?srcGraph ?distGraph) {
@@ -2075,6 +2257,7 @@
                                                                 qudt:hasReferenceQuantityKind
                                                                 qudt:systemDerivedQuantityKind
                                                                 skos:broader
+                                                                rdfs:label
                                                                 rdfs:seeAlso
                                                               }
                                                               VALUES (?srcGraph ?distGraph) {
@@ -2112,6 +2295,7 @@
                                                                 qudt:hasReferenceQuantityKind
                                                                 qudt:systemDerivedQuantityKind
                                                                 skos:broader
+                                                                rdfs:label
                                                                 rdfs:seeAlso
                                                               }
                                                               VALUES (?srcGraph ?distGraph) {
