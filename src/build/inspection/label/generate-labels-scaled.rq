@@ -1,0 +1,22 @@
+
+
+
+        SELECT DISTINCT ?unit (STRLANG(CONCAT(STR(?prefixLabel), LCASE(STR(?baseLabel))), ?baseLang) AS ?label)
+        WHERE {
+            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                ?unit
+                    qudt:scalingOf ?base ;
+                    qudt:prefix ?prefix .
+                ?base rdfs:label ?baseLabel .
+                BIND(LANG(?baseLabel) AS ?baseLang)
+            }
+            GRAPH <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> {
+                ?prefix rdfs:label ?prefixLabel .
+                BIND(LANG(?prefixLabel) as ?prefixLang)
+            }
+            FILTER (
+                    ?baseLang = ?prefixLang
+                    || ( ?baseLang = "" && ?prefixLang = "" )
+                    || ( ?prefixLang = "" && ?baseLang IN ("cs" ,"en" ,"ms" ,"pl" ,"ro" ,"sl" ,"tr" ,"hu" ,"de" ,"fr" ,"es", "it" ) )
+            )
+        }
