@@ -1,0 +1,91 @@
+CONSTRUCT {
+    ?unit rdfs:label ?label
+} WHERE {
+    SELECT DISTINCT
+        ?unit
+        ?factorUnitLang
+        (STRLANG(
+            REPLACE(
+                REPLACE(
+                    ?completeLabel,
+                    "-PER-",
+                    CONCAT(" ",?labelPer, " "))
+                ,"^ *(.+) ?"
+                ,"$1")
+            , ?factorUnitLang)
+        AS ?label)
+    WHERE
+    {
+        {
+            SELECT DISTINCT
+                ?unit
+                ?factorUnitLang
+                ?labelPer
+                (GROUP_CONCAT(?label; separator="-PER-") AS ?completeLabel)
+                (GROUP_CONCAT(?namePart; separator="-PER-") AS ?completeLocalname)
+            WHERE
+            {
+                SELECT DISTINCT
+                    ?unit
+                    ?component
+                    ?factorUnitLang
+                    ?labelPer
+                    (GROUP_CONCAT(STR(?factorUnitLabel)) AS ?label)
+                    (GROUP_CONCAT(STR(?factorUnitLocalname); separator="-") AS ?namePart)
+                WHERE
+                {
+                    SELECT *
+                    WHERE
+                    {
+                        GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                            ?unit
+                                qudt:hasFactorUnit [
+                                    qudt:hasUnit ?factorUnit ;
+                                    qudt:exponent ?exponent
+                                ] .
+                                ?factorUnit rdfs:label ?factorUnitDirectLabel .
+                                BIND(IRI(CONCAT(STR(cnf:),"expPattern",STR(ABS(?exponent)))) AS ?expPatternProp)
+                                BIND(
+                                    IF(
+                                        ABS(?exponent) > 1,
+                                        CONCAT(qfn:localname(?factorUnit), STR(ABS(?exponent))),
+                                        CONCAT(qfn:localname(?factorUnit))
+                                    )
+                                    AS ?factorUnitLocalname
+                                )
+                                BIND(LANG(?factorUnitDirectLabel) AS ?factorUnitLang)
+                                GRAPH <cnf:lang-label-config.ttl> {
+                                    cnf:labelConfig
+                                        cnf:langConfig [
+                                            cnf:labelPer ?labelPer ;
+                                            cnf:lang ?factorUnitLang ;
+                                            ?expPatternProp ?expPattern
+                                        ] ;
+                                }
+                                BIND(
+                                    IF(ABS(?exponent) = 1,
+                                        ?factorUnitDirectLabel,
+                                        REPLACE(REPLACE(?expPattern, "%Unit%", ?factorUnitDirectLabel), "%unit%", LCASE(?factorUnitDirectLabel))
+                                    )
+                                    AS ?factorUnitLabel
+                                )
+                            BIND(qfn:localname(?unit) AS ?unitLocalname)
+                            BIND(CONCAT("%", STRBEFORE(?unitLocalname, "PER")) AS ?numeratorLocalname)
+                            BIND(CONCAT("%", STRAFTER(?unitLocalname, "PER")) AS ?denominatorLocalname)
+                            BIND(CONTAINS(?unitLocalname, "PER") AS ?localnameContainsPer)
+                            BIND(STRLEN(STRBEFORE(?numeratorLocalname, ?factorUnitLocalname)) AS ?posInNumerator)
+                            BIND(STRLEN(STRBEFORE(?denominatorLocalname, ?factorUnitLocalname)) AS ?posInDenominator)
+                            FILTER(?exponent > 0 && ?posInNumerator > 0 || ?exponent < 0 && ?posInDenominator > 0)
+                            BIND(IF(?exponent > 0, "numerator", "denominator") AS ?component)
+                        }
+                    } ORDER BY ?unit ?component ?posInNumerator ?posInDenominator
+                }
+                GROUP BY ?unit ?factorUnitLang ?component ?labelPer
+                ORDER BY ?unit ?factorUnitLang DESC(?component)
+            }
+            GROUP BY ?unit ?factorUnitLang ?labelPer
+            HAVING (?completeLocalname = qfn:localname(?unit))
+        }
+    }
+    ORDER BY ?unit ?factorUnitLang
+}

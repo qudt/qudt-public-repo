@@ -1,0 +1,32 @@
+
+
+        CONSTRUCT {
+            ?unit rdfs:label ?label
+        }
+        #SELECT DISTINCT ?unit ?label
+        WHERE {
+            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                ?unit
+                    qudt:scalingOf ?base ;
+                    qudt:prefix ?prefix .
+                ?base rdfs:label ?baseLabel .
+                BIND(LANG(?baseLabel) AS ?baseLang)
+            }
+            GRAPH <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> {
+                ?prefix rdfs:label ?prefixLabel .
+                BIND(LANG(?prefixLabel) as ?prefixLang)
+            }
+            FILTER (
+                    LANGMATCHES(?baseLang, ?prefixLang)
+                    || ( ?prefixLang = "" && ?baseLang IN ("cs" ,"en" ,"ms" ,"pl" ,"ro" ,"sl" ,"tr" ,"hu" ,"de" ,"fr" ,"es", "it" ) )
+            )
+            FILTER NOT EXISTS {
+                # do not match default prefix label if we have an exact match
+                GRAPH <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> {
+                    FILTER(?prefixLang = "")
+                    ?prefix rdfs:label ?otherPrefixLabel
+                    FILTER(LANGMATCHES(?baseLang, LANG(?otherPrefixLabel)))
+                }
+            }
+            BIND(STRLANG(CONCAT(STR(?prefixLabel), LCASE(STR(?baseLabel))), ?baseLang) AS ?label)
+        }
