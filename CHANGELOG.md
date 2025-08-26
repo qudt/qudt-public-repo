@@ -160,6 +160,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added an updated intro slide deck in the doc folder
 - New Units
   - `unit:CCY_CHF-PER-HA`
+- Auto-generate labels for units wherever possible
 
 ### Changed
 
