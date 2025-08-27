@@ -3,17 +3,7 @@ CONSTRUCT {
 } WHERE {
     SELECT DISTINCT
         ?unit
-        ?factorUnitLang
-        (STRLANG(
-            REPLACE(
-                REPLACE(
-                    ?completeLabel,
-                    "-PER-",
-                    CONCAT(" ",?labelPer, " "))
-                ,"^ *(.+) ?"
-                ,"$1")
-            , ?factorUnitLang)
-        AS ?label)
+        (IF(?factorUnitLang = "", ?finalLabel, STRLANG(?finalLabel, ?factorUnitLang)) AS ?label)
     WHERE
     {
         {
@@ -21,8 +11,10 @@ CONSTRUCT {
                 ?unit
                 ?factorUnitLang
                 ?labelPer
-                (GROUP_CONCAT(?label; separator="-PER-") AS ?completeLabel)
-                (GROUP_CONCAT(?namePart; separator="-PER-") AS ?completeLocalname)
+                ?labelReciprocal
+                (GROUP_CONCAT(?label; separator="-PER-") AS ?completeLabelCandidate)
+                (GROUP_CONCAT(?namePart; separator="-PER-") AS ?completeLocalnameCandidate)
+                (GROUP_CONCAT(?component) AS ?jointComponents)
             WHERE
             {
                 SELECT DISTINCT
@@ -30,6 +22,7 @@ CONSTRUCT {
                     ?component
                     ?factorUnitLang
                     ?labelPer
+                    ?labelReciprocal
                     (GROUP_CONCAT(STR(?factorUnitLabel)) AS ?label)
                     (GROUP_CONCAT(STR(?factorUnitLocalname); separator="-") AS ?namePart)
                 WHERE
@@ -58,6 +51,7 @@ CONSTRUCT {
                                     cnf:labelConfig
                                         cnf:langConfig [
                                             cnf:labelPer ?labelPer ;
+                                            cnf:labelReciprocal ?labelReciprocal ;
                                             cnf:lang ?factorUnitLang ;
                                             ?expPatternProp ?expPattern
                                         ] ;
@@ -70,22 +64,61 @@ CONSTRUCT {
                                     AS ?factorUnitLabel
                                 )
                             BIND(qfn:localname(?unit) AS ?unitLocalname)
-                            BIND(CONCAT("%", STRBEFORE(?unitLocalname, "PER")) AS ?numeratorLocalname)
-                            BIND(CONCAT("%", STRAFTER(?unitLocalname, "PER")) AS ?denominatorLocalname)
-                            BIND(CONTAINS(?unitLocalname, "PER") AS ?localnameContainsPer)
-                            BIND(STRLEN(STRBEFORE(?numeratorLocalname, ?factorUnitLocalname)) AS ?posInNumerator)
-                            BIND(STRLEN(STRBEFORE(?denominatorLocalname, ?factorUnitLocalname)) AS ?posInDenominator)
+                            BIND(
+                                IF(
+                                    CONTAINS(?unitLocalname, "PER-"),
+                                    CONCAT("%", STRBEFORE(?unitLocalname, "PER-")),
+                                    CONCAT("%", ?unitLocalname)
+                                )
+                                AS ?numeratorLocalname
+                            )
+                            BIND(CONCAT("%", STRAFTER(?unitLocalname, "PER-")) AS ?denominatorLocalname)
+                            BIND(REPLACE(?numeratorLocalname, CONCAT("\\b",?factorUnitLocalname,"\\b"), "FOUNDIT") AS ?matchInNumerator)
+                            BIND(REPLACE(?denominatorLocalname, CONCAT("\\b",?factorUnitLocalname,"\\b"), "FOUNDIT") AS ?matchInDenominator)
+                            BIND(STRLEN(STRBEFORE(?matchInNumerator, "FOUNDIT")) AS ?posInNumerator)
+                            BIND(STRLEN(STRBEFORE(?matchInDenominator, "FOUNDIT")) AS ?posInDenominator)
                             FILTER(?exponent > 0 && ?posInNumerator > 0 || ?exponent < 0 && ?posInDenominator > 0)
                             BIND(IF(?exponent > 0, "numerator", "denominator") AS ?component)
+                            BIND(IF(?component = "numerator", ?posInNumerator, ?posInDenominator) AS ?sortPosition)
                         }
-                    } ORDER BY ?unit ?component ?posInNumerator ?posInDenominator
+                    } ORDER BY ?unit ?component ?sortPosition
                 }
-                GROUP BY ?unit ?factorUnitLang ?component ?labelPer
+                GROUP BY ?unit ?factorUnitLang ?component ?labelPer ?labelReciprocal
                 ORDER BY ?unit ?factorUnitLang DESC(?component)
             }
-            GROUP BY ?unit ?factorUnitLang ?labelPer
-            HAVING (?completeLocalname = qfn:localname(?unit))
+            GROUP BY ?unit ?factorUnitLang ?labelPer ?labelReciprocal
         }
+        BIND(
+            IF(
+                ?jointComponents = "numerator denominator"
+                || ?jointComponents = "numerator",
+                ?completeLocalnameCandidate,
+                CONCAT("PER-",?completeLocalnameCandidate)
+            )
+            AS ?completeLocalname
+        )
+        BIND(
+            IF(
+                ?jointComponents = "numerator denominator"
+                || ?jointComponents = "numerator",
+                ?completeLabelCandidate,
+                CONCAT("RECIPROCAL-",?completeLabelCandidate)
+            )
+            AS ?completeLabel
+        )
+        FILTER(?completeLocalname = qfn:localname(?unit))
+        BIND(
+            REPLACE(
+                REPLACE(
+                    ?completeLabel,
+                    "RECIPROCAL-",
+                    CONCAT(?labelReciprocal, " ")
+                ),
+                "-PER-",
+                CONCAT(" ",?labelPer, " ")
+            )
+            AS ?finalLabel
+        )
     }
     ORDER BY ?unit ?factorUnitLang
 }

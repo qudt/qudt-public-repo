@@ -1,9 +1,8 @@
-
-
-        CONSTRUCT {
-            ?unit rdfs:label ?label
-        }
-        #SELECT DISTINCT ?unit ?label
+CONSTRUCT {
+    ?unit rdfs:label ?label
+}
+WHERE {
+        SELECT DISTINCT ?unit (IF(?baseLang = "", ?jointLabel, STRLANG(?jointLabel, ?baseLang)) AS ?label)
         WHERE {
             GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                 ?unit
@@ -23,10 +22,18 @@
             FILTER NOT EXISTS {
                 # do not match default prefix label if we have an exact match
                 GRAPH <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> {
-                    FILTER(?prefixLang = "")
                     ?prefix rdfs:label ?otherPrefixLabel
-                    FILTER(LANGMATCHES(?baseLang, LANG(?otherPrefixLabel)))
+                    FILTER(?otherPrefixLabel != ?prefixLabel)
+                    FILTER(LANGMATCHES(LANG(?otherPrefixLabel), ?baseLang ))
                 }
             }
-            BIND(STRLANG(CONCAT(STR(?prefixLabel), LCASE(STR(?baseLabel))), ?baseLang) AS ?label)
+            BIND(
+                IF(
+                    CONTAINS(?baseLabel, " "),
+                    CONCAT(STR(?prefixLabel)," ",STR(?baseLabel)),
+                    CONCAT(STR(?prefixLabel), LCASE(STR(?baseLabel)))
+                )
+                AS ?jointLabel
+            )
         }
+}
