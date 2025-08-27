@@ -1,12 +1,12 @@
     SELECT DISTINCT
         ?unit
-        (IF(?factorUnitLang = "", ?finalLabel, STRLANG(?finalLabel, ?factorUnitLang)) AS ?label)
+        (IF(?targetLang = "", ?finalLabel, STRLANG(?finalLabel, ?targetLang)) AS ?label)
     WHERE
     {
         {
             SELECT DISTINCT
                 ?unit
-                ?factorUnitLang
+                ?targetLang
                 ?labelPer
                 ?labelReciprocal
                 (GROUP_CONCAT(?label; separator="-PER-") AS ?completeLabelCandidate)
@@ -17,7 +17,7 @@
                 SELECT DISTINCT
                     ?unit
                     ?component
-                    ?factorUnitLang
+                    ?targetLang
                     ?labelPer
                     ?labelReciprocal
                     (GROUP_CONCAT(STR(?factorUnitLabel)) AS ?label)
@@ -49,9 +49,22 @@
                                         cnf:langConfig [
                                             cnf:labelPer ?labelPer ;
                                             cnf:labelReciprocal ?labelReciprocal ;
-                                            cnf:lang ?factorUnitLang ;
+                                            cnf:lang ?targetLang ;
                                             ?expPatternProp ?expPattern
                                         ] ;
+                                }
+
+                                FILTER(LANGMATCHES(?targetLang, ?factorUnitLang)) # allow using an @en label when target is @en-US
+                                FILTER NOT EXISTS {
+                                    # do not use the more general label (@en) if there is a solution with an exact match (@en-US)
+                                    FILTER(?targetLang != ?factorUnitLang)
+                                    ?factorUnit rdfs:label ?otherLabel .
+                                    FILTER(LANG(?otherLabel) = ?targetLang) .
+                                }
+                                FILTER EXISTS {
+                                    # require that at least one solution with the exact match exists (we don't want to generate all @en labels in @en-US, too - just those that are different
+                                    ?unit qudt:hasFactorUnit/qudt:hasUnit/rdfs:label ?exactLangMatch;
+                                    FILTER (LANG(?exactLangMatch) = ?targetLang)
                                 }
                                 BIND(
                                     IF(ABS(?exponent) = 1,
@@ -80,10 +93,10 @@
                         }
                     } ORDER BY ?unit ?component ?sortPosition
                 }
-                GROUP BY ?unit ?factorUnitLang ?component ?labelPer ?labelReciprocal
-                ORDER BY ?unit ?factorUnitLang DESC(?component)
+                GROUP BY ?unit ?targetLang ?component ?labelPer ?labelReciprocal
+                ORDER BY ?unit ?targetLang DESC(?component)
             }
-            GROUP BY ?unit ?factorUnitLang ?labelPer ?labelReciprocal
+            GROUP BY ?unit ?targetLang ?labelPer ?labelReciprocal
         }
         BIND(
             IF(
@@ -117,4 +130,4 @@
             AS ?finalLabel
         )
     }
-    ORDER BY ?unit ?factorUnitLang
+    ORDER BY ?unit ?targetLang
