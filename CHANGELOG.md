@@ -66,6 +66,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed symbol of `unit:BFT`
 - `unit:W-PER-M3` used to be `qk:ForcePerAreaTime` which is weird, it is assciated with new `qk:PowerPerVolume`,  `qk:PowerDensity`
 - Moved some constraints that were in the SHACL-SCHEMA-SUPPLEMENT file over to the SCHEMA_QUDT_NoOWL.ttl file where they belong
+- Fixed error in qfn:bound function
 
 ## [3.1.4] - 2025-07-18
 
