@@ -503,13 +503,31 @@ qudt:QuantityKindShape
   sh:targetClass qudt:QuantityKind .
 
 qudt:RdfsLabelInTitleCaseShape
-  a sh:NodeShape ;
-  sh:property [
-    sh:message "The value of rdfs:label must be in title case: each word starts with an uppercase letter, no uppercase letters allowed directly after a lowercase letter. Articles and prepositions must be lowercase." ;
-    sh:path rdfs:label ;
-    sh:pattern "^\\p{Lu}( (al|aνά|bölü|ha|je|na|par|pe|per|por|pro|za) |[^\\p{Lu}]|[^\\p{Ll}]\\p{Lu})*$" ;
-    sh:severity sh:Violation ;
-  ] ;
+    a sh:NodeShape ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+    rdfs:label "Violations for labels that are not in title case" ;
+    sh:sparql [
+      sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+      sh:message """
+        {?this}: The value of rdfs:label, {?langValue}, is not in title case.
+            - each word must start with an uppercase letter
+            - no uppercase letters allowed directly after a lowercase letter (no CamelCase)
+            - articles and prepositions must be lowercase
+        """ ;
+      sh:select """
+        SELECT ?this ?langValue
+        WHERE {
+          ?this rdfs:label ?value .
+          BIND(LANG(?value) as ?lang)
+          # languages to check (not all languages can be in title case)
+          FILTER ( ?lang IN ("", "bg", "cs", "de", "el", "en", "es", "fr", "it", "la", "ms", "nl", "pl", "pt", "ro", "ru", "sl", "tr" ) )
+          # title case check
+          FILTER ( !REGEX(STR(?value), "^\\\\p{Lu}( (al|ανά|на|je|na|par|pe|per|por|pro|za) |[^\\\\p{Lu}]|[^\\\\p{Ll}]\\\\p{Lu})*$") )
+          BIND( CONCAT("'",STR(?value),"'", IF (?lang = "", "", CONCAT("@", ?lang))) AS ?langValue)
+        }
+      """ ;
+      sh:severity sh:Violation ;
+    ] ;
   sh:targetClass qudt:ConstantValue ;
   sh:targetClass qudt:PhysicalConstant ;
   sh:targetClass qudt:Prefix ;
