@@ -1,0 +1,30 @@
+SELECT ?unit ?newLabel
+WHERE
+{
+    {
+        GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+            ?unit a qudt:Unit .
+            ?unit rdfs:label ?label.
+            BIND(LANG(?label) AS ?lang)
+            FILTER(?lang = "en")
+            FILTER NOT EXISTS {
+                ?unit rdfs:label ?noDefaultLabel;
+                FILTER(LANG(?noDefaultLabel) = "")
+            }
+        }
+        BIND(STR(?label) as ?newLabel)
+    } UNION {
+        GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                ?unit a qudt:Unit .
+                ?unit rdfs:label ?label.
+                BIND(LANG(?label) AS ?lang)
+                FILTER(?lang = "")
+                FILTER NOT EXISTS {
+                    ?unit rdfs:label ?noENLabel;
+                    FILTER(LANG(?noENLabel) = "en")
+                }
+            }
+            BIND(STRLANG(STR(?label),"en") as ?newLabel)
+    }
+}
+ORDER BY ?unit

@@ -1,0 +1,22 @@
+SELECT SAMPLE(?label) ?lang
+WHERE {
+    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+        ?unit
+            rdfs:label ?label .
+            ?unit
+                qudt:hasFactorUnit [
+                    qudt:hasUnit ?fu1;
+                    qudt:exponent ?exp1;
+                ] ;
+                qudt:hasFactorUnit [
+                    qudt:hasUnit ?fu2;
+                    qudt:exponent ?exp2;
+                ] .
+            FILTER(?fu1 != ?fu2)
+            FILTER(?exp1 * ?exp2 < 0)
+            FILTER(?fu1 in (unit:M, unit:KiloGM, unit:SEC, unit:A))
+            FILTER(?fu2 in (unit:M, unit:KiloGM, unit:SEC, unit:A))
+            FILTER(CONTAINS(STR(?unit), "-PER-"))
+            BIND(LANG(?label) AS ?lang)
+    }
+} GROUP BY (?lang)

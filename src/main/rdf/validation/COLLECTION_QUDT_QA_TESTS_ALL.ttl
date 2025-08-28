@@ -502,6 +502,71 @@ qudt:QuantityKindShape
   ] ;
   sh:targetClass qudt:QuantityKind .
 
+qudt:RdfsLabelInTitleCaseShapeViolation
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Violations for labels that are not in title case" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    sh:message """
+        {?this}: The value of rdfs:label, {?langValue}, is not in title case.
+            - each word must start with an uppercase letter
+            - no uppercase letters allowed directly after a lowercase letter (no CamelCase)
+            - articles and prepositions must be lowercase
+        """ ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+        SELECT ?this ?langValue ?value
+        WHERE {
+          ?this rdfs:label ?value .
+          FILTER NOT EXISTS {
+              ?this qudt:deprecated true .
+          }
+          BIND(LANG(?value) as ?lang)
+          # languages to check (not all languages can be in title case)
+          FILTER ( ?lang IN ("", "bg", "cs", "de", "el", "en", "en-US", "es", "fr", "it", "la", "ms", "nl", "pl", "pt", "ro", "ru", "sl", "tr" ) )
+          # title case check
+          FILTER ( !REGEX(STR(?value), "^\\\\p{Lu}( (al|ανά|на|je|na|par|pe|per|por|pro|za|of|de|del) |[^\\\\p{Lu}]|[^\\\\p{Ll}]\\\\p{Lu})*$") )
+          BIND( CONCAT("'",STR(?value),"'", IF (?lang = "", "", CONCAT("@", ?lang))) AS ?langValue)
+        }
+      """ ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
+qudt:RdfsLabelInTitleCaseShapeWarning
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Warnings for labels that are not in title case" ;
+  sh:severity sh:Warning ;
+  sh:sparql [
+    sh:message """
+        {?this}: The value of rdfs:label, {?langValue}, is not in title case.
+            - each word must start with an uppercase letter
+            - no uppercase letters allowed directly after a lowercase letter (no CamelCase)
+            - articles and prepositions must be lowercase
+        """ ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+        SELECT ?this ?langValue ?value
+        WHERE {
+          ?this rdfs:label ?value .
+          FILTER NOT EXISTS {
+            ?this qudt:deprecated true .
+          }
+          BIND(LANG(?value) as ?lang)
+          # languages to check (not all languages can be in title case)
+          FILTER ( ?lang IN ("", "bg", "cs", "de", "el", "en", "en-US", "es", "fr", "it", "la", "ms", "nl", "pl", "pt", "ro", "ru", "sl", "tr" ) )
+          # title case check
+          FILTER ( !REGEX(STR(?value), "^\\\\p{Lu}( (al|ανά|на|je|na|par|pe|per|por|pro|za) |[^\\\\p{Lu}]|[^\\\\p{Ll}]\\\\p{Lu})*$") )
+          BIND( CONCAT("'",STR(?value),"'", IF (?lang = "", "", CONCAT("@", ?lang))) AS ?langValue)
+        }
+      """ ;
+  ] ;
+  sh:targetClass qudt:ConstantValue ;
+  sh:targetClass qudt:PhysicalConstant ;
+  sh:targetClass qudt:Prefix ;
+  sh:targetClass qudt:QuantityKind .
+
 qudt:ScalingOfAndFactorUnitsPresent
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
