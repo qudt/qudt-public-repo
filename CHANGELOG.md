@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.1.5] - 2025-08-28
+
 ### Added
 
 - `unit:NCM` to support the Dutch hydrocarbons sector
@@ -470,7 +472,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.4...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.5...HEAD
+[3.1.5]: https://github.com/qudt/qudt-public-repo/compare/v3.1.4...v3.1.5
 [3.1.4]: https://github.com/qudt/qudt-public-repo/compare/v3.1.3...v3.1.4
 [3.1.3]: https://github.com/qudt/qudt-public-repo/compare/v3.1.2...v3.1.3
 [3.1.2]: https://github.com/qudt/qudt-public-repo/compare/v3.1.1...v3.1.2
