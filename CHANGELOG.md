@@ -7,6 +7,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+- `quantitykind:NumberOfElectricalPhases` for use with AC circuits
+
 ## [3.1.5] - 2025-08-28
 
 ### Added
