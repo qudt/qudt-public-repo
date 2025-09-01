@@ -292,7 +292,7 @@
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>rdfio-maven-plugin</artifactId>
-                <version>1.5.5</version>
+                <version>1.6.2</version>
                 <executions>
                     <execution>
                         <!--
@@ -2565,7 +2565,7 @@
                                 <id>profile</id>
                                 <steps>
                                     <shaclFunctions>
-                                        <file>src/main/rdf/validation/qudt-shacl-functions.ttl</file>
+                                        <file>src/build/validation/qudt-shacl-functions.ttl</file>
                                     </shaclFunctions>
                                     <add>
                                         <files>
@@ -2580,13 +2580,16 @@
                                         <values>
                                             <in>
                                                 construction
+                                                si-base
                                             </in>
                                         </values>
                                         <var>profileName</var>
                                         <body>
                                             <clear>
-                                                <graph>profile:config:includes</graph>
-                                                <graph>profile:config:excludes</graph>
+                                                <graph>profile:config:default-includes.ttl</graph>
+                                                <graph>profile:config:default-excludes.ttl</graph>
+                                                <graph>profile:config:includes.ttl</graph>
+                                                <graph>profile:config:excludes.ttl</graph>
                                                 <graph>profile:currentState</graph>
                                             </clear>
                                             <add>
@@ -2701,7 +2704,7 @@
                                                             }
                                                         }
                                                         WHERE {
-                                                            GRAPH <profile:config:exclude.ttl> {
+                                                            GRAPH <profile:config:excludes.ttl> {
                                                                 ?profile
                                                                     a qudt:Profile ;
                                                                     qudt:excludes ?excluded
@@ -2714,6 +2717,7 @@
                                             <shaclValidate>
                                                 <message>Searching for entities to exclude using shapes in excludes.ttl</message>
                                                 <failOnSeverity>None</failOnSeverity>
+                                                <failOnMissingInputGraph>false</failOnMissingInputGraph>
                                                 <shapes>
                                                     <graph>profile:config:excludes.ttl</graph>
                                                 </shapes>
@@ -2762,6 +2766,7 @@
                                                     </clear>
                                                     <shaclInfer>
                                                         <message>Inferring qudt:excludes into graph profile:newExcludes</message>
+                                                        <failOnMissingInputGraph>false</failOnMissingInputGraph>
                                                         <data>
                                                             <graphs>
                                                                 <include>dist:*</include>
