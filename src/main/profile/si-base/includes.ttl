@@ -1,6 +1,8 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix profile: <http://qudt.org/schema/vocab/profile/> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix unit: <http://qudt.org/vocab/unit/> .
 
 profile:SIBase
@@ -12,5 +14,48 @@ profile:SIBase
   qudt:includes unit:M ;
   qudt:includes unit:MOL ;
   qudt:includes unit:SEC .
+
+profile:blocksDerivedUnits
+  a sh:NodeShape ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:construct """
+        PREFIX qudt: <http://qudt.org/schema/qudt/>
+        CONSTRUCT {
+            $this qudt:blocksInclude ?blocked .
+        }
+        WHERE {
+            ?blocked
+                qudt:hasFactorUnit/qudt:hasUnit ?any .
+            FILTER NOT EXISTS {
+                # don't block a unit that's included via some other rule
+                $this qudt:includes ?blocked .
+            }
+        }
+        """ ;
+  ] ;
+  sh:targetNode profile:SIBase .
+
+profile:blocksNewUnitsUnlessScalingsOfIncluded
+  a sh:NodeShape ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:construct """
+        PREFIX qudt: <http://qudt.org/schema/qudt/>
+        CONSTRUCT {
+            $this qudt:blocksInclude ?blocked .
+        }
+        WHERE {
+            ?blocked a qudt:Unit .
+            FILTER NOT EXISTS {
+                ?blocked
+                   qudt:scalingOf ?included ;
+                   qudt:prefix ?prefix .
+                $this qudt:includes ?included .
+            }
+        }
+        """ ;
+  ] ;
+  sh:targetNode profile:SIBase .
 
 
