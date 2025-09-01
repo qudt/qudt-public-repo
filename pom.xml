@@ -2579,7 +2579,6 @@
                                     <foreach>
                                         <values>
                                             <in>
-                                                construction
                                                 si-base
                                             </in>
                                         </values>
@@ -2633,10 +2632,10 @@
                                                     <shaclInfer>
                                                         <message>Inferring qudt:includes into graph profile:newIncludes</message>
                                                         <data>
+                                                            <graph>profile:currentState</graph>
                                                             <graphs>
                                                                 <include>dist:*</include>
                                                             </graphs>
-                                                            <graph>profile:currentState</graph>
                                                         </data>
                                                         <shapes>
                                                             <graph>profile:config:includes.ttl</graph>
@@ -2652,21 +2651,27 @@
                                                             <![CDATA[
                                                                 DELETE {
                                                                     GRAPH <profile:newIncludes> {
-                                                                        ?profile qudt:includes ?prevented .
+                                                                        ?profile qudt:includes ?knownIncluded .
+                                                                        ?profile qudt:includes ?newlyBlocked .
+                                                                        ?profile qudt:blocksInclude ?knownBlocked .
                                                                     }
                                                                 } WHERE {
                                                                     {
-                                                                        # dont infer if actively blocked
+                                                                        # dont infer if actively blocked in current iteration
                                                                         GRAPH <profile:newIncludes> {
-                                                                            ?profile qudt:blocksInclude ?prevented .
+                                                                            ?profile qudt:blocksInclude ?newlyBlocked
                                                                         }
                                                                     } UNION {
-                                                                        # dont infer if already included
+                                                                        # dont infer if already included through previous iterations
                                                                         GRAPH <profile:currentState> {
-                                                                            ?profile qudt:includes ?prevented
+                                                                            ?profile qudt:includes ?knownIncluded
+                                                                        }
+                                                                    } UNION {
+                                                                        # dont infer if already blocked through previous iterations
+                                                                        GRAPH <profile:currentState> {
+                                                                            ?profile qudt:blocksInclude ?knownBlocked
                                                                         }
                                                                     }
-
                                                                 }
                                                             ]]>
                                                         </sparql>
@@ -2674,6 +2679,10 @@
                                                     <write>
                                                         <graph>profile:newIncludes</graph>
                                                         <toFile>target/profilegen/${profileName}/new-includes-${iteration}.ttl</toFile>
+                                                    </write>
+                                                    <write>
+                                                        <graph>profile:currentState</graph>
+                                                        <toFile>target/profilegen/${profileName}/current-state-inclusion-phase-${iteration}.ttl</toFile>
                                                     </write>
                                                     <add>
                                                         <graph>profile:newIncludes</graph>
@@ -2683,11 +2692,12 @@
                                                 <sparqlAsk>
                                                     <![CDATA[
                                                         ASK WHERE {
+                                                            GRAPH <profile:currentState> {
+                                                                ?profile a qudt:Profile
+                                                            }
                                                             FILTER NOT EXISTS {
                                                                 GRAPH <profile:newIncludes> {
-                                                                    ?profile
-                                                                        a qudt:Profile ;
-                                                                        qudt:includes ?newInclude .
+                                                                    ?profile ?p ?o
                                                                 }
                                                             }
                                                         }
@@ -2787,21 +2797,27 @@
                                                             <![CDATA[
                                                                 DELETE {
                                                                     GRAPH <profile:newExcludes> {
-                                                                        ?profile qudt:excludes ?prevented .
+                                                                        ?profile qudt:excludes ?knownIncluded .
+                                                                        ?profile qudt:excludes ?newlyBlocked .
+                                                                        ?profile qudt:blocksExclude ?knownBlocked .
                                                                     }
                                                                 } WHERE {
                                                                     {
-                                                                        # dont infer if actively blocked
+                                                                        # dont infer if actively blocked in current iteration
                                                                         GRAPH <profile:newExcludes> {
-                                                                            ?profile qudt:blocksExclude ?prevented .
+                                                                            ?profile qudt:blocksExclude ?newlyBlocked
                                                                         }
                                                                     } UNION {
-                                                                        # dont infer if already excluded
+                                                                        # dont infer if already included through previous iterations
                                                                         GRAPH <profile:currentState> {
-                                                                            ?profile qudt:excludes ?prevented
+                                                                            ?profile qudt:excludes ?knownIncluded
+                                                                        }
+                                                                    } UNION {
+                                                                        # dont infer if already blocked through previous iterations
+                                                                        GRAPH <profile:currentState> {
+                                                                            ?profile qudt:blocksExclude ?knownBlocked
                                                                         }
                                                                     }
-
                                                                 }
                                                             ]]>
                                                         </sparql>
@@ -2809,6 +2825,10 @@
                                                     <write>
                                                         <graph>profile:newExcludes</graph>
                                                         <toFile>target/profilegen/${profileName}/new-excludes-${iteration}.ttl</toFile>
+                                                    </write>
+                                                    <write>
+                                                        <graph>profile:currentState</graph>
+                                                        <toFile>target/profilegen/${profileName}/current-state-exclusion-phase-${iteration}.ttl</toFile>
                                                     </write>
                                                     <add>
                                                         <graph>profile:newExcludes</graph>
@@ -2847,46 +2867,78 @@
                                                           GRAPH <rdfio:pipeline:metadata> {
                                                                     ?profileDistFile rdfio:loadsInto ?profileDistGraph .
                                                           }
-                                                        } WHERE {
+                                                        }
+                                                        WHERE
+                                                        {
                                                             {
-                                                                {
-                                                                    # finds the graphs we loaded the target/dist files into
-                                                                    SELECT DISTINCT ?distGraph ?distFile
-                                                                    WHERE {
-                                                                        GRAPH <rdfio:pipeline:metadata> {
-                                                                            ?distFile rdfio:loadsInto ?distGraph .
-                                                                            FILTER(STRSTARTS(STR(?distGraph),"dist:"))
-                                                                        }
-
+                                                                # finds the graphs we loaded the target/dist files into
+                                                                SELECT DISTINCT ?distGraph ?distFile
+                                                                WHERE {
+                                                                    GRAPH <rdfio:pipeline:metadata> {
+                                                                        ?distFile rdfio:loadsInto ?distGraph .
+                                                                        FILTER(STRSTARTS(STR(?distGraph),"dist:"))
                                                                     }
+
                                                                 }
-                                                                BIND(IRI(CONCAT(?profileName,":",STR(?distGraph))) as ?profileDistGraph)
-                                                                BIND(IRI(REPLACE(STR(?distFile), "file://target/dist/", CONCAT("file://target/dist/profile/",?profileName,"/"))) AS ?profileDistFile)
+                                                            }
+                                                            BIND(IRI(CONCAT(?profileName,":",STR(?distGraph))) as ?profileDistGraph)
+                                                            BIND(IRI(REPLACE(STR(?distFile), "file://target/dist/", CONCAT("file://target/dist/profile/",?profileName,"/"))) AS ?profileDistFile)
+                                                            GRAPH <profile:currentState> {
+                                                                ?prof
+                                                                    a qudt:Profile ;
+                                                                    qudt:includes ?res .
+                                                            }
+                                                            FILTER NOT EXISTS {
                                                                 GRAPH <profile:currentState> {
                                                                     ?prof
                                                                         a qudt:Profile ;
-                                                                        qudt:includes ?res .
-                                                                }
-                                                                FILTER NOT EXISTS {
-                                                                    GRAPH <profile:currentState> {
-                                                                        ?prof
-                                                                            a qudt:Profile ;
-                                                                            qudt:excludes ?res
-                                                                    }
+                                                                        qudt:excludes ?res
                                                                 }
                                                             }
-                                                            GRAPH ?distGraph {
+                                                            GRAPH ?distGraph
+                                                            {
                                                                 {
-                                                                    {
-                                                                        ?res ?p ?o
-                                                                    } UNION {
-                                                                        ?res ?p2 ?blank .
-                                                                        ?blank ?bp ?bo .
-                                                                        FILTER (ISBLANK(?blank))
+                                                                    ?res ?p ?o
+                                                                    FILTER NOT EXISTS {
+                                                                        FILTER(ISIRI(?o) && STRSTARTS(STR(?o), "http://qudt.org/vocab/"))
+                                                                        FILTER NOT EXISTS {
+                                                                            GRAPH <profile:currentState> {
+                                                                                ?prof
+                                                                                    a qudt:Profile ;
+                                                                                    qudt:includes ?o
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    FILTER NOT EXISTS {
+                                                                        GRAPH <profile:currentState> {
+                                                                            ?prof
+                                                                                a qudt:Profile ;
+                                                                                qudt:excludes ?o
+                                                                        }
+                                                                    }
+                                                                } UNION {
+                                                                    ?res ?p2 ?blank .
+                                                                    ?blank ?bp ?bo .
+                                                                    FILTER (ISBLANK(?blank))
+                                                                    FILTER NOT EXISTS {
+                                                                        FILTER(ISIRI(?bo) && STRSTARTS(STR(?bo), "http://qudt.org/vocab/"))
+                                                                        FILTER NOT EXISTS {
+                                                                            GRAPH <profile:currentState> {
+                                                                                ?prof
+                                                                                    a qudt:Profile ;
+                                                                                    qudt:includes ?bo
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    FILTER NOT EXISTS {
+                                                                        GRAPH <profile:currentState> {
+                                                                            ?prof
+                                                                                a qudt:Profile ;
+                                                                                qudt:excludes ?bo
+                                                                        }
                                                                     }
                                                                 }
                                                             }
-
                                                         }
                                                     ]]>
                                                 </sparql>
