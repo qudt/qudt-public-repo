@@ -1,2 +1,23 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix profile: <http://qudt.org/schema/vocab/profile/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+profile:onlySISystemShape
+  a sh:NodeShape ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:select """
+        prefix qudt: <http://qudt.org/schema/qudt/>
+        prefix sou: <http://qudt.org/vocab/sou/>
+        SELECT $this
+        WHERE {
+            ?this a qudt:SystemOfUnits .
+            FILTER (?this != sou:SI)
+        }
+    """ ;
+  ] ;
+  sh:targetClass qudt:SystemOfUnits .
 
 
