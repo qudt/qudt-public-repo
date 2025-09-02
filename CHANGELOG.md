@@ -11,6 +11,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - `quantitykind:NumberOfElectricalPhases` for use with AC circuits
 
+### Fixed
+
+- Fixed typo in `qudt:ucumCode` of `unit:MegaN-PER-M2`
+
 ## [3.1.5] - 2025-08-28
 
 ### Added
