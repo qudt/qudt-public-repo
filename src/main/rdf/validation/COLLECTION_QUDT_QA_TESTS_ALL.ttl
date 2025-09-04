@@ -508,19 +508,19 @@ qudt:RdfsLabelInTitleCaseShapeViolation
   rdfs:label "Violations for labels that are not in title case" ;
   sh:severity sh:Violation ;
   sh:sparql [
-    sh:message """
-        {?this}: The value of rdfs:label, {?langValue}, is not in title case.
+    a sh:SPARQLConstraint ;
+    sh:message """{$this}: The value of rdfs:label, {?langValue}, is not in title case.
             - each word must start with an uppercase letter
             - no uppercase letters allowed directly after a lowercase letter (no CamelCase)
             - articles and prepositions must be lowercase
         """ ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
-        SELECT ?this ?langValue ?value
+        SELECT $this ?langValue ?value
         WHERE {
-          ?this rdfs:label ?value .
+          $this rdfs:label ?value .
           FILTER NOT EXISTS {
-              ?this qudt:deprecated true .
+              $this qudt:deprecated true .
           }
           BIND(LANG(?value) as ?lang)
           # languages to check (not all languages can be in title case)
@@ -539,19 +539,19 @@ qudt:RdfsLabelInTitleCaseShapeWarning
   rdfs:label "Warnings for labels that are not in title case" ;
   sh:severity sh:Warning ;
   sh:sparql [
-    sh:message """
-        {?this}: The value of rdfs:label, {?langValue}, is not in title case.
+    a sh:SPARQLConstraint ;
+    sh:message """{$this}: The value of rdfs:label, {?langValue}, is not in title case.
             - each word must start with an uppercase letter
             - no uppercase letters allowed directly after a lowercase letter (no CamelCase)
             - articles and prepositions must be lowercase
         """ ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
-        SELECT ?this ?langValue ?value
+        SELECT $this ?langValue ?value
         WHERE {
-          ?this rdfs:label ?value .
+          $this rdfs:label ?value .
           FILTER NOT EXISTS {
-            ?this qudt:deprecated true .
+            $this qudt:deprecated true .
           }
           BIND(LANG(?value) as ?lang)
           # languages to check (not all languages can be in title case)
@@ -684,9 +684,9 @@ qudt:UnitsHaveRdfClassQudtUnitTriple
     sh:select """
         SELECT DISTINCT $this
         WHERE {
-            ?this a ?type .
+            $this a ?type .
             FILTER NOT EXISTS {
-                ?this a qudt:Unit .
+                $this a qudt:Unit .
             }
         }
         """ ;
@@ -695,10 +695,10 @@ qudt:UnitsHaveRdfClassQudtUnitTriple
     a sh:SPARQLTarget ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema/prefixes> ;
     sh:select """
-        SELECT DISTINCT ?this
+        SELECT DISTINCT $this
         WHERE {
-              ?this a ?type
-              FILTER(STRSTARTS(STR(?this), "http://qudt.org/vocab/unit/"))
+              $this a ?type
+              FILTER(STRSTARTS(STR($this), "http://qudt.org/vocab/unit/"))
             }
         """ ;
   ] .

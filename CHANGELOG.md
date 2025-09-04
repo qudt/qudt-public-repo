@@ -14,6 +14,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Fixed typo in `qudt:ucumCode` of `unit:MegaN-PER-M2`
+- Tweaked some multi-line validation error messages for environments that only display the first line (e.g. TopBraid)
 
 ## [3.1.5] - 2025-08-28
 
