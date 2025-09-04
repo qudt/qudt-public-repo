@@ -13,7 +13,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
-- Fixed `qudt:ucumCode` of many units, such that they all follow the same pattern (see 'Changed' below).
+- Fixed `qudt:ucumCode` of many units, such that they all follow the same pattern (see 'Changed' below), and such that
+  no unit has more than one.
 
 ### Changed
 
@@ -21,6 +22,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - 'qudt:ucumCode' is now calculated based on factor units or base units, the same way `qudt:symbol` is. The 'canonical'
     form is used throughout no (`/`), just multiplication of factors with positive or negative exponents, in the order
     they appear in the unit's localname
+- SHACL shapes: enforce at most one `qudt:ucumCode` per unit.
 
 ## [3.1.5] - 2025-08-28
 
