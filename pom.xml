@@ -416,6 +416,10 @@
                                         <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
                                     </add>
                                     <sparqlQuery>
+                                        <file>src/build/sparql2shacl/ucumCode/query.rq</file>
+                                        <toFile>target/inspection/ucumCode/query.txt</toFile>
+                                    </sparqlQuery>
+                                    <sparqlQuery>
                                         <file>src/build/inspection/label/generate-default-labels.rq</file>
                                         <toFile>target/inspection/label/default-labels.txt</toFile>
                                     </sparqlQuery>
@@ -1053,6 +1057,7 @@
                                                 qudt:conversionMultiplier
                                                 qudt:conversionMultiplierSN
                                                 qudt:symbol
+                                                qudt:ucumCode
                                                 qudt:hasDimensionVector
                                                 qudt:hasReciprocalUnit
                                                 qudt:hasQuantityKind
@@ -1101,6 +1106,7 @@
                                                 qudt:conversionMultiplier
                                                 qudt:conversionMultiplierSN
                                                 qudt:symbol
+                                                qudt:ucumCode
                                                 qudt:hasDimensionVector
                                                 qudt:hasReciprocalUnit
                                                 qudt:hasQuantityKind
@@ -1594,6 +1600,113 @@
                                         </sparqlAsk>
                                     </until>
                                     <savepoint><id>08-infer-symbol</id></savepoint>
+                                    <until>
+                                        <message>Checking for missing/wrong ucumCodes that can be corrected/inferred</message>
+                                        <indexVar>iteration</indexVar>
+                                        <body>
+                                            <clear>
+                                                <graph>inferred:ucumCode</graph>
+                                                <graph>delete:ucumCode</graph>
+                                            </clear>
+                                            <shaclValidate>
+                                                <failOnSeverity>None</failOnSeverity>
+                                                <message>Preventing qudt:ucumCode that does not match the ucumCode calculated from base unit(s)</message>
+                                                <shapes>
+                                                    <file>target/sparql2shacl/ucumCode/validate.ttl</file>
+                                                </shapes>
+                                                <data>
+                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                    <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                    <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                    <file>src/build/sparql2shacl/ucumCode/units-overriding-inferred-ucum-code.ttl</file>
+                                                </data>
+                                                <validationReport>
+                                                    <graph>delete:ucumCode</graph>
+                                                    <file>target/fix/ucumCode/delete-${iteration}.ttl</file>
+                                                </validationReport>
+                                            </shaclValidate>
+                                            <when>
+                                                <sparqlAsk>
+                                                    <![CDATA[
+                                                        ASK WHERE {
+                                                            GRAPH <delete:ucumCode> {
+                                                                [] a sh:ValidationReport ;
+                                                                   sh:conforms false .
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparqlAsk>
+                                                <body>
+                                                    <sparqlUpdate>
+                                                        <message>Deleting invalid ucumCodes</message>
+                                                        <sparql>
+                                                            <![CDATA[
+                                                        DELETE {
+                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                ?unit qudt:ucumCode ?incorrectUcumCode .
+                                                            }
+                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                ?unit qudt:ucumCode ?incorrectUcumCode .
+                                                            }
+                                                        }
+                                                        WHERE {
+                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                {
+                                                                    ?unit qudt:ucumCode ?incorrectUcumCode .
+                                                                }
+                                                            }
+                                                            GRAPH <delete:ucumCode> {
+                                                                ?res
+                                                                    rdf:type                      sh:ValidationResult;
+                                                                    sh:resultPath                 qudt:ucumCode;
+                                                                    sh:resultSeverity             sh:Violation;
+                                                                    sh:value                      ?unit
+                                                            }
+                                                        }
+                                                        ]]>
+                                                        </sparql>
+                                                    </sparqlUpdate>
+                                                    <shaclInfer>
+                                                        <message>Inferring missing qudt:ucumCode</message>
+                                                        <!-- it would be nice to iterate, but if we do that, we end up adding triples without
+                                                            deleting the incorrect versions. we have to go through main-fixSrc-main-fixSrc...
+                                                            as often as it takes.
+                                                        -->
+                                                        <iterateUntilStable>false</iterateUntilStable>
+                                                        <shapes>
+                                                            <file>target/sparql2shacl/ucumCode/infer.ttl</file>
+                                                        </shapes>
+                                                        <data>
+                                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                            <file>src/build/sparql2shacl/ucumCode/units-overriding-inferred-ucum-code.ttl</file>
+                                                        </data>
+                                                        <inferred>
+                                                            <graph>inferred:ucumCode</graph>
+                                                            <file>target/fix/ucumCode/inferred-${iteration}.ttl</file>
+                                                        </inferred>
+                                                    </shaclInfer>
+                                                    <add>
+                                                        <graph>inferred:ucumCode</graph>
+                                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                                    </add>
+                                                </body>
+                                            </when>
+                                        </body>
+                                        <sparqlAsk>
+                                            <![CDATA[
+                                            ASK WHERE {
+                                              FILTER NOT EXISTS {
+                                                    GRAPH <inferred:ucumCode> {
+                                                        ?s ?p ?o
+                                                    }
+                                                }
+                                            }
+                                        ]]>
+                                        </sparqlAsk>
+                                    </until>
+                                    <savepoint><id>08.5-infer-ucumCode</id></savepoint>
 
                                     <sparqlQuery>
                                         <message>Calculating default labels units that don't have them from 'en' labels</message>
@@ -2237,6 +2350,7 @@
                                                         qudt:conversionMultiplier
                                                         qudt:conversionMultiplierSN
                                                         qudt:symbol
+                                                        qudt:ucumCode
                                                         qudt:hasDimensionVector
                                                         qudt:hasReciprocalUnit
                                                         qudt:hasQuantityKind
@@ -2274,6 +2388,7 @@
                                                         qudt:conversionMultiplier
                                                         qudt:conversionMultiplierSN
                                                         qudt:symbol
+                                                        qudt:ucumCode
                                                         qudt:hasDimensionVector
                                                         qudt:hasReciprocalUnit
                                                         qudt:hasQuantityKind
@@ -2323,6 +2438,7 @@
                                                                 qudt:conversionMultiplier
                                                                 qudt:conversionMultiplierSN
                                                                 qudt:symbol
+                                                                qudt:ucumCode
                                                                 qudt:hasDimensionVector
                                                                 qudt:hasReciprocalUnit
                                                                 qudt:hasQuantityKind
@@ -2361,6 +2477,7 @@
                                                                 qudt:conversionMultiplier
                                                                 qudt:conversionMultiplierSN
                                                                 qudt:symbol
+                                                                qudt:ucumCode
                                                                 qudt:hasDimensionVector
                                                                 qudt:hasReciprocalUnit
                                                                 qudt:hasQuantityKind
