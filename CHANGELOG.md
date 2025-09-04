@@ -15,6 +15,14 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Fixed typo in `qudt:ucumCode` of `unit:MegaN-PER-M2`
 - Tweaked some multi-line validation error messages for environments that only display the first line (e.g. TopBraid)
+- Fixed `qudt:ucumCode` of many units, such that they all follow the same pattern (see 'Changed' below).
+
+### Changed
+
+- Build process
+  - 'qudt:ucumCode' is now calculated based on factor units or base units, the same way `qudt:symbol` is. The 'canonical'
+    form is used throughout no (`/`), just multiplication of factors with positive or negative exponents, in the order
+    they appear in the unit's localname
 
 ## [3.1.5] - 2025-08-28
 
