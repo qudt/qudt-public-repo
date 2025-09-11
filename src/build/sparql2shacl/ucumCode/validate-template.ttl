@@ -1,0 +1,42 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qfn: <http://qudt.org/shacl/functions#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+qfn:validateSymbols
+  a owl:Ontology ;
+  owl:imports qfn: .
+
+qfn:ucumCodeRule
+  a sh:NodeShape ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message """
+    Unit {$this} has ucumCode '{?actualUcumCode}', but '{?calculatedUcumCode}' is inferred via {?sourceRelation}.
+    If the current ucumCode is correct, add the unit to `src/build/sparql2shacl/ucumCode/units-overriding-inferred-ucum-code.ttl`
+    """ ;
+    sh:prefixes qfn: ;
+    sh:select """
+    SELECT * WHERE
+    {
+        {
+
+
+{{QUERY_WITHOUT_PREFIXES}}
+
+
+        }
+
+        FILTER NOT EXISTS {
+            qudt:UnitsOverridingInferredUcumCode qudt:includes ?this .
+        }
+    }
+
+    """ ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
+
