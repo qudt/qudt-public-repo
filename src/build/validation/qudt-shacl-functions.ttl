@@ -1,0 +1,634 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qfn: <http://qudt.org/shacl/functions#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+qfn:
+  a owl:Ontology ;
+  rdfs:isDefinedBy qfn: ;
+  rdfs:label "QUDT SHACL FUNCTIONS" ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://qudt.org/shacl/functions#"^^xsd:anyURI ;
+    sh:prefix "qfn" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+    sh:prefix "qudt" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://qudt.org/vocab/dimensionvector/"^^xsd:anyURI ;
+    sh:prefix "qkdv" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://qudt.org/vocab/quantitykind/"^^xsd:anyURI ;
+    sh:prefix "quantitykind" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://qudt.org/vocab/unit/"^^xsd:anyURI ;
+    sh:prefix "unit" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ;
+    sh:prefix "rdf" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI ;
+    sh:prefix "rdfs" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://www.w3.org/2001/XMLSchema#"^^xsd:anyURI ;
+    sh:prefix "xsd" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ;
+    sh:prefix "owl" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
+    sh:prefix "skos" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://www.w3.org/ns/shacl#"^^xsd:anyURI ;
+    sh:prefix "sh" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "https://github.com/qudtlib/numericFunctions/"^^xsd:anyURI ;
+    sh:prefix "nf" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "https://github.com/qudtlib/rdfio/"^^xsd:anyURI ;
+    sh:prefix "rdfio" ;
+  ] .
+
+qfn:bound
+  a sh:SPARQLFunction ;
+  rdfs:comment "returns true iff the value is bound and not equal to qfn:Unbound" ;
+  sh:parameter [
+    sh:description "anything" ;
+    sh:order 0 ;
+    sh:path qfn:value ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:boolean ;
+  sh:select "SELECT (BOUND(?value) && ?value != qfn:Unbound AS ?result) WHERE {}" .
+
+qfn:decimalPrecision
+  a sh:SPARQLFunction ;
+  rdfs:comment "Determines the precision (number of significant digits) of the decimal number provided as its first argument" ;
+  sh:parameter [
+    sh:datatype xsd:decimal ;
+    sh:description "The decimal value of which to determine the precision " ;
+    sh:order 0 ;
+    sh:path qfn:value ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:decimal ;
+  sh:select """
+        SELECT ?result
+        WHERE {
+            # determines precision of input
+            # simple: remove any '.' if present
+            BIND(STR(?value) as ?tmpVal)
+            BIND(REPLACE(?tmpVal, "([^.]*)\\\\.([^.]*)", "$1$2") as ?tmpVal1)
+            # leading 0 before the dot are insignificant, trailing 0 after the dot are insignificant. strip.
+            BIND(REPLACE(?tmpVal1, "^\\\\s*[+-]?\\\\s*0*([1-9]([0-9]*[1-9])?)0*$","$1") as ?val)
+            # 2. dVal
+            BIND(STRLEN(STRBEFORE(?val,".")) as ?tmp0)
+            BIND(IF(?tmp0 = 0, STRLEN(?val), ?tmp0) as ?dVal)
+            # 3. uVal
+            BIND(REPLACE(REPLACE(?val,"\\\\.",""), "^0+","") as ?uVal)
+            # 4. pVal
+            BIND(STRLEN(?uVal) as ?pVal)
+            BIND(xsd:integer(?pVal) as ?result)
+        }
+    """ .
+
+qfn:decimalRoundToPrecision
+  a sh:SPARQLFunction ;
+  sh:parameter [
+    sh:datatype xsd:decimal ;
+    sh:description "The decimal value to normalize" ;
+    sh:order 0 ;
+    sh:path qfn:value ;
+  ] ;
+  sh:parameter [
+    sh:datatype xsd:integer ;
+    sh:description "Number of significant digits (default: 34)" ;
+    sh:order 1 ;
+    sh:path qfn:precision ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:decimal ;
+  sh:select """
+        SELECT ?result
+        WHERE {
+            # rounds input decimal v to precision p
+            #
+            # unscaled number: significant digits
+            # precision: number of significant digits
+            # scale: (value = unscaled * 10^(-scale) ) eg: 123.45: unscaled: 12345 scale = 2;  110 = unscaled: 11, scale = -1; 0.000123 = unscaled: 123, scale = 6
+            #
+            # Algorithm:
+            #
+            # 1. val = normalized v (strip leading 0s, don't add trailing 0 if it has no dot)
+            # 2. find the dot position dVal (dVal = length(val) if no dot)
+            # 3. find the unscaled number uVal as the digits without the dot, leading 0s removed, trailing 0s kept
+            # 4. length of uVal is the precision of our value, pVal = length(uVal)
+            # 5. find the position eVal in val at which the unscaled number ends
+            # 6. scale sVal = eVal - dVal (e.g 123.456: dVal = 3, eVal = 6, sVal = 3, pVal = 6; 123: dVal = 0; 12345: dVal = 5, eVal = 5, sVal = 0, pVal = 5; 12000: dVal = 5, eVal = 2, sVal = -3, pVal = 2; 0.00123: dVal = 1, eVal=6, sVal= 5, pVal=3 )
+            # 7. precision to use pNew = min (p, pVal)
+            # 8. New unscaled number uNew with given precision. if pNew == pVal: uNew = uVal . otherwise, make tmp value from unscaled, inserting a dot at position pNew and use ROUND on it, ie uNew = ROUND(tmp)
+            # 9. New scale sNew = sVal - (pVal - pNew)
+            # 10. if sNew = 0 : newVal = CONCAT(uVal)
+            #     if sNew < 0 : newVal = CONCAT(uNew, SUBSTR(zeros,1,- sNew) ) - append zeros for each negative scale point
+            #     if sNew > 0 : newVal = CONCAT("0.", SUBSTR(zeros, 1, - sNew - pNew), uNew) - insert zeros to fill if needed
+            # 11. result = xsd:decimal(newVal)
+            #
+            # for testing:
+            # VALUES (?value ?precision) { (12345678 4) (0.00123456 3) (.00123456 4) (000123.456000 2) (123456789.0123456789 14) (0.123 5) (12345 3) (2 10) (3 1) (7 0) }
+            #
+            BIND(IF(bound(?precision), ?precision, 34) as ?p)
+            BIND("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000" as ?zeroPad)
+
+            # 1: normalize
+            BIND(STR(?value) as ?tmpValueStr)
+            # leading 0 before the dot are insignificant. strip.
+            BIND(REPLACE(?tmpValueStr, "^[+-]?0*(0?\\\\.|[1-9])","$1") as ?tmpValueStrNoLeading0)
+            # remember sign if negative
+            BIND(IF(REGEX(?tmpValueStr, "^-"), "-","") AS ?sign)
+            # if the number starts with '.', prepend '0'
+            BIND(IF(STRSTARTS(?tmpValueStrNoLeading0, "."), CONCAT("0", ?tmpValueStrNoLeading0), ?tmpValueStrNoLeading0) as ?val)
+            # 2. dVal
+            BIND(STRLEN(STRBEFORE(?val,".")) as ?tmp0)
+            BIND(IF(?tmp0 = 0, STRLEN(?val), ?tmp0) as ?dVal)
+            # 3. uVal
+            BIND(REPLACE(REPLACE(?val,"\\\\.",""), "^0+","") as ?uVal)
+            # 4. pVal
+            BIND(STRLEN(?uVal) as ?pVal)
+            # 5. eVal
+            BIND(REPLACE(?val,"\\\\.","") as ?tmp1)
+            BIND(STRLEN(?tmp1) - STRLEN(STRAFTER(?tmp1,?uVal)) as ?eVal)
+            # 6. sVal
+            BIND(?eVal - ?dVal as ?sVal)
+            # 7. pNew
+            BIND(IF(?p < ?pVal, ?p, ?pVal) as ?pNew)
+            # 8. uNew
+            BIND(CONCAT(SUBSTR(?uVal,1,?pNew),".", SUBSTR(?uVal, ?pNew+1) ) as ?tmp2)
+            BIND(IF(?pNew = ?pVal, ?uVal, REPlACE(STR(ROUND(xsd:decimal(?tmp2))), ".0$","")) as ?uNew)
+            # 9. sNew
+            BIND(?sVal - (?pVal - ?pNew) as ?sNew)
+            # 10. newVal
+            BIND(IF(?sNew = 0, ?uNew,
+                    IF (?sNew < 0 ,
+                        CONCAT(?uNew, SUBSTR(?zeroPad, 1, - ?sNew)),
+                        CONCAT(SUBSTR(?zeroPad, 1, ?sNew - ?pNew), ?uNew)
+                    )) as ?tmp3)
+            BIND(IF(?sNew <= 0, ?tmp3,
+                    CONCAT(SUBSTR(?tmp3,1,STRLEN(?tmp3) - ?sNew), ".", SUBSTR(?tmp3, STRLEN(?tmp3) - ?sNew + 1))
+                ) as ?tmp4)
+            BIND(IF(STRSTARTS(?tmp4, "."), CONCAT("0",?tmp4), ?tmp4) as ?tmp5)
+            # 11. result
+            # 12. append '.0' if there is no '.' in the string
+            BIND(IF(CONTAINS(?tmp5,"."), ?tmp5, CONCAT(?tmp5,".0")) AS ?tmp6)
+            BIND(REPLACE(?tmp6, "^0*([1-9][0-9]*.[0-9][1-9]*)0*$", "$1", "") AS ?tmp7)
+            BIND(CONCAT(?sign, ?tmp7) AS ?newVal)
+            BIND(xsd:decimal(?newVal) as ?result)
+        }
+    """ .
+
+qfn:decimalToDouble
+  a sh:SPARQLFunction ;
+  sh:parameter [
+    sh:datatype xsd:decimal ;
+    sh:description "The decimal value to expess as double" ;
+    sh:order 0 ;
+    sh:path qfn:input ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:decimal ;
+  sh:select """
+    SELECT ?result
+    WHERE {
+      BIND(IF(?input = 0.0, "0.0", "") AS ?zeroCheck)
+      BIND(STR(?input) AS ?str)
+      BIND(STRSTARTS(?str, "-") AS ?isNegative)
+      BIND(IF(?isNegative, SUBSTR(?str, 2), ?str) AS ?absStr)
+      BIND(CONTAINS(?absStr, ".") AS ?hasDecimal)
+      BIND(IF(?hasDecimal, STRBEFORE(?absStr, "."), ?absStr) AS ?intPart)
+      BIND(IF(?hasDecimal, STRAFTER(?absStr, "."), "") AS ?fracPart)
+      BIND(IF(?intPart = "", "", REPLACE(?intPart, "^0+", "", "")) AS ?trimmedInt)
+      BIND(IF(?fracPart = "", "", REPLACE(?fracPart, "^0+", "", "")) AS ?trimmedFrac)  # Only trim leading zeros
+      BIND(IF(?fracPart = "", "", REPLACE(?fracPart, "0+$","","")) AS ?fracTrimmedAtEnd) # only trim trailing zeros
+      BIND(STRLEN(?trimmedInt) AS ?trimmedIntLen)
+      BIND(STRLEN(?trimmedFrac) AS ?trimmedFracLen)
+      BIND(STRLEN(?fracPart) AS ?fracLen)
+      BIND(IF(
+        ?trimmedIntLen > 0,
+        ?trimmedIntLen - 1,
+        IF(
+          ?trimmedFracLen > 0,
+          -(?fracLen - ?trimmedFracLen + 1),
+          0
+        )
+      ) AS ?exp)
+      BIND(IF(
+        ?trimmedIntLen > 0,
+        CONCAT(
+          SUBSTR(?trimmedInt, 1, 1),
+          IF(?trimmedIntLen > 1 || ?trimmedFracLen > 0, ".", ""),
+          SUBSTR(?trimmedInt, 2),
+          ?fracTrimmedAtEnd
+        ),
+        IF(
+          ?trimmedFracLen > 0,
+          CONCAT(
+            SUBSTR(?trimmedFrac, 1, 1),
+            IF(?trimmedFracLen > 1, ".", ""),
+            SUBSTR(?trimmedFrac, 2)
+          ),
+          "0.0"
+        )
+      ) AS ?mantissaTmpStr)
+      BIND(REPLACE(?mantissaTmpStr, "^0*([0-9]+(\\\\.[0-9][1-9]*)?)0*$", "$1","") AS ?mantissaTmpStr2)
+      BIND(IF(!CONTAINS(?mantissaTmpStr2, "."), CONCAT(?mantissaTmpStr2,".0"), ?mantissaTmpStr2) AS ?mantissaStr)
+      BIND(STRDT(IF(
+        ?zeroCheck = "0.0",
+        "0.0E0",
+        CONCAT(
+          IF(?isNegative, "-", ""),
+          ?mantissaStr,
+          "E",
+          STR(?exp)
+        )
+      ), xsd:double) AS ?result)
+    }
+    """ .
+
+qfn:defaultValue
+  a sh:SPARQLFunction ;
+  sh:parameter [
+    sh:description "Any value, may also be unbound" ;
+    sh:order 0 ;
+    sh:path qfn:value ;
+  ] ;
+  sh:parameter [
+    sh:description "The default value to return if value is unbound" ;
+    sh:order 1 ;
+    sh:path qfn:defaultValue ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:select """
+    SELECT
+        (IF(BOUND(?value), ?value, ?defaultValue) AS ?result)
+    WHERE {}
+    """ .
+
+qfn:dimVec.fromLocalname
+  a sh:SPARQLFunction ;
+  rdfs:comment "Constructs a valid dimension vector IRI from the specified localname. If necessary, the localname is replaced by 'A0E0L0I0M0H0T0D1'. " ;
+  sh:parameter [
+    sh:datatype xsd:string ;
+    sh:description "the dimension vector localname" ;
+    sh:order 0 ;
+    sh:path qfn:dimVecLocalname ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:anyURI ;
+  sh:select """
+            SELECT (IRI(CONCAT(STR(qkdv:), ?finalLocalname)) as ?result)
+            WHERE {
+                BIND ( IF(
+                          STRSTARTS(?dimVecLocalname, "A0E0L0I0M0H0T0"),
+                          "A0E0L0I0M0H0T0D1",
+                          REPLACE(?dimVecLocalname,"^(.+)D.+$","$1D0") # apparently, we explicitly set D0 if any other dimension is != 0
+                    ) AS ?finalLocalname)
+            }
+        """ .
+
+qfn:dimVec.getDimensionExponent
+  a sh:SPARQLFunction ;
+  rdfs:comment "Gets the exponent of the specified dimension indicator (ie, letter) in the specified dimension vector" ;
+  sh:parameter [
+    sh:datatype xsd:anyURI ;
+    sh:description "the dimension vector IRI" ;
+    sh:order 0 ;
+    sh:path qfn:dimVec ;
+  ] ;
+  sh:parameter [
+    sh:datatype xsd:string ;
+    sh:description "dimensionIndicator" ;
+    sh:order 1 ;
+    sh:path qfn:dimensionIndicator ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:number ;
+  sh:select """
+            SELECT (qfn:dimVec.getDimensionExponentFromLocalname(qfn:localname(?dimVec), ?dimensionIndicator) as ?result)
+            WHERE{}
+        """ .
+
+qfn:dimVec.getDimensionExponentFromLocalname
+  a sh:SPARQLFunction ;
+  rdfs:comment "Gets the exponent of the specified dimension indicator (ie, letter) in the specified dimension vector's localname" ;
+  sh:parameter [
+    sh:datatype xsd:string ;
+    sh:description "the dimension vector localname" ;
+    sh:order 0 ;
+    sh:path qfn:dimVecLocalname ;
+  ] ;
+  sh:parameter [
+    sh:datatype xsd:string ;
+    sh:description "dimensionIndicator" ;
+    sh:order 1 ;
+    sh:path qfn:dimensionIndicator ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:number ;
+  sh:select """
+            SELECT (
+                    xsd:integer(
+                        REPLACE(
+                            ?dimVecLocalname,
+                            CONCAT("^[^",?dimensionIndicator,"]*",?dimensionIndicator,"(-?\\\\d+(\\\\.\\\\d+)?)($|\\\\w.+)$"),"$1"))
+                        as ?result)
+            WHERE {}
+        """ .
+
+qfn:dimVec.multiply
+  a sh:SPARQLFunction ;
+  rdfs:comment "Combines two dimension vectors by multiplication. if one argument is unbound, the other is returned as-is" ;
+  sh:parameter [
+    sh:datatype xsd:anyURI ;
+    sh:description "an IRI" ;
+    sh:order 0 ;
+    sh:path qfn:leftDimVec ;
+  ] ;
+  sh:parameter [
+    sh:datatype xsd:anyURI ;
+    sh:description "an IRI" ;
+    sh:order 1 ;
+    sh:path qfn:rightDimVec ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:anyURI ;
+  sh:select """
+                SELECT (
+                        IF(qfn:bound(?leftDimVec),
+                            IF (qfn:bound(?rightDimVec),
+                                qfn:dimVec.fromLocalname(?rawLocalname),
+                                ?leftDimVec),
+                            IF (qfn:bound(?rightDimVec),
+                                ?rightDimVec,
+                                qfn:Unbound))
+                    AS ?result )
+                {
+                    {
+                        SELECT (COALESCE(GROUP_CONCAT(?dimResult; separator=""),"") AS ?rawLocalname)
+                        WHERE {
+                            # a dim vector looks like this: qkdv:A0E0L1I0M0H0T0D0 ;
+                            VALUES ?dim { "A" "E" "L" "I" "M" "H" "T" "D" }
+                            BIND(COALESCE(qfn:dimVec.getDimensionExponent(?leftDimVec, ?dim) + qfn:dimVec.getDimensionExponent(?rightDimVec, ?dim), 0) as ?dimExp)
+                            BIND(CONCAT(?dim, STR(?dimExp)) AS ?dimResult)
+                        }
+                    }
+                }
+        """ .
+
+qfn:dimVec.pow
+  a sh:SPARQLFunction ;
+  rdfs:comment "Raises the specified dimension vector, provided as an IRI, to the specified power and returns its IRI" ;
+  sh:parameter [
+    sh:datatype xsd:anyURI ;
+    sh:description "an IRI" ;
+    sh:order 0 ;
+    sh:path qfn:dimVec ;
+  ] ;
+  sh:parameter [
+    sh:datatype xsd:decimal ;
+    sh:description "exponent" ;
+    sh:order 1 ;
+    sh:path qfn:exponent ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:anyURI ;
+  sh:select """
+            SELECT ( qfn:dimVec.fromLocalname(?localname) as ?result)
+            WHERE {
+                SELECT (GROUP_CONCAT(?dimResult; separator="") as ?localname)
+                WHERE {
+                    # a dim vector looks like this: qkdv:A0E0L1I0M0H0T0D0 ;
+                    VALUES ?dim { "A" "E" "L" "I" "M" "H" "T" "D" }
+                    {
+                        BIND(qfn:localname(?dimVec) as ?dimVecLocalname)
+                    }
+                    BIND(qfn:dimVec.getDimensionExponentFromLocalname(?dimVecLocalname, ?dim) * ?exponent as ?dimExp)
+                    BIND(CONCAT(?dim, STR(?dimExp)) AS ?dimResult)
+                }
+
+            }
+        """ .
+
+qfn:exponentSuperscript
+  a sh:SPARQLFunction ;
+  sh:parameter [
+    sh:datatype xsd:decimal ;
+    sh:order 0 ;
+    sh:path qfn:exponent ;
+  ] ;
+  sh:parameter [
+    sh:datatype xsd:boolean ;
+    sh:optional true ;
+    sh:order 1 ;
+    sh:path qfn:absolute ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:string ;
+  sh:select """
+    SELECT ?superscript
+    WHERE {
+      BIND(COALESCE(?absolute,false) as ?useAbsoluteValue)
+      BIND(IF(?useAbsoluteValue, ABS(?exponent), ?exponent) AS ?expValue)
+      BIND(STR(?expValue) as ?exprStr)
+      BIND(REPLACE(?exprStr, "\\\\.0+$", "") AS ?sp)
+      BIND(IF(?sp = "1", "", ?sp) AS ?notOne)
+      # Replace minus sign with superscript minus
+      BIND(REPLACE(?notOne, "-", "⁻") AS ?sm)
+      # Replace digits 0-9 with superscript equivalents
+      BIND(REPLACE(?sm, "0", "⁰") AS ?s0)
+      BIND(REPLACE(?s0, "1", "¹") AS ?s1)
+      BIND(REPLACE(?s1, "2", "²") AS ?s2)
+      BIND(REPLACE(?s2, "3", "³") AS ?s3)
+      BIND(REPLACE(?s3, "4", "⁴") AS ?s4)
+      BIND(REPLACE(?s4, "5", "⁵") AS ?s5)
+      BIND(REPLACE(?s5, "6", "⁶") AS ?s6)
+      BIND(REPLACE(?s6, "7", "⁷") AS ?s7)
+      BIND(REPLACE(?s7, "8", "⁸") AS ?s8)
+      BIND(REPLACE(?s8, "9", "⁹") AS ?s9)
+      # Replace decimal point with . + Combining Dot Above (U+0307)
+      BIND(REPLACE(?s9, "\\\\.", ".\\\\u0307") AS ?superscript)
+      # Remove trailing .0 (common in doubles like 2.0) to clean up output
+    }
+  """ .
+
+qfn:localname
+  a sh:SPARQLFunction ;
+  rdfs:comment "Extracts the localname part of an IRI" ;
+  sh:parameter [
+    sh:datatype xsd:anyURI ;
+    sh:description "an IRI" ;
+    sh:order 0 ;
+    sh:path qfn:input ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:string ;
+  sh:select """
+        SELECT (REPLACE(STR(?input), "^.+[/#]", "") as ?result) WHERE {}
+    """ .
+
+qfn:pow
+  a sh:SPARQLFunction ;
+  sh:parameter [
+    sh:datatype xsd:decimal ;
+    sh:description "The decimal value to exponentiate" ;
+    sh:order 0 ;
+    sh:path qfn:value ;
+  ] ;
+  sh:parameter [
+    sh:datatype xsd:integer ;
+    sh:description "The exponent - an integer between 0 and 8 (inclusive)" ;
+    sh:order 1 ;
+    sh:path qfn:exponent ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:decimal ;
+  sh:select """
+    SELECT ?result
+    WHERE {
+        # supports exponents 0 to 8
+        BIND(ABS(?exponent) as ?absoluteExponent)
+        BIND(IF (?value = 0.0,
+            0.0,
+            if (?exponent < 0, nf:decimal.div(1.0, ?value, 34), ?value )) AS ?multiplier)
+        BIND(
+            IF(?absoluteExponent = 0, 1.0,
+                IF(?absoluteExponent = 1,
+                    ?multiplier,
+                    IF(?absoluteExponent = 2,
+                        ?multiplier * ?multiplier,
+                        IF(?absoluteExponent = 3,
+                            ?multiplier * ?multiplier * ?multiplier,
+                            IF(?absoluteExponent = 4,
+                                ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                IF(?absoluteExponent = 5,
+                                    ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                    IF(?absoluteExponent = 6,
+                                        ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                        IF(?absoluteExponent = 7,
+                                            ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                            IF(?absoluteExponent = 8,
+                                                ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier * ?multiplier,
+                                                CONCAT("CANNOT HANDLE EXPONENT ", ?exponent))))))))))
+        AS ?result )
+    }
+    """ .
+
+qfn:unit.dimVec.calculate
+  a sh:SPARQLFunction ;
+  rdfs:comment "Calculates the dimension vector of a unit if that unit has factor units or is a scaled unit" ;
+  sh:parameter [
+    sh:datatype xsd:anyURI ;
+    sh:description "a unit IRI" ;
+    sh:order 0 ;
+    sh:path qfn:unit ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:anyURI ;
+  sh:select """
+            SELECT ?result
+                WHERE {
+                    {
+                        SELECT (GROUP_CONCAT(?factorDimVecResult) AS ?allDimVecs)
+                        WHERE
+                        {
+                            {
+                                ?unit qudt:hasFactorUnit ?fu .
+                                ?fu
+                                    qudt:hasUnit ?base;
+                                    qudt:exponent ?exponent ;
+                            } UNION {
+                                ?unit qudt:scalingOf ?base .
+                                BIND(1 as ?exponent)
+                            }
+                            OPTIONAL {
+                                ?base qudt:hasDimensionVector ?dimVector .
+                            }
+                            BIND(qfn:dimVec.pow(?dimVector, ?exponent) AS ?factorDimVec)
+                            BIND(COALESCE(?factorDimVec, qfn:Unbound) AS ?factorDimVecResult)
+                        }
+                    }
+                    BIND(REPLACE(?allDimVecs,"^([^ ]+)( .+)?$", "$1") AS ?dv0)
+                    BIND(SUBSTR(?allDimVecs,STRLEN(STR(?dv0)) + 2) AS ?rest0)
+                    BIND(REPLACE(?rest0,"^([^ ]+)( .+)?$", "$1") AS ?dv1)
+                    BIND(SUBSTR(?rest0,STRLEN(STR(?dv1)) + 2) AS ?rest1)
+                    BIND(REPLACE(?rest1,"^([^ ]+)( .+)?$", "$1") AS ?dv2)
+                    BIND(SUBSTR(?rest1,STRLEN(STR(?dv2)) + 2) AS ?rest2)
+                    BIND(REPLACE(?rest2,"^([^ ]+)( .+)?$", "$1") AS ?dv3)
+                    BIND(SUBSTR(?rest2,STRLEN(STR(?dv3)) + 2) AS ?rest3)
+                    BIND(REPLACE(?rest3,"^([^ ]+)( .+)?$", "$1") AS ?dv4)
+                    BIND(SUBSTR(?rest3,STRLEN(STR(?dv4)) + 2) AS ?rest4)
+                    BIND(REPLACE(?rest4,"^([^ ]+)( .+)?$", "$1") AS ?dv5)
+                    BIND(SUBSTR(?rest4,STRLEN(STR(?dv5)) + 2) AS ?rest5)
+                    BIND(REPLACE(?rest5,"^([^ ]+)( .+)?$", "$1") AS ?dv6)
+                    BIND(SUBSTR(?rest5,STRLEN(STR(?dv6)) + 2) AS ?rest6)
+                    BIND(REPLACE(?rest6,"^([^ ]+)( .+)?$", "$1") AS ?dv7)
+                    BIND(SUBSTR(?rest6,STRLEN(STR(?dv7)) + 2) AS ?rest7)
+                    BIND(IF(?dv0 = "", ?undefined, IRI(?dv0)) AS ?dvIri0)
+                    BIND(IF(?dv1 = "", ?undefined, IRI(?dv1)) AS ?dvIri1)
+                    BIND(IF(?dv2 = "", ?undefined, IRI(?dv2)) AS ?dvIri2)
+                    BIND(IF(?dv3 = "", ?undefined, IRI(?dv3)) AS ?dvIri3)
+                    BIND(IF(?dv4 = "", ?undefined, IRI(?dv4)) AS ?dvIri4)
+                    BIND(IF(?dv5 = "", ?undefined, IRI(?dv5)) AS ?dvIri5)
+                    BIND(IF(?dv6 = "", ?undefined, IRI(?dv6)) AS ?dvIri6)
+                    BIND(IF(?dv7 = "", ?undefined, IRI(?dv7)) AS ?dvIri7)
+                    BIND(IF(
+                        # check if we found all factors' dimvecs and if the unit has no more than 8 of them
+                        CONTAINS(?allDimVecs,STR(qfn:Unbound)) || (BOUND(?rest7) && ?rest7 != "") ,
+                        qfn:Unbound, # unbound if the above did not hold
+                        qfn:dimVec.multiply(?dvIri0,
+                            qfn:dimVec.multiply(?dvIri1,
+                                qfn:dimVec.multiply(?dvIri2,
+                                    qfn:dimVec.multiply(?dvIri3,
+                                        qfn:dimVec.multiply(?dvIri4,
+                                            qfn:dimVec.multiply(?dvIri5,
+                                                qfn:dimVec.multiply(?dvIri6,?dvIri7))))))))
+                        AS ?result)
+                    #BIND(CONCAT(
+                    #IF(BOUND(?dvIri0),STR(?dvIri0),"unbound"),
+                    #"-0----",
+                    #IF(BOUND(?dvIri1),STR(?dvIri1),"unbound"),
+                    #"-1----",
+                    #IF(BOUND(?dvIri2),STR(?dvIri2),"unbound"),
+                    #"-2----",
+                    #IF(BOUND(?dvIri3),STR(?dvIri3),"unbound"),
+                    #"-3----",
+                    #IF(BOUND(?dvIri4),STR(?dvIri4),"unbound"),
+                    #"-4----") AS ?result)
+                }
+        """ .
+
+

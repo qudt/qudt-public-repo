@@ -1,0 +1,16 @@
+SELECT qfn:localname(?unit) ?exp1 ?label ?lang
+WHERE {
+    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+        ?unit
+            rdfs:label ?label .
+            ?unit
+                qudt:hasFactorUnit [
+                    qudt:hasUnit ?fu1;
+                    qudt:exponent ?exp1;
+                ] ;
+            FILTER(?exp1 > 1)
+            #FILTER(?fu1 in (unit:M, unit:KiloGM, unit:SEC, unit:A))
+            BIND(LANG(?label) AS ?lang)
+    }
+}
+ORDER BY ?lang ?exp1 ?unit

@@ -1,4 +1,4 @@
-name: Fix sources and commit to branch
+name: run `mvn spotless:apply`
 on:
   workflow_dispatch:
 
@@ -44,9 +44,12 @@ jobs:
             echo "Sources need formatting, we'll do that now"
           fi
 
-      # Apply formatting (changelog was touched)
+      # run mvn install,
+      # if there are problems, try mvn -Pfix install
+      # then run mvn install again
+      # try that up to three times
       - name: Apply formatting
-        run: mvn -Pfix install
+        run: mvn spotless:apply
 
       # Commit changes
       - name: Commit changes

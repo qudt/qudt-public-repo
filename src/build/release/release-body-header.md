@@ -1,8 +1,8 @@
-## Please note!
+# Highlights
 
-This new Release adds some significant new functionality by generating 'factor units' for most units. This will be a new relation that could help when defining profiles (still coming). For this reason the semantic version is incremented from 3.0.0 to 3.1.0.
+This release provides several significant improvements in both consistency and ease of use.
 
-We are also introducing the idea of a ContextualUnit that allows users to introduce domain-specific units (recall our discussion about CFU, Colony Forming Units, suggested by @Toby-Broom and @dr-shorthair). We will depend on the introduction of profiles to keep these additions from overwhelming the vocabularies. Such ContextualUnits will be related to more generic versions of units using skos:broader.
+Note in the "Added" section that we now provide two versions of a single file that contains everything a user needs in one place - the schemas and the vocabularies. Depending on whether you are using OWL or SHACL, your application can now simply load or import one of these files, available in the release Zip file. They are also resolvable on the web as http://qudt.org/qudt-all (for OWL) and http://qudt.org/shacl/qudt-all (for SHACL). There are also resolvable versioned URIs starting with version 3.1.4, with URIs http://qudt.org/3.1.4/qudt-all (for OWL) and http://qudt.org/3.1.4/shacl/qudt-all (for SHACL).
 
-Finally, we are continuing to refine the automation of our build process to minimize human error, while hopefully not making the contribution process too complicated. Feedback is always welcome.
+Note also in the "Changed" section that our automated build process is much improved to ensure consistency among vocabulary entries. Please read the description where you will learn that many of the properties of units are now auto-corrected for new additions. We will be updating our Wiki documentation to reflect these improvements soon.
 

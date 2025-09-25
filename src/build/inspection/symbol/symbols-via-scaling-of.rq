@@ -1,0 +1,40 @@
+SELECT
+    ?unit
+    ?actualSymbol
+    ?calculatedSymbol
+    (?calculatedSymbol = ?actualSymbol AS ?same)
+WHERE
+{
+
+
+    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+        ?unit
+            a qudt:Unit ;
+            qudt:scalingOf ?base .
+        OPTIONAL {
+            ?unit qudt:symbol ?actualSymbol
+        }
+        ?base qudt:symbol ?baseUnitSymbol .
+        BIND(qfn:localname(?unit) as ?unitLocalname )
+        BIND(qfn:localname(?base) AS ?baseLocalname)
+        OPTIONAL {
+            ?unit qudt:prefix ?prefix .
+            GRAPH <target:VOCAB_QUDT-PREFIXES.ttl> {
+                        ?prefix qudt:symbol ?prefixSymbol .
+            }
+            BIND(qfn:localname(?prefix) AS ?prefixLocalname)
+        }
+        BIND(
+            IF(BOUND(?prefixSymbol),
+                CONCAT(?prefixSymbol, ?baseUnitSymbol),
+                ?baseUnitSymbol)
+            AS ?calculatedSymbol)
+        BIND(
+            IF(BOUND(?prefixLocalname),
+                CONCAT(?prefixLocalname, ?baseLocalname),
+                ?baseLocalname)
+            AS ?scaledUnitLocalnameReconstructed)
+    }
+    FILTER( ?unitLocalname = ?scaledUnitLocalnameReconstructed )
+}
+ORDER BY ?looksOk ?same ?unit

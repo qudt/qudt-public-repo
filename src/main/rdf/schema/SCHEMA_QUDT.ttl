@@ -7,7 +7,6 @@
 @prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
-@prefix qudt.type: <http://qudt.org/vocab/type/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix vaem: <http://www.linkedmodel.org/schema/vaem#> .
 @prefix voag: <http://voag.linkedmodel.org/schema/voag#> .
@@ -514,7 +513,7 @@ qudt:Encoding
 
 qudt:EndianType
   a owl:Class ;
-  owl:oneOf ( qudt.type:LittleEndian qudt.type:BigEndian ) ;
+  owl:oneOf ( qudt:LittleEndian qudt:BigEndian ) ;
   qudt:informativeReference "http://en.wikipedia.org/wiki/Endianness"^^xsd:anyURI ;
   qudt:plainTextDescription "In computing, endianness is the ordering used to represent some kind of data as a sequence of smaller units. Typical cases are the order in which integer values are stored as bytes in computer memory (relative to a given memory addressing scheme) and the transmission order over a network or other medium. When specifically talking about bytes, endianness is also referred to simply as byte order.  Most computer processors simply store integers as sequences of bytes, so that, conceptually, the encoded value can be obtained by simple concatenation. For an 'n-byte' integer value this allows 'n!' (n factorial) possible representations (one for each byte permutation). The two most common of them are: increasing numeric significance with increasing memory addresses, known as little-endian, and its opposite, called big-endian." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
@@ -1987,6 +1986,7 @@ qudt:hasAllowedUnit
   dcterms:description "This property relates a unit system with a unit of measure that is not defined by or part of the system, but is allowed for use within the system. An allowed unit must be convertible to some dimensionally eqiuvalent unit that is defined by the system."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
   rdfs:label "allowed unit" ;
+  rdfs:range qudt:Unit ;
   rdfs:subPropertyOf qudt:hasUnit .
 
 qudt:hasBaseQuantityKind
@@ -2015,6 +2015,7 @@ qudt:hasDefinedUnit
   dcterms:description "This property relates a unit system with a unit of measure that is defined by the system."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
   rdfs:label "defined unit" ;
+  rdfs:range qudt:Unit ;
   rdfs:subPropertyOf qudt:hasUnit .
 
 qudt:hasDenominatorPart
@@ -2089,6 +2090,14 @@ qudt:hasQuantityKind
   rdfs:label "has quantity kind" ;
   rdfs:range qudt:QuantityKind .
 
+qudt:hasReciprocalUnit
+  a owl:ObjectProperty ;
+  qudt:plainTextDescription "Used to relate a unit to its reciprocal unit." ;
+  rdfs:domain qudt:Unit ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
+  rdfs:label "has reciprocal unit" ;
+  rdfs:range qudt:Unit .
+
 qudt:hasReferenceQuantityKind
   a owl:ObjectProperty ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
@@ -2105,7 +2114,8 @@ qudt:hasUnit
   dcterms:description "This property relates a factor unit to its unit or a system of units with a unit of measure that is either a) defined by the system, or b) accepted for use by the system and is convertible to a unit of equivalent dimension that is defined by the system. Systems of units may distinguish between base and derived units. Base units are the units which measure the base quantities for the corresponding system of quantities. The base units are used to define units for all other quantities as products of powers of the base units. Such units are called derived units for the system."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
   rdfs:label "has unit" ;
-  rdfs:label "hasUnit" .
+  rdfs:label "hasUnit" ;
+  rdfs:range qudt:Unit .
 
 qudt:hasUnitSystem
   a owl:ObjectProperty, owl:FunctionalProperty ;
@@ -2254,6 +2264,7 @@ qudt:systemDimension
 qudt:unitFor
   a owl:ObjectProperty ;
   owl:inverseOf qudt:hasUnit ;
+  rdfs:domain qudt:Unit ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
   rdfs:label "unit for" .
 
@@ -2361,12 +2372,6 @@ qudt:dataStructure
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
   rdfs:label "data structure" ;
   rdfs:range xsd:string .
-
-qudt:dbpediaMatch
-  a owl:DatatypeProperty ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
-  rdfs:label "dbpedia match" ;
-  rdfs:range xsd:anyURI .
 
 qudt:deprecated
   a owl:DatatypeProperty ;
@@ -2835,6 +2840,12 @@ dcterms:title
   rdfs:label "title" ;
   rdfs:range xsd:string .
 
+qudt:dbpediaMatch
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
+  rdfs:label "dbpedia match" ;
+  rdfs:range xsd:anyURI .
+
 qudt:example
   a owl:AnnotationProperty ;
   rdfs:comment "The 'qudt:example' property is used to annotate an instance of a class with a reference to a concept that is an example. The type of this property is 'rdf:Property'. This allows both scalar and object ranges."^^rdf:HTML ;
@@ -2852,6 +2863,12 @@ qudt:informativeReference
   dcterms:description "Provides a way to reference a source that provided useful but non-normative information."^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
   rdfs:label "informative reference" ;
+  rdfs:range xsd:anyURI .
+
+qudt:wikidataMatch
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
+  rdfs:label "wikidata match" ;
   rdfs:range xsd:anyURI .
 
 <http://www.linkedmodel.org/schema/dtype>
@@ -2984,12 +3001,6 @@ qudt:PartiallyOrdered
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
   rdfs:label "Partially Ordered" .
 
-qudt:SIGNED
-  a qudt:SignednessType ;
-  dtype:literal "signed" ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
-  rdfs:label "Signed" .
-
 qudt:ShortSignedIntegerEncoding
   a qudt:IntegerEncodingType ;
   qudt:bytes 2 ;
@@ -3001,6 +3012,12 @@ qudt:ShortUnsignedIntegerEncoding
   qudt:bytes 2 ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
   rdfs:label "Short Unsigned Integer Encoding" .
+
+qudt:Signed
+  a qudt:SignednessType ;
+  dtype:literal "signed" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
+  rdfs:label "Signed" .
 
 qudt:SignedIntegerEncoding
   a qudt:IntegerEncodingType ;
@@ -3076,6 +3093,12 @@ qudt:Verifiable
     a owl:Restriction ;
     owl:minCardinality "0"^^xsd:nonNegativeInteger ;
     owl:onProperty qudt:dbpediaMatch ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
+    owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+    owl:onProperty qudt:wikidataMatch ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;

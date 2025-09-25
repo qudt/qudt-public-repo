@@ -1,0 +1,60 @@
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+PREFIX prefix: <http://qudt.org/vocab/prefix/>
+PREFIX kind: <http://qudt.org/vocab/quantitykind/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+    SELECT DISTINCT $this ?baseUnit ?exponent
+    WHERE
+    {
+        {
+            {
+                {
+                    $this a qudt:Unit ;
+                    FILTER NOT EXISTS {
+                        $this qudt:hasFactorUnit [
+                                qudt:hasUnit ?baseUnit ;
+                                qudt:exponent ?exponent
+                            ] .
+                    }
+
+                    FILTER NOT EXISTS {
+                        $this qudt:scalingOf ?someOtherUnit
+                    }
+                }
+                BIND(REPLACE(STR($this), "^.+/", "") as ?derivedUnitLocalName)
+                FILTER(REPLACE(?derivedUnitLocalName, "(PER|2|3|4|5|6|-)\\b", "") != ?derivedUnitLocalName)
+                FILTER(?derivedUnitLocalName NOT IN (
+                    "Gold-OunceTroy",
+                    "Palladium-OunceTroy",
+                    "Silver-OunceTroy",
+                    "Platinum-OunceTroy",
+                    "failures-in-time",
+                    "USDollar-NextDay",
+                    "Kilo-FT3"
+                ))
+            }
+
+            VALUES ?skipUnits { 0 1 2 3 4 5 6 }
+            BIND("(\\w+(_\\w+)?\\d?)" as ?baseUnitRegex)
+            BIND("(\\w+(_\\w+)?\\d?|PER)" as ?skipUnitRegex)
+            BIND(CONCAT("^(",?skipUnitRegex,"-){", STR(?skipUnits), "}", ?baseUnitRegex, "(-" ,?skipUnitRegex, ")*$") as ?selectUnitRegex )
+            BIND(REPLACE(?derivedUnitLocalName, ?selectUnitRegex, "$4") as ?baseUnitLocalNameExtractedTmp)
+            BIND(REPLACE(?baseUnitLocalNameExtractedTmp, "^(\\w*[^\\d])(\\d?)$", "$1") as ?baseUnitLocalNameExtracted)
+            BIND(REPLACE(?baseUnitLocalNameExtractedTmp, "^(\\w*[^\\d])(\\d?)$", "$2") as ?exponentTmpStr)
+            BIND(IF(?exponentTmpStr = "", STRDT("1",xsd:integer), STRDT(?exponentTmpStr,xsd:integer)) as ?exponentTmp)
+            VALUES ( ?matchString ?dontMatchString ?expFactor) {
+                ( "^.*PER-.*\\b@@UNIT@@\\b.*$" "dontfindthis" -1 )
+                ( "^.*\\b@@UNIT@@\\b.*PER.*$" "dontfindthis"  1 )
+                ( ".+" "\\bPER\\b" 1 )
+            }
+            FILTER(REPLACE(?derivedUnitLocalName, REPLACE(?matchString, "@@UNIT@@", ?baseUnitLocalNameExtractedTmp), "") != ?derivedUnitLocalName)
+            FILTER(REPLACE(?derivedUnitLocalName, ?dontMatchString, "") = ?derivedUnitLocalName)
+        }
+        BIND(?exponentTmp * ?expFactor as ?exponent)
+        FILTER( ?baseUnitLocalNameExtractedTmp != "PER" )
+        FILTER( ! CONTAINS(?baseUnitLocalNameExtractedTmp, "-") )
+        BIND(IRI(CONCAT("http://qudt.org/vocab/unit/", ?baseUnitLocalNameExtracted)) as ?baseUnit)
+    }
+order by $this ?baseUnit

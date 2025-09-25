@@ -1,0 +1,70 @@
+name: run `mvn -Pfix install`
+on:
+  workflow_dispatch:
+
+jobs:
+  format:
+    # setting the environment on the job is mandatory, otherwise it cannot access environment secrets.
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check write access to repo
+        run: |
+          token_login=$(curl -H "Authorization: Bearer ${token}" https://api.github.com/user | jq -r '.login')
+          echo token login is ${token_login}
+          echo $(curl  -H "Authorization: Bearer ${token}" https://api.github.com/repos/${repo}/collaborators/${token_login}/permission) > result
+          cat result | jq  '.permission == "admin" // .permission == "write"' > /dev/null || ( echo "Token does not have write access to ${repo}" >> ${GITHUB_STEP_SUMMARY}; exit 1)
+          curl -sS -f -I -H "Authorization: Bearer ${token}" https://api.github.com | grep 'x-oauth-scopes:' | grep 'repo' > /dev/null && exit 0 || echo "Token does not have repo scope on ${repo}" >> ${GITHUB_STEP_SUMMARY}
+        env:
+          repo: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Set up java with maven cache
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      # configure git
+      - name: Setup git config
+        run: |
+          git config user.name ${{ github.actor }}
+          git config user.email "<>"
+
+      # run mvn install,
+      # if there are problems, try mvn -Pfix install
+      # then run mvn install again
+      # try that up to three times
+      - name: Apply formatting and fix recoverable data errors in src
+        run: |
+          attempt=0
+          while true; do
+            if mvn install; then
+              break
+            fi
+            if [ $attempt -ge 3 ]; then
+              echo "Failed to fix formatting after 3 attempts."
+              exit 1
+            fi
+            mvn -Pfix install
+            attempt=$((attempt + 1))
+          done
+
+      # Commit changes
+      - name: Commit changes
+        run: |
+          git add --all
+          git commit -m "Apply formatting rules"
+
+      # Push changes to branch
+      - name: Push changes to branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: git push origin
+
+      # print the summary
+      - name: Print summary
+        run: echo "Successfully built with -Pfix and made a commit." >> $GITHUB_STEP_SUMMARY

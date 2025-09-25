@@ -107,7 +107,9 @@ qudt:Concept
   sh:property qudt:Concept-hasRule ;
   sh:property qudt:Concept-id ;
   sh:property qudt:Concept-isReplacedBy ;
-  sh:property qudt:Concept-plainTextDescription .
+  sh:property qudt:Concept-label ;
+  sh:property qudt:Concept-plainTextDescription ;
+  sh:property qudt:Concept-type .
 
 qudt:ConstantValue
   a rdfs:Class, sh:NodeShape ;
@@ -836,6 +838,7 @@ qudt:Unit
   sh:property qudt:Unit-hasDimensionVector ;
   sh:property qudt:Unit-hasFactorUnit ;
   sh:property qudt:Unit-hasQuantityKind ;
+  sh:property qudt:Unit-hasReciprocalUnit ;
   sh:property qudt:Unit-iec61360Code ;
   sh:property qudt:Unit-latexDefinition ;
   sh:property qudt:Unit-latexSymbol ;
@@ -1383,6 +1386,12 @@ qudt:hasQuantityKind
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "has quantity kind" .
 
+qudt:hasReciprocalUnit
+  a rdf:Property ;
+  dcterms:description "Used to relate a unit to its reciprocal unit." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
+  rdfs:label "has reciprocal unit" .
+
 qudt:hasReferenceQuantityKind
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
@@ -1771,6 +1780,12 @@ qudt:width
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "width" .
 
+qudt:wikidataMatch
+  a rdf:Property ;
+  dcterms:description "This property relates a QUDT concept to a Wikidata item. The Wikidata item is identified by the Wikidata URI, which is of the form `https://www.wikidata.org/wiki/Q{number}`."^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  rdfs:label "Wikidata match" .
+
 voag:supersededBy
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
@@ -1833,6 +1848,7 @@ qudt:Citation-description
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
+  sh:or qudt:TextTypeUnion ;
   sh:path dcterms:description .
 
 qudt:Citation-url
@@ -1910,10 +1926,22 @@ qudt:Concept-isReplacedBy
   sh:maxCount 1 ;
   sh:path dcterms:isReplacedBy .
 
+qudt:Concept-label
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:minCount 1 ;
+  sh:path rdfs:label .
+
 qudt:Concept-plainTextDescription
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:path qudt:plainTextDescription .
+
+qudt:Concept-type
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:minCount 1 ;
+  sh:path rdf:type .
 
 qudt:ConstantValue-exactConstant
   a sh:PropertyShape ;
@@ -1984,6 +2012,7 @@ qudt:EnumeratedValue-description
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
+  sh:or qudt:TextTypeUnion ;
   sh:path dcterms:description .
 
 qudt:EnumeratedValue-symbol
@@ -2412,30 +2441,35 @@ qudt:QuantityKind-baseCGSUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
+  sh:or qudt:TextTypeUnion ;
   sh:path qudt:baseCGSUnitDimensions .
 
 qudt:QuantityKind-baseISOUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
+  sh:or qudt:TextTypeUnion ;
   sh:path qudt:baseISOUnitDimensions .
 
 qudt:QuantityKind-baseImperialUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
+  sh:or qudt:TextTypeUnion ;
   sh:path qudt:baseImperialUnitDimensions .
 
 qudt:QuantityKind-baseSIUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
+  sh:or qudt:TextTypeUnion ;
   sh:path qudt:baseSIUnitDimensions .
 
 qudt:QuantityKind-baseUSCustomaryUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
+  sh:or qudt:TextTypeUnion ;
   sh:path qudt:baseUSCustomaryUnitDimensions .
 
 qudt:QuantityKind-belongsToSystemOfQuantities
@@ -2617,7 +2651,7 @@ qudt:ScalarDataItem-datatype
 
 qudt:ScalarDataItem-value
   a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qydt> ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
   sh:or ( [
     sh:class qudt:QuantityValue ;
@@ -2861,6 +2895,12 @@ qudt:Unit-hasQuantityKind
   sh:path qudt:hasQuantityKind ;
   sh:severity sh:Info .
 
+qudt:Unit-hasReciprocalUnit
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:class qudt:Unit ;
+  sh:path qudt:hasReciprocalUnit .
+
 qudt:Unit-iec61360Code
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
@@ -2946,6 +2986,7 @@ qudt:Unit-ucumCode
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:datatype qudt:UCUMcs ;
+  sh:maxCount 1 ;
   sh:path qudt:ucumCode ;
   sh:pattern "[\\x21-\\x7e]+" .
 
@@ -2986,7 +3027,8 @@ qudt:Verifiable
   sh:property qudt:InformativeReferencePropertyShape ;
   sh:property qudt:Verifiable-dbpediaMatch ;
   sh:property qudt:Verifiable-isoNormativeReference ;
-  sh:property qudt:Verifiable-normativeReference .
+  sh:property qudt:Verifiable-normativeReference ;
+  sh:property qudt:Verifiable-wikidataMatch .
 
 qudt:Verifiable-dbpediaMatch
   a sh:PropertyShape ;
@@ -3008,6 +3050,12 @@ qudt:Verifiable-normativeReference
   sh:datatype xsd:anyURI ;
   sh:minCount 0 ;
   sh:path qudt:normativeReference .
+
+qudt:Verifiable-wikidataMatch
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:maxCount 1 ;
+  sh:path qudt:wikidataMatch .
 
 vaem:GMD_SHACLQUDT-SCHEMA
   a vaem:GraphMetaData ;

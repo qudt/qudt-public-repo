@@ -1,0 +1,86 @@
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+PREFIX prefix: <http://qudt.org/vocab/prefix/>
+PREFIX kind: <http://qudt.org/vocab/quantitykind/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT $this ?baseUnit ?prefix
+where
+{
+    {
+        { SELECT DISTINCT $this ?scaledUnitLocalName ?prefixRegex
+            WHERE
+            {
+
+                # select all base units (not using prefixes)
+                {
+                    $this a qudt:Unit .
+                } UNION  {
+                    ?factor qudt:hasUnit $this ;
+                    FILTER NOT EXISTS {
+                        $this a qudt:Unit .
+                    }
+                }
+                FILTER NOT EXISTS {
+                    {
+                        $this qudt:scalingOf ?baseUnit .
+                    } UNION {
+                        $this qudt:prefix ?prefix
+                    } UNION {
+                        $this qudt:hasFactorUnit ?x . # for derived units, we don't generate a prefix.
+                    }
+                }
+                FILTER($this != unit:KiloGM)
+                BIND(REPLACE(STR($this), "^.+/", "") as ?scaledUnitLocalName)
+                FILTER(!CONTAINS(?scaledUnitLocalName,"DeciB"))
+                FILTER(REPLACE(?scaledUnitLocalName, ?prefixRegex, "") != ?scaledUnitLocalName)
+                {
+                    SELECT (CONCAT("\\b(",GROUP_CONCAT(STR(?prefixLabel); separator ="|"), ")") as ?prefixRegex) where
+                    {
+                        ?prefix
+                            a qudt:Prefix ;
+                            rdfs:label ?prefixLabel .
+                     }
+                }
+            }
+        }
+
+        # select all base units (not using prefixes)
+        # special handling for prefix + time, e.g.
+        # 'unit:MegaYR qudt:scalingOf unit:YR', not unit:SEC
+        #{
+        #    ?baseUnit a qudt:Unit ;
+        #    BIND(REPLACE(STR(?baseUnit), "^.+/", "") as ?baseUnitLocalName)
+        #    # we don't generate scalingOf for bases that are derived units
+        #    FILTER(! CONTAINS(?baseUnitLocalName, "-"))
+        #    # we don't generate scalingOf for bases with a non-1 exponent (because then we cannot use the existing factor as would have to be exponentiated)
+        #    FILTER(! REGEX(?baseUnitLocalName,".+\\d+"))
+        #}
+        BIND("(YR|MO|DAY|HR|MIN)\\b" as ?timeRegex)
+       # special handling for prefix scaling or unprefixed time scaling to SEC
+        BIND(
+            IF(
+                #special case for scaling via time expression
+                ?scaledUnitLocalName = REPLACE(?scaledUnitLocalName, CONCAT(?prefixRegex, ?timeRegex), ""),           # scaled NOT unit:[prefix][timeparticle] (e.g. unit:KiloM or also unit:HR)
+                REPLACE(REPLACE(?scaledUnitLocalName, ?prefixRegex, ""), ?timeRegex, "SEC"),                           # base = scaled without the prefix, and time replaced by SEC (e.g unitM or also unit:SEC)
+                # normal case for scaling via prefix
+                REPLACE(?scaledUnitLocalName, ?prefixRegex, ""))                                                                                         # none of the above - not a scaled unit
+             AS ?baseUnitLocalName)
+        # we don't generate scalingOf for bases that are derived units
+        FILTER(! CONTAINS(?baseUnitLocalName, "-"))
+        # we don't generate scalingOf for bases with a non-1 exponent (because then we cannot use the existing factor as would have to be exponentiated)
+        FILTER(! REGEX(?baseUnitLocalName,".+\\d+"))
+        BIND(IRI(CONCAT(STR(unit:),?baseUnitLocalName)) as ?baseUnit)
+    }
+    OPTIONAL {
+        # if the scaled unit has a prefix, match it so we can add the triple
+        ?prefix a qudt:Prefix ;
+            rdfs:label ?prefixLabel ;
+            FILTER (CONTAINS(?scaledUnitLocalName, STR(?prefixLabel)))
+    }
+
+    # NOTE: conversion multiplier calcluation for scaled units
+    # is done in src/build/sparql2shacl/conversionMultiplier
+
+}
+order by ?baseUnit $this

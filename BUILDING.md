@@ -13,6 +13,8 @@ The QUDT project uses Maven (a build tool) to:
 - **Package** everything into a ZIP file for distribution (optional).
 The process is driven by a `pom.xml` file, which is like a blueprint for Maven. You’ll run commands to trigger specific steps, and we’ll explain the key ones below.
 
+(A detailed description can be seen [here](https://github.com/qudt/qudt-public-repo/wiki/QUDT_Build_Execution_Flow))
+
 ## Prerequisites
 
 - **Java**: Version 11 or higher (Maven needs this to run).
@@ -108,13 +110,15 @@ mvn seq:run@infer-and-format
 ## How It Works: Key Steps
 
 The build process is split into stages (Maven calls them "phases"). Here’s what happens, in terms an RDF expert might appreciate:
-- **Validate**: Sets up properties like the version `3.0.1-SNAPSHOT` and prepares SHACL templates from `src/build/srcgen/`.
+- **Validate**: Sets up properties like the version `3.0.1-SNAPSHOT` and prepares SHACL templates from `src/build/sparql2shacl/`.
 - **Process Sources**: Checks that all `.ttl` files in `src/` are formatted and valid against SHACL shapes (e.g., `QUDT_SRC_QA_TESTS.ttl`).
 - **Compile**: Infers triples like `qudt:applicableUnit` and merges them into `target/dist/` files.
 - **Process Resources**: Adds links to IEC standards e.g., `qudt:informativeReference` for units.
 - **Test**: Validates the final output in `target/dist/` against stricter SHACL tests.
 - **Install** (with `-Pzip`): Optionally creates the ZIP.
 The special commands above like `mvn seq:run@infer-factorUnits` let you run inference and merging steps manually, updating the source files directly instead of waiting for the full build.
+
+(A detailed description can be seen [here](https://github.com/qudt/qudt-public-repo/wiki/QUDT_Build_Execution_Flow))
 
 ## Troubleshooting
 

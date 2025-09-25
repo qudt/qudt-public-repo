@@ -8,7 +8,9 @@
 <http://qudt.org/$$QUDT_VERSION$$/collection/usertest>
   a owl:Ontology ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
-  rdfs:label "QUDT Collection - USER TESTS - v $$QUDT_VERSION$$" ;
+  rdfs:label "QUDT Collection - USER TESTS - v $$QUDT_VERSION$$" .
+
+<http://qudt.org/$$QUDT_VERSION$$/collection/usertestPrefixes>
   sh:declare [
     a sh:PrefixDeclaration ;
     sh:namespace "http://purl.org/dc/terms/"^^xsd:anyURI ;
@@ -73,7 +75,7 @@ qudt:ConsistentDimensionVectorConstraint
     a sh:SPARQLConstraint ;
     rdfs:comment "Checks for consistent dimension vectors for a QuantityKind and the Unit" ;
     sh:message "s223: Inconsistent dimensionalities for a Quantity's Unit and Quantity Kind" ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertestPrefixes> ;
     sh:select """
 SELECT $this
    WHERE 
@@ -94,8 +96,8 @@ qudt:DontReferToDeprecatedConceptConstraint
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Warns if a deprecated QUDT resource is used" ;
-    sh:message "Resource '{?s}' refers to deprecated resource '{?this}', which will be removed in the next major version of QUDT. {?replacementMessage}" ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+    sh:message "Resource '{?s}' refers to deprecated resource '{$this}', which will be removed in the next major version of QUDT. {?replacementMessage}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertestPrefixes> ;
     sh:select """
     SELECT ?s $this ?replacementMessage
     WHERE {
@@ -122,13 +124,13 @@ qudt:DontUseDeprecatedPropertyConstraint
   sh:sparql [
     a sh:SPARQLConstraint ;
     rdfs:comment "Warns if a deprecated QUDT property is used" ;
-    sh:message "Resource '{?s}' uses the deprecated property '{?this}', which will be removed in the next major version of QUDT.{?replacementMessage}" ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+    sh:message "Resource '{?s}' uses the deprecated property '{$this}', which will be removed in the next major version of QUDT.{?replacementMessage}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertestPrefixes> ;
     sh:select """
-    SELECT ?s ?this ?replacementMessage
+    SELECT ?s $this ?replacementMessage
         WHERE {
-        ?this qudt:deprecated true .
-        ?s ?this ?o .
+        $this qudt:deprecated true .
+        ?s $this ?o .
         OPTIONAL {
             $this dcterms:isReplacedBy ?replacement .
         }
