@@ -17,7 +17,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Tweaked some multi-line validation error messages for environments that only display the first line (e.g. TopBraid)
 - Fixed `qudt:ucumCode` of many units, such that they all follow the same pattern (see 'Changed' below), and such that
   no unit has more than one.
-- Fixed descriptions of `quantitykind:Activity` and `quantitykind:ActivityConcentration` ([Henrike Fleischhack](https://github.com/henrikef)).
+- Fixed descriptions of `quantitykind:Activity` and `quantitykind:ActivityConcentration`; fixed Dimension vecor of
+  `quantityKind:AbsoluteActivity` ([Henrike Fleischhack](https://github.com/henrikef)).
 
 ### Changed
 
