@@ -22,7 +22,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed `qudt:ucumCode` of many units, such that they all follow the same pattern (see 'Changed' below), and such that
   no unit has more than one.
 - Fixed descriptions of `quantitykind:Activity` and `quantitykind:ActivityConcentration`; fixed Dimension vecor of
-  `quantityKind:AbsoluteActivity` ([Henrike Fleischhack](https://github.com/henrikef)).
+  `quantityKind:AbsoluteActivity`.
+- New `quantityKind:Exposure_Radon` (time-integrated radon activity concentration) with units (existing) `unit:BQ-SEC-PER-M3` 
+  and (new) `unit:BQ-HR-PER-M3` ([Henrike Fleischhack](https://github.com/henrikef)).  
 
 ### Changed
 
