@@ -11,6 +11,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - `quantitykind:NumberOfElectricalPhases` for use with AC circuits
 
+### Deprecated
+
+- Deprecated dimension vector A0E0L0I0M0H0T0D0, which has no valid definition. A unit or quantity kind either has a dimension based on the 7 base SI dimensions, or it is dimensionless, with a "D1".
+
 ### Fixed
 
 - Fixed typo in `qudt:ucumCode` of `unit:MegaN-PER-M2`
