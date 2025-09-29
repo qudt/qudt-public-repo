@@ -7,9 +7,19 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.1.6] - 2025-09-29
+
 ### Added
 
 - `quantitykind:NumberOfElectricalPhases` for use with AC circuits
+
+### Changed
+
+- Build process
+  - 'qudt:ucumCode' is now calculated based on factor units or base units, the same way `qudt:symbol` is. The 'canonical'
+    form is used throughout no (`/`), just multiplication of factors with positive or negative exponents, in the order
+    they appear in the unit's localname
+- SHACL shapes: enforce at most one `qudt:ucumCode` per unit.
 
 ### Deprecated
 
@@ -22,14 +32,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed `qudt:ucumCode` of many units, such that they all follow the same pattern (see 'Changed' below), and such that
   no unit has more than one.
 - Fixed descriptions of `quantitykind:Activity` and `quantitykind:ActivityConcentration` ([Henrike Fleischhack](https://github.com/henrikef)).
-
-### Changed
-
-- Build process
-  - 'qudt:ucumCode' is now calculated based on factor units or base units, the same way `qudt:symbol` is. The 'canonical'
-    form is used throughout no (`/`), just multiplication of factors with positive or negative exponents, in the order
-    they appear in the unit's localname
-- SHACL shapes: enforce at most one `qudt:ucumCode` per unit.
 
 ## [3.1.5] - 2025-08-28
 
@@ -496,7 +498,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.5...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.6...HEAD
+[3.1.6]: https://github.com/qudt/qudt-public-repo/compare/v3.1.5...v3.1.6
 [3.1.5]: https://github.com/qudt/qudt-public-repo/compare/v3.1.4...v3.1.5
 [3.1.4]: https://github.com/qudt/qudt-public-repo/compare/v3.1.3...v3.1.4
 [3.1.3]: https://github.com/qudt/qudt-public-repo/compare/v3.1.2...v3.1.3
