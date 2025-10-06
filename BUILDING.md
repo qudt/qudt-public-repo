@@ -106,6 +106,14 @@ mvn seq:run@infer-and-format
 
    - **What it does**: Infers `qudt:scalingOf` triples e.g., how units scale with prefixes like "kilo", merges them into `VOCAB_QUDT-UNITS-ALL.ttl`, and formats it.
    - **When to use**: If validation flags scaling issues (check `target/validation/validationReportSrc-factorUnits.ttl`).
+4. **Get deleted, formerly deprecated entities of an earlier release**
+   - **What it does**: downloads the specified release, unpacks it to `target/deprecated-in-${version}/release` and copies the vocab files to `target/deprecated-in-${version}/deprecated-only`, removing any entities that are not deprecated
+   - **When to use**: Clients who want to migrate to a new major version might need the new major version files and the old deprecated entities that were deleted, to avoid an inconsistent db state
+
+   ```bash
+   # assuming releaseVersion is an existing release, such as "2.1.47"
+   mvn -DdeprecatedInVersion=${releaseVersion} clean install
+   ```
 
 ## How It Works: Key Steps
 

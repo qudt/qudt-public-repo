@@ -7,6 +7,13 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Changed
+
+- Build process
+  - with `-DdeprecatedInVersion=[releaseVersion]`, a maven build now generates all vocab files from that `releaseVersion` into
+    `target/deprecated-in-[releaseVersion]`, containing only the entities that are `qudt:deprecated` in that
+    release
+
 ## [3.1.6] - 2025-09-29
 
 ### Added
