@@ -14,6 +14,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
     `target/deprecated-in-[releaseVersion]`, containing only the entities that are `qudt:deprecated` in that
     release
 
+
+### Fixed
+
+- Corrected errors in the definition of the variants of constant:MolarVolumeOfIdealGas...
+
 ## [3.1.6] - 2025-09-29
 
 ### Added
