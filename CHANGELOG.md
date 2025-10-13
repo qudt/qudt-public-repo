@@ -7,12 +7,28 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+- Defined some missing factor units, such as unit:MicroGALILEO
+- Added unit:PERMILLE, analogous to unit:PERCENT
+
 ### Changed
 
 - Build process
   - with `-DdeprecatedInVersion=[releaseVersion]`, a maven build now generates all vocab files from that `releaseVersion` into
     `target/deprecated-in-[releaseVersion]`, containing only the entities that are `qudt:deprecated` in that
     release
+- Declared a few more units as being of type qudt:ContextualUnit, such as unit:SAMPLE-PER-SEC, because we don't really need or want unit:SAMPLE or things like unit:DEG_C_GROWING_CEREAL as factor units.
+
+### Deprecated
+
+- Replaced OHM_CIRC-MIL-PER-FT with OHM-MIL_Circ-PER-FT
+- Replaced unit:PER-MILLE-PSI with unit:PERMILLE-PER-PSI
+- Replaced unit:MIL with unit:MIL_Angle and unit:MIL_Length to distinguish the two meanings
+
+### Fixed
+
+- Fixed the distinction between unit:MI_US (U.S. Survey Mile) and unit:MI (International mile).
 
 ## [3.1.6] - 2025-09-29
 
