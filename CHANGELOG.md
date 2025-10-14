@@ -7,13 +7,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
-- Added quantityKind:RateOfChange & unit:PERCENT-PER-SEC
-- Replaced quantityKind:Frequency to quantityKind:RateOfChange for unit:PERCENT-PER-YR & unit:PERCENT-PER-WK
-
 ### Added
 
 - Defined some missing factor units, such as unit:MicroGALILEO
 - Added unit:PERMILLE, analogous to unit:PERCENT
+- Added quantityKind:RateOfChange & unit:PERCENT-PER-SEC
 
 ### Changed
 
@@ -22,6 +20,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
     `target/deprecated-in-[releaseVersion]`, containing only the entities that are `qudt:deprecated` in that
     release
 - Declared a few more units as being of type qudt:ContextualUnit, such as unit:SAMPLE-PER-SEC, because we don't really need or want unit:SAMPLE or things like unit:DEG_C_GROWING_CEREAL as factor units.
+- Replaced quantityKind:Frequency to quantityKind:RateOfChange for unit:PERCENT-PER-YR & unit:PERCENT-PER-WK
 
 ### Deprecated
 
