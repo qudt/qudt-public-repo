@@ -18,7 +18,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   - with `-DdeprecatedInVersion=[releaseVersion]`, a maven build now generates all vocab files from that `releaseVersion` into
     `target/deprecated-in-[releaseVersion]`, containing only the entities that are `qudt:deprecated` in that
     release
-- Declared a few more units as being of type qudt:ContextualUnit, such as unit:SAMPLE-PER-SEC, because we don't really need or want unit:SAMPLE or things like unit:DEG_C_GROWING_CEREAL as factor units.
+- Declared a few more units as being of type qudt:ContextualUnit, such as unit:SAMPLE-PER-SEC.
+- Modified the build process to generate component units. If the compound unit is a qudt:ContextualUnit, then so are the newly generated component units. So, for example, unit:SAMPLE is now generated as a ContextualUnit to support unit:SAMPLE-PER-SEC. This is needed to allow consistent validation of factor units, dimension vectors and other relations.
 
 ### Deprecated
 
