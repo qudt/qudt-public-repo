@@ -7,6 +7,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+- Added quantityKind:RateOfChange & unit:PERCENT-PER-SEC
+- Replaced quantityKind:Frequency to quantityKind:RateOfChange for unit:PERCENT-PER-YR & unit:PERCENT-PER-WK
+
 ### Added
 
 - Defined some missing factor units, such as unit:MicroGALILEO
