@@ -1071,6 +1071,7 @@
                                                 skos:broader
                                                 rdfs:label
                                                 rdfs:seeAlso
+                                                rdf:type
                                               }
                                               VALUES (?srcGraph ?distGraph) {
                                                 ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
@@ -1120,6 +1121,7 @@
                                                 skos:broader
                                                 rdfs:label
                                                 rdfs:seeAlso
+                                                rdf:type
                                               }
                                               VALUES (?srcGraph ?distGraph) {
                                                 ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
@@ -1402,6 +1404,7 @@
                                         </sparql>
                                     </sparqlUpdate>
                                     <savepoint><id>06-infer-scalingOf</id></savepoint>
+
                                     <sparqlUpdate>
                                         <message>Copy conversionMultipliers/offsets from qudt:exactMatch|skos:broader unit where not present</message>
                                         <sparql>
@@ -2304,7 +2307,59 @@
                                         ]]>
                                         </sparql>
                                     </sparqlUpdate>
-
+                                    <sparqlUpdate> 
+                                        <message> Florian's unit generator query. Find all things that are objects in qudt:hasUnit or qudt:scalingOf that are undefined, and declare them as ContextualUnit, Unit. For scalingOf, look up subject's quantitykind. </message>
+                                        <sparql>
+                                            <![CDATA[
+                                                INSERT {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+    ?unit a qudt:ContextualUnit, qudt:Unit ;
+        qudt:hasDimensionVector ?dimensionVector ;
+        rdfs:comment  ?comment ;
+        rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/vocab/unit> .
+}}
+WHERE
+{
+GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+    {
+        ?x qudt:hasFactorUnit/qudt:hasUnit ?unit .
+        BIND("factor unit" as ?reason)
+    } UNION {
+        ?unit qudt:hasFactorUnit/qudt:hasUnit ?x .
+        BIND("derived unit" as ?reason)
+    } UNION {
+        ?x qudt:scalingOf ?unit .
+        BIND("base unit" as ?reason)
+    } UNION {
+        ?unit qudt:scalingOf ?x .
+        BIND("scaled unit" as ?reason)
+    }
+    FILTER NOT EXISTS {
+        ?unit a qudt:Unit
+    }
+    FILTER NOT EXISTS {
+        ?unit a qudt:CurrencyUnit
+    }
+    FILTER NOT EXISTS {
+        ?unit qudt:deprecated true
+    }
+    FILTER NOT EXISTS {
+        ?x qudt:deprecated true
+    }
+    OPTIONAL {
+        ?unit qudt:scalingOf/qudt:hasDimensionVector ?dimensionVector .
+    }
+    OPTIONAL {
+        ?unit skos:broader/qudt:hasDimensionVector ?dimensionVector .
+    }
+    OPTIONAL {
+        ?unit qudt:hasQuantityKind/qudt:hasDimensionVector ?dimensionVector .
+    }
+    BIND(STRLANG(CONCAT("This unit was added while generating qudt:hasFactorUnit. This unit is a ", ?reason, " of ", (REPLACE(STR(?x), "http://qudt.org/vocab/unit/", "unit:")), ", missing from the original QUDT data."), "en") as ?comment)
+}}
+                                            ]]>
+                                        </sparql> 
+                                    </sparqlUpdate>
                                     <sparqlUpdate>
                                         <message>Replace deprecated entities</message>
                                         <sparql>
@@ -2364,6 +2419,7 @@
                                                         skos:broader
                                                         rdfs:label
                                                         rdfs:seeAlso
+                                                        rdf:type
                                                       }
                                                       VALUES (?srcGraph ?distGraph) {
                                                         ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
@@ -2402,6 +2458,7 @@
                                                         skos:broader
                                                         rdfs:label
                                                         rdfs:seeAlso
+                                                        rdf:type
                                                       }
                                                       VALUES (?srcGraph ?distGraph) {
                                                         ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
@@ -2452,6 +2509,7 @@
                                                                 skos:broader
                                                                 rdfs:label
                                                                 rdfs:seeAlso
+                                                                rdf:type
                                                               }
                                                               VALUES (?srcGraph ?distGraph) {
                                                                 ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
@@ -2491,6 +2549,7 @@
                                                                 skos:broader
                                                                 rdfs:label
                                                                 rdfs:seeAlso
+                                                                rdf:type
                                                               }
                                                               VALUES (?srcGraph ?distGraph) {
                                                                 ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
