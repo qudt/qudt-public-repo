@@ -2307,6 +2307,27 @@
                                         ]]>
                                         </sparql>
                                     </sparqlUpdate>
+
+                                    <sparqlUpdate>
+                                        <message>Declare a compound unit as ContextualUnit if factor is ContextualUnit</message>
+                                        <sparql>
+                                            <![CDATA[
+                                            INSERT {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    ?compound a qudt:ContextualUnit .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                ?u a qudt:ContextualUnit .
+                                                ?compound qudt:hasFactorUnit/qudt:hasUnit ?u .
+                                                FILTER NOT EXISTS {?compound a qudt:ContextualUnit}
+                                                }
+                                            }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+
                                     <sparqlUpdate> 
                                         <message> Florian's unit generator query. Find all things that are objects in qudt:hasUnit or qudt:scalingOf that are undefined, and declare them as ContextualUnit, Unit. For scalingOf, look up subject's quantitykind. </message>
                                         <sparql>
