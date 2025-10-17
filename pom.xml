@@ -2307,6 +2307,24 @@
                                         ]]>
                                         </sparql>
                                     </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Add rdfs:isDefinedBy triple if missing</message>
+                                        <sparql>
+                                            <![CDATA[
+                                            INSERT {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    ?u rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/vocab/unit> .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                ?u a qudt:Unit .
+                                                FILTER NOT EXISTS {?u rdfs:isDefinedBy ?any .}
+                                                }
+                                            }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>                
                                     <sparqlUpdate> 
                                         <message> Florian's unit generator query. Find all things that are objects in qudt:hasUnit or qudt:scalingOf that are undefined, and declare them as ContextualUnit, Unit. For scalingOf, look up subject's quantitykind. </message>
                                         <sparql>
