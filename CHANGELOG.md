@@ -21,6 +21,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
     release
 - Declared a few more units as being of type qudt:ContextualUnit, such as unit:SAMPLE-PER-SEC.
 - Modified the build process to generate all component units. If a compound unit is a qudt:ContextualUnit, then so are the **newly generated** component units. So, for example, unit:SAMPLE is now generated as a ContextualUnit to support unit:SAMPLE-PER-SEC. This is needed to allow consistent validation of factor units, dimension vectors and other relations. Converseley, if an **existing** ContextualUnit is a component of a compound unit, then that compound unit is also declared as a ContextualUnit.
+- Further modified the build process to define new dimension vectors if they are referred to by a unit, but do not yet exist.
 - Replaced quantityKind:Frequency to quantityKind:RateOfChange for unit:PERCENT-PER-YR & unit:PERCENT-PER-WK
 
 ### Deprecated
