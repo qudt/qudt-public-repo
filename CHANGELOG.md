@@ -32,10 +32,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Fixed the distinction between unit:MI_US (U.S. Survey Mile) and unit:MI (International mile).
-
-### Fixed
-
 - Corrected errors in the definition of the variants of constant:MolarVolumeOfIdealGas...
+- Fixed 17 unmatched HTML tags in description fields.
 
 ## [3.1.6] - 2025-09-29
 
