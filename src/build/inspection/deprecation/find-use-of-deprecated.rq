@@ -1,0 +1,16 @@
+SELECT DISTINCT ?usedIn ?definedIn ?deprecated ?replacement
+WHERE {
+    graph ?definedIn {
+            ?deprecated
+                qudt:deprecated      true ;
+                dcterms:isReplacedBy ?replacement .
+    }
+    {
+        graph ?usedIn {
+            ?s ?p ?deprecated
+        }
+    } UNION {
+        ?s ?p ?deprecated
+        BIND("[default graph]" as ?usedIn)
+    }
+} ORDER BY ?definedIn ?deprecated ?usedIn
