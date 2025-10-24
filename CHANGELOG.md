@@ -12,7 +12,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Defined some missing factor units, such as unit:MicroGALILEO
 - Added unit:PERMILLE, analogous to unit:PERCENT
 - Added quantityKind:RateOfChange & unit:PERCENT-PER-SEC
-- Added unit: TON_UK-PER-HR
 
 ### Changed
 
