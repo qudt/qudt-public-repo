@@ -13,6 +13,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added unit:PERMILLE, analogous to unit:PERCENT
 - Added quantityKind:RateOfChange & unit:PERCENT-PER-SEC
 - Added unit:RAYL_MKS to distinguish it from the CGS version, unit:RAYL
+- Added unit: TON_UK-PER-HR
 
 ### Changed
 
