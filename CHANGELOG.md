@@ -29,6 +29,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Replaced OHM_CIRC-MIL-PER-FT with OHM-MIL_Circ-PER-FT
 - Replaced unit:PER-MILLE-PSI with unit:PERMILLE-PER-PSI
 - Replaced unit:MIL with unit:MIL_Angle and unit:MIL_Length to distinguish the two meanings
+- Deprecated unit:HeartBeat in favor of unit:BEAT
 
 ### Fixed
 
