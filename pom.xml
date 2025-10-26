@@ -1072,6 +1072,16 @@
                                                 rdfs:label
                                                 rdfs:seeAlso
                                                 rdf:type
+                                                qudt:dimensionExponentForAmountOfSubstance
+                                                qudt:dimensionExponentForElectricCurrent
+                                                qudt:dimensionExponentForLength
+                                                qudt:dimensionExponentForLuminousIntensity
+                                                qudt:dimensionExponentForMass
+                                                qudt:dimensionExponentForThermodynamicTemperature
+                                                qudt:dimensionExponentForTime
+                                                qudt:dimensionlessExponent
+                                                qudt:latexDefinition
+                                                rdfs:isDefinedBy
                                               }
                                               VALUES (?srcGraph ?distGraph) {
                                                 ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
@@ -1122,7 +1132,17 @@
                                                 rdfs:label
                                                 rdfs:seeAlso
                                                 rdf:type
-                                              }
+                                                qudt:dimensionExponentForAmountOfSubstance
+                                                qudt:dimensionExponentForElectricCurrent
+                                                qudt:dimensionExponentForLength
+                                                qudt:dimensionExponentForLuminousIntensity
+                                                qudt:dimensionExponentForMass
+                                                qudt:dimensionExponentForThermodynamicTemperature
+                                                qudt:dimensionExponentForTime
+                                                qudt:dimensionlessExponent
+                                                qudt:latexDefinition                                                                                                
+                                                rdfs:isDefinedBy
+                                                }
                                               VALUES (?srcGraph ?distGraph) {
                                                 ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
                                                 ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
@@ -2307,7 +2327,24 @@
                                         ]]>
                                         </sparql>
                                     </sparqlUpdate>
-
+                                    <sparqlUpdate>
+                                        <message>Add rdfs:isDefinedBy triple if missing</message>
+                                        <sparql>
+                                            <![CDATA[
+                                            INSERT {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                    ?u rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/vocab/unit> .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                ?u a qudt:Unit .
+                                                FILTER NOT EXISTS {?u rdfs:isDefinedBy ?any .}
+                                                }
+                                            }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
                                     <sparqlUpdate>
                                         <message>Declare a compound unit as ContextualUnit if factor is ContextualUnit</message>
                                         <sparql>
@@ -2324,6 +2361,68 @@
                                                 FILTER NOT EXISTS {?compound a qudt:ContextualUnit}
                                                 }
                                             }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Declare a new dimension vector if it is needed by a unit.</message>
+                                        <sparql>
+                                            <![CDATA[
+                                            INSERT {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> {
+                                                    ?newDimVec a qudt:QuantityKindDimensionVector ;
+                                                    qudt:dimensionExponentForAmountOfSubstance        ?A ;
+                                                    qudt:dimensionExponentForElectricCurrent          ?E ;
+                                                    qudt:dimensionExponentForLength                   ?L ;
+                                                    qudt:dimensionExponentForLuminousIntensity        ?I ;
+                                                    qudt:dimensionExponentForMass                     ?M ;
+                                                    qudt:dimensionExponentForThermodynamicTemperature ?H ;
+                                                    qudt:dimensionExponentForTime                     ?T ;
+                                                    qudt:dimensionlessExponent                        ?D ;
+                                                    qudt:latexDefinition ?latex ;
+                                                    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/vocab/dimensionvector> ;
+                                                    rdfs:label ?label .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                ?u a qudt:Unit .
+                                                ?u qudt:hasDimensionVector ?newDimVec .
+                                                }
+                                                FILTER NOT EXISTS {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> {
+                                                ?newDimVec a qudt:QuantityKindDimensionVector .}}
+                                                BIND(REPLACE(STR(?newDimVec), "^.*[#/]", "") AS ?local)
+
+# Extract each exponent (default 0 if missing)
+                                                  BIND(xsd:integer(REPLACE(?local, "^.*A(-?[0-9]+).*", "$1")) AS ?A)
+                                                  BIND(xsd:integer(REPLACE(?local, "^.*E(-?[0-9]+).*", "$1")) AS ?E)
+                                                  BIND(xsd:integer(REPLACE(?local, "^.*L(-?[0-9]+).*", "$1")) AS ?L)
+                                                  BIND(xsd:integer(REPLACE(?local, "^.*I(-?[0-9]+).*", "$1")) AS ?I)
+                                                  BIND(xsd:integer(REPLACE(?local, "^.*M(-?[0-9]+).*", "$1")) AS ?M)
+                                                  BIND(xsd:integer(REPLACE(?local, "^.*H(-?[0-9]+).*", "$1")) AS ?H)
+                                                  BIND(xsd:integer(REPLACE(?local, "^.*T(-?[0-9]+).*", "$1")) AS ?T)
+                                                  BIND(xsd:integer(REPLACE(?local, "^.*D(-?[0-9]+).*", "$1")) AS ?D)
+
+                                                  BIND(?local AS ?label)
+
+# Build LaTeX definition dynamically for any permutation of exponents
+                                                  BIND(
+                                                    STRDT(
+                                                      CONCAT(
+                                                        IF(?A != 0, CONCAT(" $A^{", STR(?A), "}$"), ""),
+                                                        IF(?E != 0, CONCAT(" $E^{", STR(?E), "}$"), ""),
+                                                        IF(?L != 0, CONCAT(" $L^{", STR(?L), "}$"), ""),
+                                                        IF(?I != 0, CONCAT(" $I^{", STR(?I), "}$"), ""),
+                                                        IF(?M != 0, CONCAT(" $M^{", STR(?M), "}$"), ""),
+                                                        IF(?H != 0, CONCAT(" $H^{", STR(?H), "}$"), ""),
+                                                        IF(?T != 0, CONCAT(" $T^{", STR(?T), "}$"), ""),
+                                                        IF(?D != 0, CONCAT(" $D^{", STR(?D), "}$"), "")
+                                                      ),
+                                                      qudt:LatexString
+                                                    ) AS ?latex
+                                                  )
+                                                }
                                             ]]>
                                         </sparql>
                                     </sparqlUpdate>
@@ -2441,6 +2540,16 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         rdfs:label
                                                         rdfs:seeAlso
                                                         rdf:type
+                                                        qudt:dimensionExponentForAmountOfSubstance
+                                                        qudt:dimensionExponentForElectricCurrent
+                                                        qudt:dimensionExponentForLength
+                                                        qudt:dimensionExponentForLuminousIntensity
+                                                        qudt:dimensionExponentForMass
+                                                        qudt:dimensionExponentForThermodynamicTemperature
+                                                        qudt:dimensionExponentForTime
+                                                        qudt:dimensionlessExponent
+                                                        qudt:latexDefinition
+                                                          rdfs:isDefinedBy
                                                       }
                                                       VALUES (?srcGraph ?distGraph) {
                                                         ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
@@ -2480,6 +2589,16 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         rdfs:label
                                                         rdfs:seeAlso
                                                         rdf:type
+                                                        qudt:dimensionExponentForAmountOfSubstance
+                                                        qudt:dimensionExponentForElectricCurrent
+                                                        qudt:dimensionExponentForLength
+                                                        qudt:dimensionExponentForLuminousIntensity
+                                                        qudt:dimensionExponentForMass
+                                                        qudt:dimensionExponentForThermodynamicTemperature
+                                                        qudt:dimensionExponentForTime
+                                                        qudt:dimensionlessExponent
+                                                        qudt:latexDefinition
+                                                          rdfs:isDefinedBy
                                                       }
                                                       VALUES (?srcGraph ?distGraph) {
                                                         ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
@@ -2531,6 +2650,16 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 rdfs:label
                                                                 rdfs:seeAlso
                                                                 rdf:type
+                                                                qudt:dimensionExponentForAmountOfSubstance
+                                                                qudt:dimensionExponentForElectricCurrent
+                                                                qudt:dimensionExponentForLength
+                                                                qudt:dimensionExponentForLuminousIntensity
+                                                                qudt:dimensionExponentForMass
+                                                                qudt:dimensionExponentForThermodynamicTemperature
+                                                                qudt:dimensionExponentForTime
+                                                                qudt:dimensionlessExponent
+                                                                qudt:latexDefinition
+                                                                rdfs:isDefinedBy
                                                               }
                                                               VALUES (?srcGraph ?distGraph) {
                                                                 ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
@@ -2571,7 +2700,17 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 rdfs:label
                                                                 rdfs:seeAlso
                                                                 rdf:type
-                                                              }
+                                                                qudt:dimensionExponentForAmountOfSubstance
+                                                                qudt:dimensionExponentForElectricCurrent
+                                                                qudt:dimensionExponentForLength
+                                                                qudt:dimensionExponentForLuminousIntensity
+                                                                qudt:dimensionExponentForMass
+                                                                qudt:dimensionExponentForThermodynamicTemperature
+                                                                qudt:dimensionExponentForTime
+                                                                qudt:dimensionlessExponent
+                                                                qudt:latexDefinition
+                                                                rdfs:isDefinedBy
+                                                }
                                                               VALUES (?srcGraph ?distGraph) {
                                                                 ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
                                                                 ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
