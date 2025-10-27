@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.1.7] - 2025-10-27
+
 ### Added
 
 - Defined some missing factor units, such as unit:MicroGALILEO
@@ -531,7 +533,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.6...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.7...HEAD
+[3.1.7]: https://github.com/qudt/qudt-public-repo/compare/v3.1.6...v3.1.7
 [3.1.6]: https://github.com/qudt/qudt-public-repo/compare/v3.1.5...v3.1.6
 [3.1.5]: https://github.com/qudt/qudt-public-repo/compare/v3.1.4...v3.1.5
 [3.1.4]: https://github.com/qudt/qudt-public-repo/compare/v3.1.3...v3.1.4
