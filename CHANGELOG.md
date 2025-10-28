@@ -16,6 +16,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added quantityKind:RateOfChange & unit:PERCENT-PER-SEC
 - Added unit:TON_UK-PER-HR
 - Added unit:RAYL_MKS to distinguish it from the CGS version, unit:RAYL
+- Added quantityKind:CoolingPerformanceRatio & unit:KiloW-PER-TON_FG
 
 ### Changed
 
