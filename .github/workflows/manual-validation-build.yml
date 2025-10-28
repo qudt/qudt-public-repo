@@ -1,0 +1,116 @@
+name: Manual Validation Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build (defaults to current ref)'
+        required: false
+        default: ''
+      mvn_profiles:
+        description: 'Maven profiles (comma-separated)'
+        required: false
+        default: 'zip'
+      goals:
+        description: 'Maven goals'
+        required: false
+        default: 'install'
+      extra_args:
+        description: 'Extra mvn arguments (optional)'
+        required: false
+        default: ''
+
+# allow commit/push back to the branch
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # If a branch is provided in the dispatch form, build *that* branch;
+          # otherwise build the ref from which you triggered the run.
+          ref: ${{ inputs.branch || github.ref }}
+          fetch-depth: 0
+          # leave persist-credentials: true (default) so pushes use GITHUB_TOKEN
+
+      - name: Ensure output dirs exist
+        run: |
+          mkdir -p target/src-errors target/inferred target/fix target/dist
+
+      - name: Trust this working tree for git & set identity
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name  "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          echo "On ref: $(git rev-parse --abbrev-ref HEAD) @ $(git rev-parse --short HEAD)"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        id: build
+        continue-on-error: true
+        run: |
+          PROFILES="${{ inputs.mvn_profiles }}"
+          GOALS="${{ inputs.goals }}"
+          EXTRA="${{ inputs.extra_args }}"
+          echo "Running: mvn -P${PROFILES} ${GOALS} ${EXTRA}"
+          mvn -P${PROFILES} ${GOALS} ${EXTRA}
+
+      - name: Show detected errors (if any)
+        if: ${{ always() }}
+        run: |
+          echo "----- target/src-errors/errors.txt -----"
+          if [ -f target/src-errors/errors.txt ]; then
+            sed -n '1,200p' target/src-errors/errors.txt
+          else
+            echo "(no errors.txt found)"
+          fi
+
+      # Some fix profiles disable mutation when CI=true. Clear CI for this step so it can write to src/**
+      - name: Fix pass (mutate src)
+        if: ${{ always() }}
+        env:
+          CI: ""   # allow fix logic to mutate in CI if it checks this flag
+        run: |
+          echo "Running: mvn -Pfix install"
+          mvn -Pfix install
+          echo "----- Changes in working tree after -Pfix -----"
+          git status --porcelain=1 || true
+
+      - name: Upload fix artifacts (for review)
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: qudt-fix-results
+          path: |
+            target/src-errors/**
+            target/fix/**
+            target/inferred/**
+            target/dist/**
+          if-no-files-found: warn
+
+      - name: Commit and push mutated src (if any)
+        if: ${{ always() }}
+        run: |
+          # Only commit if there are changes (modified/added/deleted files)
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Committing changes produced by -Pfix ..."
+            git add -A
+            git commit -m "Apply -Pfix changes from CI (manual validation build)"
+            # Push back to the same branch (origin) we checked out
+            CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+            echo "Pushing to origin ${CURRENT_BRANCH}"
+            git push origin "HEAD:${CURRENT_BRANCH}"
+          else
+            echo "No changes to commit."
+          fi
