@@ -7,6 +7,18 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+- Added quantityKind:CoolingPerformanceRatio & unit:KiloW-PER-TON_FG
+
+### Changed
+
+### Deprecated
+
+- Replaced CM_H2O with CentiM_H2O
+
+### Fixed
+
 ## [3.1.7] - 2025-10-27
 
 ### Added
@@ -16,7 +28,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added quantityKind:RateOfChange & unit:PERCENT-PER-SEC
 - Added unit:TON_UK-PER-HR
 - Added unit:RAYL_MKS to distinguish it from the CGS version, unit:RAYL
-- Added quantityKind:CoolingPerformanceRatio & unit:KiloW-PER-TON_FG
 
 ### Changed
 
