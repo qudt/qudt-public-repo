@@ -13,6 +13,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
+- Reordered some of the manually specified factor unit clauses to avoid repeated serialization
+
 ### Deprecated
 
 - Replaced CM_H2O with CentiM_H2O
