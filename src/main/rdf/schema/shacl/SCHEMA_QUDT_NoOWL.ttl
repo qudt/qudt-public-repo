@@ -198,6 +198,44 @@ qudt:DerivedUnit
   rdfs:label "Derived Unit" ;
   rdfs:subClassOf qudt:Unit .
 
+qudt:DigitalCurrencyUnit
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description "A currency-like unit for cryptographic or tokenized assets. Instances should reference an ISO 24165 Digital Token Identifier (DTI) when available."@en ;
+  qudt:informativeReference <https://dtif.org/> ;
+  qudt:informativeReference <https://www.iso.org/standard/79891.html> ;
+  rdfs:comment "A currency-like unit for cryptographic or tokenized assets. Instances should reference an ISO 24165 Digital Token Identifier (DTI) when available."@en ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  rdfs:label "Digital Currency Unit"@en ;
+  rdfs:subClassOf qudt:CurrencyUnit ;
+  sh:property [
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:maxInclusive 30 ;
+    sh:message "currencyExponent must be a single integer between 0 and 30 (e.g., BTC = 8, ETH = 18)."@en ;
+    sh:minInclusive 0 ;
+    sh:path qudt:currencyExponent ;
+  ] ;
+  sh:property [
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "hasDTICode, if provided, must be a 12-character ISO 24165 DTI (A–Z, 0–9)."@en ;
+    sh:path qudt:hasDTICode ;
+    sh:pattern "^[A-Z0-9]{12}$" ;
+  ] ;
+  sh:property [
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "currencyCode must be a single 2–10 character uppercase alphanumeric mnemonic (e.g., 'BTC', 'USDT')."@en ;
+    sh:path qudt:currencyCode ;
+    sh:pattern "^[A-Z0-9]{2,10}$" ;
+  ] ;
+  sh:property [
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "blockchainNetwork, if provided, must be a single string (e.g., 'Bitcoin Mainnet')."@en ;
+    sh:path qudt:blockchainNetwork ;
+  ] .
+
 qudt:DimensionlessUnit
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
@@ -1015,6 +1053,12 @@ qudt:belongsToSystemOfQuantities
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "belongs to system of quantities" .
 
+qudt:blockchainNetwork
+  a rdf:Property ;
+  rdfs:comment "Primary network name (e.g., 'Bitcoin Mainnet', 'Ethereum Mainnet')."@en ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  rdfs:label "blockchain network"@en .
+
 qudt:categorizedAs
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
@@ -1308,6 +1352,12 @@ qudt:hasCoherentUnit
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "coherent unit" ;
   rdfs:subPropertyOf qudt:hasDefinedUnit .
+
+qudt:hasDTICode
+  a rdf:Property ;
+  rdfs:comment "ISO 24165 Digital Token Identifier (12-character alphanumeric)."@en ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  rdfs:label "has DTI code"@en .
 
 qudt:hasDefinedUnit
   a rdf:Property ;
