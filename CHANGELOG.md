@@ -10,6 +10,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - Added quantityKind:CoolingPerformanceRatio & unit:KiloW-PER-TON_FG
+- Added a new class and instances for crypto currency units
 
 ### Changed
 
