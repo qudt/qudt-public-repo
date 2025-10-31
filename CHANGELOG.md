@@ -9,10 +9,26 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added quantityKind:CoolingPerformanceRatio & unit:KiloW-PER-TON_FG
+- Added a new class and instances for crypto currency units
+
+### Changed
+
+### Deprecated
+
+- Replaced CM_H2O with CentiM_H2O
+
+### Fixed
+
+## [3.1.7] - 2025-10-27
+
+### Added
+
 - Defined some missing factor units, such as unit:MicroGALILEO
 - Added unit:PERMILLE, analogous to unit:PERCENT
 - Added quantityKind:RateOfChange & unit:PERCENT-PER-SEC
-- Added unit: TON_UK-PER-HR
+- Added unit:TON_UK-PER-HR
+- Added unit:RAYL_MKS to distinguish it from the CGS version, unit:RAYL
 
 ### Changed
 
@@ -21,7 +37,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
     `target/deprecated-in-[releaseVersion]`, containing only the entities that are `qudt:deprecated` in that
     release
 - Declared a few more units as being of type qudt:ContextualUnit, such as unit:SAMPLE-PER-SEC.
-- Modified the build process to generate all component units. If a compound unit is a qudt:ContextualUnit, then so are the newly generated component units. So, for example, unit:SAMPLE is now generated as a ContextualUnit to support unit:SAMPLE-PER-SEC. This is needed to allow consistent validation of factor units, dimension vectors and other relations.
+- Modified the build process to generate all component units. If a compound unit is a qudt:ContextualUnit, then so are the **newly generated** component units. So, for example, unit:SAMPLE is now generated as a ContextualUnit to support unit:SAMPLE-PER-SEC. This is needed to allow consistent validation of factor units, dimension vectors and other relations. Converseley, if an **existing** ContextualUnit is a component of a compound unit, then that compound unit is also declared as a ContextualUnit.
+- Further modified the build process to define new dimension vectors if they are referred to by a unit, but do not yet exist.
+- Another build update, to add rdfs:isDefinedBy triple for any units where it is missing
 - Replaced quantityKind:Frequency to quantityKind:RateOfChange for unit:PERCENT-PER-YR & unit:PERCENT-PER-WK
 
 ### Deprecated
@@ -34,10 +52,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Fixed the distinction between unit:MI_US (U.S. Survey Mile) and unit:MI (International mile).
-
-### Fixed
-
 - Corrected errors in the definition of the variants of constant:MolarVolumeOfIdealGas...
+- Fixed 17 unmatched HTML tags in description fields.
+- Fixed some missing rdfs:isDefinedBy triples in the datatypes vocabulary.
 
 ## [3.1.6] - 2025-09-29
 
@@ -530,7 +547,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.6...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.7...HEAD
+[3.1.7]: https://github.com/qudt/qudt-public-repo/compare/v3.1.6...v3.1.7
 [3.1.6]: https://github.com/qudt/qudt-public-repo/compare/v3.1.5...v3.1.6
 [3.1.5]: https://github.com/qudt/qudt-public-repo/compare/v3.1.4...v3.1.5
 [3.1.4]: https://github.com/qudt/qudt-public-repo/compare/v3.1.3...v3.1.4
