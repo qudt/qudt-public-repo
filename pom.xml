@@ -2366,6 +2366,29 @@
                                         </sparql>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
+                                      <message>Inherit rdf:type from skos:broader (dist vocab only)</message>
+                                      <add>
+                                        <files>
+                                          <include>target/dist/vocab/**/*.ttl</include>
+                                        </files>
+                                      </add>
+
+                                      <sparql><![CDATA[
+                                        INSERT {
+                                          GRAPH ?graph {
+                                            ?y a ?type .
+                                          }
+                                        }
+                                        WHERE {
+                                          GRAPH ?graph {
+                                            ?x a ?type .
+                                            ?y skos:broader ?x .
+                                            FILTER NOT EXISTS { ?y a ?type . }
+                                          }
+                                        }
+                                      ]]></sparql>
+                                    </sparqlUpdate>                                   
+                                    <sparqlUpdate>
                                         <message>Declare a new dimension vector if it is needed by a unit.</message>
                                         <sparql>
                                             <![CDATA[
