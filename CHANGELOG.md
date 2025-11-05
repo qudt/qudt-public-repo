@@ -15,6 +15,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
+- Fixed spelling errors in descriptions for CurrencyUnit, fieldCode, normativeReference, BaseDimensionMagnitude. For both OWL and SHACL schemas. ([Vlad Korolev](https://github.com/vladistan))
+
 ### Deprecated
 
 - Replaced CM_H2O with CentiM_H2O
