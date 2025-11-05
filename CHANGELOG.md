@@ -11,6 +11,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Added quantityKind:CoolingPerformanceRatio & unit:KiloW-PER-TON_FG
 - Added a new class and instances for crypto currency units
+- Added an inference in the build that causes inheritance of rdfs:type down the skos:broader hierarchy.
 
 ### Changed
 
