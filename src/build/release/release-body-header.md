@@ -4,7 +4,7 @@ We are considering simplifying the OWL schema for QUDT for several reasons.
 
 1. We perform all of our development and maintenance work using the SHACL schemas
 2. We have been told that few users are actually trying to do OWL reasoning on QUDT
-3. The OWL axioms concerning between annotation properties and object properties is a maintenance timesink
+3. The OWL axioms concerning between annotation properties and object properties is a maintenance time sink
 
 Before we take any action, we need to hear from you! We are considering any of the following options:
 
