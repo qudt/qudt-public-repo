@@ -23,6 +23,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Fixed the declaration of some properties (most importantly changing from `owl:DatatypeProperty` to `owl:AnnotationProperty`) in `SCHEMA_QUDT.ttl`.
+
 ## [3.1.7] - 2025-10-27
 
 ### Added
