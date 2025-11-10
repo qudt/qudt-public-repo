@@ -8,9 +8,8 @@ We are considering simplifying the OWL schema for QUDT for several reasons.
 
 Before we take any action, we need to hear from you! We are considering any of the following options:
 
-1. Trim the OWL schema to just a "classonomy" composed of the class definitions and the rdfs:subClassOf relations among them.
-2. Trim the OWL schema to the class definitions and the object property relations
-3. Leave things as is, recognizing that errors occasionally creep in (e.g. try loading it in Protege right now - there are 3 errors)
+1. Remove all axioms from OWL schema, such as restriction classes, possibly by adopting a version of RDFS-plus. Because there are several variants of RDFS-plus gaining use, we could consider the common subset of RDFS-plus being implemented. This solution still leaves the question of how to handle domain and range statements in the case of class unions.
+2. Leave things as they are, recognizing that errors occasionally creep in (e.g. try loading it in Protege right now - there are 3 errors)
 
 The vocabularies are all just RDFS, so they remain untouched by this change.
 
