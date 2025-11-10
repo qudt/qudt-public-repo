@@ -9,10 +9,61 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
-- `quantitykind:NumberOfElectricalPhases` for use with AC circuits
+- Added quantityKind:CoolingPerformanceRatio & unit:KiloW-PER-TON_FG
+- Added a new class and instances for crypto currency units
+- Added an inference in the build that causes inheritance of rdfs:type down the skos:broader hierarchy.
+
+### Changed
+
+- Fixed spelling errors in descriptions for CurrencyUnit, fieldCode, normativeReference, BaseDimensionMagnitude. For both OWL and SHACL schemas. ([Vlad Korolev](https://github.com/vladistan))
+
+### Deprecated
+
+- Replaced CM_H2O with CentiM_H2O
 
 ### Fixed
 
+## [3.1.7] - 2025-10-27
+
+### Added
+
+- Defined some missing factor units, such as unit:MicroGALILEO
+- Added unit:PERMILLE, analogous to unit:PERCENT
+- Added quantityKind:RateOfChange & unit:PERCENT-PER-SEC
+- Added unit:TON_UK-PER-HR
+- Added unit:RAYL_MKS to distinguish it from the CGS version, unit:RAYL
+
+### Changed
+
+- Build process
+  - with `-DdeprecatedInVersion=[releaseVersion]`, a maven build now generates all vocab files from that `releaseVersion` into
+    `target/deprecated-in-[releaseVersion]`, containing only the entities that are `qudt:deprecated` in that
+    release
+- Declared a few more units as being of type qudt:ContextualUnit, such as unit:SAMPLE-PER-SEC.
+- Modified the build process to generate all component units. If a compound unit is a qudt:ContextualUnit, then so are the **newly generated** component units. So, for example, unit:SAMPLE is now generated as a ContextualUnit to support unit:SAMPLE-PER-SEC. This is needed to allow consistent validation of factor units, dimension vectors and other relations. Converseley, if an **existing** ContextualUnit is a component of a compound unit, then that compound unit is also declared as a ContextualUnit.
+- Further modified the build process to define new dimension vectors if they are referred to by a unit, but do not yet exist.
+- Another build update, to add rdfs:isDefinedBy triple for any units where it is missing
+- Replaced quantityKind:Frequency to quantityKind:RateOfChange for unit:PERCENT-PER-YR & unit:PERCENT-PER-WK
+
+### Deprecated
+
+- Replaced OHM_CIRC-MIL-PER-FT with OHM-MIL_Circ-PER-FT
+- Replaced unit:PER-MILLE-PSI with unit:PERMILLE-PER-PSI
+- Replaced unit:MIL with unit:MIL_Angle and unit:MIL_Length to distinguish the two meanings
+- Deprecated unit:HeartBeat in favor of unit:BEAT
+
+### Fixed
+
+- Fixed the distinction between unit:MI_US (U.S. Survey Mile) and unit:MI (International mile).
+- Corrected errors in the definition of the variants of constant:MolarVolumeOfIdealGas...
+- Fixed 17 unmatched HTML tags in description fields.
+- Fixed some missing rdfs:isDefinedBy triples in the datatypes vocabulary.
+
+## [3.1.6] - 2025-09-29
+
+### Added
+
+- `quantitykind:NumberOfElectricalPhases` for use with AC circuits
 - Fixed the declaration of some properties (most importantly changing from `owl:DatatypeProperty` to `owl:AnnotationProperty`) in `SCHEMA_QUDT.ttl`.
 - Fixed typo in `qudt:ucumCode` of `unit:MegaN-PER-M2`
 - Tweaked some multi-line validation error messages for environments that only display the first line (e.g. TopBraid)
@@ -26,6 +77,18 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
     form is used throughout no (`/`), just multiplication of factors with positive or negative exponents, in the order
     they appear in the unit's localname
 - SHACL shapes: enforce at most one `qudt:ucumCode` per unit.
+
+### Deprecated
+
+- Deprecated dimension vector A0E0L0I0M0H0T0D0, which has no valid definition. A unit or quantity kind either has a dimension based on the 7 base SI dimensions, or it is dimensionless, with a "D1".
+
+### Fixed
+
+- Fixed typo in `qudt:ucumCode` of `unit:MegaN-PER-M2`
+- Tweaked some multi-line validation error messages for environments that only display the first line (e.g. TopBraid)
+- Fixed `qudt:ucumCode` of many units, such that they all follow the same pattern (see 'Changed' below), and such that
+  no unit has more than one.
+- Fixed descriptions of `quantitykind:Activity` and `quantitykind:ActivityConcentration` ([Henrike Fleischhack](https://github.com/henrikef)).
 
 ## [3.1.5] - 2025-08-28
 
@@ -492,7 +555,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.5...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.7...HEAD
+[3.1.7]: https://github.com/qudt/qudt-public-repo/compare/v3.1.6...v3.1.7
+[3.1.6]: https://github.com/qudt/qudt-public-repo/compare/v3.1.5...v3.1.6
 [3.1.5]: https://github.com/qudt/qudt-public-repo/compare/v3.1.4...v3.1.5
 [3.1.4]: https://github.com/qudt/qudt-public-repo/compare/v3.1.3...v3.1.4
 [3.1.3]: https://github.com/qudt/qudt-public-repo/compare/v3.1.2...v3.1.3
