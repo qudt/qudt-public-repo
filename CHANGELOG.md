@@ -23,7 +23,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
-- Added a type declaration (qudt:ReifiedFactor) for the anonymous nodes describing factor units.
+- Added a type declaration (qudt:FactorUnit) for the anonymous nodes describing factor units.
 
 ## [3.1.7] - 2025-10-27
 

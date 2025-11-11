@@ -334,6 +334,33 @@ FILTER NOT EXISTS {?t qudt:exactMatch $this } .
   ] ;
   sh:targetClass qudt:Concept .
 
+qudt:FactorUnitShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Only check for valid factor units on non-deprecated units" ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Only check for valid factor units on non-deprecated units" ;
+    sh:message "{$this} has an undefined factor unit {?factorUnit}." ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+            SELECT $this ?factorUnit
+            WHERE {
+                FILTER NOT EXISTS {$this qudt:deprecated true} .
+                $this qudt:hasFactorUnit ?reifiedFactor .
+                ?reifiedFactor qudt:hasUnit ?factorUnit .
+                  {
+                  FILTER NOT EXISTS {?factorUnit a qudt:Unit .} .
+                  }
+                UNION 
+                  {
+                  ?factorUnit qudt:deprecated true .
+                  }
+                }
+        """ ;
+  ] ;
+  sh:targetClass qudt:Concept .
+
 qudt:InconsistentDimensionVector
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
@@ -586,33 +613,6 @@ qudt:RdfsLabelInTitleCaseShapeWarning
   sh:targetClass qudt:PhysicalConstant ;
   sh:targetClass qudt:Prefix ;
   sh:targetClass qudt:QuantityKind .
-
-qudt:ReifiedFactorShape
-  a sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
-  rdfs:label "Only check for valid factor units on non-deprecated units" ;
-  sh:sparql [
-    a sh:SPARQLConstraint ;
-    rdfs:comment "Only check for valid factor units on non-deprecated units" ;
-    sh:message "{$this} has an undefined factor unit {?factorUnit}." ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
-    sh:select """
-            SELECT $this ?factorUnit
-            WHERE {
-                FILTER NOT EXISTS {$this qudt:deprecated true} .
-                $this qudt:hasFactorUnit ?reifiedFactor .
-                ?reifiedFactor qudt:hasUnit ?factorUnit .
-                  {
-                  FILTER NOT EXISTS {?factorUnit a qudt:Unit .} .
-                  }
-                UNION 
-                  {
-                  ?factorUnit qudt:deprecated true .
-                  }
-                }
-        """ ;
-  ] ;
-  sh:targetClass qudt:Concept .
 
 qudt:ScalingOfAndFactorUnitsPresent
   a sh:NodeShape ;
