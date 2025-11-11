@@ -1,6 +1,7 @@
 # YOUR OPINION NEEDED!
 
 ## First question
+
 We are trying to get a better feel for how people are using QUDT. Do you...
 
 1. Use QUDT with the OWL schema
@@ -11,6 +12,7 @@ We are trying to get a better feel for how people are using QUDT. Do you...
 Please answer our brief poll [here](https://github.com/qudt/qudt-public-repo/discussions/1329)
 
 ## Second question
+
 For the OWL users, we are considering simplifying the OWL schema for several reasons.
 
 1. We perform all of our development and maintenance work using the SHACL schemas
@@ -25,6 +27,4 @@ Before we take any action, we need to hear from you! We are considering any of t
 The vocabularies are all just RDFS, so they remain untouched by this change.
 
 Please give us feedback by entering a comment on our GitHub Discussions page [here](https://github.com/qudt/qudt-public-repo/discussions/1330). We will wait for your feedback until December 15, 2025 before deciding on our course of action.
-
-
 
