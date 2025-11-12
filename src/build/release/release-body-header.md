@@ -21,7 +21,7 @@ For the OWL users, we are considering simplifying the OWL schema for several rea
 
 Before we take any action, we need to hear from you! We are considering one of the following options:
 
-1. Remove all axioms from OWL schema, that is restriction classes for allValuesFrom, someValuesFrom and cardinality constraints, and perhaps a small number of other axioms. Instead adopt a version of RDFS-plus which would necessitate expressing domain(s) and range(s) on properties.
+1. Remove all axioms from the OWL schema, that is restriction classes for allValuesFrom, someValuesFrom and cardinality constraints, and perhaps a small number of other axioms. Instead adopt a version of RDFS-plus which would necessitate expressing domain(s) and range(s) on properties.
 2. Leave things as they are, recognizing that errors occasionally creep in (e.g. try loading it in Protege right now - there are 3 errors)
 
 The vocabularies are all just RDFS, so they remain untouched by this change.
