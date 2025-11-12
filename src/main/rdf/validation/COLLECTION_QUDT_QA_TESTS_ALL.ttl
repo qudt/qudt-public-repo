@@ -94,7 +94,7 @@ $this ?p ?o .
 FILTER(STRSTARTS (str(?p), 'http://qudt.org/schema/qudt'))
 FILTER NOT EXISTS {$this a sh:NodeShape}
 FILTER NOT EXISTS {$this a/rdfs:subClassOf* ?class .
-\t\t\t?class sh:property/sh:path ?p .
+?class sh:property/sh:path ?p .
 }
 FILTER NOT EXISTS {$this a/rdfs:subClassOf* ?class .
 ?class sh:xone/rdf:rest*/rdf:first/sh:property/sh:path ?p .
@@ -106,6 +106,25 @@ FILTER NOT EXISTS {$this a/rdfs:subClassOf* ?class .
 """ ;
   ] ;
   sh:targetClass qudt:Concept .
+
+qudt:Concept-label-IRI-Shape
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:message "An rdfs:label is required." ;
+  sh:minCount 1 ;
+  sh:path rdfs:label ;
+  sh:target [
+    a sh:SPARQLTarget ;
+    sh:select """
+      PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      PREFIX qudt: <http://qudt.org/schema/qudt/>
+      SELECT $this WHERE {
+        $this rdf:type/rdfs:subClassOf* qudt:Concept .
+        FILTER(!isBlank($this))
+      }
+    """ ;
+  ] .
 
 qudt:ConvertibleDerivedUnitOfInconvertibleBase
   a sh:NodeShape ;
@@ -164,6 +183,7 @@ qudt:DefinedByConstraint
 WHERE {
 FILTER NOT EXISTS {$this rdfs:isDefinedBy ?y}
 FILTER NOT EXISTS {$this qudt:deprecated true}
+FILTER(!isBlank($this))
 }""" ;
   ] ;
   sh:targetClass qudt:Concept .
@@ -313,6 +333,33 @@ FILTER NOT EXISTS {?t qudt:exactMatch $this } .
 """ ;
   ] ;
   sh:targetClass qudt:Concept .
+
+qudt:FactorUnitShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Only check for valid factor units on non-deprecated units" ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Only check for valid factor units on non-deprecated units" ;
+    sh:message "{$this} has an undefined factor unit {?factorUnit}." ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+            SELECT $this ?factorUnit
+            WHERE {
+                FILTER NOT EXISTS {$this qudt:deprecated true} .
+                $this qudt:hasFactorUnit ?reifiedFactor .
+                ?reifiedFactor qudt:hasUnit ?factorUnit .
+                  {
+                  FILTER NOT EXISTS {?factorUnit a qudt:Unit .} .
+                  }
+                UNION 
+                  {
+                  ?factorUnit qudt:deprecated true .
+                  }
+                }
+        """ ;
+  ] ;
+  sh:targetClass qudt:Unit .
 
 qudt:InconsistentDimensionVector
   a sh:NodeShape ;
