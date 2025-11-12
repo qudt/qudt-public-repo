@@ -19,9 +19,9 @@ For the OWL users, we are considering simplifying the OWL schema for several rea
 2. We have been told that few users are actually trying to do OWL reasoning on QUDT
 3. The OWL axioms concerning object properties is a maintenance time sink
 
-Before we take any action, we need to hear from you! We are considering any of the following options:
+Before we take any action, we need to hear from you! We are considering one of the following options:
 
-1. Remove all axioms from OWL schema, such as restriction classes beyond simple cardinality constraints, possibly by adopting a version of RDFS-plus. Because there are several variants of RDFS-plus in use, we could consider a common subset of RDFS-plus being implemented. This solution still leaves the question of how to handle domain and range statements in the case of class unions.
+1. Remove all axioms from OWL schema, that is restriction classes for allValuesFrom, someValuesFrom and cardinality constraints, and perhaps a small number of other axioms. Instead adopt a version of RDFS-plus which would necessitate expressing domain(s) and range(s) on properties.
 2. Leave things as they are, recognizing that errors occasionally creep in (e.g. try loading it in Protege right now - there are 3 errors)
 
 The vocabularies are all just RDFS, so they remain untouched by this change.
