@@ -66,10 +66,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - `quantitykind:NumberOfElectricalPhases` for use with AC circuits
-- Fixed typo in `qudt:ucumCode` of `unit:MegaN-PER-M2`
-- Tweaked some multi-line validation error messages for environments that only display the first line (e.g. TopBraid)
-- Fixed `qudt:ucumCode` of many units, such that they all follow the same pattern (see 'Changed' below), and such that
-  no unit has more than one.
 
 ### Changed
 
