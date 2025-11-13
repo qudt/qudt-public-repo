@@ -7,7 +7,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
-
 ## [3.1.8] - 2025-11-13
 
 ### Added
