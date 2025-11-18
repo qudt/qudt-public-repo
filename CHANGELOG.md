@@ -7,6 +7,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Deprecated
+
+### Fixed
+
+- Found and fixed some erroneous values for rdfs:isDefinedBy
+
 ## [3.1.8] - 2025-11-13
 
 ### Added
