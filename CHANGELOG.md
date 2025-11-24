@@ -9,6 +9,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added unit:MicroMOL-PER-KiloGM-YR
+
 ### Changed
 
 - Increased the precision of conversion multipliers for unit:DEG, unit:REV and related units
