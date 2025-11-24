@@ -13,6 +13,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
+- Increased the precision of conversion multipliers for unit:DEG, unit:REV and related units
+
 ### Deprecated
 
 ### Fixed
