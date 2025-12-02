@@ -207,42 +207,63 @@
                             </scripts>
                         </configuration>
                     </execution>
-                </executions>
-                <execution>
-  <id>reserialize-units</id>
+<execution>
+  <id>prune-orphan-factorunit-bnodes</id>
   <phase>process-test-sources</phase>
-  <goals>
-    <goal>execute</goal>
-  </goals>
+  <goals><goal>execute</goal></goals>
   <configuration>
+    <includeClasspath>PLUGIN_ONLY</includeClasspath>
     <scripts>
       <script><![CDATA[
         import org.apache.jena.rdf.model.ModelFactory
+        import org.apache.jena.rdf.model.ResourceFactory
+        import org.apache.jena.vocabulary.RDF
         import org.apache.jena.riot.RDFDataMgr
         import org.apache.jena.riot.RDFFormat
         import java.nio.file.Paths
 
-        // target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
-        def unitsFile = Paths.get(
-          project.properties['project.build.directory'] as String,
-          'dist','vocab','unit','VOCAB_QUDT-UNITS-ALL.ttl'
-        ).toFile()
-
-        if (unitsFile.exists()) {
+        def pruneFile = { java.nio.file.Path p ->
+          def f = p.toFile()
+          if (!f.exists()) { println "Prune orphans: skip (not found) ${f}"; return }
           def m = ModelFactory.createDefaultModel()
-          RDFDataMgr.read(m, unitsFile.absolutePath)              // load
-          def tmp = new File(unitsFile.parentFile, unitsFile.name + '.tmp')
-          tmp.withOutputStream { os -> RDFDataMgr.write(os, m, RDFFormat.TURTLE_BLOCKS) }  // save pretty TTL
-          if (!unitsFile.delete()) { println "Warn: couldn't delete ${unitsFile}" }
-          if (!tmp.renameTo(unitsFile)) { println "Warn: couldn't move ${tmp} -> ${unitsFile}" }
-          println "Re-serialized ${unitsFile}"
-        } else {
-          println "Skipping re-serialize; not found: ${unitsFile}"
+          RDFDataMgr.read(m, f.absolutePath)
+
+          def QUDT = "http://qudt.org/schema/qudt/"
+          def FACTOR_UNIT = ResourceFactory.createResource(QUDT + "FactorUnit")
+          def HAS_FACTOR_UNIT = ResourceFactory.createProperty(QUDT + "hasFactorUnit")
+
+          def toRemove = []
+          def stmts = m.listStatements(null, RDF.type, FACTOR_UNIT).toList()
+          stmts.each { st ->
+            def s = st.getSubject()
+            if (!s.isAnon()) return
+            // incoming link from any unit?
+            boolean incoming = m.contains(null, HAS_FACTOR_UNIT, s)
+            // any other outgoing statements besides rdf:type ?
+            boolean otherOutgoing = m.listStatements(s, null, (org.apache.jena.rdf.model.RDFNode)null)
+                                      .toList()
+                                      .any { it.getPredicate() != RDF.type }
+            if (!incoming && !otherOutgoing) {
+              toRemove.add(st)
+            }
+          }
+          if (!toRemove.isEmpty()) {
+            m.remove(toRemove)
+            f.withOutputStream { out -> RDFDataMgr.write(out, m, RDFFormat.TURTLE_PRETTY) }
+            println "Pruned ${toRemove.size()} orphan FactorUnit bnodes from ${f}"
+          } else {
+            println "No orphan FactorUnit bnodes found in ${f}"
+          }
         }
+
+        def buildDir = project.build.directory
+        // Dist units file
+        pruneFile(Paths.get(buildDir, 'dist','vocab','unit','VOCAB_QUDT-UNITS-ALL.ttl'))
       ]]></script>
     </scripts>
   </configuration>
 </execution>
+                </executions>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.groovy</groupId>
@@ -250,16 +271,16 @@
                         <version>4.0.23</version>
                         <scope>runtime</scope>
                     </dependency>
-                      <dependency>
-    <groupId>org.apache.jena</groupId>
-    <artifactId>jena-core</artifactId>
-    <version>4.10.0</version> <!-- or any recent 4.x/5.x compatible with your JDK -->
-  </dependency>
-  <dependency>
-    <groupId>org.apache.jena</groupId>
-    <artifactId>jena-arq</artifactId>
-    <version>4.10.0</version>
-  </dependency>
+    <dependency>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-arq</artifactId>
+      <version>5.6.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-core</artifactId>
+      <version>5.6.0</version>
+    </dependency>
                 </dependencies>
             </plugin>
 
@@ -1203,6 +1224,7 @@
 
                                               GRAPH ?distGraph {
                                                 ?entity ?propertyToUpdate ?value
+                                                FILTER ( !isBlank(?entity))
                                               }
                                               FILTER NOT EXISTS {
                                                 GRAPH ?srcGraph {
