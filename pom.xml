@@ -208,6 +208,41 @@
                         </configuration>
                     </execution>
                 </executions>
+                <execution>
+  <id>reserialize-units</id>
+  <phase>process-test-sources</phase>
+  <goals>
+    <goal>execute</goal>
+  </goals>
+  <configuration>
+    <scripts>
+      <script><![CDATA[
+        import org.apache.jena.rdf.model.ModelFactory
+        import org.apache.jena.riot.RDFDataMgr
+        import org.apache.jena.riot.RDFFormat
+        import java.nio.file.Paths
+
+        // target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+        def unitsFile = Paths.get(
+          project.properties['project.build.directory'] as String,
+          'dist','vocab','unit','VOCAB_QUDT-UNITS-ALL.ttl'
+        ).toFile()
+
+        if (unitsFile.exists()) {
+          def m = ModelFactory.createDefaultModel()
+          RDFDataMgr.read(m, unitsFile.absolutePath)              // load
+          def tmp = new File(unitsFile.parentFile, unitsFile.name + '.tmp')
+          tmp.withOutputStream { os -> RDFDataMgr.write(os, m, RDFFormat.TURTLE_BLOCKS) }  // save pretty TTL
+          if (!unitsFile.delete()) { println "Warn: couldn't delete ${unitsFile}" }
+          if (!tmp.renameTo(unitsFile)) { println "Warn: couldn't move ${tmp} -> ${unitsFile}" }
+          println "Re-serialized ${unitsFile}"
+        } else {
+          println "Skipping re-serialize; not found: ${unitsFile}"
+        }
+      ]]></script>
+    </scripts>
+  </configuration>
+</execution>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.groovy</groupId>
@@ -215,6 +250,16 @@
                         <version>4.0.23</version>
                         <scope>runtime</scope>
                     </dependency>
+                      <dependency>
+    <groupId>org.apache.jena</groupId>
+    <artifactId>jena-core</artifactId>
+    <version>4.10.0</version> <!-- or any recent 4.x/5.x compatible with your JDK -->
+  </dependency>
+  <dependency>
+    <groupId>org.apache.jena</groupId>
+    <artifactId>jena-arq</artifactId>
+    <version>4.10.0</version>
+  </dependency>
                 </dependencies>
             </plugin>
 
