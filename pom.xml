@@ -689,6 +689,37 @@
                                         <toFile>target/inspection/symbol/symbol.txt</toFile>
                                     </sparqlQuery>
 
+                                    <sparqlUpdate>
+                                        <message>Try generating OWL schema</message>
+                                        <sparql>
+                                            <![CDATA[
+INSERT {
+GRAPH <target:inspection:owl.ttl> {
+?oentity a owl:Class .
+?oentity rdfs:subClassOf ?super .
+?oentity dcterms:description ?description .
+?oentity qudt:informativeReference ?infoRef .
+?oentity rdfs:comment ?comment .
+?oendity rdfs:isDefinedBy ?defined .
+?oentity rdfs:label ?label .
+?oentity qudt:usesProperty ?property .
+}}
+WHERE {
+GRAPH <src:schema:shacl:SCHEMA_QUDT_NoOWL.ttl> {
+?entity a rdfs:Class .
+OPTIONAL {?entity sh:property/sh:path ?property .}
+OPTIONAL {?entity rdfs:subClassOf ?super .}
+OPTIONAL {?entity dcterms:description ?description .}
+OPTIONAL {?entity qudt:informativeReference ?infoRef .}
+OPTIONAL {?entity rdfs:comment ?comment .}
+OPTIONAL {?endity rdfs:isDefinedBy ?defined .}
+OPTIONAL {?entity rdfs:label ?label .}
+BIND (qfn:localname(?entity) AS ?local) .
+BIND (CONCAT ("<http://qudt.org/schema/owl/",?local,">") AS ?oentity)
+}}
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
 
                                 </steps>
                             </pipeline>
