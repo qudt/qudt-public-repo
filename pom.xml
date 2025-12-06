@@ -3608,5 +3608,305 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                 </plugins>
             </build>
         </profile>
+<profile>
+    <id>protege-schema</id>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.github.qudtlib</groupId>
+                <artifactId>rdfio-maven-plugin</artifactId>
+                <!-- version inherited from main build -->
+
+                <executions>
+                    <execution>
+                        <id>protege-schema</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>pipeline</goal>
+                        </goals>
+
+                        <configuration>
+                            <pipeline>
+                                <id>protege-schema</id>
+                                <steps>
+
+                                    <!-- 1. Load SHACL masters into DEFAULT graph -->
+                                    <add>
+                                        <files>
+                                            <include>target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl</include>
+                                            <include>target/dist/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl</include>
+                                        </files>
+                                    </add>
+
+                                    <!-- 2. Clear the Protege graph -->
+                                    <sparqlUpdate>
+                                        <message>Clear Protégé documentation graph</message>
+                                        <sparql><![CDATA[
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+DELETE {
+  GRAPH <dist:schema:SCHEMA_QUDT-Protege.ttl> { ?s ?p ?o }
+}
+WHERE {
+  GRAPH <dist:schema:SCHEMA_QUDT-Protege.ttl> { ?s ?p ?o }
+}
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+
+                                    <!-- 3. Insert qudt:usesProperty definition -->
+                                    <sparqlUpdate>
+                                        <message>Define qudt:usesProperty annotation</message>
+                                        <sparql><![CDATA[
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+
+INSERT {
+  GRAPH <dist:schema:SCHEMA_QUDT-Protege.ttl> {
+    qudt:usesProperty
+      a owl:AnnotationProperty ;
+      rdfs:label "uses property" ;
+      rdfs:comment "Documents which properties are commonly used with instances of this class (informative only; see SHACL for constraints)." ;
+      rdfs:domain owl:Class ;
+      rdfs:range  rdf:Property .
+  }
+}
+WHERE { }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+
+                                    <!-- 4. Insert classes -->
+                                    <sparqlUpdate>
+                                        <message>Insert Protégé classes from SHACL</message>
+                                        <sparql><![CDATA[
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+PREFIX sh:   <http://www.w3.org/ns/shacl#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+INSERT {
+  GRAPH <dist:schema:SCHEMA_QUDT-Protege.ttl> {
+    ?class a owl:Class .
+
+    ?class rdfs:label ?label .
+    ?class rdfs:comment ?comment .
+    ?class dcterms:description ?desc .
+    ?class rdfs:isDefinedBy ?isd .
+    ?class rdfs:subClassOf ?superClass .
+  }
+}
+WHERE {
+  {
+    SELECT DISTINCT ?class
+    WHERE {
+      {
+        # Pattern A: NodeShape with sh:targetClass
+        ?shape a sh:NodeShape ;
+               sh:targetClass ?class .
+      }
+      UNION
+      {
+        # Pattern B: class-as-shape
+        ?class a rdfs:Class ;
+               sh:property ?psA .
+      }
+      UNION
+      {
+        # Pattern C: NodeShape-only "classes" with properties
+        ?class a sh:NodeShape ;
+               sh:property ?psB .
+        FILTER NOT EXISTS { ?class a rdfs:Class }
+      }
+
+      FILTER isIRI(?class)
+    }
+  }
+
+  OPTIONAL { ?class rdfs:label ?label }
+  OPTIONAL { ?class rdfs:comment ?comment }
+  OPTIONAL { ?class dcterms:description ?desc }
+  OPTIONAL { ?class rdfs:isDefinedBy ?isd }
+  OPTIONAL {
+    ?class rdfs:subClassOf ?superClass .
+    FILTER isIRI(?superClass)
+  }
+}
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+
+                                    <!-- 5. Insert object properties with single domain -->
+                                    <sparqlUpdate>
+                                        <message>Insert Protégé object properties from SHACL</message>
+                                        <sparql><![CDATA[
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+PREFIX sh:   <http://www.w3.org/ns/shacl#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+INSERT {
+  GRAPH <dist:schema:SCHEMA_QUDT-Protege.ttl> {
+    ?pObj a owl:ObjectProperty ;
+          rdfs:domain ?singleDomainObj ;
+          rdfs:range  ?rangeClassObj .
+
+    ?pObj rdfs:label ?pObjLabel .
+    ?pObj rdfs:comment ?pObjComment .
+    ?pObj rdfs:isDefinedBy ?pObjIsDefinedBy .
+  }
+}
+WHERE {
+  {
+    SELECT ?pObj ?rangeClassObj (SAMPLE(?domainClassObj) AS ?singleDomainObj)
+    WHERE {
+      {
+        ?shape1 a sh:NodeShape ;
+                sh:targetClass ?domainClassObj ;
+                sh:property ?ps1 .
+      }
+      UNION
+      {
+        ?domainClassObj a rdfs:Class ;
+                        sh:property ?ps1 .
+      }
+
+      ?ps1 sh:path ?pObj ;
+           sh:class ?rangeClassObj .
+
+      FILTER isIRI(?pObj)
+      FILTER isIRI(?rangeClassObj)
+      FILTER isIRI(?domainClassObj)
+    }
+    GROUP BY ?pObj ?rangeClassObj
+    HAVING (COUNT(DISTINCT ?domainClassObj) = 1)
+  }
+
+  OPTIONAL { ?pObj rdfs:label ?pObjLabel }
+  OPTIONAL { ?pObj rdfs:comment ?pObjComment }
+  OPTIONAL { ?pObj rdfs:isDefinedBy ?pObjIsDefinedBy }
+}
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+
+                                    <!-- 6. Insert datatype properties with single domain -->
+                                    <sparqlUpdate>
+                                        <message>Insert Protégé datatype properties from SHACL</message>
+                                        <sparql><![CDATA[
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+PREFIX sh:   <http://www.w3.org/ns/shacl#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+INSERT {
+  GRAPH <dist:schema:SCHEMA_QUDT-Protege.ttl> {
+    ?pDt a owl:DatatypeProperty ;
+         rdfs:domain ?singleDomainDt ;
+         rdfs:range  ?dt .
+
+    ?pDt rdfs:label ?pDtLabel .
+    ?pDt rdfs:comment ?pDtComment .
+    ?pDt rdfs:isDefinedBy ?pDtIsDefinedBy .
+  }
+}
+WHERE {
+  {
+    SELECT ?pDt ?dt (SAMPLE(?domainClassDt) AS ?singleDomainDt)
+    WHERE {
+      {
+        ?shape2 a sh:NodeShape ;
+                sh:targetClass ?domainClassDt ;
+                sh:property ?ps2 .
+      }
+      UNION
+      {
+        ?domainClassDt a rdfs:Class ;
+                       sh:property ?ps2 .
+      }
+
+      ?ps2 sh:path ?pDt ;
+           sh:datatype ?dt .
+
+      FILTER isIRI(?pDt)
+      FILTER isIRI(?dt)
+      FILTER isIRI(?domainClassDt)
+    }
+    GROUP BY ?pDt ?dt
+    HAVING (COUNT(DISTINCT ?domainClassDt) = 1)
+  }
+
+  OPTIONAL { ?pDt rdfs:label ?pDtLabel }
+  OPTIONAL { ?pDt rdfs:comment ?pDtComment }
+  OPTIONAL { ?pDt rdfs:isDefinedBy ?pDtIsDefinedBy }
+}
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+
+                                    <!-- 7. Insert qudt:usesProperty annotations (class → property) -->
+                                    <sparqlUpdate>
+                                        <message>Insert qudt:usesProperty annotations</message>
+                                        <sparql><![CDATA[
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sh:   <http://www.w3.org/ns/shacl#>
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+
+INSERT {
+  GRAPH <dist:schema:SCHEMA_QUDT-Protege.ttl> {
+    ?classUses qudt:usesProperty ?propertyUsed .
+  }
+}
+WHERE {
+  {
+    SELECT DISTINCT ?classUses ?propertyUsed
+    WHERE {
+      {
+        # Pattern 1: NodeShape with sh:targetClass
+        ?shape3 a sh:NodeShape ;
+                sh:targetClass ?classUses ;
+                sh:property ?ps3 .
+      }
+      UNION
+      {
+        # Pattern 2: class-as-shape
+        ?classUses a rdfs:Class ;
+                   sh:property ?ps3 .
+      }
+      UNION
+      {
+        # Pattern 3: NodeShape-only "classes"
+        ?classUses a sh:NodeShape ;
+                   sh:property ?ps3 .
+        FILTER NOT EXISTS { ?classUses a rdfs:Class }
+      }
+
+      ?ps3 sh:path ?propertyUsed .
+
+      FILTER isIRI(?classUses)
+      FILTER isIRI(?propertyUsed)
+    }
+  }
+}
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+
+                                    <!-- 8. Write the Protégé schema graph as a single TTL file -->
+                                    <write>
+                                        <graph>dist:schema:SCHEMA_QUDT-Protege.ttl</graph>
+                                        <toFile>target/dist/schema/SCHEMA_QUDT-Protege.ttl</toFile>
+                                    </write>
+
+                                </steps>
+                            </pipeline>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</profile>
     </profiles>
 </project>
