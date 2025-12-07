@@ -1,0 +1,47 @@
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+PREFIX sh:   <http://www.w3.org/ns/shacl#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+INSERT {
+  GRAPH <dist:schema:SCHEMA_QUDT-Protege.ttl> {
+    ?pObj a owl:ObjectProperty ;
+          rdfs:domain ?singleDomainObj ;
+          rdfs:range  ?rangeClassObj .
+
+    ?pObj rdfs:label ?pObjLabel .
+    ?pObj rdfs:comment ?pObjComment .
+    ?pObj rdfs:isDefinedBy ?pObjIsDefinedBy .
+  }
+}
+WHERE {
+  {
+    SELECT ?pObj ?rangeClassObj (SAMPLE(?domainClassObj) AS ?singleDomainObj)
+    WHERE {
+      {
+        ?shape1 a sh:NodeShape ;
+                sh:targetClass ?domainClassObj ;
+                sh:property ?ps1 .
+      }
+      UNION
+      {
+        ?domainClassObj a rdfs:Class ;
+                        sh:property ?ps1 .
+      }
+
+      ?ps1 sh:path ?pObj ;
+           sh:class ?rangeClassObj .
+
+      FILTER isIRI(?pObj)
+      FILTER isIRI(?rangeClassObj)
+      FILTER isIRI(?domainClassObj)
+    }
+    GROUP BY ?pObj ?rangeClassObj
+    HAVING (COUNT(DISTINCT ?domainClassObj) = 1)
+  }
+
+  OPTIONAL { ?pObj rdfs:label ?pObjLabel }
+  OPTIONAL { ?pObj rdfs:comment ?pObjComment }
+  OPTIONAL { ?pObj rdfs:isDefinedBy ?pObjIsDefinedBy }
+}

@@ -1,0 +1,53 @@
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+PREFIX sh:   <http://www.w3.org/ns/shacl#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+INSERT {
+  GRAPH <dist:schema:SCHEMA_QUDT-Protege.ttl> {
+    ?class a owl:Class .
+
+    ?class rdfs:label ?label .
+    ?class rdfs:comment ?comment .
+    ?class dcterms:description ?desc .
+    ?class rdfs:isDefinedBy ?isd .
+    ?class rdfs:subClassOf ?superClass .
+  }
+}
+WHERE {
+  {
+    SELECT DISTINCT ?class
+    WHERE {
+      {
+        # Pattern A: NodeShape with sh:targetClass
+        ?shape a sh:NodeShape ;
+               sh:targetClass ?class .
+      }
+      UNION
+      {
+        # Pattern B: class-as-shape
+        ?class a rdfs:Class ;
+               sh:property ?psA .
+      }
+      UNION
+      {
+        # Pattern C: NodeShape-only "classes" with properties
+        ?class a sh:NodeShape ;
+               sh:property ?psB .
+        FILTER NOT EXISTS { ?class a rdfs:Class }
+      }
+
+      FILTER isIRI(?class)
+    }
+  }
+
+  OPTIONAL { ?class rdfs:label ?label }
+  OPTIONAL { ?class rdfs:comment ?comment }
+  OPTIONAL { ?class dcterms:description ?desc }
+  OPTIONAL { ?class rdfs:isDefinedBy ?isd }
+  OPTIONAL {
+    ?class rdfs:subClassOf ?superClass .
+    FILTER isIRI(?superClass)
+  }
+}

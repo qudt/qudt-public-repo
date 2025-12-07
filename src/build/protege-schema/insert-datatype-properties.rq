@@ -1,0 +1,47 @@
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+PREFIX sh:   <http://www.w3.org/ns/shacl#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+INSERT {
+  GRAPH <dist:schema:SCHEMA_QUDT-Protege.ttl> {
+    ?pDt a owl:DatatypeProperty ;
+         rdfs:domain ?singleDomainDt ;
+         rdfs:range  ?dt .
+
+    ?pDt rdfs:label ?pDtLabel .
+    ?pDt rdfs:comment ?pDtComment .
+    ?pDt rdfs:isDefinedBy ?pDtIsDefinedBy .
+  }
+}
+WHERE {
+  {
+    SELECT ?pDt ?dt (SAMPLE(?domainClassDt) AS ?singleDomainDt)
+    WHERE {
+      {
+        ?shape2 a sh:NodeShape ;
+                sh:targetClass ?domainClassDt ;
+                sh:property ?ps2 .
+      }
+      UNION
+      {
+        ?domainClassDt a rdfs:Class ;
+                       sh:property ?ps2 .
+      }
+
+      ?ps2 sh:path ?pDt ;
+           sh:datatype ?dt .
+
+      FILTER isIRI(?pDt)
+      FILTER isIRI(?dt)
+      FILTER isIRI(?domainClassDt)
+    }
+    GROUP BY ?pDt ?dt
+    HAVING (COUNT(DISTINCT ?domainClassDt) = 1)
+  }
+
+  OPTIONAL { ?pDt rdfs:label ?pDtLabel }
+  OPTIONAL { ?pDt rdfs:comment ?pDtComment }
+  OPTIONAL { ?pDt rdfs:isDefinedBy ?pDtIsDefinedBy }
+}
