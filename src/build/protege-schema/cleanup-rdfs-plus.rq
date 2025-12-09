@@ -1,0 +1,42 @@
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sh:   <http://www.w3.org/ns/shacl#>
+
+########################################################################
+# 1. Remove all SHACL-specific triples (predicates and types)
+########################################################################
+
+# 1a. Remove all triples whose predicate is a SHACL property
+DELETE {
+  ?s ?p ?o .
+}
+WHERE {
+  ?s ?p ?o .
+  FILTER( STRSTARTS(STR(?p), "http://www.w3.org/ns/shacl#") )
+};
+
+# 1b. Remove all rdf:type triples whose object is a SHACL class
+DELETE {
+  ?s rdf:type ?t .
+}
+WHERE {
+  ?s rdf:type ?t .
+  FILTER( STRSTARTS(STR(?t), "http://www.w3.org/ns/shacl#") )
+};
+
+########################################################################
+# 2. Remove any remaining subjects that are NOT
+#    classes or properties in the RDFS+/OWL sense
+########################################################################
+
+DELETE {
+  ?s ?p ?o .
+}
+WHERE {
+  ?s ?p ?o .
+
+  FILTER NOT EXISTS { ?s a owl:Class }
+  FILTER NOT EXISTS { ?s a rdfs:Class }
+  FILTER NOT EXISTS { ?s a owl:ObjectProperty }
+  FILTER NOT EXISTS { ?s a owl:DatatypeProperty }
+  FILTER NOT EXISTS { ?s a owl:AnnotationProperty }
+}

@@ -3630,54 +3630,168 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                 <id>protege-schema</id>
                                 <steps>
 
-                                    <!-- 1. Load SHACL masters into DEFAULT graph -->
+                                    <!-- ========================= -->
+                                    <!--  A. Core SCHEMA_QUDT_…    -->
+                                    <!-- ========================= -->
+
+                                    <!-- 1A: clear default graph -->
+                                    <sparqlUpdate>
+                                        <message>Clear default graph for core schema</message>
+                                        <file>src/build/protege-schema/clear-protege-graph.rq</file>
+                                    </sparqlUpdate>
+
+                                    <!-- 2A: load SCHEMA_QUDT_NoOWL.ttl into default graph -->
                                     <add>
                                         <files>
                                             <include>target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl</include>
+                                        </files>
+                                    </add>
+
+                                    <!-- 3A: build RDFS+ view (core) -->
+                                    <sparqlUpdate>
+                                        <message>Define qudt:usesProperty (core)</message>
+                                        <file>src/build/protege-schema/define-usesProperty.rq</file>
+                                    </sparqlUpdate>
+
+                                    <sparqlUpdate>
+                                        <message>Insert classes (core)</message>
+                                        <file>src/build/protege-schema/insert-classes.rq</file>
+                                    </sparqlUpdate>
+
+                                    <sparqlUpdate>
+                                        <message>Insert object properties (core)</message>
+                                        <file>src/build/protege-schema/insert-object-properties.rq</file>
+                                    </sparqlUpdate>
+
+                                    <sparqlUpdate>
+                                        <message>Insert datatype properties (core)</message>
+                                        <file>src/build/protege-schema/insert-datatype-properties.rq</file>
+                                    </sparqlUpdate>
+
+                                    <sparqlUpdate>
+                                        <message>Insert qudt:usesProperty annotations (core)</message>
+                                        <file>src/build/protege-schema/insert-usesProperty-annotations.rq</file>
+                                    </sparqlUpdate>
+
+                                    <!-- NEW: 5A cleanup to remove SHACL-only stuff -->
+                                    <sparqlUpdate>
+                                        <message>Cleanup RDFS+ graph (core)</message>
+                                        <file>src/build/protege-schema/cleanup-rdfs-plus.rq</file>
+                                    </sparqlUpdate>
+
+                                    <!-- 6A: write core RDFS+ file -->
+                                    <write>
+                                        <toFile>target/dist/schema/rdfs-plus/SCHEMA_QUDT_RDFS-PLUS.ttl</toFile>
+                                    </write>
+
+
+                                    <!-- ========================= -->
+                                    <!--  B. COORDINATES schema    -->
+                                    <!-- ========================= -->
+
+                                    <!-- 1B: clear default graph -->
+                                    <sparqlUpdate>
+                                        <message>Clear default graph for coordinates schema</message>
+                                        <file>src/build/protege-schema/clear-protege-graph.rq</file>
+                                    </sparqlUpdate>
+
+                                    <!-- 2B: load SCHEMA_QUDT-COORDINATES_NoOWL.ttl -->
+                                    <add>
+                                        <files>
+                                            <include>target/dist/schema/shacl/SCHEMA_QUDT-COORDINATES_NoOWL.ttl</include>
+                                        </files>
+                                    </add>
+
+                                    <!-- 3B: build RDFS+ view (coordinates) -->
+                                    <sparqlUpdate>
+                                        <message>Define qudt:usesProperty (coordinates)</message>
+                                        <file>src/build/protege-schema/define-usesProperty.rq</file>
+                                    </sparqlUpdate>
+
+                                    <sparqlUpdate>
+                                        <message>Insert classes (coordinates)</message>
+                                        <file>src/build/protege-schema/insert-classes.rq</file>
+                                    </sparqlUpdate>
+
+                                    <sparqlUpdate>
+                                        <message>Insert object properties (coordinates)</message>
+                                        <file>src/build/protege-schema/insert-object-properties.rq</file>
+                                    </sparqlUpdate>
+
+                                    <sparqlUpdate>
+                                        <message>Insert datatype properties (coordinates)</message>
+                                        <file>src/build/protege-schema/insert-datatype-properties.rq</file>
+                                    </sparqlUpdate>
+
+                                    <sparqlUpdate>
+                                        <message>Insert qudt:usesProperty annotations (coordinates)</message>
+                                        <file>src/build/protege-schema/insert-usesProperty-annotations.rq</file>
+                                    </sparqlUpdate>
+
+                                    <!-- NEW: 5B cleanup -->
+                                    <sparqlUpdate>
+                                        <message>Cleanup RDFS+ graph (coordinates)</message>
+                                        <file>src/build/protege-schema/cleanup-rdfs-plus.rq</file>
+                                    </sparqlUpdate>
+
+                                    <!-- 6B: write coordinates RDFS+ file -->
+                                    <write>
+                                        <toFile>target/dist/schema/rdfs-plus/SCHEMA_QUDT-COORDINATES_RDFS-PLUS.ttl</toFile>
+                                    </write>
+
+
+                                    <!-- ========================= -->
+                                    <!--  C. DATATYPES schema      -->
+                                    <!-- ========================= -->
+
+                                    <!-- 1C: clear default graph -->
+                                    <sparqlUpdate>
+                                        <message>Clear default graph for datatypes schema</message>
+                                        <file>src/build/protege-schema/clear-protege-graph.rq</file>
+                                    </sparqlUpdate>
+
+                                    <!-- 2C: load SCHEMA_QUDT-DATATYPES_NoOWL.ttl -->
+                                    <add>
+                                        <files>
                                             <include>target/dist/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl</include>
                                         </files>
                                     </add>
 
-                                    <!-- 2. Clear Protégé documentation graph -->
+                                    <!-- 3C: build RDFS+ view (datatypes) -->
                                     <sparqlUpdate>
-                                        <message>Clear Protégé documentation graph</message>
-                                        <file>src/build/protege-schema/clear-protege-graph.rq</file>
-                                    </sparqlUpdate>
-
-                                    <!-- 3. Define qudt:usesProperty annotation -->
-                                    <sparqlUpdate>
-                                        <message>Define qudt:usesProperty annotation</message>
+                                        <message>Define qudt:usesProperty (datatypes)</message>
                                         <file>src/build/protege-schema/define-usesProperty.rq</file>
                                     </sparqlUpdate>
 
-                                    <!-- 4. Insert classes -->
                                     <sparqlUpdate>
-                                        <message>Insert Protégé classes from SHACL</message>
+                                        <message>Insert classes (datatypes)</message>
                                         <file>src/build/protege-schema/insert-classes.rq</file>
                                     </sparqlUpdate>
 
-                                    <!-- 5. Insert object properties with single domain -->
                                     <sparqlUpdate>
-                                        <message>Insert Protégé object properties from SHACL</message>
+                                        <message>Insert object properties (datatypes)</message>
                                         <file>src/build/protege-schema/insert-object-properties.rq</file>
                                     </sparqlUpdate>
 
-                                    <!-- 6. Insert datatype properties with single domain -->
                                     <sparqlUpdate>
-                                        <message>Insert Protégé datatype properties from SHACL</message>
+                                        <message>Insert datatype properties (datatypes)</message>
                                         <file>src/build/protege-schema/insert-datatype-properties.rq</file>
                                     </sparqlUpdate>
 
-                                    <!-- 7. Insert qudt:usesProperty annotations (class → property) -->
                                     <sparqlUpdate>
-                                        <message>Insert qudt:usesProperty annotations</message>
+                                        <message>Insert qudt:usesProperty annotations (datatypes)</message>
                                         <file>src/build/protege-schema/insert-usesProperty-annotations.rq</file>
                                     </sparqlUpdate>
 
-                                    <!-- 8. Write the Protégé schema graph as a single TTL file -->
+                                    <!-- NEW: 5C cleanup -->
+                                    <sparqlUpdate>
+                                        <message>Cleanup RDFS+ graph (datatypes)</message>
+                                        <file>src/build/protege-schema/cleanup-rdfs-plus.rq</file>
+                                    </sparqlUpdate>
+
+                                    <!-- 6C: write datatypes RDFS+ file -->
                                     <write>
-                                        <graph>dist:schema:SCHEMA_QUDT-Protege.ttl</graph>
-                                        <toFile>target/dist/schema/SCHEMA_QUDT-Protege.ttl</toFile>
+                                        <toFile>target/dist/schema/rdfs-plus/SCHEMA_QUDT-DATATYPES_RDFS-PLUS.ttl</toFile>
                                     </write>
 
                                 </steps>
