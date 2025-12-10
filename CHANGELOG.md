@@ -10,6 +10,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - Added unit:MicroMOL-PER-KiloGM-YR
+- Added unit:L-PER-HA
+- Added quantitykind:CATION-EXCHANGE-CAPACITY, unit:EQ, unit:MilliEQ, and unit:MilliEQ-PER-HectoGM
 
 ### Changed
 
