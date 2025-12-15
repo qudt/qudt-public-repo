@@ -22,7 +22,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Found and fixed some erroneous values for rdfs:isDefinedBy
-- Rolled back the FactorUnit changes until the source of the error is found
+- Fixed the FactorUnit type declaration build error that was discovered since 3.1.8
 - Explicitly typed some URI references as xsd:anyURI
 
 ## [3.1.8] - 2025-11-13
