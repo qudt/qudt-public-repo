@@ -47,7 +47,7 @@ QUDT SHACL for contributors (accessed by using the individual graphs rather than
 Protege Users
 -------------
 
-The QUDT ontologies have been tested to load without error in Protege 5.6.4.
+The QUDT ontologies have been tested to load without error in Protege 5.6.4., up to QUDT version 3.1.4.
 
 To load QUDT into Protege, choose "Open from URI" from the file menu, and enter http://qudt.org/qudt-all
 
