@@ -127,69 +127,70 @@
                                 // Ensure target directory exists
                                 targetDir.mkdirs()
 
-                                // Step 1: Collect all aspect directories and their file status
-                                def allAspectDirs = srcgenDir.listFiles().findAll { it.isDirectory() }
-                                def validAspectDirs = []
-                                // Map to store omitted dirs and missing files
-                                def omittedAspectDirsWithReasons = [:]
+// Step 1: Collect all aspect directories and their file status
+def allAspectDirs = srcgenDir.listFiles().findAll { it.isDirectory() }
+def validAspectDirs = []
+def omittedAspectDirsWithReasons = [:]
 
-                                allAspectDirs.each { dir ->
-                                    def aspectName = dir.name
-                                    def queryFile = new File(dir, "query.rq")
-                                    def inferTemplateFile = new File(dir, "infer-template.ttl")
-                                    def validateTemplateFile = new File(dir, "validate-template.ttl")
+allAspectDirs.each { dir ->
+    def aspectName = dir.name
+    def queryFile = new File(dir, "query.rq")
+    def inferTemplateFile = new File(dir, "infer-template.ttl")
+    def validateTemplateFile = new File(dir, "validate-template.ttl")
 
-                                    def requiredFiles = [
-                                        queryFile: queryFile,
-                                        inferTemplateFile: inferTemplateFile,
-                                        validateTemplateFile: validateTemplateFile
-                                    ]
+    def requiredFiles = [
+        queryFile: queryFile,
+        inferTemplateFile: inferTemplateFile,
+        validateTemplateFile: validateTemplateFile
+    ]
 
-                                    // Find missing files for this directory
-                                    def missingFiles = requiredFiles.findAll { !it.value.exists() }.keySet()
+    def missingFiles = requiredFiles.findAll { !it.value.exists() }.keySet()
+    if (missingFiles.isEmpty()) {
+        validAspectDirs << dir
+    } else {
+        omittedAspectDirsWithReasons[dir] = missingFiles
+    }
+}
 
-                                    if (missingFiles.isEmpty()) {
-                                        // All files present, add to valid list
-                                        validAspectDirs << dir } else { omittedAspectDirsWithReasons[dir] = missingFiles } } 
-                                    validAspectDirs.each { aspectDir ->
-                                    def aspectName = aspectDir.name
-                                    println "Processing aspect: ${aspectName}"
+// (Optional) log what we're skipping
+omittedAspectDirsWithReasons.each { d, miss ->
+    println "Skipping aspect '${d.name}': missing ${miss.join(', ')}"
+}
 
-                                    // Load required files
-                                    def queryFile = new File(aspectDir, "query.rq")
-                                    def inferTemplateFile = new File(aspectDir, "infer-template.ttl")
-                                    def validateTemplateFile = new File(aspectDir, "validate-template.ttl")
+// Process only the valid aspect dirs
+validAspectDirs.each { aspectDir ->
+    def aspectName = aspectDir.name
+    println "Processing aspect: ${aspectName}"
 
-                                    // Process query file (e.g., remove prefixes)
-                                    def queryText = queryFile.text
-                                    def queryWithoutPrefixes = queryText.replaceAll('(?is)^\\s*(PREFIX\\s+[^\\n]*\\n)*\\s*', '')
-                                                                .replaceAll('(?is)\\s*$', '')
-                                    if (!queryWithoutPrefixes) {
-                                        throw new Exception("No query body found in ${queryFile}")
-                                    }
-                                    queryWithoutPrefixes = queryWithoutPrefixes.replaceAll("\\\\", "\\\\\\\\")
+    def queryFile = new File(aspectDir, "query.rq")
+    def inferTemplateFile = new File(aspectDir, "infer-template.ttl")
+    def validateTemplateFile = new File(aspectDir, "validate-template.ttl")
 
-                                    // Create output directory for this aspect
-                                    def aspectOutputDir = new File(targetDir, aspectName)
-                                    aspectOutputDir.mkdirs()
+    def queryText = queryFile.text
+    def queryWithoutPrefixes = queryText
+        .replaceAll('(?is)^\\s*(PREFIX\\s+[^\\n]*\\n)*\\s*', '')
+        .replaceAll('(?is)\\s*$', '')
+    if (!queryWithoutPrefixes) {
+        throw new Exception("No query body found in ${queryFile}")
+    }
+    queryWithoutPrefixes = queryWithoutPrefixes.replaceAll("\\\\", "\\\\\\\\")
 
-                                    // Define templates to process
-                                    def templates = [
-                                        [source: inferTemplateFile, target: "infer.ttl"],
-                                        [source: validateTemplateFile, target: "validate.ttl"]
-                                    ]
+    def aspectOutputDir = new File(targetDir, aspectName)
+    aspectOutputDir.mkdirs()
 
-                                    // Generate output files
-                                    templates.each { template ->
-                                        def content = template.source.text
-                                        def outputContent = content.replace('{{QUERY_WITHOUT_PREFIXES}}', queryWithoutPrefixes)
-                                        outputContent = outputContent.replace('{{AUTOGENERATED_WARNING_DO_NOT_EDIT}}',
-                                            " Auto-generated file - ALL EDITS WILL BE LOST! Edit the '-template.ttl' file instead!")
-                                        def outputFile = new File(aspectOutputDir, template.target)
-                                        outputFile.text = outputContent
-                                        println "Generated: ${outputFile}"
-                                    }
-                                }
+    [[source: inferTemplateFile, target: "infer.ttl"],
+     [source: validateTemplateFile, target: "validate.ttl"]]
+    .each { template ->
+        def content = template.source.text
+        def outputContent = content
+            .replace('{{QUERY_WITHOUT_PREFIXES}}', queryWithoutPrefixes)
+            .replace('{{AUTOGENERATED_WARNING_DO_NOT_EDIT}}',
+                     " Auto-generated file - ALL EDITS WILL BE LOST! Edit the '-template.ttl' file instead!")
+        def outputFile = new File(aspectOutputDir, template.target)
+        outputFile.text = outputContent
+        println "Generated: ${outputFile}"
+    }
+}
 
                                 // Step 3: Log omitted directories with missing file details
                                 if (omittedAspectDirsWithReasons) {
