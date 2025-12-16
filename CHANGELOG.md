@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.1.9] - 2025-12-16
+
 ### Added
 
 - Added unit:MicroMOL-PER-KiloGM-YR
@@ -16,8 +18,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Changed
 
 - Increased the precision of conversion multipliers for unit:DEG, unit:REV and related units
-
-### Deprecated
 
 ### Fixed
 
@@ -572,7 +572,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.8...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.9...HEAD
+[3.1.9]: https://github.com/qudt/qudt-public-repo/compare/v3.1.8...v3.1.9
 [3.1.8]: https://github.com/qudt/qudt-public-repo/compare/v3.1.7...v3.1.8
 [3.1.7]: https://github.com/qudt/qudt-public-repo/compare/v3.1.6...v3.1.7
 [3.1.6]: https://github.com/qudt/qudt-public-repo/compare/v3.1.5...v3.1.6
