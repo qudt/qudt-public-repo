@@ -21,19 +21,33 @@ WHERE {
             WHERE {
               $this a qudt:Unit .
               OPTIONAL { $this qudt:conversionMultiplier ?actualMultiplier . }
-              FILTER(!BOUND(?actualMultiplier)                               # no actual multiplier? use calculated!
-                     || (?actualMultiplier != 0.0))                          # actual multiplier is 0? skip!!
+              FILTER(!BOUND(?actualMultiplier)                               # no actual multiplier, or zero? use calculated!
+                     || (?actualMultiplier = 0.0))                         
               $this qudt:hasFactorUnit ?factor .
-              ?factor qudt:hasUnit ?baseUnit ;
-                      qudt:exponent ?exponent .
-              OPTIONAL {
-                ?baseUnit qudt:conversionMultiplier ?baseMultiplier .
-              }
 
+?factor qudt:hasUnit ?unitInFactor ;
+        qudt:exponent ?exponent .
 
-              # did we find the multiplier?
-              BIND(IF(BOUND(?baseMultiplier), "YES", "NO") AS ?multiplierFound)
-              BIND(nf:decimal.pow(?baseMultiplier, ?exponent, 34) AS ?factorContribution)
+# A) direct multiplier on the unit, if present
+OPTIONAL { ?unitInFactor qudt:conversionMultiplier ?cm_direct . }
+
+# B) derive via scalingOf + prefix (common for Milli*, Hecto*, etc.)
+OPTIONAL { ?unitInFactor qudt:scalingOf / qudt:conversionMultiplier ?cm_base . }
+OPTIONAL { ?unitInFactor qudt:prefix / qudt:prefixMultiplier ?cm_prefix . }
+
+# C) (optional) prefix directly on the FactorUnit node (seen in some data)
+OPTIONAL { ?factor qudt:prefix / qudt:prefixMultiplier ?cm_factorPrefix . }
+
+# Choose the unit CM: first direct, else base*prefix
+BIND( COALESCE(?cm_direct, (?cm_base * COALESCE(?cm_prefix, 1.0))) AS ?unitCM )
+
+# Mark whether we have a usable multiplier for this factor
+BIND( IF(BOUND(?unitCM), "YES", "NO") AS ?multiplierFound )
+
+# Per-factor contribution (unitCM^exponent) * (factorPrefix^exponent)
+BIND( nf:decimal.pow(?unitCM,  ?exponent, 34) AS ?_unitPow )
+BIND( nf:decimal.pow(COALESCE(?cm_factorPrefix,1.0), ?exponent, 34) AS ?_prefPow )
+BIND( ?_unitPow * ?_prefPow AS ?factorContribution )
 
             }
             GROUP BY $this ?actualMultiplier
