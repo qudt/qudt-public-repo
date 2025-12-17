@@ -13,7 +13,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
- - Fixed the conversion multiplier inference to fix values in src that incorrectly assert 0.0. As a result, corrected the conversion multiplier for unit:MilliEQ-PER-HectoGM
+- Fixed the conversion multiplier inference to fix values in src that incorrectly assert 0.0. As a result, corrected the conversion multiplier for unit:MilliEQ-PER-HectoGM
 
 ## [3.1.9] - 2025-12-16
 
