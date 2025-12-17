@@ -9,11 +9,14 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added a validation constraint to ensure consistent dimension vectors between a deprecated entity and its replacement
+
 ### Changed
 
 ### Fixed
 
 - Fixed the conversion multiplier inference to fix values in src that incorrectly assert 0.0. As a result, corrected the conversion multiplier for unit:MilliEQ-PER-HectoGM
+- Fixed erroneous dimension vectors found with the validation constraint described above
 
 ## [3.1.9] - 2025-12-16
 
