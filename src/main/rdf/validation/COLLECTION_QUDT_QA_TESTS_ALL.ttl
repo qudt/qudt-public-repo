@@ -409,6 +409,27 @@ FILTER (?udv != ?qdv) .
   ] ;
   sh:targetClass qudt:QuantityKind .
 
+qudt:InconsistentDimensionVectorOfDeprecationConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Checks that a deprecated entity has the same dimension vector as its replacement" ;
+    sh:message "Entity {$this} has dimension vector {$udv} which is not the same as the dimension vector of its replacement, {$qk} with dimension vector {$qdv}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+SELECT $this ?udv ?qk ?qdv
+WHERE {
+$this dcterms:isReplacedBy ?qk .
+$this qudt:hasDimensionVector  ?udv .
+?qk qudt:hasDimensionVector ?qdv .
+FILTER (?udv != ?qdv) .
+}
+""" ;
+  ] ;
+  sh:targetClass qudt:QuantityKind ;
+  sh:targetClass qudt:Unit .
+
 qudt:InconsistentUnitAndDimensionVectorConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
@@ -526,25 +547,6 @@ qudt:QuantityKindShape
                     qudt:exactMatch ?qk .
                 }
               """ ;
-    ] ;
-  ] ;
-  sh:property [
-    rdfs:comment "Check for inconsistent dimensionvectors in the skos:broader hierarchy" ;
-    sh:path qudt:hasDimensionVector ;
-    sh:sparql [
-      a sh:SPARQLConstraint ;
-      sh:message "{$this} has a dimension vector that is inconsistent with {?qk} in its skos:broader hierarchy." ;
-      sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
-      sh:select """
-                SELECT $this ?qk
-                WHERE {
-                FILTER NOT EXISTS {$this qudt:deprecated true} .
-                $this qudt:hasDimensionVector  ?udv .
-                $this skos:broader* ?qk .
-                ?qk qudt:hasDimensionVector ?qdv .
-                FILTER (?udv != ?qdv) .
-                }
-          """ ;
     ] ;
   ] ;
   sh:targetClass qudt:QuantityKind .
