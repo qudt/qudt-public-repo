@@ -10,6 +10,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - Added a validation constraint to ensure consistent dimension vectors between a deprecated entity and its replacement
+- Added unit symbols for `unit:CYC`, `unit:FRAME`, `unit:MIL_Angle`, and `unit:MIL_Length`.
+- Added the following quantity kinds for unit:UNITLESS: `quantitykind:LengthRatio`, `quantitykind:LuminousFluxRatio`, `quantitykind:ResistanceRatio`, `quantitykind:VoltageRatio`, and `quantitykind:TimeRatio`.
 
 ### Changed
 
