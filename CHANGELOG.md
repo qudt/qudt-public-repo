@@ -20,6 +20,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed the conversion multiplier inference to fix values in src that incorrectly assert 0.0. As a result, corrected the conversion multiplier for unit:MilliEQ-PER-HectoGM
 - Fixed erroneous dimension vectors found with the validation constraint described above
 - Augmented the type declaration for 5 dimension vectors
+- Not a true fix, but a workaround to leave untouched any units that contain non-integer exponents (e.g. unit:PA-M0dot5). Currently we cannot compute the conversion multipliers and factor declarations for such (rare) occurrences.
 
 ## [3.1.9] - 2025-12-16
 
