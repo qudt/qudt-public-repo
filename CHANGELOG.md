@@ -17,7 +17,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Deprecated
 
-
 ## [3.1.10] - 2026-01-15
 
 ### Added
