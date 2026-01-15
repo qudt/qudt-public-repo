@@ -20,6 +20,8 @@ WHERE {
                 (GROUP_CONCAT(?multiplierFound;SEPARATOR="|") AS ?allMultipliersFound)
             WHERE {
               $this a qudt:Unit .
+# Don't process units that contain "dot" in their IRI
+              FILTER( !CONTAINS(STR($this), "dot") )
               OPTIONAL { $this qudt:conversionMultiplier ?actualMultiplier . }
               FILTER(!BOUND(?actualMultiplier)                               # no actual multiplier, or zero? use calculated!
                      || (?actualMultiplier = 0.0))                         

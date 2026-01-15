@@ -376,6 +376,8 @@ qudt:InconsistentDimensionVector
     sh:select """
     SELECT $this ?calculatedDimVec ?actualDimVec
     WHERE {
+# Don't process units that contain "dot" in their IRI
+        FILTER( !CONTAINS(STR($this), "dot") )
         $this qudt:hasDimensionVector ?actualDimVec
         BIND(qfn:unit.dimVec.calculate($this) AS ?calculatedDimVec)
         FILTER(qfn:bound(?calculatedDimVec))
