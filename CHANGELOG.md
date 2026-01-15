@@ -7,13 +7,13 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.1.10] - 2026-01-15
+
 ### Added
 
 - Added a validation constraint to ensure consistent dimension vectors between a deprecated entity and its replacement
 - Added unit symbols for `unit:CYC`, `unit:FRAME`, `unit:MIL_Angle`, and `unit:MIL_Length`.
 - Added the following quantity kinds for unit:UNITLESS: `quantitykind:LengthRatio`, `quantitykind:LuminousFluxRatio`, `quantitykind:ResistanceRatio`, `quantitykind:VoltageRatio`, and `quantitykind:TimeRatio`.
-
-### Changed
 
 ### Fixed
 
@@ -587,7 +587,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.9...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.10...HEAD
+[3.1.10]: https://github.com/qudt/qudt-public-repo/compare/v3.1.9...v3.1.10
 [3.1.9]: https://github.com/qudt/qudt-public-repo/compare/v3.1.8...v3.1.9
 [3.1.8]: https://github.com/qudt/qudt-public-repo/compare/v3.1.7...v3.1.8
 [3.1.7]: https://github.com/qudt/qudt-public-repo/compare/v3.1.6...v3.1.7
