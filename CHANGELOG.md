@@ -7,6 +7,17 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Fixed
+
+- Corrected the conversion multiplier for unit:MegaPA-M-dot5
+
+### Deprecated
+
+
 ## [3.1.10] - 2026-01-15
 
 ### Added
