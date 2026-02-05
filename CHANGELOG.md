@@ -19,6 +19,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Corrected the conversion multiplier for unit:MegaPA-M-dot5
 
+- Fixed some corrupted Powerpoint and pdf slide decks in src/main/docs
+
 ### Deprecated
 
 ## [3.1.10] - 2026-01-15
