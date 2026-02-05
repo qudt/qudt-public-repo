@@ -11,6 +11,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
+- Cleaned up skos:broader relationships between the variants of quantitykind:Strain, including LinearStrain, ShearStrain, VolumeStrain.
+
+- Redefined quantitykind:IonConcentration to the commonly used meaning of moles per volume, not number per volume. quantitykind:IonDensity remains number per volume but is no longer qudt:exactMatch with quantitykind:IonConcentration.
+
 ### Fixed
 
 - Corrected the conversion multiplier for unit:MegaPA-M-dot5
