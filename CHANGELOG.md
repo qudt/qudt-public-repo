@@ -19,6 +19,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Corrected the conversion multiplier for unit:MegaPA-M-dot5
 
+- Fixed incorrect metadata in the SHACL datatypes schema
+
 - Fixed some corrupted Powerpoint and pdf slide decks in src/main/docs
 
 ### Deprecated
