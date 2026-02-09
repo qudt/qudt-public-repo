@@ -9,11 +9,15 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added LatexSymbol:gamma to quantityKind:ElectricConductivity 
+
 ### Changed
 
 - Cleaned up skos:broader relationships between the variants of quantitykind:Strain, including LinearStrain, ShearStrain, VolumeStrain.
 
 - Redefined quantitykind:IonConcentration to the commonly used meaning of moles per volume, not number per volume. quantitykind:IonDensity remains number per volume but is no longer qudt:exactMatch with quantitykind:IonConcentration.
+
+- Moved applicableUnits from quantityKind: Conductivity to quantityKind: ElectricConductivity
 
 ### Fixed
 
@@ -24,6 +28,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed some corrupted Powerpoint and pdf slide decks in src/main/docs
 
 ### Deprecated
+
+- Removed quantityKind:Conductivity in favour of explicit quantitykind: ElectricConductivity
 
 ## [3.1.10] - 2026-01-15
 
