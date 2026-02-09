@@ -9,7 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
-- Added LatexSymbol:gamma to quantityKind:ElectricConductivity 
+- Added LatexSymbol:gamma to quantityKind:ElectricConductivity
 
 ### Changed
 
