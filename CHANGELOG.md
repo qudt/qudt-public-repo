@@ -27,8 +27,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Fixed some corrupted Powerpoint and pdf slide decks in src/main/docs
 
-- Changed units derived from `unit:INDIV`, such as `unit:KiloIndiv` to have the correct `qudt:conversionMultiplier`, 
-  not `0.0` (which incorrectly indicates that no conversion is possible).
+- Changed units derived from `unit:INDIV`, such as `unit:KiloIndiv` to have the correct `qudt:conversionMultiplier`, not `0.0` (which incorrectly indicates that no conversion is possible).
 
 ### Deprecated
 
