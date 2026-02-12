@@ -7,6 +7,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Fixed
+
+- Change units derived from `unit:INDIV`, such as `unit:KiloIndiv` to have a correct conversion multiplier instead
+  of 0.0
+
 ### Added
 
 - Added LatexSymbol:gamma to quantityKind:ElectricConductivity
