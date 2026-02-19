@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.1.11] - 2026-02-19
+
 ### Added
 
 - Added LatexSymbol:gamma to quantityKind:ElectricConductivity
@@ -14,24 +16,19 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Changed
 
 - Cleaned up skos:broader relationships between the variants of quantitykind:Strain, including LinearStrain, ShearStrain, VolumeStrain.
-
 - Redefined quantitykind:IonConcentration to the commonly used meaning of moles per volume, not number per volume. quantitykind:IonDensity remains number per volume but is no longer qudt:exactMatch with quantitykind:IonConcentration.
-
 - Moved applicableUnits from quantityKind: Conductivity to quantityKind: ElectricConductivity
-
-### Fixed
-
-- Corrected the conversion multiplier for unit:MegaPA-M-dot5
-
-- Fixed incorrect metadata in the SHACL datatypes schema
-
-- Fixed some corrupted Powerpoint and pdf slide decks in src/main/docs
-
-- Changed units derived from `unit:INDIV`, such as `unit:KiloIndiv` to have the correct `qudt:conversionMultiplier`, not `0.0` (which incorrectly indicates that no conversion is possible).
 
 ### Deprecated
 
 - Removed quantityKind:Conductivity in favour of explicit quantitykind: ElectricConductivity
+
+### Fixed
+
+- Corrected the conversion multiplier for unit:MegaPA-M-dot5
+- Fixed incorrect metadata in the SHACL datatypes schema
+- Fixed some corrupted Powerpoint and pdf slide decks in src/main/docs
+- Changed units derived from `unit:INDIV`, such as `unit:KiloIndiv` to have the correct `qudt:conversionMultiplier`, not `0.0` (which incorrectly indicates that no conversion is possible).
 
 ## [3.1.10] - 2026-01-15
 
@@ -613,7 +610,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.10...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.1.11...HEAD
+[3.1.11]: https://github.com/qudt/qudt-public-repo/compare/v3.1.10...v3.1.11
 [3.1.10]: https://github.com/qudt/qudt-public-repo/compare/v3.1.9...v3.1.10
 [3.1.9]: https://github.com/qudt/qudt-public-repo/compare/v3.1.8...v3.1.9
 [3.1.8]: https://github.com/qudt/qudt-public-repo/compare/v3.1.7...v3.1.8
