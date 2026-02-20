@@ -7,6 +7,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Deprecated
+
+### Fixed
+
+- Tracked down and fixed errors in the OWL schema that was causing problems in Protege
+
 ## [3.1.11] - 2026-02-19
 
 ### Added
