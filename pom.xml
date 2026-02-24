@@ -22,13 +22,27 @@
   </scm>
     <build>
         <!--
-            project is built using
+            Maven usage quick reference:
 
-            mvn install
+            Normal build (validation + inference + packaging checks):
+              mvn install
 
-            the release zip is built using
+            Release zip build:
+              mvn -Pzip install
 
-            mvn -Pzip install
+            Fast build without test-phase validation:
+              mvn -DskipTests install
+
+            OWL schema derivation from SHACL (explicit, not lifecycle-bound):
+              mvn rdfio:pipeline@derive-owl-schema
+
+            OWL derivation inspection against backup baseline (explicit, gated):
+              mvn rdfio:pipeline@inspect-owl-schema-diff
+
+            Typical schema-derivation workflow:
+              1) mvn rdfio:pipeline@derive-owl-schema
+              2) mvn rdfio:pipeline@inspect-owl-schema-diff
+              3) mvn install
         -->
         <pluginManagement>
             <plugins>
@@ -40,38 +54,27 @@
         </pluginManagement>
         <plugins>
             <!--
-                this section defines the actions taken during the build.
-                The build is executed as a series of 'lifecycle phases': https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html)
-                Each plugin has an <execution> section that binds its execution to a lifecycle phase (or it has a default lifecycle phase in which it runs, or 'none' for direct invocation).
-                Here are the phases and the execution ids that are linked to them (executed in the order they appear in this file):
-                      validate                 defineAdditionalProperties, preprocess-shacl-files
-                      initialize               check-src-format
-                      generate-sources         unit-test
-                      process-sources          shacl-validate-src
-                      generate-resources       copy-rdf-to-dist, copy-rdf-to-work, copy-docs, copy-root-files, validate-shacl-files
-                      process-resources
-                      process-classes          main
-                      generate-test-sources
-                      process-test-sources     all-in-one
-                      generate-test-resources
-                      process-test-resources
-                      test-compile
-                      process-test-classes     format-dist
-                      test                     validate-dist
-                      prepare-package
-                      package
-                      pre-integration-test
-                      integration-test
-                      post-integration-test
-                      verify
-                      install                  [Profile -Pzip: release-zip]
-                      deploy
+                Build orchestration notes:
+                - Executions bound to lifecycle phases run during normal Maven commands (validate/install/etc.).
+                - Executions with phase 'none' run only when explicitly invoked as plugin goals.
 
-                Executions with phase 'none' (invocable directly via command line, not bound to lifecycle):
-                      none                     rdfio:pipeline@fix-src       replaces certain triples in src if they are dfferent in target
-                                               rdfio:pipeline@inspect       runs a number of interesting queries, mostly on target
-                                               spotless:apply@reformat-src  reformats the sources (not target)
+                Lifecycle highlights (most relevant):
+                  validate                 defineAdditionalProperties, preprocess-shacl-files
+                  initialize               check-src-format
+                  generate-sources         unit-test
+                  process-sources          shacl-validate-src
+                  generate-resources       copy-rdf-to-dist, copy-rdf-to-work, copy-docs, copy-root-files, validate-shacl-files
+                  process-classes          main
+                  process-test-classes     format-dist
+                  test                     validate-dist
+                  install                  [Profile -Pzip: release-zip]
 
+                Explicit (phase 'none') workflows:
+                  rdfio:pipeline@derive-owl-schema        derive OWL schema from SHACL into src/main/rdf/schema/SCHEMA_QUDT.ttl
+                  rdfio:pipeline@inspect-owl-schema-diff  compare derived OWL schema to backup and fail on unexpected diffs
+                  rdfio:pipeline@fix-src                  apply selected source repairs from generated data
+                  rdfio:pipeline@inspect                  generate inspection reports (mainly target/dist)
+                  spotless:apply@reformat-src             reformat source RDF files
             -->
 
             <plugin>
@@ -360,7 +363,7 @@ validAspectDirs.each { aspectDir ->
                 <executions>
                     <execution>
                         <id>derive-owl-schema</id>
-                        <phase>validate</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>pipeline</goal>
                         </goals>
@@ -376,6 +379,7 @@ validAspectDirs.each { aspectDir ->
                                         <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl</file>
                                         <toGraph>work:schema:datatypes-shacl</toGraph>
                                     </add>
+                                    <savepoint><id>01-inputs-loaded</id></savepoint>
                                     <sparqlUpdate>
                                         <message>Set ontology IRI, labels and definedBy for OWL schema</message>
                                         <sparql><![CDATA[
@@ -1300,10 +1304,108 @@ validAspectDirs.each { aspectDir ->
                                             }
                                         ]]></sparql>
                                     </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove orphaned restriction blank nodes left after subject pruning</message>
+                                        <sparql><![CDATA[
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?bn ?p ?o .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?bn a owl:Restriction ;
+                                                        ?p ?o .
+                                                    FILTER(isBlank(?bn))
+                                                }
+                                                FILTER NOT EXISTS {
+                                                    GRAPH <work:schema:derived> {
+                                                        ?refS ?refP ?bn .
+                                                    }
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove orphaned RDF list blank-node chains left after SHACL stripping</message>
+                                        <sparql><![CDATA[
+                                            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?n ?np ?no .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?head rdf:first ?headFirst .
+                                                    FILTER(isBlank(?head))
+                                                    FILTER NOT EXISTS {
+                                                        ?ref ?refP ?head .
+                                                        FILTER(?ref != ?head)
+                                                    }
+
+                                                    ?head rdf:rest* ?n .
+                                                    FILTER(isBlank(?n))
+                                                    ?n ?np ?no .
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove SHACL helper list resources from derived OWL schema</message>
+                                        <sparql><![CDATA[
+                                            PREFIX qudt: <http://qudt.org/schema/qudt/>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?helper ?p ?o .
+                                                }
+                                            }
+                                            WHERE {
+                                                VALUES ?helper {
+                                                    qudt:NumericTypeUnion
+                                                    qudt:NumericListShape
+                                                }
+                                                GRAPH <work:schema:derived> {
+                                                    ?helper ?p ?o .
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Final cleanup of orphaned RDF list blank-node chains</message>
+                                        <sparql><![CDATA[
+                                            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?n ?np ?no .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?head rdf:first ?headFirst .
+                                                    FILTER(isBlank(?head))
+                                                    FILTER NOT EXISTS {
+                                                        ?ref ?refP ?head .
+                                                        FILTER(?ref != ?head)
+                                                    }
+
+                                                    ?head rdf:rest* ?n .
+                                                    FILTER(isBlank(?n))
+                                                    ?n ?np ?no .
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
                                     <write>
                                         <graph>work:schema:derived</graph>
                                         <toFile>src/main/rdf/schema/SCHEMA_QUDT.ttl</toFile>
                                     </write>
+                                    <savepoint><id>99-derived-schema-written</id></savepoint>
                                 </steps>
                             </pipeline>
                         </configuration>
@@ -1696,6 +1798,32 @@ validAspectDirs.each { aspectDir ->
                                                                 }
                                                             )
                                                         }
+                                                        FILTER NOT EXISTS {
+                                                            GRAPH <schema:shacl> {
+                                                                ?s ?p ?o .
+                                                            }
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                ?p = <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+                                                                && ?o IN (
+                                                                    <http://www.w3.org/2002/07/owl#ObjectProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#AnnotationProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#InverseFunctionalProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#SymmetricProperty>,
+                                                                    <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property>
+                                                                )
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?ps a <http://www.w3.org/ns/shacl#PropertyShape> ;
+                                                                            <http://www.w3.org/ns/shacl#path> ?s .
+                                                                        FILTER(isIRI(?s))
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             }
@@ -1976,6 +2104,20 @@ validAspectDirs.each { aspectDir ->
                                             ORDER BY ?s ?p ?o
                                         ]]></sparql>
                                     </sparqlQuery>
+                                    <!--
+                                      Schema-diff normalization rules (SHACL-authoritative):
+                                      1) Ignore SHACL-native structural triples (sh:* terms, shape typing, SHACL ontology node).
+                                      2) Treat SHACL-constrained predicates as expected drift for label/comment/type/range/domain.
+                                      3) Treat selected metadata predicates as expected when present in SHACL.
+                                      4) Exclude datatype-managed subjects and backup-only legacy range removals.
+                                      5) Exclude explicit legacy removal triples (exact s/p/o allowlist).
+                                      6) Exclude SHACL-present additions and SHACL-path-derived OWL property typing additions.
+
+                                      Keep these filters aligned across:
+                                      - summary unexpected_* metrics
+                                      - unexpected-added/removed detailed reports
+                                      - unexpected-by-predicate reports
+                                    -->
                                     <sparqlQuery>
                                         <message>Potentially unexpected removals: backup named triples missing in derived</message>
                                         <toFile>target/inspection/schema-diff/unexpected-removed.txt</toFile>
@@ -2277,10 +2419,381 @@ validAspectDirs.each { aspectDir ->
                                                         }
                                                     )
                                                 }
+                                                FILTER NOT EXISTS {
+                                                    GRAPH <schema:shacl> {
+                                                        ?s ?p ?o .
+                                                    }
+                                                }
+                                                FILTER NOT EXISTS {
+                                                    FILTER(
+                                                        ?p = <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+                                                        && ?o IN (
+                                                            <http://www.w3.org/2002/07/owl#ObjectProperty>,
+                                                            <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+                                                            <http://www.w3.org/2002/07/owl#AnnotationProperty>,
+                                                            <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+                                                            <http://www.w3.org/2002/07/owl#InverseFunctionalProperty>,
+                                                            <http://www.w3.org/2002/07/owl#SymmetricProperty>,
+                                                            <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property>
+                                                        )
+                                                        && EXISTS {
+                                                            GRAPH <schema:shacl> {
+                                                                ?ps a <http://www.w3.org/ns/shacl#PropertyShape> ;
+                                                                    <http://www.w3.org/ns/shacl#path> ?s .
+                                                                FILTER(isIRI(?s))
+                                                            }
+                                                        }
+                                                    )
+                                                }
                                             }
                                             ORDER BY ?s ?p ?o
                                         ]]></sparql>
                                     </sparqlQuery>
+                                    <assert>
+                                        <message>Gate: fail if unexpected removals remain after normalization</message>
+                                        <failureMessage>
+                                            Unexpected schema removals detected. See target/inspection/schema-diff/unexpected-removed.txt and summary.txt.
+                                        </failureMessage>
+                                        <sparqlSelect><![CDATA[
+                                            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                                            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                                            PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+                                            SELECT ?count
+                                            WHERE {
+                                                {
+                                                    SELECT (COUNT(*) AS ?count)
+                                                    WHERE {
+                                                        GRAPH <schema:backup> {
+                                                            ?s ?p ?o .
+                                                            FILTER(!isBlank(?s) && !isBlank(?o))
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            GRAPH <schema:derived> {
+                                                                ?s ?p ?o .
+                                                            }
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                STRSTARTS(STR(?p), STR(sh:))
+                                                                || (?p = rdf:type && ?o IN (sh:NodeShape, sh:PropertyShape, sh:PrefixDeclaration))
+                                                                || (?s = <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt>)
+                                                                || (?o = <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt>)
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                ?p = rdfs:label
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?s rdfs:label ?anyShaclLabel .
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                ?p = <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?s a ?anyShaclType .
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                ?p = rdfs:comment
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        {
+                                                                            ?s rdfs:comment ?anyShaclComment .
+                                                                        } UNION {
+                                                                            ?s <http://purl.org/dc/terms/description> ?anyShaclDescription .
+                                                                        }
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                ?p = rdfs:range
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?ps a <http://www.w3.org/ns/shacl#PropertyShape> ;
+                                                                            <http://www.w3.org/ns/shacl#path> ?s .
+                                                                        FILTER(isIRI(?s))
+                                                                        {
+                                                                            ?ps <http://www.w3.org/ns/shacl#class> ?anyShaclRange .
+                                                                        } UNION {
+                                                                            ?ps <http://www.w3.org/ns/shacl#datatype> ?anyShaclRange .
+                                                                        } UNION {
+                                                                            ?ps <http://www.w3.org/ns/shacl#or> ?anyShaclRangeList .
+                                                                            ?anyShaclRangeList <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>*/<http://www.w3.org/1999/02/22-rdf-syntax-ns#first> ?anyShaclRangeChoice .
+                                                                            {
+                                                                                ?anyShaclRangeChoice <http://www.w3.org/ns/shacl#class> ?anyShaclRange .
+                                                                            } UNION {
+                                                                                ?anyShaclRangeChoice <http://www.w3.org/ns/shacl#datatype> ?anyShaclRange .
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                ?p = rdfs:domain
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?shaclDomain a <http://www.w3.org/ns/shacl#NodeShape> ;
+                                                                             a rdfs:Class ;
+                                                                             <http://www.w3.org/ns/shacl#property> ?domainPs .
+                                                                        ?domainPs a <http://www.w3.org/ns/shacl#PropertyShape> ;
+                                                                                  <http://www.w3.org/ns/shacl#path> ?s .
+                                                                        FILTER(isIRI(?s))
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            VALUES ?metadataPredicate {
+                                                                <http://purl.org/dc/terms/description>
+                                                                <http://qudt.org/schema/qudt/informativeReference>
+                                                                <http://qudt.org/schema/qudt/plainTextDescription>
+                                                                <http://qudt.org/schema/qudt/dbpediaMatch>
+                                                            }
+                                                            FILTER(
+                                                                ?p = ?metadataPredicate
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?s ?metadataPredicate ?anyShaclMetadataValue .
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                !EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?s ?spAny ?soAny .
+                                                                        FILTER(!isBlank(?s))
+                                                                    }
+                                                                }
+                                                                && !EXISTS {
+                                                                    GRAPH <schema:overlay> {
+                                                                        ?s ?overlayPAny ?overlayOAny .
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            VALUES ?legacyRangeProperty {
+                                                                <http://purl.org/dc/terms/abstract>
+                                                                <http://purl.org/dc/terms/created>
+                                                                <http://purl.org/dc/terms/modified>
+                                                                <http://purl.org/dc/terms/source>
+                                                                <http://www.w3.org/ns/prov#wasDerivedFrom>
+                                                                <http://qudt.org/schema/qudt/acronym>
+                                                                <http://qudt.org/schema/qudt/applicablePlanckUnit>
+                                                                <http://qudt.org/schema/qudt/denominatorDimensionVector>
+                                                                <http://qudt.org/schema/qudt/derivedNonCoherentUnitOfSystem>
+                                                                <http://qudt.org/schema/qudt/fieldCode>
+                                                                <http://qudt.org/schema/qudt/hasVocabulary>
+                                                                <http://qudt.org/schema/qudt/isMetricUnit>
+                                                                <http://qudt.org/schema/qudt/mathDefinition>
+                                                                <http://qudt.org/schema/qudt/numeratorDimensionVector>
+                                                                <http://qudt.org/schema/qudt/numericValue>
+                                                                <http://qudt.org/schema/qudt/onlineReference>
+                                                                <http://qudt.org/schema/qudt/outOfScope>
+                                                                <http://qudt.org/schema/qudt/relevantQuantityKind>
+                                                                <http://qudt.org/schema/qudt/relevantUnit>
+                                                            }
+                                                            FILTER(?p = rdfs:range && ?s = ?legacyRangeProperty)
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            VALUES (?legacyRemovalS ?legacyRemovalP ?legacyRemovalO) {
+                                                                (<http://purl.org/dc/terms/abstract> <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> <http://purl.org/dc/terms/>)
+                                                                (<http://purl.org/dc/terms/source> <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> <http://purl.org/dc/terms/>)
+                                                                (<http://qudt.org/schema/qudt/Aspect> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing>)
+                                                                (<http://qudt.org/schema/qudt/Comment> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing>)
+                                                                (<http://qudt.org/schema/qudt/Concept> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing>)
+                                                                (<http://qudt.org/schema/qudt/EnumeratedValue> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://qudt.org/schema/qudt/Concept>)
+                                                                (<http://qudt.org/schema/qudt/NIST_SP811_Comment> <http://purl.org/dc/elements/1.1/description> "National Institute of Standards and Technology (NIST) Special Publication 811 Comments on some quantities and their units")
+                                                                (<http://qudt.org/schema/qudt/UCUMcs> <http://purl.org/dc/terms/source> "https://ucum.org/ucum.html"^^<http://www.w3.org/2001/XMLSchema#anyURI>)
+                                                                (<http://qudt.org/schema/qudt/UCUMcs> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2000/01/rdf-schema#Resource>)
+                                                                (<http://qudt.org/schema/qudt/UCUMcs> <http://www.w3.org/2002/07/owl#onDatatype> <http://www.w3.org/2001/XMLSchema#string>)
+                                                                (<http://qudt.org/schema/qudt/currencyCode> <http://www.w3.org/2000/01/rdf-schema#seeAlso> "https://en.wikipedia.org/wiki/ISO_4217"^^<http://www.w3.org/2001/XMLSchema#anyURI>)
+                                                                (<http://qudt.org/schema/qudt/currencyNumber> <http://www.w3.org/2000/01/rdf-schema#seeAlso> "https://en.wikipedia.org/wiki/ISO_4217"^^<http://www.w3.org/2001/XMLSchema#anyURI>)
+                                                                (<http://qudt.org/schema/qudt/hasReciprocalUnit> <http://qudt.org/schema/qudt/plainTextDescription> "Used to relate a unit to its reciprocal unit.")
+                                                                (<http://voag.linkedmodel.org/schema/voag#supersededBy> <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> <http://voag.linkedmodel.org/schema/voag>)
+                                                                (<http://www.w3.org/ns/prov#wasDerivedFrom> <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> <http://www.w3.org/ns/prov>)
+                                                            }
+                                                            FILTER(?s = ?legacyRemovalS && ?p = ?legacyRemovalP && ?o = ?legacyRemovalO)
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                EXISTS {
+                                                                    GRAPH <schema:datatypes-shacl> {
+                                                                        ?s ?dtAnyP ?dtAnyO .
+                                                                        FILTER(!isBlank(?s))
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                                FILTER(?count > 0)
+                                            }
+                                        ]]></sparqlSelect>
+                                    </assert>
+                                    <assert>
+                                        <message>Gate: fail if unexpected additions remain after normalization</message>
+                                        <failureMessage>
+                                            Unexpected schema additions detected. See target/inspection/schema-diff/unexpected-added.txt and summary.txt.
+                                        </failureMessage>
+                                        <sparqlSelect><![CDATA[
+                                            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+                                            SELECT ?count
+                                            WHERE {
+                                                {
+                                                    SELECT (COUNT(*) AS ?count)
+                                                    WHERE {
+                                                        GRAPH <schema:derived> {
+                                                            ?s ?p ?o .
+                                                            FILTER(!isBlank(?s) && !isBlank(?o))
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            GRAPH <schema:backup> {
+                                                                ?s ?p ?o .
+                                                            }
+                                                        }
+                                                        FILTER(
+                                                            ?s != <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>
+                                                            && ?o != <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>
+                                                        )
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                ?p = rdfs:label
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?s rdfs:label ?o .
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                ?p = <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?s a ?anyShaclType .
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                ?p = rdfs:comment
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        {
+                                                                            ?s rdfs:comment ?anyShaclComment .
+                                                                        } UNION {
+                                                                            ?s <http://purl.org/dc/terms/description> ?anyShaclDescription .
+                                                                        }
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                ?p = rdfs:range
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?ps a <http://www.w3.org/ns/shacl#PropertyShape> ;
+                                                                            <http://www.w3.org/ns/shacl#path> ?s .
+                                                                        FILTER(isIRI(?s))
+                                                                        {
+                                                                            ?ps <http://www.w3.org/ns/shacl#class> ?anyShaclRange .
+                                                                        } UNION {
+                                                                            ?ps <http://www.w3.org/ns/shacl#datatype> ?anyShaclRange .
+                                                                        } UNION {
+                                                                            ?ps <http://www.w3.org/ns/shacl#or> ?anyShaclRangeList .
+                                                                            ?anyShaclRangeList <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>*/<http://www.w3.org/1999/02/22-rdf-syntax-ns#first> ?anyShaclRangeChoice .
+                                                                            {
+                                                                                ?anyShaclRangeChoice <http://www.w3.org/ns/shacl#class> ?anyShaclRange .
+                                                                            } UNION {
+                                                                                ?anyShaclRangeChoice <http://www.w3.org/ns/shacl#datatype> ?anyShaclRange .
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                ?p = rdfs:domain
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?shaclDomain a <http://www.w3.org/ns/shacl#NodeShape> ;
+                                                                             a rdfs:Class ;
+                                                                             <http://www.w3.org/ns/shacl#property> ?domainPs .
+                                                                        ?domainPs a <http://www.w3.org/ns/shacl#PropertyShape> ;
+                                                                                  <http://www.w3.org/ns/shacl#path> ?s .
+                                                                        FILTER(isIRI(?s))
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            VALUES ?metadataPredicate {
+                                                                <http://purl.org/dc/terms/description>
+                                                                <http://qudt.org/schema/qudt/informativeReference>
+                                                                <http://qudt.org/schema/qudt/plainTextDescription>
+                                                                <http://qudt.org/schema/qudt/dbpediaMatch>
+                                                            }
+                                                            FILTER(
+                                                                ?p = ?metadataPredicate
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?s ?metadataPredicate ?anyShaclMetadataValue .
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            GRAPH <schema:shacl> {
+                                                                ?s ?p ?o .
+                                                            }
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                ?p = <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+                                                                && ?o IN (
+                                                                    <http://www.w3.org/2002/07/owl#ObjectProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#AnnotationProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#InverseFunctionalProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#SymmetricProperty>,
+                                                                    <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property>
+                                                                )
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?ps a <http://www.w3.org/ns/shacl#PropertyShape> ;
+                                                                            <http://www.w3.org/ns/shacl#path> ?s .
+                                                                        FILTER(isIRI(?s))
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                                FILTER(?count > 0)
+                                            }
+                                        ]]></sparqlSelect>
+                                    </assert>
                                     <sparqlQuery>
                                         <message>Triage unexpected schema diffs by predicate (with SHACL and overlay flags)</message>
                                         <toFile>target/inspection/schema-diff/unexpected-by-predicate.txt</toFile>
@@ -2576,6 +3089,32 @@ validAspectDirs.each { aspectDir ->
                                                                 && EXISTS {
                                                                     GRAPH <schema:shacl> {
                                                                         ?s ?metadataPredicate ?anyShaclMetadataValue .
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            GRAPH <schema:shacl> {
+                                                                ?s ?predicate ?o .
+                                                            }
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                ?predicate = <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+                                                                && ?o IN (
+                                                                    <http://www.w3.org/2002/07/owl#ObjectProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#AnnotationProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#InverseFunctionalProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#SymmetricProperty>,
+                                                                    <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property>
+                                                                )
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?ps a <http://www.w3.org/ns/shacl#PropertyShape> ;
+                                                                            <http://www.w3.org/ns/shacl#path> ?s .
+                                                                        FILTER(isIRI(?s))
                                                                     }
                                                                 }
                                                             )
@@ -2898,6 +3437,32 @@ validAspectDirs.each { aspectDir ->
                                                                 && EXISTS {
                                                                     GRAPH <schema:shacl> {
                                                                         ?s ?metadataPredicate ?anyShaclMetadataValue .
+                                                                    }
+                                                                }
+                                                            )
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            GRAPH <schema:shacl> {
+                                                                ?s ?predicate ?o .
+                                                            }
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            FILTER(
+                                                                ?predicate = <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+                                                                && ?o IN (
+                                                                    <http://www.w3.org/2002/07/owl#ObjectProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#DatatypeProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#AnnotationProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#FunctionalProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#InverseFunctionalProperty>,
+                                                                    <http://www.w3.org/2002/07/owl#SymmetricProperty>,
+                                                                    <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property>
+                                                                )
+                                                                && EXISTS {
+                                                                    GRAPH <schema:shacl> {
+                                                                        ?ps a <http://www.w3.org/ns/shacl#PropertyShape> ;
+                                                                            <http://www.w3.org/ns/shacl#path> ?s .
+                                                                        FILTER(isIRI(?s))
                                                                     }
                                                                 }
                                                             )

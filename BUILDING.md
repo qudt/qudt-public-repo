@@ -115,6 +115,41 @@ mvn seq:run@infer-and-format
    mvn -DdeprecatedInVersion=${releaseVersion} clean install
    ```
 
+## SHACL to OWL Schema Derivation
+
+For the schema, SHACL is the source of truth:
+- `src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl`
+
+The OWL schema is derived to:
+- `src/main/rdf/schema/SCHEMA_QUDT.ttl`
+
+The legacy baseline is kept at:
+- `src/main/rdf/schema/SCHEMA_QUDT.ttl.backup`
+
+### Run derivation only
+
+```bash
+mvn rdfio:pipeline@derive-owl-schema
+```
+
+This runs the `derive-owl-schema` pipeline explicitly (not part of the default lifecycle) and regenerates `src/main/rdf/schema/SCHEMA_QUDT.ttl`.
+
+The derivation pipeline uses RDFIO savepoints for incremental resumes.
+If derivation inputs are unchanged, a subsequent run can resume from the latest valid savepoint instead of re-running all derivation steps.
+
+### Inspect derived schema vs backup (gated)
+
+```bash
+mvn rdfio:pipeline@inspect-owl-schema-diff
+```
+
+Outputs are written to:
+- `target/inspection/schema-diff/summary.txt`
+- `target/inspection/schema-diff/unexpected-added.txt`
+- `target/inspection/schema-diff/unexpected-removed.txt`
+
+This inspection is now gated: the command fails if either `unexpected_added_named` or `unexpected_removed_named` is non-zero after normalization.
+
 ## How It Works: Key Steps
 
 The build process is split into stages (Maven calls them "phases"). Here’s what happens, in terms an RDF expert might appreciate:
