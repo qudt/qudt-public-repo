@@ -1201,12 +1201,55 @@ validAspectDirs.each { aspectDir ->
                                                     FILTER(?specificType IN (
                                                         owl:ObjectProperty,
                                                         owl:DatatypeProperty,
-                                                        owl:AnnotationProperty,
-                                                        owl:FunctionalProperty,
-                                                        owl:InverseFunctionalProperty,
-                                                        owl:SymmetricProperty,
-                                                        owl:TransitiveProperty
+                                                        owl:AnnotationProperty
                                                     ))
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove OWL property characteristics from properties without object/datatype/annotation typing</message>
+                                        <sparql><![CDATA[
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?p a ?characteristicType .
+                                                }
+                                            }
+                                            WHERE {
+                                                VALUES ?characteristicType {
+                                                    owl:FunctionalProperty
+                                                    owl:InverseFunctionalProperty
+                                                    owl:SymmetricProperty
+                                                    owl:TransitiveProperty
+                                                    owl:AsymmetricProperty
+                                                    owl:ReflexiveProperty
+                                                    owl:IrreflexiveProperty
+                                                }
+                                                GRAPH <work:schema:derived> {
+                                                    ?p a ?characteristicType .
+                                                    FILTER NOT EXISTS { ?p a owl:ObjectProperty . }
+                                                    FILTER NOT EXISTS { ?p a owl:DatatypeProperty . }
+                                                    FILTER NOT EXISTS { ?p a owl:AnnotationProperty . }
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove owl:inverseOf from properties without owl:ObjectProperty typing</message>
+                                        <sparql><![CDATA[
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?p owl:inverseOf ?inv .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?p owl:inverseOf ?inv .
+                                                    FILTER NOT EXISTS { ?p a owl:ObjectProperty . }
                                                 }
                                             }
                                         ]]></sparql>
@@ -1300,6 +1343,65 @@ validAspectDirs.each { aspectDir ->
                                                     GRAPH <work:schema:overlay> {
                                                         ?s ?overlayP ?overlayO .
                                                     }
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove restrictions that point to datatype-schema subjects (managed separately)</message>
+                                        <sparql><![CDATA[
+                                            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?c rdfs:subClassOf ?r .
+                                                    ?r ?rp ?ro .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?c rdfs:subClassOf ?r .
+                                                    ?r a owl:Restriction ;
+                                                       owl:allValuesFrom ?range ;
+                                                       ?rp ?ro .
+                                                    FILTER(isBlank(?r))
+                                                    FILTER(!isBlank(?range))
+                                                }
+                                                GRAPH <work:schema:datatypes-shacl> {
+                                                    ?range ?datatypeP ?datatypeO .
+                                                    FILTER(!isBlank(?range))
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove malformed anonymous restrictions missing owl:Restriction type or owl:onProperty</message>
+                                        <sparql><![CDATA[
+                                            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?c rdfs:subClassOf ?r .
+                                                    ?r ?rp ?ro .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?c rdfs:subClassOf ?r .
+                                                    FILTER(isBlank(?r))
+                                                    FILTER(
+                                                        EXISTS { ?r owl:minCardinality ?min . }
+                                                        || EXISTS { ?r owl:maxCardinality ?max . }
+                                                        || EXISTS { ?r owl:cardinality ?card . }
+                                                        || EXISTS { ?r owl:allValuesFrom ?allv . }
+                                                    )
+                                                    FILTER(
+                                                        !EXISTS { ?r a owl:Restriction . }
+                                                        || !EXISTS { ?r owl:onProperty ?op . }
+                                                    )
+                                                    ?r ?rp ?ro .
                                                 }
                                             }
                                         ]]></sparql>
