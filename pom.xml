@@ -435,8 +435,7 @@ validAspectDirs.each { aspectDir ->
                                             }
                                             WHERE {
                                                 GRAPH <work:schema:derived> {
-                                                    ?c a sh:NodeShape ;
-                                                       a rdfs:Class .
+                                                    ?c a sh:NodeShape .
                                                 }
                                             }
                                         ]]></sparql>
@@ -546,6 +545,8 @@ validAspectDirs.each { aspectDir ->
                                         <sparql><![CDATA[
                                             PREFIX owl: <http://www.w3.org/2002/07/owl#>
                                             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                                            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                                            PREFIX sh: <http://www.w3.org/ns/shacl#>
 
                                             INSERT {
                                                 GRAPH <work:schema:derived> {
@@ -561,7 +562,14 @@ validAspectDirs.each { aspectDir ->
                                                     FILTER(isIRI(?p))
                                                     FILTER(
                                                         STRSTARTS(STR(?range), "http://www.w3.org/2001/XMLSchema#")
+                                                        || ?range = rdf:HTML
                                                         || EXISTS { ?range a rdfs:Datatype . }
+                                                        || EXISTS { ?ps2 a sh:PropertyShape ; sh:datatype ?range . }
+                                                        || EXISTS {
+                                                            ?ps2 a sh:PropertyShape ; sh:or ?rangeList .
+                                                            ?rangeList rdf:rest*/rdf:first ?choice .
+                                                            ?choice sh:datatype ?range .
+                                                        }
                                                     )
                                                 }
                                             }
@@ -572,6 +580,8 @@ validAspectDirs.each { aspectDir ->
                                         <sparql><![CDATA[
                                             PREFIX owl: <http://www.w3.org/2002/07/owl#>
                                             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                                            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                                            PREFIX sh: <http://www.w3.org/ns/shacl#>
 
                                             INSERT {
                                                 GRAPH <work:schema:derived> {
@@ -587,7 +597,14 @@ validAspectDirs.each { aspectDir ->
                                                     FILTER(isIRI(?p))
                                                     FILTER(
                                                         !STRSTARTS(STR(?range), "http://www.w3.org/2001/XMLSchema#")
+                                                        && ?range != rdf:HTML
                                                         && !EXISTS { ?range a rdfs:Datatype . }
+                                                        && !EXISTS { ?ps2 a sh:PropertyShape ; sh:datatype ?range . }
+                                                        && !EXISTS {
+                                                            ?ps2 a sh:PropertyShape ; sh:or ?rangeList .
+                                                            ?rangeList rdf:rest*/rdf:first ?choice .
+                                                            ?choice sh:datatype ?range .
+                                                        }
                                                     )
                                                 }
                                             }
@@ -703,11 +720,11 @@ validAspectDirs.each { aspectDir ->
                                                         sh:path ?p .
                                                     FILTER(isIRI(?p))
                                                     FILTER(
-                                                        EXISTS { ?ps sh:datatype [] . }
+                                                        EXISTS { ?ps sh:datatype ?dt . }
                                                         || EXISTS {
                                                             ?ps sh:or ?datatypeList .
                                                             ?datatypeList rdf:rest*/rdf:first ?datatypeChoice .
-                                                            ?datatypeChoice sh:datatype [] .
+                                                            ?datatypeChoice sh:datatype ?orDt .
                                                         }
                                                     )
                                                 }
@@ -732,7 +749,7 @@ validAspectDirs.each { aspectDir ->
                                                         sh:path ?p .
                                                     FILTER(isIRI(?p))
                                                     FILTER(
-                                                        EXISTS { ?ps sh:class [] . }
+                                                        EXISTS { ?ps sh:class ?cls . }
                                                         || EXISTS { ?ps sh:node [] . }
                                                         || EXISTS {
                                                             ?ps sh:nodeKind ?nk .
@@ -741,7 +758,7 @@ validAspectDirs.each { aspectDir ->
                                                         || EXISTS {
                                                             ?ps sh:or ?classList .
                                                             ?classList rdf:rest*/rdf:first ?classChoice .
-                                                            ?classChoice sh:class [] .
+                                                            ?classChoice sh:class ?orCls .
                                                         }
                                                     )
                                                 }
@@ -944,6 +961,35 @@ validAspectDirs.each { aspectDir ->
                                                     ?r a owl:Restriction ;
                                                        owl:onProperty ?p ;
                                                        ?rp ?ro .
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove cardinality restrictions on properties without owl:ObjectProperty/owl:DatatypeProperty typing</message>
+                                        <sparql><![CDATA[
+                                            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?c rdfs:subClassOf ?r .
+                                                    ?r ?rp ?ro .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?c rdfs:subClassOf ?r .
+                                                    ?r a owl:Restriction ;
+                                                       owl:onProperty ?p ;
+                                                       ?rp ?ro .
+                                                    FILTER(
+                                                        EXISTS { ?r owl:minCardinality ?min . }
+                                                        || EXISTS { ?r owl:maxCardinality ?max . }
+                                                        || EXISTS { ?r owl:cardinality ?card . }
+                                                    )
+                                                    FILTER NOT EXISTS { ?p a owl:ObjectProperty . }
+                                                    FILTER NOT EXISTS { ?p a owl:DatatypeProperty . }
                                                 }
                                             }
                                         ]]></sparql>
@@ -1184,6 +1230,35 @@ validAspectDirs.each { aspectDir ->
                                         <toGraph>work:schema:derived</toGraph>
                                     </add>
                                     <sparqlUpdate>
+                                        <message>Post-overlay cleanup: remove cardinality restrictions on properties without owl:ObjectProperty/owl:DatatypeProperty typing</message>
+                                        <sparql><![CDATA[
+                                            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?c rdfs:subClassOf ?r .
+                                                    ?r ?rp ?ro .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?c rdfs:subClassOf ?r .
+                                                    ?r a owl:Restriction ;
+                                                       owl:onProperty ?p ;
+                                                       ?rp ?ro .
+                                                    FILTER(
+                                                        EXISTS { ?r owl:minCardinality ?min . }
+                                                        || EXISTS { ?r owl:maxCardinality ?max . }
+                                                        || EXISTS { ?r owl:cardinality ?card . }
+                                                    )
+                                                    FILTER NOT EXISTS { ?p a owl:ObjectProperty . }
+                                                    FILTER NOT EXISTS { ?p a owl:DatatypeProperty . }
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
                                         <message>Remove redundant rdf:Property types when a specific OWL property type exists</message>
                                         <sparql><![CDATA[
                                             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -1348,6 +1423,35 @@ validAspectDirs.each { aspectDir ->
                                         ]]></sparql>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
+                                        <message>Late cleanup: remove cardinality restrictions on properties left untyped after datatype pruning</message>
+                                        <sparql><![CDATA[
+                                            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?c rdfs:subClassOf ?r .
+                                                    ?r ?rp ?ro .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?c rdfs:subClassOf ?r .
+                                                    ?r a owl:Restriction ;
+                                                       owl:onProperty ?p ;
+                                                       ?rp ?ro .
+                                                    FILTER(
+                                                        EXISTS { ?r owl:minCardinality ?min . }
+                                                        || EXISTS { ?r owl:maxCardinality ?max . }
+                                                        || EXISTS { ?r owl:cardinality ?card . }
+                                                    )
+                                                    FILTER NOT EXISTS { ?p a owl:ObjectProperty . }
+                                                    FILTER NOT EXISTS { ?p a owl:DatatypeProperty . }
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
                                         <message>Remove restrictions that point to datatype-schema subjects (managed separately)</message>
                                         <sparql><![CDATA[
                                             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -1371,6 +1475,59 @@ validAspectDirs.each { aspectDir ->
                                                 GRAPH <work:schema:datatypes-shacl> {
                                                     ?range ?datatypeP ?datatypeO .
                                                     FILTER(!isBlank(?range))
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove datatype restrictions that use custom non-XSD datatypes in main OWL schema</message>
+                                        <sparql><![CDATA[
+                                            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                                            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?c rdfs:subClassOf ?r .
+                                                    ?r ?rp ?ro .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?c rdfs:subClassOf ?r .
+                                                    ?r a owl:Restriction ;
+                                                       owl:onProperty ?p ;
+                                                       owl:allValuesFrom ?range ;
+                                                       ?rp ?ro .
+                                                    ?p a owl:DatatypeProperty .
+                                                    FILTER(isIRI(?range))
+                                                    FILTER(!STRSTARTS(STR(?range), "http://www.w3.org/2001/XMLSchema#"))
+                                                    FILTER(?range != rdf:HTML)
+                                                    FILTER(?range != rdfs:Literal)
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove non-XSD custom datatype ranges from main OWL schema datatype properties</message>
+                                        <sparql><![CDATA[
+                                            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                                            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?p rdfs:range ?range .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?p a owl:DatatypeProperty ;
+                                                       rdfs:range ?range .
+                                                    FILTER(isIRI(?range))
+                                                    FILTER(!STRSTARTS(STR(?range), "http://www.w3.org/2001/XMLSchema#"))
+                                                    FILTER(?range != rdf:HTML)
+                                                    FILTER(?range != rdfs:Literal)
                                                 }
                                             }
                                         ]]></sparql>
