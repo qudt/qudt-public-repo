@@ -11,6 +11,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
+- Switched from a hand-curated OWL schema to one derived from the SHACL schema
+
 ### Deprecated
 
 ### Fixed
