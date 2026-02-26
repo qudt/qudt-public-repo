@@ -372,12 +372,24 @@ validAspectDirs.each { aspectDir ->
                                 <id>derive-owl-schema</id>
                                 <steps>
                                     <add>
+                                        <file>src/build/schema/OWL-derivation-prefixes.ttl</file>
+                                        <toGraph>work:schema:derived</toGraph>
+                                    </add>
+                                    <add>
                                         <file>src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl</file>
                                         <toGraph>work:schema:derived</toGraph>
                                     </add>
                                     <add>
                                         <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl</file>
                                         <toGraph>work:schema:datatypes-shacl</toGraph>
+                                    </add>
+                                    <add>
+                                        <file>src/main/rdf/schema/shacl/SHACL-SCHEMA-SUPPLEMENT_QUDT.ttl</file>
+                                        <toGraph>work:schema:derived</toGraph>
+                                    </add>
+                                    <add>
+                                        <file>src/main/rdf/schema/shacl/SHACL-SCHEMA-STUBS_QUDT.ttl</file>
+                                        <toGraph>work:schema:derived</toGraph>
                                     </add>
                                     <savepoint><id>01-inputs-loaded</id></savepoint>
                                     <sparqlUpdate>
@@ -732,6 +744,27 @@ validAspectDirs.each { aspectDir ->
                                         ]]></sparql>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
+                                        <message>Classify datatype properties from SHACL nodeKind sh:Literal constraints</message>
+                                        <sparql><![CDATA[
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+                                            PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+                                            INSERT {
+                                                GRAPH <work:schema:derived> {
+                                                    ?p a owl:DatatypeProperty .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?ps a sh:PropertyShape ;
+                                                        sh:path ?p ;
+                                                        sh:nodeKind sh:Literal .
+                                                    FILTER(isIRI(?p))
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
                                         <message>Classify object properties from SHACL constraints</message>
                                         <sparql><![CDATA[
                                             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -761,6 +794,31 @@ validAspectDirs.each { aspectDir ->
                                                             ?classChoice sh:class ?orCls .
                                                         }
                                                     )
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Classify object properties from inverse-property and symmetry evidence</message>
+                                        <sparql><![CDATA[
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+                                            PREFIX qudt: <http://qudt.org/schema/qudt/>
+
+                                            INSERT {
+                                                GRAPH <work:schema:derived> {
+                                                    ?p a owl:ObjectProperty .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    {
+                                                        ?p owl:inverseOf ?other .
+                                                    } UNION {
+                                                        ?other owl:inverseOf ?p .
+                                                    } UNION {
+                                                        ?p a qudt:SymmetricRelation .
+                                                    }
+                                                    FILTER(isIRI(?p))
                                                 }
                                             }
                                         ]]></sparql>
@@ -994,6 +1052,31 @@ validAspectDirs.each { aspectDir ->
                                             }
                                         ]]></sparql>
                                     </sparqlUpdate>
+                                    <sparqlQuery>
+                                        <message>Declared properties with no SHACL property-shape usage and no specific OWL type before overlay</message>
+                                        <toFile>target/inspection/schema-derivation/declared-no-shape-properties.txt</toFile>
+                                        <sparql><![CDATA[
+                                            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+                                            PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+                                            SELECT DISTINCT ?property
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?property a rdf:Property .
+                                                    FILTER(isIRI(?property))
+                                                    FILTER NOT EXISTS {
+                                                        ?ps a sh:PropertyShape ;
+                                                            sh:path ?property .
+                                                    }
+                                                    FILTER NOT EXISTS { ?property a owl:ObjectProperty . }
+                                                    FILTER NOT EXISTS { ?property a owl:DatatypeProperty . }
+                                                    FILTER NOT EXISTS { ?property a owl:AnnotationProperty . }
+                                                }
+                                            }
+                                            ORDER BY ?property
+                                        ]]></sparql>
+                                    </sparqlQuery>
                                     <add>
                                         <file>src/build/schema/OWL-derivation-overlay.ttl</file>
                                         <toGraph>work:schema:overlay</toGraph>
@@ -1259,6 +1342,57 @@ validAspectDirs.each { aspectDir ->
                                         ]]></sparql>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
+                                        <message>Post-overlay classify object properties from inverse-property and symmetry evidence</message>
+                                        <sparql><![CDATA[
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+                                            PREFIX qudt: <http://qudt.org/schema/qudt/>
+
+                                            INSERT {
+                                                GRAPH <work:schema:derived> {
+                                                    ?p a owl:ObjectProperty .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    {
+                                                        ?p owl:inverseOf ?other .
+                                                    } UNION {
+                                                        ?other owl:inverseOf ?p .
+                                                    } UNION {
+                                                        ?p a qudt:SymmetricRelation .
+                                                    }
+                                                    FILTER(isIRI(?p))
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Fallback typing: convert remaining rdf:Property declarations to owl:AnnotationProperty</message>
+                                        <sparql><![CDATA[
+                                            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?p a rdf:Property .
+                                                }
+                                            }
+                                            INSERT {
+                                                GRAPH <work:schema:derived> {
+                                                    ?p a owl:AnnotationProperty .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?p a rdf:Property .
+                                                    FILTER NOT EXISTS { ?p a owl:ObjectProperty . }
+                                                    FILTER NOT EXISTS { ?p a owl:DatatypeProperty . }
+                                                    FILTER NOT EXISTS { ?p a owl:AnnotationProperty . }
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
                                         <message>Remove redundant rdf:Property types when a specific OWL property type exists</message>
                                         <sparql><![CDATA[
                                             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -1368,6 +1502,300 @@ validAspectDirs.each { aspectDir ->
                                                         || EXISTS { ?s a sh:PropertyShape . }
                                                         || (?p = rdf:type && ?o IN (sh:NodeShape, sh:PropertyShape, sh:PrefixDeclaration))
                                                     )
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove SHACL property-group resources from derived OWL schema</message>
+                                        <sparql><![CDATA[
+                                            PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?group ?p ?o .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?group a sh:PropertyGroup ;
+                                                           ?p ?o .
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove qudt:Narratable from derived OWL schema</message>
+                                        <sparql><![CDATA[
+                                            PREFIX qudt: <http://qudt.org/schema/qudt/>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?s ?p ?o .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?s ?p ?o .
+                                                    FILTER(?s = qudt:Narratable || ?o = qudt:Narratable)
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Normalize ontology resources: keep only the OWL schema ontology IRI</message>
+                                        <sparql><![CDATA[
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?ont ?p ?o .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?ont a owl:Ontology ;
+                                                         ?p ?o .
+                                                    FILTER(?ont != <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>)
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove remaining SHACL schema resources from derived OWL schema</message>
+                                        <sparql><![CDATA[
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?s ?p ?o .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?s ?p ?o .
+                                                    FILTER(
+                                                        isIRI(?s)
+                                                        && STRSTARTS(STR(?s), "http://qudt.org/$$QUDT_VERSION$$/schema/shacl/")
+                                                    )
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Normalize rdfs:isDefinedBy references away from SHACL schema IRIs</message>
+                                        <sparql><![CDATA[
+                                            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?s rdfs:isDefinedBy ?oldDefinedBy .
+                                                }
+                                            }
+                                            INSERT {
+                                                GRAPH <work:schema:derived> {
+                                                    ?s rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?s rdfs:isDefinedBy ?oldDefinedBy .
+                                                    FILTER(
+                                                        isIRI(?oldDefinedBy)
+                                                        && STRSTARTS(STR(?oldDefinedBy), "http://qudt.org/$$QUDT_VERSION$$/schema/shacl/")
+                                                    )
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Keep only the canonical VAEM metadata instance for schema derivation</message>
+                                        <sparql><![CDATA[
+                                            PREFIX vaem: <http://www.linkedmodel.org/schema/vaem#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?m ?p ?o .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?m a vaem:GraphMetaData ;
+                                                       ?p ?o .
+                                                    FILTER(?m NOT IN (vaem:GMD_QUDT-SCHEMA, vaem:GMD_SHACLQUDT-SCHEMA))
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Rename canonical metadata subject to vaem:GMD_QUDT-SCHEMA</message>
+                                        <sparql><![CDATA[
+                                            PREFIX vaem: <http://www.linkedmodel.org/schema/vaem#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    vaem:GMD_SHACLQUDT-SCHEMA ?p ?o .
+                                                }
+                                            }
+                                            INSERT {
+                                                GRAPH <work:schema:derived> {
+                                                    vaem:GMD_QUDT-SCHEMA ?p ?o .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    vaem:GMD_SHACLQUDT-SCHEMA ?p ?o .
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Normalize canonical VAEM metadata links from SHACL resources to OWL schema resources</message>
+                                        <sparql><![CDATA[
+                                            PREFIX vaem: <http://www.linkedmodel.org/schema/vaem#>
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    vaem:GMD_QUDT-SCHEMA ?p ?oldObj .
+                                                }
+                                            }
+                                            INSERT {
+                                                GRAPH <work:schema:derived> {
+                                                    vaem:GMD_QUDT-SCHEMA ?p ?newObj .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    vaem:GMD_QUDT-SCHEMA ?p ?oldObj .
+                                                    FILTER(isIRI(?oldObj))
+                                                    FILTER(
+                                                        ?p IN (vaem:isMetadataFor, owl:versionIRI)
+                                                        && CONTAINS(STR(?oldObj), "/schema/shacl/")
+                                                    )
+                                                    BIND(IRI(REPLACE(STR(?oldObj), "/schema/shacl/", "/schema/")) AS ?newObj)
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Normalize canonical VAEM metadata literal fields by removing SHACL markers and shacl path segments</message>
+                                        <sparql><![CDATA[
+                                            PREFIX vaem: <http://www.linkedmodel.org/schema/vaem#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    vaem:GMD_QUDT-SCHEMA ?p ?oldLiteral .
+                                                }
+                                            }
+                                            INSERT {
+                                                GRAPH <work:schema:derived> {
+                                                    vaem:GMD_QUDT-SCHEMA ?p ?newLiteral .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    vaem:GMD_QUDT-SCHEMA ?p ?oldLiteral .
+                                                    FILTER(isLiteral(?oldLiteral))
+                                                    FILTER(
+                                                        ?p IN (
+                                                            <http://www.w3.org/2000/01/rdf-schema#label>,
+                                                            <http://purl.org/dc/terms/title>,
+                                                            vaem:graphTitle,
+                                                            vaem:latestPublishedVersion,
+                                                            vaem:previousPublishedVersion,
+                                                            vaem:turtleFileURL
+                                                        )
+                                                    )
+                                                    BIND(REPLACE(STR(?oldLiteral), "/schema/shacl/", "/schema/") AS ?v0)
+                                                    BIND(REPLACE(?v0, "DOC_SCHEMA-SHACL-", "DOC_SCHEMA-") AS ?v1)
+                                                    BIND(REPLACE(?v1, "SHACL-", "") AS ?v2)
+                                                    BIND(REPLACE(?v2, " SHACL ", " ") AS ?v3)
+                                                    BIND(REPLACE(?v3, " SHACL", "") AS ?v4)
+                                                    BIND(REPLACE(?v4, "SHACL ", "") AS ?v5)
+                                                    BIND(REPLACE(?v5, "SHACL", "") AS ?v6)
+                                                    BIND(REPLACE(?v6, "  +", " ") AS ?normalizedLex)
+                                                    BIND(
+                                                        IF(
+                                                            LANG(?oldLiteral) != "",
+                                                            STRLANG(?normalizedLex, LANG(?oldLiteral)),
+                                                            STRDT(?normalizedLex, DATATYPE(?oldLiteral))
+                                                        ) AS ?newLiteral
+                                                    )
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Set canonical derived OWL metadata description and remove manual creator field</message>
+                                        <sparql><![CDATA[
+                                            PREFIX dcterms: <http://purl.org/dc/terms/>
+                                            PREFIX prov: <http://www.w3.org/ns/prov#>
+                                            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                                            PREFIX vaem: <http://www.linkedmodel.org/schema/vaem#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    vaem:GMD_QUDT-SCHEMA dcterms:description ?oldDescription .
+                                                    vaem:GMD_QUDT-SCHEMA dcterms:creator ?oldCreator .
+                                                    vaem:GMD_QUDT-SCHEMA prov:derivedFrom ?oldDerivedFrom .
+                                                }
+                                            }
+                                            INSERT {
+                                                GRAPH <work:schema:derived> {
+                                                    vaem:GMD_QUDT-SCHEMA dcterms:description "<p>This OWL schema is derived from the SHACL schema found at http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt. </p>"^^rdf:HTML .
+                                                    vaem:GMD_QUDT-SCHEMA prov:derivedFrom <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    OPTIONAL { vaem:GMD_QUDT-SCHEMA dcterms:description ?oldDescription . }
+                                                    OPTIONAL { vaem:GMD_QUDT-SCHEMA dcterms:creator ?oldCreator . }
+                                                    OPTIONAL { vaem:GMD_QUDT-SCHEMA prov:derivedFrom ?oldDerivedFrom . }
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Set canonical derived OWL metadata graph role</message>
+                                        <sparql><![CDATA[
+                                            PREFIX vaem: <http://www.linkedmodel.org/schema/vaem#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    vaem:GMD_QUDT-SCHEMA vaem:hasGraphRole ?oldRole .
+                                                }
+                                            }
+                                            INSERT {
+                                                GRAPH <work:schema:derived> {
+                                                    vaem:GMD_QUDT-SCHEMA vaem:hasGraphRole vaem:SchemaGraph .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    OPTIONAL { vaem:GMD_QUDT-SCHEMA vaem:hasGraphRole ?oldRole . }
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Link ontology to canonical graph metadata</message>
+                                        <sparql><![CDATA[
+                                            PREFIX vaem: <http://www.linkedmodel.org/schema/vaem#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> vaem:hasGraphMetadata ?oldMetadata .
+                                                }
+                                            }
+                                            INSERT {
+                                                GRAPH <work:schema:derived> {
+                                                    <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> vaem:hasGraphMetadata vaem:GMD_QUDT-SCHEMA .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    OPTIONAL {
+                                                        <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> vaem:hasGraphMetadata ?oldMetadata .
+                                                    }
                                                 }
                                             }
                                         ]]></sparql>
@@ -1563,6 +1991,22 @@ validAspectDirs.each { aspectDir ->
                                             }
                                         ]]></sparql>
                                     </sparqlUpdate>
+                                    <sparqlQuery>
+                                        <message>Residual rdf:Property typing after derivation cleanup</message>
+                                        <toFile>target/inspection/schema-derivation/residual-rdf-property-typing.txt</toFile>
+                                        <sparql><![CDATA[
+                                            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+                                            SELECT DISTINCT ?property
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?property a rdf:Property .
+                                                    FILTER(isIRI(?property))
+                                                }
+                                            }
+                                            ORDER BY ?property
+                                        ]]></sparql>
+                                    </sparqlQuery>
                                     <sparqlUpdate>
                                         <message>Remove orphaned restriction blank nodes left after subject pruning</message>
                                         <sparql><![CDATA[
@@ -1921,6 +2365,34 @@ validAspectDirs.each { aspectDir ->
                                                             FILTER(?p = rdfs:range && ?s = ?legacyRangeProperty)
                                                         }
                                                         FILTER NOT EXISTS {
+                                                            VALUES ?stubRangeProperty {
+                                                                <http://qudt.org/schema/qudt/baseUnitOfSystem>
+                                                                <http://qudt.org/schema/qudt/coherentUnitSystem>
+                                                                <http://qudt.org/schema/qudt/dimensionExponent>
+                                                                <http://qudt.org/schema/qudt/dimensionInverse>
+                                                                <http://qudt.org/schema/qudt/hasDenominatorPart>
+                                                                <http://qudt.org/schema/qudt/hasDerivedNonCoherentUnit>
+                                                                <http://qudt.org/schema/qudt/hasDimension>
+                                                                <http://qudt.org/schema/qudt/hasNumeratorPart>
+                                                                <http://qudt.org/schema/qudt/hasPrefixUnit>
+                                                                <http://qudt.org/schema/qudt/isDimensionInSystem>
+                                                                <http://qudt.org/schema/qudt/quantity>
+                                                                <http://qudt.org/schema/qudt/reference>
+                                                                <http://qudt.org/schema/qudt/referenceUnit>
+                                                                <http://purl.org/dc/terms/created>
+                                                                <http://purl.org/dc/terms/modified>
+                                                            }
+                                                            FILTER(?p = rdfs:range && ?s = ?stubRangeProperty)
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            VALUES (?metadataS ?metadataP ?metadataO) {
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://purl.org/dc/terms/description> "<p>This OWL schema is derived from the SHACL schema found at http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt. </p>"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML>)
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/2000/01/rdf-schema#label> "QUDT Schema Metadata Version $$QUDT_VERSION$$")
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/ns/prov#derivedFrom> <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt>)
+                                                            }
+                                                            FILTER(?s = ?metadataS && ?p = ?metadataP && ?o = ?metadataO)
+                                                        }
+                                                        FILTER NOT EXISTS {
                                                             VALUES (?legacyRemovalS ?legacyRemovalP ?legacyRemovalO) {
                                                                 (<http://purl.org/dc/terms/abstract> <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> <http://purl.org/dc/terms/>)
                                                                 (<http://purl.org/dc/terms/source> <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> <http://purl.org/dc/terms/>)
@@ -2061,6 +2533,34 @@ validAspectDirs.each { aspectDir ->
                                                             GRAPH <schema:shacl> {
                                                                 ?s ?p ?o .
                                                             }
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            VALUES ?stubRangeProperty {
+                                                                <http://qudt.org/schema/qudt/baseUnitOfSystem>
+                                                                <http://qudt.org/schema/qudt/coherentUnitSystem>
+                                                                <http://qudt.org/schema/qudt/dimensionExponent>
+                                                                <http://qudt.org/schema/qudt/dimensionInverse>
+                                                                <http://qudt.org/schema/qudt/hasDenominatorPart>
+                                                                <http://qudt.org/schema/qudt/hasDerivedNonCoherentUnit>
+                                                                <http://qudt.org/schema/qudt/hasDimension>
+                                                                <http://qudt.org/schema/qudt/hasNumeratorPart>
+                                                                <http://qudt.org/schema/qudt/hasPrefixUnit>
+                                                                <http://qudt.org/schema/qudt/isDimensionInSystem>
+                                                                <http://qudt.org/schema/qudt/quantity>
+                                                                <http://qudt.org/schema/qudt/reference>
+                                                                <http://qudt.org/schema/qudt/referenceUnit>
+                                                                <http://purl.org/dc/terms/created>
+                                                                <http://purl.org/dc/terms/modified>
+                                                            }
+                                                            FILTER(?p = rdfs:range && ?s = ?stubRangeProperty)
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            VALUES (?metadataS ?metadataP ?metadataO) {
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://purl.org/dc/terms/description> "<p>This OWL schema is derived from the SHACL schema found at http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt. </p>"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML>)
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/2000/01/rdf-schema#label> "QUDT Schema Metadata Version $$QUDT_VERSION$$")
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/ns/prov#derivedFrom> <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt>)
+                                                            }
+                                                            FILTER(?s = ?metadataS && ?p = ?metadataP && ?o = ?metadataO)
                                                         }
                                                         FILTER NOT EXISTS {
                                                             FILTER(
@@ -2534,6 +3034,34 @@ validAspectDirs.each { aspectDir ->
                                                     FILTER(?p = rdfs:range && ?s = ?legacyRangeProperty)
                                                 }
                                                 FILTER NOT EXISTS {
+                                                    VALUES ?stubRangeProperty {
+                                                        <http://qudt.org/schema/qudt/baseUnitOfSystem>
+                                                        <http://qudt.org/schema/qudt/coherentUnitSystem>
+                                                        <http://qudt.org/schema/qudt/dimensionExponent>
+                                                        <http://qudt.org/schema/qudt/dimensionInverse>
+                                                        <http://qudt.org/schema/qudt/hasDenominatorPart>
+                                                        <http://qudt.org/schema/qudt/hasDerivedNonCoherentUnit>
+                                                        <http://qudt.org/schema/qudt/hasDimension>
+                                                        <http://qudt.org/schema/qudt/hasNumeratorPart>
+                                                        <http://qudt.org/schema/qudt/hasPrefixUnit>
+                                                        <http://qudt.org/schema/qudt/isDimensionInSystem>
+                                                        <http://qudt.org/schema/qudt/quantity>
+                                                        <http://qudt.org/schema/qudt/reference>
+                                                        <http://qudt.org/schema/qudt/referenceUnit>
+                                                        <http://purl.org/dc/terms/created>
+                                                        <http://purl.org/dc/terms/modified>
+                                                    }
+                                                    FILTER(?p = rdfs:range && ?s = ?stubRangeProperty)
+                                                }
+                                                FILTER NOT EXISTS {
+                                                    VALUES (?metadataS ?metadataP ?metadataO) {
+                                                        (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://purl.org/dc/terms/description> "<p>This OWL schema is derived from the SHACL schema found at http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt. </p>"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML>)
+                                                        (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/2000/01/rdf-schema#label> "QUDT Schema Metadata Version $$QUDT_VERSION$$")
+                                                        (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/ns/prov#derivedFrom> <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt>)
+                                                    }
+                                                    FILTER(?s = ?metadataS && ?p = ?metadataP && ?o = ?metadataO)
+                                                }
+                                                FILTER NOT EXISTS {
                                                     VALUES (?legacyRemovalS ?legacyRemovalP ?legacyRemovalO) {
                                                         (<http://purl.org/dc/terms/abstract> <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> <http://purl.org/dc/terms/>)
                                                         (<http://purl.org/dc/terms/source> <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> <http://purl.org/dc/terms/>)
@@ -2682,6 +3210,34 @@ validAspectDirs.each { aspectDir ->
                                                     GRAPH <schema:shacl> {
                                                         ?s ?p ?o .
                                                     }
+                                                }
+                                                FILTER NOT EXISTS {
+                                                    VALUES ?stubRangeProperty {
+                                                        <http://qudt.org/schema/qudt/baseUnitOfSystem>
+                                                        <http://qudt.org/schema/qudt/coherentUnitSystem>
+                                                        <http://qudt.org/schema/qudt/dimensionExponent>
+                                                        <http://qudt.org/schema/qudt/dimensionInverse>
+                                                        <http://qudt.org/schema/qudt/hasDenominatorPart>
+                                                        <http://qudt.org/schema/qudt/hasDerivedNonCoherentUnit>
+                                                        <http://qudt.org/schema/qudt/hasDimension>
+                                                        <http://qudt.org/schema/qudt/hasNumeratorPart>
+                                                        <http://qudt.org/schema/qudt/hasPrefixUnit>
+                                                        <http://qudt.org/schema/qudt/isDimensionInSystem>
+                                                        <http://qudt.org/schema/qudt/quantity>
+                                                        <http://qudt.org/schema/qudt/reference>
+                                                        <http://qudt.org/schema/qudt/referenceUnit>
+                                                        <http://purl.org/dc/terms/created>
+                                                        <http://purl.org/dc/terms/modified>
+                                                    }
+                                                    FILTER(?p = rdfs:range && ?s = ?stubRangeProperty)
+                                                }
+                                                FILTER NOT EXISTS {
+                                                    VALUES (?metadataS ?metadataP ?metadataO) {
+                                                        (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://purl.org/dc/terms/description> "<p>This OWL schema is derived from the SHACL schema found at http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt. </p>"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML>)
+                                                        (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/2000/01/rdf-schema#label> "QUDT Schema Metadata Version $$QUDT_VERSION$$")
+                                                        (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/ns/prov#derivedFrom> <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt>)
+                                                    }
+                                                    FILTER(?s = ?metadataS && ?p = ?metadataP && ?o = ?metadataO)
                                                 }
                                                 FILTER NOT EXISTS {
                                                     FILTER(
@@ -2870,6 +3426,34 @@ validAspectDirs.each { aspectDir ->
                                                             FILTER(?p = rdfs:range && ?s = ?legacyRangeProperty)
                                                         }
                                                         FILTER NOT EXISTS {
+                                                            VALUES ?stubRangeProperty {
+                                                                <http://qudt.org/schema/qudt/baseUnitOfSystem>
+                                                                <http://qudt.org/schema/qudt/coherentUnitSystem>
+                                                                <http://qudt.org/schema/qudt/dimensionExponent>
+                                                                <http://qudt.org/schema/qudt/dimensionInverse>
+                                                                <http://qudt.org/schema/qudt/hasDenominatorPart>
+                                                                <http://qudt.org/schema/qudt/hasDerivedNonCoherentUnit>
+                                                                <http://qudt.org/schema/qudt/hasDimension>
+                                                                <http://qudt.org/schema/qudt/hasNumeratorPart>
+                                                                <http://qudt.org/schema/qudt/hasPrefixUnit>
+                                                                <http://qudt.org/schema/qudt/isDimensionInSystem>
+                                                                <http://qudt.org/schema/qudt/quantity>
+                                                                <http://qudt.org/schema/qudt/reference>
+                                                                <http://qudt.org/schema/qudt/referenceUnit>
+                                                                <http://purl.org/dc/terms/created>
+                                                                <http://purl.org/dc/terms/modified>
+                                                            }
+                                                            FILTER(?p = rdfs:range && ?s = ?stubRangeProperty)
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            VALUES (?metadataS ?metadataP ?metadataO) {
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://purl.org/dc/terms/description> "<p>This OWL schema is derived from the SHACL schema found at http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt. </p>"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML>)
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/2000/01/rdf-schema#label> "QUDT Schema Metadata Version $$QUDT_VERSION$$")
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/ns/prov#derivedFrom> <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt>)
+                                                            }
+                                                            FILTER(?s = ?metadataS && ?p = ?metadataP && ?o = ?metadataO)
+                                                        }
+                                                        FILTER NOT EXISTS {
                                                             VALUES (?legacyRemovalS ?legacyRemovalP ?legacyRemovalO) {
                                                                 (<http://purl.org/dc/terms/abstract> <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> <http://purl.org/dc/terms/>)
                                                                 (<http://purl.org/dc/terms/source> <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> <http://purl.org/dc/terms/>)
@@ -3025,6 +3609,34 @@ validAspectDirs.each { aspectDir ->
                                                             GRAPH <schema:shacl> {
                                                                 ?s ?p ?o .
                                                             }
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            VALUES ?stubRangeProperty {
+                                                                <http://qudt.org/schema/qudt/baseUnitOfSystem>
+                                                                <http://qudt.org/schema/qudt/coherentUnitSystem>
+                                                                <http://qudt.org/schema/qudt/dimensionExponent>
+                                                                <http://qudt.org/schema/qudt/dimensionInverse>
+                                                                <http://qudt.org/schema/qudt/hasDenominatorPart>
+                                                                <http://qudt.org/schema/qudt/hasDerivedNonCoherentUnit>
+                                                                <http://qudt.org/schema/qudt/hasDimension>
+                                                                <http://qudt.org/schema/qudt/hasNumeratorPart>
+                                                                <http://qudt.org/schema/qudt/hasPrefixUnit>
+                                                                <http://qudt.org/schema/qudt/isDimensionInSystem>
+                                                                <http://qudt.org/schema/qudt/quantity>
+                                                                <http://qudt.org/schema/qudt/reference>
+                                                                <http://qudt.org/schema/qudt/referenceUnit>
+                                                                <http://purl.org/dc/terms/created>
+                                                                <http://purl.org/dc/terms/modified>
+                                                            }
+                                                            FILTER(?p = rdfs:range && ?s = ?stubRangeProperty)
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            VALUES (?metadataS ?metadataP ?metadataO) {
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://purl.org/dc/terms/description> "<p>This OWL schema is derived from the SHACL schema found at http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt. </p>"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML>)
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/2000/01/rdf-schema#label> "QUDT Schema Metadata Version $$QUDT_VERSION$$")
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/ns/prov#derivedFrom> <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt>)
+                                                            }
+                                                            FILTER(?s = ?metadataS && ?p = ?metadataP && ?o = ?metadataO)
                                                         }
                                                         FILTER NOT EXISTS {
                                                             FILTER(
@@ -3212,6 +3824,34 @@ validAspectDirs.each { aspectDir ->
                                                                 <http://qudt.org/schema/qudt/relevantUnit>
                                                             }
                                                             FILTER(?predicate = rdfs:range && ?s = ?legacyRangeProperty)
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            VALUES ?stubRangeProperty {
+                                                                <http://qudt.org/schema/qudt/baseUnitOfSystem>
+                                                                <http://qudt.org/schema/qudt/coherentUnitSystem>
+                                                                <http://qudt.org/schema/qudt/dimensionExponent>
+                                                                <http://qudt.org/schema/qudt/dimensionInverse>
+                                                                <http://qudt.org/schema/qudt/hasDenominatorPart>
+                                                                <http://qudt.org/schema/qudt/hasDerivedNonCoherentUnit>
+                                                                <http://qudt.org/schema/qudt/hasDimension>
+                                                                <http://qudt.org/schema/qudt/hasNumeratorPart>
+                                                                <http://qudt.org/schema/qudt/hasPrefixUnit>
+                                                                <http://qudt.org/schema/qudt/isDimensionInSystem>
+                                                                <http://qudt.org/schema/qudt/quantity>
+                                                                <http://qudt.org/schema/qudt/reference>
+                                                                <http://qudt.org/schema/qudt/referenceUnit>
+                                                                <http://purl.org/dc/terms/created>
+                                                                <http://purl.org/dc/terms/modified>
+                                                            }
+                                                            FILTER(?predicate = rdfs:range && ?s = ?stubRangeProperty)
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            VALUES (?metadataS ?metadataP ?metadataO) {
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://purl.org/dc/terms/description> "<p>This OWL schema is derived from the SHACL schema found at http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt. </p>"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML>)
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/2000/01/rdf-schema#label> "QUDT Schema Metadata Version $$QUDT_VERSION$$")
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/ns/prov#derivedFrom> <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt>)
+                                                            }
+                                                            FILTER(?s = ?metadataS && ?predicate = ?metadataP && ?o = ?metadataO)
                                                         }
                                                         FILTER NOT EXISTS {
                                                             VALUES (?legacyRemovalS ?legacyRemovalP ?legacyRemovalO) {
@@ -3560,6 +4200,34 @@ validAspectDirs.each { aspectDir ->
                                                                 <http://qudt.org/schema/qudt/relevantUnit>
                                                             }
                                                             FILTER(?predicate = rdfs:range && ?s = ?legacyRangeProperty)
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            VALUES ?stubRangeProperty {
+                                                                <http://qudt.org/schema/qudt/baseUnitOfSystem>
+                                                                <http://qudt.org/schema/qudt/coherentUnitSystem>
+                                                                <http://qudt.org/schema/qudt/dimensionExponent>
+                                                                <http://qudt.org/schema/qudt/dimensionInverse>
+                                                                <http://qudt.org/schema/qudt/hasDenominatorPart>
+                                                                <http://qudt.org/schema/qudt/hasDerivedNonCoherentUnit>
+                                                                <http://qudt.org/schema/qudt/hasDimension>
+                                                                <http://qudt.org/schema/qudt/hasNumeratorPart>
+                                                                <http://qudt.org/schema/qudt/hasPrefixUnit>
+                                                                <http://qudt.org/schema/qudt/isDimensionInSystem>
+                                                                <http://qudt.org/schema/qudt/quantity>
+                                                                <http://qudt.org/schema/qudt/reference>
+                                                                <http://qudt.org/schema/qudt/referenceUnit>
+                                                                <http://purl.org/dc/terms/created>
+                                                                <http://purl.org/dc/terms/modified>
+                                                            }
+                                                            FILTER(?predicate = rdfs:range && ?s = ?stubRangeProperty)
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            VALUES (?metadataS ?metadataP ?metadataO) {
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://purl.org/dc/terms/description> "<p>This OWL schema is derived from the SHACL schema found at http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt. </p>"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML>)
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/2000/01/rdf-schema#label> "QUDT Schema Metadata Version $$QUDT_VERSION$$")
+                                                                (<http://www.linkedmodel.org/schema/vaem#GMD_QUDT-SCHEMA> <http://www.w3.org/ns/prov#derivedFrom> <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt>)
+                                                            }
+                                                            FILTER(?s = ?metadataS && ?predicate = ?metadataP && ?o = ?metadataO)
                                                         }
                                                         FILTER NOT EXISTS {
                                                             VALUES (?legacyRemovalS ?legacyRemovalP ?legacyRemovalO) {
