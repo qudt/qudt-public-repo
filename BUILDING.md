@@ -129,10 +129,10 @@ The legacy baseline is kept at:
 ### Run derivation only
 
 ```bash
-mvn rdfio:pipeline@derive-owl-schema
+mvn -Powl-schema-derive rdfio:pipeline@derive-owl-schema
 ```
 
-This runs the `derive-owl-schema` pipeline explicitly (not part of the default lifecycle) and regenerates `src/main/rdf/schema/SCHEMA_QUDT.ttl`.
+This runs the `derive-owl-schema` pipeline explicitly via the `owl-schema-derive` profile (not part of the default lifecycle) and regenerates `src/main/rdf/schema/SCHEMA_QUDT.ttl`.
 
 The derivation pipeline uses RDFIO savepoints for incremental resumes.
 If derivation inputs are unchanged, a subsequent run can resume from the latest valid savepoint instead of re-running all derivation steps.
@@ -140,7 +140,7 @@ If derivation inputs are unchanged, a subsequent run can resume from the latest 
 ### Inspect derived schema vs backup (gated)
 
 ```bash
-mvn rdfio:pipeline@inspect-owl-schema-diff
+mvn -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
 ```
 
 Outputs are written to:
@@ -148,7 +148,7 @@ Outputs are written to:
 - `target/inspection/schema-diff/unexpected-added.txt`
 - `target/inspection/schema-diff/unexpected-removed.txt`
 
-This inspection is now gated: the command fails if either `unexpected_added_named` or `unexpected_removed_named` is non-zero after normalization.
+This inspection is now gated (via the `owl-schema-inspect` profile): the command fails if either `unexpected_added_named` or `unexpected_removed_named` is non-zero after normalization.
 
 ## How It Works: Key Steps
 
