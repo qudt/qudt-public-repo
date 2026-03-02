@@ -150,6 +150,35 @@ Outputs are written to:
 
 This inspection is now gated (via the `owl-schema-inspect` profile): the command fails if either `unexpected_added_named` or `unexpected_removed_named` is non-zero after normalization.
 
+## SHACL Datatypes to OWL Datatypes Schema Derivation
+
+For datatypes, SHACL is the source of truth:
+- `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl`
+
+The OWL datatypes schema is derived to:
+- `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl`
+
+### Run datatypes derivation only
+
+```bash
+mvn -Powl-datatypes-derive rdfio:pipeline@derive-owl-datatypes-schema
+```
+
+This runs the `derive-owl-datatypes-schema` pipeline explicitly via the `owl-datatypes-derive` profile (not part of the default lifecycle) and regenerates `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl`.
+
+### Inspect derived datatypes schema vs backup (gated)
+
+```bash
+mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
+```
+
+Outputs are written to:
+- `target/inspection/datatype-schema-diff/summary.txt`
+- `target/inspection/datatype-schema-diff/unexpected-added.txt`
+- `target/inspection/datatype-schema-diff/unexpected-removed.txt`
+
+This inspection is gated: by default, any unexpected named additions or removals fail the command (`datatype.schema.diff.max.unexpected.added=0` and `datatype.schema.diff.max.unexpected.removed=0`).
+
 ## How It Works: Key Steps
 
 The build process is split into stages (Maven calls them "phases"). Here’s what happens, in terms an RDF expert might appreciate:

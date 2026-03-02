@@ -82,6 +82,28 @@ This file lists SHACL-only type objects (for example `sh:NodeShape`).
 If these SHACL typing triples are missing from the OWL output, inspection treats that as expected.
 That is normal, because OWL output is not meant to carry SHACL-only typing.
 
+### `datatype-metadata-predicates.ttl`
+
+This is the datatype-schema version of metadata predicate allowlisting.
+
+Plainly:
+- If a removed triple uses one of these predicates,
+- and SHACL still has the same subject + predicate,
+- inspection treats that removal as expected metadata churn.
+
+### `datatype-expected-metadata-added.ttl`
+
+This file is for exact added triples that are acceptable in the datatype OWL schema.
+
+Use this for very specific new metadata triples that you intentionally approved.
+Keep it small.
+
+### `datatype-expected-legacy-removals.ttl`
+
+This file is for exact removed triples that are acceptable in the datatype OWL schema.
+
+Use this when an old legacy triple should disappear and stay gone.
+
 ## Safe way to edit these files
 
 When you change one of these files:
