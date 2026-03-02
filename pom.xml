@@ -3594,8 +3594,12 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         <toGraph>work:schema:derived</toGraph>
                                     </add>
                                     <add>
+                                        <file>src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl</file>
+                                        <toGraph>work:schema:typing-evidence</toGraph>
+                                    </add>
+                                    <add>
                                         <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl</file>
-                                        <toGraph>work:schema:datatypes-shacl</toGraph>
+                                        <toGraph>work:schema:typing-evidence</toGraph>
                                     </add>
                                     <add>
                                         <file>src/main/rdf/schema/shacl/SHACL-SCHEMA-SUPPLEMENT_QUDT.ttl</file>
@@ -3605,6 +3609,27 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         <file>src/main/rdf/schema/shacl/SHACL-SCHEMA-STUBS_QUDT.ttl</file>
                                         <toGraph>work:schema:derived</toGraph>
                                     </add>
+                                    <assert>
+                                        <message>Guard: disallow sh:class xsd:* in SHACL property shapes used for OWL derivation</message>
+                                        <failureMessage>
+                                            Found SHACL property shapes using sh:class with an XSD datatype. Use sh:datatype instead.
+                                        </failureMessage>
+                                        <sparqlSelect><![CDATA[
+                                            PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+                                            SELECT ?ps ?xsdDatatype
+                                            WHERE {
+                                                GRAPH <work:schema:typing-evidence> {
+                                                    ?ps a sh:PropertyShape ;
+                                                        sh:class ?xsdDatatype .
+                                                    FILTER(
+                                                        isIRI(?xsdDatatype)
+                                                        && STRSTARTS(STR(?xsdDatatype), "http://www.w3.org/2001/XMLSchema#")
+                                                    )
+                                                }
+                                            }
+                                        ]]></sparqlSelect>
+                                    </assert>
                                     <savepoint><id>01-inputs-loaded</id></savepoint>
                                     <sparqlUpdate>
                                         <message>Set ontology IRI, labels and definedBy for OWL schema</message>
@@ -3941,10 +3966,16 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                 }
                                             }
                                             WHERE {
-                                                GRAPH <work:schema:derived> {
+                                                GRAPH <work:schema:typing-evidence> {
                                                     ?ps a sh:PropertyShape ;
                                                         sh:path ?p .
                                                     FILTER(isIRI(?p))
+                                                    FILTER EXISTS {
+                                                        GRAPH <work:schema:derived> {
+                                                            ?targetPs a sh:PropertyShape ;
+                                                                      sh:path ?p .
+                                                        }
+                                                    }
                                                     FILTER(
                                                         EXISTS { ?ps sh:datatype ?dt . }
                                                         || EXISTS {
@@ -3969,11 +4000,17 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                 }
                                             }
                                             WHERE {
-                                                GRAPH <work:schema:derived> {
+                                                GRAPH <work:schema:typing-evidence> {
                                                     ?ps a sh:PropertyShape ;
                                                         sh:path ?p ;
                                                         sh:nodeKind sh:Literal .
                                                     FILTER(isIRI(?p))
+                                                    FILTER EXISTS {
+                                                        GRAPH <work:schema:derived> {
+                                                            ?targetPs a sh:PropertyShape ;
+                                                                      sh:path ?p .
+                                                        }
+                                                    }
                                                 }
                                             }
                                         ]]></sparql>
@@ -3991,10 +4028,16 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                 }
                                             }
                                             WHERE {
-                                                GRAPH <work:schema:derived> {
+                                                GRAPH <work:schema:typing-evidence> {
                                                     ?ps a sh:PropertyShape ;
                                                         sh:path ?p .
                                                     FILTER(isIRI(?p))
+                                                    FILTER EXISTS {
+                                                        GRAPH <work:schema:derived> {
+                                                            ?targetPs a sh:PropertyShape ;
+                                                                      sh:path ?p .
+                                                        }
+                                                    }
                                                     FILTER(
                                                         EXISTS { ?ps sh:class ?cls . }
                                                         || EXISTS { ?ps sh:node [] . }
@@ -4049,11 +4092,17 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                 }
                                             }
                                             WHERE {
-                                                GRAPH <work:schema:derived> {
+                                                GRAPH <work:schema:typing-evidence> {
                                                     ?ps a sh:PropertyShape ;
                                                         sh:path ?p ;
                                                         sh:maxCount 1 .
                                                     FILTER(isIRI(?p))
+                                                    FILTER EXISTS {
+                                                        GRAPH <work:schema:derived> {
+                                                            ?targetPs a sh:PropertyShape ;
+                                                                      sh:path ?p .
+                                                        }
+                                                    }
                                                     FILTER NOT EXISTS {
                                                         ?otherPs a sh:PropertyShape ;
                                                                  sh:path ?p .
@@ -5360,9 +5409,38 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                 <toGraph>work:datatype:derived</toGraph>
                                             </add>
                                             <add>
+                                                <file>src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl</file>
+                                                <toGraph>work:datatype:typing-evidence</toGraph>
+                                            </add>
+                                            <add>
+                                                <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl</file>
+                                                <toGraph>work:datatype:typing-evidence</toGraph>
+                                            </add>
+                                            <add>
                                                 <file>src/build/schema/OWL-derivation-overlay-datatype.ttl</file>
                                                 <toGraph>work:datatype:derived</toGraph>
                                             </add>
+                                            <assert>
+                                                <message>Guard: disallow sh:class xsd:* in SHACL property shapes used for OWL derivation</message>
+                                                <failureMessage>
+                                                    Found SHACL property shapes using sh:class with an XSD datatype. Use sh:datatype instead.
+                                                </failureMessage>
+                                                <sparqlSelect><![CDATA[
+                                                    PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+                                                    SELECT ?ps ?xsdDatatype
+                                                    WHERE {
+                                                        GRAPH <work:datatype:typing-evidence> {
+                                                            ?ps a sh:PropertyShape ;
+                                                                sh:class ?xsdDatatype .
+                                                            FILTER(
+                                                                isIRI(?xsdDatatype)
+                                                                && STRSTARTS(STR(?xsdDatatype), "http://www.w3.org/2001/XMLSchema#")
+                                                            )
+                                                        }
+                                                    }
+                                                ]]></sparqlSelect>
+                                            </assert>
                                             <savepoint><id>01-inputs-loaded</id></savepoint>
                                             <sparqlUpdate>
                                                 <message>Set ontology IRI, labels and definedBy for OWL datatypes schema</message>
@@ -5603,10 +5681,16 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         }
                                                     }
                                                     WHERE {
-                                                        GRAPH <work:datatype:derived> {
+                                                        GRAPH <work:datatype:typing-evidence> {
                                                             ?ps a sh:PropertyShape ;
                                                                 sh:path ?p .
                                                             FILTER(isIRI(?p))
+                                                            FILTER EXISTS {
+                                                                GRAPH <work:datatype:derived> {
+                                                                    ?targetPs a sh:PropertyShape ;
+                                                                              sh:path ?p .
+                                                                }
+                                                            }
                                                             {
                                                                 ?ps sh:datatype ?datatype .
                                                             } UNION {
@@ -5628,10 +5712,16 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         }
                                                     }
                                                     WHERE {
-                                                        GRAPH <work:datatype:derived> {
+                                                        GRAPH <work:datatype:typing-evidence> {
                                                             ?ps a sh:PropertyShape ;
                                                                 sh:path ?p .
                                                             FILTER(isIRI(?p))
+                                                            FILTER EXISTS {
+                                                                GRAPH <work:datatype:derived> {
+                                                                    ?targetPs a sh:PropertyShape ;
+                                                                              sh:path ?p .
+                                                                }
+                                                            }
                                                             {
                                                                 ?ps sh:class ?class .
                                                             } UNION {
@@ -5655,14 +5745,20 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         }
                                                     }
                                                     WHERE {
-                                                        GRAPH <work:datatype:derived> {
+                                                        GRAPH <work:datatype:typing-evidence> {
                                                             ?ps a sh:PropertyShape ;
                                                                 sh:path ?path ;
                                                                 sh:maxCount 1 .
                                                             FILTER(isIRI(?path))
+                                                            FILTER EXISTS {
+                                                                GRAPH <work:datatype:derived> {
+                                                                    ?targetPs a sh:PropertyShape ;
+                                                                              sh:path ?path .
+                                                                }
+                                                            }
                                                         }
                                                         FILTER NOT EXISTS {
-                                                            GRAPH <work:datatype:derived> {
+                                                            GRAPH <work:datatype:typing-evidence> {
                                                                 ?otherPs a sh:PropertyShape ;
                                                                          sh:path ?path .
                                                                 FILTER NOT EXISTS { ?otherPs sh:maxCount 1 . }
