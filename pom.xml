@@ -28,6 +28,9 @@
             Key schema commands:
               mvn -Powl-schema-derive rdfio:pipeline@derive-owl-schema
               mvn -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
+              mvn -Powl-datatypes-derive rdfio:pipeline@derive-owl-datatypes-schema
+              mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
+              mvn -Powl-baseline-promote antrun:run@promote-owl-baselines
         -->
         <pluginManagement>
             <plugins>
@@ -59,6 +62,12 @@
                                                    derive OWL schema from SHACL into src/main/rdf/schema/SCHEMA_QUDT.ttl
                   -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
                                                    compare derived OWL schema to backup and fail on unexpected diffs
+                  -Powl-datatypes-derive rdfio:pipeline@derive-owl-datatypes-schema
+                                                   derive OWL datatype schema from SHACL into src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl
+                  -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
+                                                   compare derived OWL datatype schema to backup and fail on unexpected diffs
+                  -Powl-baseline-promote antrun:run@promote-owl-baselines
+                                                   copy currently-derived OWL schemas into *.backup baseline files (manual, release workflow only)
                   rdfio:pipeline@fix-src                  apply selected source repairs from generated data
                   rdfio:pipeline@inspect                  generate inspection reports (mainly target/dist)
                   spotless:apply@reformat-src             reformat source RDF files
@@ -3015,6 +3024,10 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                 <include>src/main/rdf/**/*.ttl</include>
                                 <include>src/build/**/*.ttl</include>
                             </includes>
+                            <excludes>
+                                <!-- keep this file as prefix declarations only; formatter removes unused prefixes -->
+                                <exclude>src/build/schema/OWL-derivation-prefixes.ttl</exclude>
+                            </excludes>
                             <format>
                                 <failOnWarning>false</failOnWarning>
                                 <verify>true</verify>
@@ -3141,6 +3154,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                     <exclude>target/**/*.*</exclude>
                                     <exclude>src/build/sparql2shacl/**/infer.ttl</exclude>
                                     <exclude>src/build/sparql2shacl/**/validate.ttl</exclude>
+                                    <exclude>src/build/schema/OWL-derivation-prefixes.ttl</exclude>
                                     <exclude>src/main/rdf/schema/SCHEMA_QUDT.ttl</exclude>
                                 </excludes>
                             </rdf>
@@ -3404,6 +3418,43 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                             <execution>
                                 <id>reformat-src</id>
                                 <phase>generate-test-sources</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!--
+                manual baseline promotion:
+                copies current derived OWL schemas to backup baselines used by inspect pipelines.
+                keep this out of normal build flow and invoke only when intentionally accepting a new baseline.
+             -->
+            <id>owl-baseline-promote</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <id>promote-owl-baselines</id>
+                                <phase>none</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <echo message="Promoting OWL schema baselines (*.ttl -> *.ttl.backup)." />
+                                        <available file="src/main/rdf/schema/SCHEMA_QUDT.ttl" property="schema.main.exists" />
+                                        <available file="src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl" property="schema.datatype.exists" />
+                                        <fail unless="schema.main.exists" message="Missing source file: src/main/rdf/schema/SCHEMA_QUDT.ttl" />
+                                        <fail unless="schema.datatype.exists" message="Missing source file: src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl" />
+                                        <copy file="src/main/rdf/schema/SCHEMA_QUDT.ttl" tofile="src/main/rdf/schema/SCHEMA_QUDT.ttl.backup" overwrite="true" />
+                                        <copy file="src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl" tofile="src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl.backup" overwrite="true" />
+                                        <echo message="Baseline promotion complete. Review and commit backup updates intentionally." />
+                                    </target>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -3709,7 +3760,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         ]]></sparql>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
-                                        <message>Derive rdfs:range from SHACL property shape class and datatype constraints</message>
+                                        <message>Derive rdfs:range from SHACL property shape class/datatype constraints and node-shape superclasses</message>
                                         <sparql><![CDATA[
                                             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                                             PREFIX sh: <http://www.w3.org/ns/shacl#>
@@ -3728,6 +3779,12 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ?ps sh:class ?rangeClassOrDatatype .
                                                     } UNION {
                                                         ?ps sh:datatype ?rangeClassOrDatatype .
+                                                    } UNION {
+                                                        ?ps sh:node ?nodeShape .
+                                                        FILTER(isIRI(?nodeShape))
+                                                        ?nodeShape rdfs:subClassOf ?rangeClassOrDatatype .
+                                                        FILTER(isIRI(?rangeClassOrDatatype))
+                                                        FILTER(?rangeClassOrDatatype != rdfs:Resource)
                                                     }
                                                 }
                                             }
@@ -4697,6 +4754,25 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         ]]></sparql>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
+                                        <message>Remove owl:AnnotationProperty typing when object/datatype typing exists</message>
+                                        <sparql><![CDATA[
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?p a owl:AnnotationProperty .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?p a owl:AnnotationProperty ;
+                                                       a ?specificType .
+                                                    FILTER(?specificType IN (owl:ObjectProperty, owl:DatatypeProperty))
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
                                         <message>Remove OWL property characteristics from properties without object/datatype/annotation typing</message>
                                         <sparql><![CDATA[
                                             PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -4721,6 +4797,33 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                     FILTER NOT EXISTS { ?p a owl:ObjectProperty . }
                                                     FILTER NOT EXISTS { ?p a owl:DatatypeProperty . }
                                                     FILTER NOT EXISTS { ?p a owl:AnnotationProperty . }
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove object/datatype-only OWL property characteristics from annotation properties</message>
+                                        <sparql><![CDATA[
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                            DELETE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?p a ?characteristicType .
+                                                }
+                                            }
+                                            WHERE {
+                                                VALUES ?characteristicType {
+                                                    owl:FunctionalProperty
+                                                    owl:InverseFunctionalProperty
+                                                    owl:SymmetricProperty
+                                                    owl:TransitiveProperty
+                                                    owl:AsymmetricProperty
+                                                    owl:ReflexiveProperty
+                                                    owl:IrreflexiveProperty
+                                                }
+                                                GRAPH <work:schema:derived> {
+                                                    ?p a owl:AnnotationProperty ;
+                                                       a ?characteristicType .
                                                 }
                                             }
                                         ]]></sparql>
@@ -5586,7 +5689,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                 ]]></sparql>
                                             </sparqlUpdate>
                                             <sparqlUpdate>
-                                                <message>Derive rdfs:range from SHACL property shape class and datatype constraints</message>
+                                                <message>Derive rdfs:range from SHACL property shape class/datatype constraints and node-shape superclasses</message>
                                                 <sparql><![CDATA[
                                                     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                                                     PREFIX sh: <http://www.w3.org/ns/shacl#>
@@ -5605,6 +5708,12 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 ?ps sh:class ?rangeClassOrDatatype .
                                                             } UNION {
                                                                 ?ps sh:datatype ?rangeClassOrDatatype .
+                                                            } UNION {
+                                                                ?ps sh:node ?nodeShape .
+                                                                FILTER(isIRI(?nodeShape))
+                                                                ?nodeShape rdfs:subClassOf ?rangeClassOrDatatype .
+                                                                FILTER(isIRI(?rangeClassOrDatatype))
+                                                                FILTER(?rangeClassOrDatatype != rdfs:Resource)
                                                             }
                                                         }
                                                     }
@@ -5950,6 +6059,111 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 || EXISTS { ?p a owl:DatatypeProperty . }
                                                                 || EXISTS { ?p a owl:AnnotationProperty . }
                                                             )
+                                                        }
+                                                    }
+                                                ]]></sparql>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove owl:AnnotationProperty typing when object/datatype typing exists</message>
+                                                <sparql><![CDATA[
+                                                    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                                    DELETE {
+                                                        GRAPH <work:datatype:derived> {
+                                                            ?p a owl:AnnotationProperty .
+                                                        }
+                                                    }
+                                                    WHERE {
+                                                        GRAPH <work:datatype:derived> {
+                                                            ?p a owl:AnnotationProperty ;
+                                                               a ?specificType .
+                                                            FILTER(?specificType IN (owl:ObjectProperty, owl:DatatypeProperty))
+                                                        }
+                                                    }
+                                                ]]></sparql>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove OWL property characteristics from properties without object/datatype/annotation typing</message>
+                                                <sparql><![CDATA[
+                                                    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                                    DELETE {
+                                                        GRAPH <work:datatype:derived> {
+                                                            ?p a ?characteristicType .
+                                                        }
+                                                    }
+                                                    WHERE {
+                                                        VALUES ?characteristicType {
+                                                            owl:FunctionalProperty
+                                                            owl:InverseFunctionalProperty
+                                                            owl:SymmetricProperty
+                                                            owl:TransitiveProperty
+                                                            owl:AsymmetricProperty
+                                                            owl:ReflexiveProperty
+                                                            owl:IrreflexiveProperty
+                                                        }
+                                                        GRAPH <work:datatype:derived> {
+                                                            ?p a ?characteristicType .
+                                                            FILTER NOT EXISTS { ?p a owl:ObjectProperty . }
+                                                            FILTER NOT EXISTS { ?p a owl:DatatypeProperty . }
+                                                            FILTER NOT EXISTS { ?p a owl:AnnotationProperty . }
+                                                        }
+                                                    }
+                                                ]]></sparql>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove object/datatype-only OWL property characteristics from annotation properties</message>
+                                                <sparql><![CDATA[
+                                                    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                                    DELETE {
+                                                        GRAPH <work:datatype:derived> {
+                                                            ?p a ?characteristicType .
+                                                        }
+                                                    }
+                                                    WHERE {
+                                                        VALUES ?characteristicType {
+                                                            owl:FunctionalProperty
+                                                            owl:InverseFunctionalProperty
+                                                            owl:SymmetricProperty
+                                                            owl:TransitiveProperty
+                                                            owl:AsymmetricProperty
+                                                            owl:ReflexiveProperty
+                                                            owl:IrreflexiveProperty
+                                                        }
+                                                        GRAPH <work:datatype:derived> {
+                                                            ?p a owl:AnnotationProperty ;
+                                                               a ?characteristicType .
+                                                        }
+                                                    }
+                                                ]]></sparql>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove cardinality restrictions on properties without owl:ObjectProperty/owl:DatatypeProperty typing</message>
+                                                <sparql><![CDATA[
+                                                    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                                                    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                                    DELETE {
+                                                        GRAPH <work:datatype:derived> {
+                                                            ?c rdfs:subClassOf ?r .
+                                                            ?r ?rp ?ro .
+                                                        }
+                                                    }
+                                                    WHERE {
+                                                        GRAPH <work:datatype:derived> {
+                                                            ?c rdfs:subClassOf ?r .
+                                                            ?r a owl:Restriction ;
+                                                               owl:onProperty ?p ;
+                                                               ?rp ?ro .
+                                                            FILTER(isBlank(?r))
+                                                            FILTER(
+                                                                EXISTS { ?r owl:minCardinality ?min . }
+                                                                || EXISTS { ?r owl:maxCardinality ?max . }
+                                                                || EXISTS { ?r owl:cardinality ?card . }
+                                                            )
+                                                            FILTER NOT EXISTS { ?p a owl:ObjectProperty . }
+                                                            FILTER NOT EXISTS { ?p a owl:DatatypeProperty . }
                                                         }
                                                     }
                                                 ]]></sparql>
@@ -6364,6 +6578,31 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                 ]]></sparql>
                                             </sparqlUpdate>
                                             <sparqlUpdate>
+                                                <message>Remove orphaned malformed cardinality blank nodes with no owl:onProperty</message>
+                                                <sparql><![CDATA[
+                                                    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                                    DELETE {
+                                                        GRAPH <work:datatype:derived> {
+                                                            ?r ?rp ?ro .
+                                                        }
+                                                    }
+                                                    WHERE {
+                                                        GRAPH <work:datatype:derived> {
+                                                            ?r ?rp ?ro .
+                                                            FILTER(isBlank(?r))
+                                                            FILTER(
+                                                                EXISTS { ?r owl:minCardinality ?min . }
+                                                                || EXISTS { ?r owl:maxCardinality ?max . }
+                                                                || EXISTS { ?r owl:cardinality ?card . }
+                                                            )
+                                                            FILTER NOT EXISTS { ?r owl:onProperty ?onP . }
+                                                            FILTER NOT EXISTS { ?anyS ?anyP ?r . }
+                                                        }
+                                                    }
+                                                ]]></sparql>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
                                                 <message>Remove orphaned RDF list blank-node chains</message>
                                                 <sparql><![CDATA[
                                                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -6483,6 +6722,10 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                             <add>
                                                 <file>src/build/schema/inspection/datatype-expected-metadata-added.ttl</file>
                                                 <toGraph>schema:allowlist-metadata-added</toGraph>
+                                            </add>
+                                            <add>
+                                                <file>src/build/schema/inspection/datatype-expected-added.ttl</file>
+                                                <toGraph>schema:allowlist-added</toGraph>
                                             </add>
                                             <add>
                                                 <file>src/build/schema/inspection/datatype-expected-legacy-removals.ttl</file>
@@ -6666,6 +6909,11 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 }
                                                                 FILTER NOT EXISTS {
                                                                     GRAPH <schema:allowlist-metadata-added> {
+                                                                        ?s ?p ?o .
+                                                                    }
+                                                                }
+                                                                FILTER NOT EXISTS {
+                                                                    GRAPH <schema:allowlist-added> {
                                                                         ?s ?p ?o .
                                                                     }
                                                                 }
@@ -6960,7 +7208,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                 ]]></sparql>
                                             </sparqlQuery>
                                             <sparqlQuery>
-                                                <message>Expected additions: exact allowlisted metadata triples</message>
+                                                <message>Expected additions: exact allowlisted triples</message>
                                                 <toFile>target/inspection/datatype-schema-diff/expected-added-allowlisted-metadata.txt</toFile>
                                                 <sparql><![CDATA[
                                                     SELECT ?s ?p ?o
@@ -6974,8 +7222,14 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 ?s ?p ?o .
                                                             }
                                                         }
-                                                        GRAPH <schema:allowlist-metadata-added> {
-                                                            ?s ?p ?o .
+                                                        {
+                                                            GRAPH <schema:allowlist-metadata-added> {
+                                                                ?s ?p ?o .
+                                                            }
+                                                        } UNION {
+                                                            GRAPH <schema:allowlist-added> {
+                                                                ?s ?p ?o .
+                                                            }
                                                         }
                                                     }
                                                     ORDER BY ?s ?p ?o
@@ -6999,6 +7253,11 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         }
                                                         FILTER NOT EXISTS {
                                                             GRAPH <schema:allowlist-metadata-added> {
+                                                                ?s ?p ?o .
+                                                            }
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            GRAPH <schema:allowlist-added> {
                                                                 ?s ?p ?o .
                                                             }
                                                         }
@@ -7212,6 +7471,11 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                             }
                                                             FILTER NOT EXISTS {
                                                                 GRAPH <schema:allowlist-metadata-added> {
+                                                                    ?s ?predicate ?o .
+                                                                }
+                                                            }
+                                                            FILTER NOT EXISTS {
+                                                                GRAPH <schema:allowlist-added> {
                                                                     ?s ?predicate ?o .
                                                                 }
                                                             }
@@ -7432,6 +7696,11 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                     }
                                                                     FILTER NOT EXISTS {
                                                                         GRAPH <schema:allowlist-metadata-added> {
+                                                                            ?s ?predicate ?o .
+                                                                        }
+                                                                    }
+                                                                    FILTER NOT EXISTS {
+                                                                        GRAPH <schema:allowlist-added> {
                                                                             ?s ?predicate ?o .
                                                                         }
                                                                     }
@@ -7682,6 +7951,11 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 }
                                                                 FILTER NOT EXISTS {
                                                                     GRAPH <schema:allowlist-metadata-added> {
+                                                                        ?s ?p ?o .
+                                                                    }
+                                                                }
+                                                                FILTER NOT EXISTS {
+                                                                    GRAPH <schema:allowlist-added> {
                                                                         ?s ?p ?o .
                                                                     }
                                                                 }

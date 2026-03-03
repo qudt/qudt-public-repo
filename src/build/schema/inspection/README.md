@@ -154,6 +154,16 @@ Same idea as `expected-metadata-added.ttl`, but for datatype schema.
 
 This file contains exact metadata triples that are allowed to be newly added.
 
+### `datatype-expected-added.ttl`
+
+Scope: datatype OWL schema.
+
+This file contains exact non-metadata triples that are allowed to be newly added.
+
+Use this when datatype OWL derivation now produces a real schema triple you accept
+(for example, a new `rdfs:range` inferred from SHACL), and you want inspection to
+stop reporting it as unexpected.
+
 ### `datatype-metadata-predicates.ttl`
 
 Scope: datatype OWL schema.

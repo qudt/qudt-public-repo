@@ -158,6 +158,9 @@ For datatypes, SHACL is the source of truth:
 The OWL datatypes schema is derived to:
 - `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl`
 
+The datatype legacy baseline is kept at:
+- `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl.backup`
+
 ### Run datatypes derivation only
 
 ```bash
@@ -178,6 +181,77 @@ Outputs are written to:
 - `target/inspection/datatype-schema-diff/unexpected-removed.txt`
 
 This inspection is gated: by default, any unexpected named additions or removals fail the command (`datatype.schema.diff.max.unexpected.added=0` and `datatype.schema.diff.max.unexpected.removed=0`).
+
+## Recommended Workflows (What To Run)
+
+Use these command sets depending on what changed.
+
+### 1) Only vocabularies changed (no SHACL schema changes)
+
+Run a normal build:
+
+```bash
+mvn install
+```
+
+Use this when changes are limited to vocab content and you are not changing:
+- `src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl`
+- `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl`
+
+### 2) SHACL main and/or SHACL datatypes schema changed
+
+Run derivation + inspection for each changed schema, then run the normal build.
+
+If **main SHACL schema** changed:
+
+```bash
+mvn -Powl-schema-derive rdfio:pipeline@derive-owl-schema
+mvn -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
+```
+
+If **datatype SHACL schema** changed:
+
+```bash
+mvn -Powl-datatypes-derive rdfio:pipeline@derive-owl-datatypes-schema
+mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
+```
+
+Then run:
+
+```bash
+mvn install
+```
+
+### 3) After a new release (accepting a new inspection baseline)
+
+This is for intentionally advancing the baseline used by inspection diffs.
+Do this only after reviewing and accepting schema changes.
+
+1. Regenerate and inspect both schemas:
+
+```bash
+mvn -Powl-schema-derive rdfio:pipeline@derive-owl-schema
+mvn -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
+mvn -Powl-datatypes-derive rdfio:pipeline@derive-owl-datatypes-schema
+mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
+```
+
+2. Promote current derived OWL files into backup baseline files:
+
+```bash
+mvn -Powl-baseline-promote antrun:run@promote-owl-baselines
+```
+
+This copies:
+- `src/main/rdf/schema/SCHEMA_QUDT.ttl` -> `src/main/rdf/schema/SCHEMA_QUDT.ttl.backup`
+- `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl` -> `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl.backup`
+
+3. Re-run inspections to confirm clean diffs against the new baseline, then commit.
+
+```bash
+mvn -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
+mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
+```
 
 ## How It Works: Key Steps
 
