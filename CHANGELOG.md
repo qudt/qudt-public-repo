@@ -18,6 +18,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Tracked down and fixed errors in the OWL schema that were causing problems in Protege
+- Fixed the `qudt:hasQuantityKind` of `unit:MicroS-PER-M`
+- Fixed the `rdfs:isDefinedBy` of `unit:MicroM-PER-SEC2`
 
 ## [3.1.11] - 2026-02-19
 
