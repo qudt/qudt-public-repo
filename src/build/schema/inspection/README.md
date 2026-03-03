@@ -1,124 +1,190 @@
-# Schema Inspection Allowlists
+# Schema Inspection Allowlists (Plain-English Guide)
 
-This folder contains helper files used by the Maven inspection command:
+This folder contains small Turtle files that tell the inspection pipelines:
 
-`mvn -DskipTests -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff -Drdfio.pipeline.forceRun=true`
+1. which schema differences are expected and acceptable
+2. which schema differences should still fail the build
 
-That command compares two OWL schema files:
+In short, these files are the "rules of interpretation" for schema diffs.
 
-- `src/main/rdf/schema/SCHEMA_QUDT.ttl.backup`
-  This is the older reference OWL file.
-- `src/main/rdf/schema/SCHEMA_QUDT.ttl`
-  This is the newly generated OWL file (derived from SHACL).
+## Which commands use these files
 
-When the command compares those files, it finds added triples and removed triples.
-Some of those differences are expected, and some are real problems.
-The files in this folder define what should be treated as expected.
+Main OWL schema inspection:
 
-Think of these files as a "known differences" policy.
+`mvn -DskipTests -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff`
 
-## What each file does
+Datatype OWL schema inspection:
 
-### `legacy-range-properties.ttl`
+`mvn -DskipTests -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff`
 
-This file lists properties for which a missing `rdfs:range` triple is acceptable.
+Each inspection compares:
 
-Plainly:
-- If the old backup file had a range triple for one of these properties,
-- and the new generated file does not,
-- inspection will allow that removal.
+1. a backup OWL schema (`*.ttl.backup`) as the old baseline
+2. the newly derived OWL schema (`*.ttl`)
 
-Use this when old range statements are legacy behavior you no longer want to keep.
+Then it writes reports under `target/inspection/...`.
 
-### `stub-range-properties.ttl`
+## Mental model
 
-This file lists properties for which a new `rdfs:range` triple is acceptable.
+Inspection first computes raw differences:
 
-Plainly:
-- If the new generated file has a range triple for one of these properties,
-- and the backup file did not,
-- inspection will allow that addition.
+1. triples added in derived OWL
+2. triples removed from derived OWL
 
-Use this when ranges are now being produced from newer SHACL/stub behavior.
+After that, inspection filters out differences that are expected.
+The files in this directory define those expected cases.
 
-### `metadata-predicates.ttl`
+So if you edit one of these files, you are changing what inspection treats as:
 
-This file lists predicates that inspection should treat like metadata fields.
+1. acceptable differences
+2. unexpected differences
 
-For these predicates, differences are interpreted more leniently when they match SHACL-driven expectations.
-This helps avoid false alarms for descriptive metadata fields.
-
-### `expected-metadata-added.ttl`
-
-This file lists exact triples that are allowed to be newly added.
-
-"Exact" means all three parts must match:
-- subject
-- predicate
-- object
-
-If one part is different, it is not considered a match.
+## File-by-file: what changes if you edit it
 
 ### `expected-legacy-removals.ttl`
 
-This file lists exact triples that are allowed to disappear.
+Scope: main OWL schema.
 
-Again, matching is exact:
-- subject + predicate + object must be identical.
+This file contains exact triples that are allowed to disappear from the derived OWL schema.
 
-Use this for specific old triples you intentionally want gone.
+What happens if you add a triple here:
+
+1. if that exact triple is missing in the derived OWL file
+2. it will be counted as expected
+3. it will not show up as an unexpected removal
+
+Use this for one-off legacy triples you intentionally retired.
+
+### `expected-metadata-added.ttl`
+
+Scope: main OWL schema.
+
+This file contains exact triples that are allowed to appear newly in the derived OWL schema.
+
+What happens if you add a triple here:
+
+1. if that exact triple appears in derived OWL and was not in backup
+2. it is treated as expected
+3. it does not fail the inspection gate
+
+Use this mostly for approved metadata additions.
+
+### `legacy-range-properties.ttl`
+
+Scope: main OWL schema.
+
+This file lists properties for which dropped `rdfs:range` statements are acceptable.
+
+What happens if you add a property here:
+
+1. if backup had `<thatProperty> rdfs:range ...`
+2. and derived OWL removed it
+3. removal is treated as expected
+
+Use when an old range statement is known legacy behavior and should stay removed.
+
+### `stub-range-properties.ttl`
+
+Scope: main OWL schema.
+
+This file lists properties for which newly added `rdfs:range` statements are acceptable.
+
+What happens if you add a property here:
+
+1. if derived OWL adds `<thatProperty> rdfs:range ...`
+2. and backup did not have that range
+3. addition is treated as expected
+
+Use when new SHACL/stub modeling now produces ranges that did not exist before.
+
+### `metadata-predicates.ttl`
+
+Scope: main OWL schema.
+
+This file lists predicates considered "metadata-like" in diff normalization.
+
+What happens if you add a predicate here:
+
+1. differences using that predicate may be treated more leniently
+2. especially when SHACL carries corresponding subject/predicate evidence
+3. fewer metadata-only false alarms in `unexpected-*` reports
+
+Use carefully; this broadens filtering for that predicate.
 
 ### `property-type-objects.ttl`
 
-This file lists allowed `rdf:type` object values used in property-type normalization
+Scope: main OWL schema.
+
+This file lists allowed `rdf:type` objects for property typing normalization
 (for example `owl:ObjectProperty`, `owl:DatatypeProperty`).
 
-These help inspection treat SHACL-derived type classifications consistently.
+What happens if you add a type object here:
+
+1. type shifts to that object may be considered expected
+2. when supported by SHACL path/type derivation logic
+
+Use when a type object is a valid SHACL-driven property classification.
 
 ### `shacl-type-objects.ttl`
 
-This file lists SHACL-only type objects (for example `sh:NodeShape`).
+Scope: main and datatype schema inspection.
 
-If these SHACL typing triples are missing from the OWL output, inspection treats that as expected.
-That is normal, because OWL output is not meant to carry SHACL-only typing.
+This file lists SHACL-only class objects (for example `sh:NodeShape`, `sh:PropertyShape`).
 
-### `datatype-metadata-predicates.ttl`
+What happens if you add an object here:
 
-This is the datatype-schema version of metadata predicate allowlisting.
+1. removal of `rdf:type <thatObject>` from OWL output is treated as expected
+2. because OWL output intentionally strips SHACL-only typing
 
-Plainly:
-- If a removed triple uses one of these predicates,
-- and SHACL still has the same subject + predicate,
-- inspection treats that removal as expected metadata churn.
-
-### `datatype-expected-metadata-added.ttl`
-
-This file is for exact added triples that are acceptable in the datatype OWL schema.
-
-Use this for very specific new metadata triples that you intentionally approved.
-Keep it small.
+Use only for SHACL vocabulary types that should not survive in OWL files.
 
 ### `datatype-expected-legacy-removals.ttl`
 
-This file is for exact removed triples that are acceptable in the datatype OWL schema.
+Scope: datatype OWL schema.
 
-Use this when an old legacy triple should disappear and stay gone.
+Same idea as `expected-legacy-removals.ttl`, but for datatype schema.
 
-## Safe way to edit these files
+This file contains exact removed triples that are accepted in datatype OWL derivation.
 
-When you change one of these files:
+### `datatype-expected-metadata-added.ttl`
 
-1. Make one small change at a time.
-2. Run the inspection command.
-3. Read:
-   - `target/inspection/schema-diff/summary.txt`
-   - `target/inspection/schema-diff/unexpected-added.txt`
-   - `target/inspection/schema-diff/unexpected-removed.txt`
-4. Keep or revert your change based on whether the result matches your intent.
+Scope: datatype OWL schema.
 
-This keeps inspection strict, and prevents the allowlists from growing without reason.
+Same idea as `expected-metadata-added.ttl`, but for datatype schema.
 
-## Why this README exists
+This file contains exact metadata triples that are allowed to be newly added.
 
-Turtle comments at the top of `.ttl` files may be reformatted or removed by tooling.
-This Markdown file is the stable place for explanations written for humans.
+### `datatype-metadata-predicates.ttl`
+
+Scope: datatype OWL schema.
+
+Same idea as `metadata-predicates.ttl`, but for datatype schema.
+
+This file defines which predicates are treated as metadata-like during datatype diff filtering.
+
+## Practical editing workflow
+
+When you change any file in this folder:
+
+1. make a small, focused change
+2. rerun the relevant inspection command
+3. check these outputs first:
+   1. `summary.txt`
+   2. `unexpected-added.txt`
+   3. `unexpected-removed.txt`
+   4. `unexpected-by-predicate.txt`
+4. confirm that only intended differences moved from unexpected to expected
+
+## What not to do
+
+1. Do not add large batches to allowlists just to "make it green".
+2. Do not treat these files as a place to hide unknown regressions.
+3. Do not put general SHACL/OWL modeling rules here if they belong in derivation logic.
+
+These files should stay small and explicit.
+If a pattern is truly general, prefer implementing it in derivation or normalization SPARQL, not by listing many one-off triples.
+
+## Why this README is in Markdown (not Turtle comments)
+
+Tooling can reformat Turtle files and remove or rearrange comments.
+This README is meant to be the stable, human-readable explanation of what each allowlist does.

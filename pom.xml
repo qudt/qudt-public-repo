@@ -396,6 +396,7 @@ validAspectDirs.each { aspectDir ->
                                             src/build/collection-declarations/OWL-Collection.ttl
                                             target/dist/vocab/**/*.ttl
                                             target/dist/schema/SCHEMA_QUDT.ttl
+                                            target/dist/schema/SCHEMA_QUDT-DATATYPE.ttl
                                         </include>
                                     </input>
                                     <filters>
@@ -3598,6 +3599,10 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         <toGraph>work:schema:typing-evidence</toGraph>
                                     </add>
                                     <add>
+                                        <file>src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl</file>
+                                        <toGraph>work:schema:shacl-source</toGraph>
+                                    </add>
+                                    <add>
                                         <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl</file>
                                         <toGraph>work:schema:typing-evidence</toGraph>
                                     </add>
@@ -3606,8 +3611,20 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         <toGraph>work:schema:derived</toGraph>
                                     </add>
                                     <add>
+                                        <file>src/main/rdf/schema/shacl/SHACL-SCHEMA-SUPPLEMENT_QUDT.ttl</file>
+                                        <toGraph>work:schema:shacl-source</toGraph>
+                                    </add>
+                                    <add>
                                         <file>src/main/rdf/schema/shacl/SHACL-SCHEMA-STUBS_QUDT.ttl</file>
                                         <toGraph>work:schema:derived</toGraph>
+                                    </add>
+                                    <add>
+                                        <file>src/main/rdf/schema/shacl/SHACL-SCHEMA-STUBS_QUDT.ttl</file>
+                                        <toGraph>work:schema:shacl-source</toGraph>
+                                    </add>
+                                    <add>
+                                        <file>src/main/rdf/schema/SCHEMA_QUDT.ttl.backup</file>
+                                        <toGraph>work:schema:backup</toGraph>
                                     </add>
                                     <assert>
                                         <message>Guard: disallow sh:class xsd:* in SHACL property shapes used for OWL derivation</message>
@@ -5386,6 +5403,44 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                             }
                                         ]]></sparql>
                                     </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Carry over one backup dcterms:description when SHACL has none</message>
+                                        <sparql><![CDATA[
+                                            PREFIX dcterms: <http://purl.org/dc/terms/>
+
+                                            INSERT {
+                                                GRAPH <work:schema:derived> {
+                                                    ?s dcterms:description ?carryDescription .
+                                                }
+                                            }
+                                            WHERE {
+                                                {
+                                                    SELECT ?s (MIN(?backupDescriptionCandidate) AS ?carryDescription)
+                                                    WHERE {
+                                                        GRAPH <work:schema:backup> {
+                                                            ?s dcterms:description ?backupDescriptionCandidate .
+                                                            FILTER(isIRI(?s))
+                                                        }
+                                                    }
+                                                    GROUP BY ?s
+                                                }
+                                                GRAPH <work:schema:derived> {
+                                                    ?s ?anyP ?anyO .
+                                                    FILTER(isIRI(?s))
+                                                }
+                                                FILTER NOT EXISTS {
+                                                    GRAPH <work:schema:shacl-source> {
+                                                        ?s dcterms:description ?shaclDescription .
+                                                    }
+                                                }
+                                                FILTER NOT EXISTS {
+                                                    GRAPH <work:schema:derived> {
+                                                        ?s dcterms:description ?existingDescription .
+                                                    }
+                                                }
+                                            }
+                                        ]]></sparql>
+                                    </sparqlUpdate>
                                     <write>
                                         <graph>work:schema:derived</graph>
                                         <toFile>src/main/rdf/schema/SCHEMA_QUDT.ttl</toFile>
@@ -5430,6 +5485,10 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                             <add>
                                                 <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl</file>
                                                 <toGraph>work:datatype:shacl-source</toGraph>
+                                            </add>
+                                            <add>
+                                                <file>src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl.backup</file>
+                                                <toGraph>work:datatype:backup</toGraph>
                                             </add>
                                             <add>
                                                 <file>src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl</file>
@@ -6326,6 +6385,44 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                             ?head rdf:rest* ?n .
                                                             FILTER(isBlank(?n))
                                                             ?n ?np ?no .
+                                                        }
+                                                    }
+                                                ]]></sparql>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Carry over one backup dcterms:description when SHACL datatypes schema has none</message>
+                                                <sparql><![CDATA[
+                                                    PREFIX dcterms: <http://purl.org/dc/terms/>
+
+                                                    INSERT {
+                                                        GRAPH <work:datatype:derived> {
+                                                            ?s dcterms:description ?carryDescription .
+                                                        }
+                                                    }
+                                                    WHERE {
+                                                        {
+                                                            SELECT ?s (MIN(?backupDescriptionCandidate) AS ?carryDescription)
+                                                            WHERE {
+                                                                GRAPH <work:datatype:backup> {
+                                                                    ?s dcterms:description ?backupDescriptionCandidate .
+                                                                    FILTER(isIRI(?s))
+                                                                }
+                                                            }
+                                                            GROUP BY ?s
+                                                        }
+                                                        GRAPH <work:datatype:derived> {
+                                                            ?s ?anyP ?anyO .
+                                                            FILTER(isIRI(?s))
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            GRAPH <work:datatype:shacl-source> {
+                                                                ?s dcterms:description ?shaclDescription .
+                                                            }
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            GRAPH <work:datatype:derived> {
+                                                                ?s dcterms:description ?existingDescription .
+                                                            }
                                                         }
                                                     }
                                                 ]]></sparql>
