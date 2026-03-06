@@ -9,6 +9,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added `unit:PicoCI` (picocurie, pCi)
+- Added `unit:PicoCI-PER-L` (picocuries per litre)
+- Added `unit:GRAIN_AIR` (grain per pound): grains of water vapor per pound of dry air, a psychrometric mass-ratio unit used in HVAC
+
 ### Changed
 
 ### Deprecated
