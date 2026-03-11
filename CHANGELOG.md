@@ -16,6 +16,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
+- Refactored the SHACL Datatypes schema and the Datatypes vocabulary
+
 ### Deprecated
 
 ### Fixed
