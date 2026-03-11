@@ -11,7 +11,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Added `unit:PicoCI` (picocurie, pCi)
 - Added `unit:PicoCI-PER-L` (picocuries per litre)
-- Added `unit:GRAIN_AIR` (grain per pound): grains of water vapor per pound of dry air, a psychrometric mass-ratio unit used in HVAC
+- Added `unit:GRAIN-PER-LB_M` (grains per pound-mass): dimensionless mass-ratio unit
+- Added `quantitykind:SpecificHumidity`: ratio of mass of water vapor to total mass of air parcel, with `skos:broader quantitykind:MassRatio`
 - Added `quantitykind:ZenithAngle`: angle from zenith to an object; broader: `Angle`
 - Added `quantitykind:ElectricEnergy`: integral of electric power over time (e.g. kWh); broader: `Energy`
 - Added `quantitykind:ThermalPower`: rate of thermal energy transfer (e.g. heating/cooling output); broader: `Power`
