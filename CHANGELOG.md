@@ -9,6 +9,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added `unit:PicoCI` (picocurie, pCi)
+- Added `unit:PicoCI-PER-L` (picocuries per litre)
+- Added `unit:GRAIN-PER-LB_M` (grains per pound-mass): dimensionless mass-ratio unit
+- Added `quantitykind:SpecificHumidity`: ratio of mass of water vapor to total mass of air parcel, with `skos:broader quantitykind:MassRatio`
+
 ### Changed
 
 ### Deprecated
