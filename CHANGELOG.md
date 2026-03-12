@@ -16,6 +16,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
+- Refactored the SHACL Datatypes schema and the Datatypes vocabulary
+- Renamed graph metadata object names (vaem:GMD_...) for consistency
+
 ### Deprecated
 
 ### Fixed
@@ -23,6 +26,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Tracked down and fixed errors in the OWL schema that were causing problems in Protege
 - Fixed the `qudt:hasQuantityKind` of `unit:MicroS-PER-M`
 - Fixed the `rdfs:isDefinedBy` of `unit:MicroM-PER-SEC2`
+- Fixed a couple of hard-coded dcterms:modified dates so they auto-update during build
 
 ## [3.1.11] - 2026-02-19
 
