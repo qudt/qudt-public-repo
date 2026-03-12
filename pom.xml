@@ -26,9 +26,9 @@
         <!--
             Build command guide lives in BUILDING.md.
             Key schema commands:
-              mvn -Powl-schema-derive rdfio:pipeline@derive-owl-schema
+              mvn -Powl-schema-derive antrun:run@derive-owl-schema
               mvn -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
-              mvn -Powl-datatypes-derive rdfio:pipeline@derive-owl-datatypes-schema
+              mvn -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
               mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
               mvn -Powl-baseline-promote antrun:run@promote-owl-baselines
         -->
@@ -58,12 +58,12 @@
                   install                  [Profile -Pzip: release-zip]
 
                 Explicit (phase 'none') workflows:
-                  -Powl-schema-derive rdfio:pipeline@derive-owl-schema
-                                                   derive OWL schema from SHACL into src/main/rdf/schema/SCHEMA_QUDT.ttl
+                  -Powl-schema-derive antrun:run@derive-owl-schema
+                                                   derive OWL schema from SHACL into src/main/rdf/schema/SCHEMA_QUDT.ttl and serialize it
                   -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
                                                    compare derived OWL schema to backup and fail on unexpected diffs
-                  -Powl-datatypes-derive rdfio:pipeline@derive-owl-datatypes-schema
-                                                   derive OWL datatype schema from SHACL into src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl
+                  -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
+                                                   derive OWL datatype schema from SHACL into src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl and serialize it
                   -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
                                                    compare derived OWL datatype schema to backup and fail on unexpected diffs
                   -Powl-baseline-promote antrun:run@promote-owl-baselines
@@ -3628,7 +3628,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                         <version>1.5.5</version>
                         <executions>
                     <execution>
-                        <id>derive-owl-schema</id>
+                        <id>derive-owl-schema-pipeline</id>
                         <phase>none</phase>
                         <goals>
                             <goal>pipeline</goal>
@@ -5555,6 +5555,29 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <id>derive-owl-schema</id>
+                                <phase>none</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <exec executable="mvn" failonerror="true">
+                                            <arg value="-q" />
+                                            <arg value="-Powl-schema-derive" />
+                                            <arg value="rdfio:pipeline@derive-owl-schema-pipeline" />
+                                            <arg value="spotless:apply@reformat-src" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -5568,7 +5591,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                         <version>1.5.5</version>
                         <executions>
                             <execution>
-                                <id>derive-owl-datatypes-schema</id>
+                                <id>derive-owl-datatypes-schema-pipeline</id>
                                 <phase>none</phase>
                                 <goals>
                                     <goal>pipeline</goal>
@@ -6673,6 +6696,29 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                             <savepoint><id>99-derived-datatype-schema-written</id></savepoint>
                                         </steps>
                                     </pipeline>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <id>derive-owl-datatypes-schema</id>
+                                <phase>none</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <exec executable="mvn" failonerror="true">
+                                            <arg value="-q" />
+                                            <arg value="-Powl-datatypes-derive" />
+                                            <arg value="rdfio:pipeline@derive-owl-datatypes-schema-pipeline" />
+                                            <arg value="spotless:apply@reformat-src" />
+                                        </exec>
+                                    </target>
                                 </configuration>
                             </execution>
                         </executions>

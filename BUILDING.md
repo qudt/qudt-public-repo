@@ -129,10 +129,10 @@ The legacy baseline is kept at:
 ### Run derivation only
 
 ```bash
-mvn -Powl-schema-derive rdfio:pipeline@derive-owl-schema
+mvn -Powl-schema-derive antrun:run@derive-owl-schema
 ```
 
-This runs the `derive-owl-schema` pipeline explicitly via the `owl-schema-derive` profile (not part of the default lifecycle) and regenerates `src/main/rdf/schema/SCHEMA_QUDT.ttl`.
+This runs the `derive-owl-schema` workflow explicitly via the `owl-schema-derive` profile (not part of the default lifecycle), regenerates `src/main/rdf/schema/SCHEMA_QUDT.ttl`, and then serializes it with Spotless.
 
 The derivation pipeline uses RDFIO savepoints for incremental resumes.
 If derivation inputs are unchanged, a subsequent run can resume from the latest valid savepoint instead of re-running all derivation steps.
@@ -164,10 +164,10 @@ The datatype legacy baseline is kept at:
 ### Run datatypes derivation only
 
 ```bash
-mvn -Powl-datatypes-derive rdfio:pipeline@derive-owl-datatypes-schema
+mvn -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
 ```
 
-This runs the `derive-owl-datatypes-schema` pipeline explicitly via the `owl-datatypes-derive` profile (not part of the default lifecycle) and regenerates `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl`.
+This runs the `derive-owl-datatypes-schema` workflow explicitly via the `owl-datatypes-derive` profile (not part of the default lifecycle), regenerates `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl`, and then serializes it with Spotless.
 
 ### Inspect derived datatypes schema vs backup (gated)
 
@@ -205,14 +205,14 @@ Run derivation + inspection for each changed schema, then run the normal build.
 If **main SHACL schema** changed:
 
 ```bash
-mvn -Powl-schema-derive rdfio:pipeline@derive-owl-schema
+mvn -Powl-schema-derive antrun:run@derive-owl-schema
 mvn -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
 ```
 
 If **datatype SHACL schema** changed:
 
 ```bash
-mvn -Powl-datatypes-derive rdfio:pipeline@derive-owl-datatypes-schema
+mvn -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
 mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
 ```
 
@@ -230,9 +230,9 @@ Do this only after reviewing and accepting schema changes.
 1. Regenerate and inspect both schemas:
 
 ```bash
-mvn -Powl-schema-derive rdfio:pipeline@derive-owl-schema
+mvn -Powl-schema-derive antrun:run@derive-owl-schema
 mvn -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
-mvn -Powl-datatypes-derive rdfio:pipeline@derive-owl-datatypes-schema
+mvn -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
 mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
 ```
 
