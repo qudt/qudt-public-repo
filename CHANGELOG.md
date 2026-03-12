@@ -9,9 +9,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added `unit:PicoCI` (picocurie, pCi)
+- Added `unit:PicoCI-PER-L` (picocuries per litre)
+- Added `unit:GRAIN-PER-LB_M` (grains per pound-mass): dimensionless mass-ratio unit
+- Added `quantitykind:SpecificHumidity`: ratio of mass of water vapor to total mass of air parcel, with `skos:broader quantitykind:MassRatio`
+
 ### Changed
 
 - Switched from hand-curated OWL main and datatype schemas to derivations from the SHACL schemas
+- Refactored the SHACL Datatypes schema and the Datatypes vocabulary
+- Renamed graph metadata object names (vaem:GMD_...) for consistency
 
 ### Deprecated
 
@@ -20,6 +27,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Tracked down and fixed errors in the OWL schema that were causing problems in Protege
 - Fixed the `qudt:hasQuantityKind` of `unit:MicroS-PER-M`
 - Fixed the `rdfs:isDefinedBy` of `unit:MicroM-PER-SEC2`
+- Fixed a couple of hard-coded dcterms:modified dates so they auto-update during build
 
 ## [3.1.11] - 2026-02-19
 
