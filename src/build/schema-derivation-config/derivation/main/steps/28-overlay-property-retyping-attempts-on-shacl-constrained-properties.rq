@@ -1,0 +1,19 @@
+# owl-schema-derive step 28
+# Message: Overlay property retyping attempts on SHACL-constrained properties
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+                                            PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+                                            SELECT DISTINCT ?property ?overlayType
+                                            WHERE {
+                                                GRAPH <work:schema:overlay> {
+                                                    ?property a ?overlayType .
+                                                    FILTER(?overlayType IN (owl:AnnotationProperty, owl:ObjectProperty, owl:DatatypeProperty))
+                                                }
+                                                GRAPH <work:schema:derived> {
+                                                    ?ps a sh:PropertyShape ;
+                                                        sh:path ?property .
+                                                    FILTER(isIRI(?property))
+                                                }
+                                            }
+                                            ORDER BY ?property ?overlayType
