@@ -14,8 +14,8 @@ PREFIX vaem: <http://www.linkedmodel.org/schema/vaem#>
                                                                ?p ?o .
                                                             FILTER(
                                                                 ?m NOT IN (
-                                                                    <http://qudt.org/schema/datatype/GMD_datatype>,
-                                                                    <http://qudt.org/schema/shacl/datatype/GMD_datatype>
+                                                                    vaem:GMD_SCHEMA-DATATYPE,
+                                                                    vaem:GMD_SCHEMA-SHACL-DATATYPE
                                                                 )
                                                             )
                                                         }

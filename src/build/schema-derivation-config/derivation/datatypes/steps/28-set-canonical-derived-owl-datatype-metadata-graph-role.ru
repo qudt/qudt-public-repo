@@ -5,16 +5,16 @@ PREFIX vaem: <http://www.linkedmodel.org/schema/vaem#>
 
                                                     DELETE {
                                                         GRAPH <work:datatype:derived> {
-                                                            <http://qudt.org/schema/datatype/GMD_datatype> vaem:hasGraphRole ?oldRole .
+                                                            vaem:GMD_SCHEMA-DATATYPE vaem:hasGraphRole ?oldRole .
                                                         }
                                                     }
                                                     INSERT {
                                                         GRAPH <work:datatype:derived> {
-                                                            <http://qudt.org/schema/datatype/GMD_datatype> vaem:hasGraphRole vaem:SchemaGraph .
+                                                            vaem:GMD_SCHEMA-DATATYPE vaem:hasGraphRole vaem:SchemaGraph .
                                                         }
                                                     }
                                                     WHERE {
                                                         GRAPH <work:datatype:derived> {
-                                                            OPTIONAL { <http://qudt.org/schema/datatype/GMD_datatype> vaem:hasGraphRole ?oldRole . }
+                                                            OPTIONAL { vaem:GMD_SCHEMA-DATATYPE vaem:hasGraphRole ?oldRole . }
                                                         }
                                                     }

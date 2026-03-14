@@ -10,7 +10,7 @@ PREFIX vaem: <http://www.linkedmodel.org/schema/vaem#>
                                                     }
                                                     INSERT {
                                                         GRAPH <work:datatype:derived> {
-                                                            <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> vaem:hasGraphMetadata <http://qudt.org/schema/datatype/GMD_datatype> .
+                                                            <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> vaem:hasGraphMetadata vaem:GMD_SCHEMA-DATATYPE .
                                                         }
                                                     }
                                                     WHERE {

@@ -6,17 +6,17 @@ PREFIX vaem: <http://www.linkedmodel.org/schema/vaem#>
 
                                                     DELETE {
                                                         GRAPH <work:datatype:derived> {
-                                                            <http://qudt.org/schema/datatype/GMD_datatype> ?p ?oldObj .
+                                                            vaem:GMD_SCHEMA-DATATYPE ?p ?oldObj .
                                                         }
                                                     }
                                                     INSERT {
                                                         GRAPH <work:datatype:derived> {
-                                                            <http://qudt.org/schema/datatype/GMD_datatype> ?p ?newObj .
+                                                            vaem:GMD_SCHEMA-DATATYPE ?p ?newObj .
                                                         }
                                                     }
                                                     WHERE {
                                                         GRAPH <work:datatype:derived> {
-                                                            <http://qudt.org/schema/datatype/GMD_datatype> ?p ?oldObj .
+                                                            vaem:GMD_SCHEMA-DATATYPE ?p ?oldObj .
                                                             FILTER(isIRI(?oldObj))
                                                             FILTER(
                                                                 ?p IN (vaem:isMetadataFor, owl:versionIRI)

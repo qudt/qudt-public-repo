@@ -7,17 +7,17 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
                                                     DELETE {
                                                         GRAPH <work:datatype:derived> {
-                                                            <http://qudt.org/schema/datatype/GMD_datatype> ?p ?oldLiteral .
+                                                            vaem:GMD_SCHEMA-DATATYPE ?p ?oldLiteral .
                                                         }
                                                     }
                                                     INSERT {
                                                         GRAPH <work:datatype:derived> {
-                                                            <http://qudt.org/schema/datatype/GMD_datatype> ?p ?newLiteral .
+                                                            vaem:GMD_SCHEMA-DATATYPE ?p ?newLiteral .
                                                         }
                                                     }
                                                     WHERE {
                                                         GRAPH <work:datatype:derived> {
-                                                            <http://qudt.org/schema/datatype/GMD_datatype> ?p ?oldLiteral .
+                                                            vaem:GMD_SCHEMA-DATATYPE ?p ?oldLiteral .
                                                             FILTER(isLiteral(?oldLiteral))
                                                             FILTER(
                                                                 ?p IN (
