@@ -19,6 +19,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Switched from hand-curated OWL main and datatype schemas to derivations from the SHACL schemas
 - Refactored the SHACL Datatypes schema and the Datatypes vocabulary
 - Renamed graph metadata object names (vaem:GMD_...) for consistency
+- Make use of correct symbol `var` for reactive power quantities
 
 ### Deprecated
 
