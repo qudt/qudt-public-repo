@@ -29,6 +29,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed the `qudt:hasQuantityKind` of `unit:MicroS-PER-M`
 - Fixed the `rdfs:isDefinedBy` of `unit:MicroM-PER-SEC2`
 - Fixed a couple of hard-coded dcterms:modified dates so they auto-update during build
+- Improved the definition of `unit:MIN` and added a definition to `unit:MIN_ANGLE` to disambiguate
 
 ## [3.1.11] - 2026-02-19
 
