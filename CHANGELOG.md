@@ -70,6 +70,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed the `rdfs:isDefinedBy` of `unit:MicroM-PER-SEC2`
 - Fixed a couple of hard-coded dcterms:modified dates so they auto-update during build
 - Added some missing metadata in the datatypes vocabulary graph, needed for publication
+- test change
 
 ## [3.1.11] - 2026-02-19
 
