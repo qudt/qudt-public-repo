@@ -13,6 +13,12 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `unit:PicoCI-PER-L` (picocuries per litre)
 - Added `unit:GRAIN-PER-LB_M` (grains per pound-mass): dimensionless mass-ratio unit
 - Added `quantitykind:SpecificHumidity`: ratio of mass of water vapour to total mass of air parcel, with `skos:broader quantitykind:MassRatio`
+- Added `quantitykind:ZenithAngle`: angle from zenith to an object; broader: `Angle`
+- Added `quantitykind:ElectricEnergy`: integral of electric power over time (e.g. kWh); broader: `Energy`
+- Added `quantitykind:ThermalPower`: rate of thermal energy transfer (e.g. heating/cooling output); broader: `Power`
+- Added `quantitykind:ReactiveEnergy`: integral of reactive power over time (e.g. kvarh); broader: `Energy`
+- Added `quantitykind:ElectricCurrentImbalance`: phase current deviation from average in polyphase systems; broader: `DimensionlessRatio`
+- Added `quantitykind:VoltageImbalance`: phase voltage deviation from average in polyphase systems; broader: `DimensionlessRatio`
 
 ### Changed
 
