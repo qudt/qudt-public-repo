@@ -37,6 +37,16 @@ jobs:
     - name: Check if a snapshot release should be made and set environment variable
       run: echo "MAKE_SNAPSHOT_RELEASE=${{ inputs.force_snapshot_release || (github.event.pull_request.base.ref == 'main' && github.event.action == 'closed' && github.event.pull_request.merged == true) }}" >> $GITHUB_ENV
 
+    - name: Determine comparison refs
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "BASE_REF=main" >> $GITHUB_ENV
+          echo "HEAD_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+        else
+          echo "BASE_REF=${{ github.base_ref }}" >> $GITHUB_ENV
+          echo "HEAD_REF=${{ github.head_ref }}" >> $GITHUB_ENV
+        fi
+
       # configure git
     - name: setup git config
       run: |
@@ -47,21 +57,25 @@ jobs:
       if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'false' }}
       run: |
         # as we aren't building main, let's fetch it
-        git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
-        if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+        git fetch origin $BASE_REF:$BASE_REF
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "$HEAD_REF" != "$BASE_REF" ]; then
+            git fetch origin $HEAD_REF:$HEAD_REF
+          fi
+        elif [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
           # Fetch from contributor’s fork
           git remote add fork ${{ github.event.pull_request.head.repo.clone_url }}
-          git fetch fork ${{ github.event.pull_request.head.ref }}:${{ github.head_ref }}
+          git fetch fork ${{ github.event.pull_request.head.ref }}:$HEAD_REF
         else
           # Fetch from the same repo
-          git fetch origin ${{ github.head_ref }}:${{ github.head_ref }}
+          git fetch origin $HEAD_REF:$HEAD_REF
         fi
 
     - name: Fail if src/main has changes but CHANGELOG.md does not (unless PR was merged)
       if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'false' }}
       run: |
         set -e
-        CHANGED_FILES=$(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }})
+        CHANGED_FILES=$(git diff --name-only $BASE_REF $HEAD_REF)
         if echo "$CHANGED_FILES" | grep -q '^src/main' && ! echo "$CHANGED_FILES" | grep -q '^CHANGELOG.md$'; then
           echo "Directory src/main changed without an update of CHANGELOG.md, this is not allowed. Please update CHANGELOG.md"
           exit 1
