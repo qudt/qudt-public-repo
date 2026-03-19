@@ -13,6 +13,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `unit:PicoCI-PER-L` (picocuries per litre)
 - Added `unit:GRAIN-PER-LB_M` (grains per pound-mass): dimensionless mass-ratio unit
 - Added `quantitykind:SpecificHumidity`: ratio of mass of water vapour to total mass of air parcel, with `skos:broader quantitykind:MassRatio`
+- Added `unit:DU` (Dobson Unit), with thanks to @larsbarring.
 
 ### Changed
 
