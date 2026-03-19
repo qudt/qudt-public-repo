@@ -12,17 +12,65 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `unit:PicoCI` (picocurie, pCi)
 - Added `unit:PicoCI-PER-L` (picocuries per litre)
 - Added `unit:GRAIN-PER-LB_M` (grains per pound-mass): dimensionless mass-ratio unit
-- Added `quantitykind:SpecificHumidity`: ratio of mass of water vapor to total mass of air parcel, with `skos:broader quantitykind:MassRatio`
+- Added `quantitykind:SpecificHumidity`: ratio of mass of water vapour to total mass of air parcel, with `skos:broader quantitykind:MassRatio`
 
 ### Changed
 
+- Switched from hand-curated OWL main and datatype schemas to derivations from the SHACL schemas.
+- Refactored the SHACL Datatypes schema and the Datatypes vocabulary
+- Renamed graph metadata object names (vaem:GMD_...) for consistency
+- Make use of correct symbol `var` for reactive power quantities
+
 ### Deprecated
+
+- `quantitykind:CENTER-OF-MASS`
+- `quantitykind:CONTRACT-END-ITEM-SPECIFICATION-MASS`
+- `quantitykind:CONTROL-MASS`
+- `quantitykind:DELTA-V`
+- `quantitykind:DRY-MASS`
+- `quantitykind:FLIGHT-PERFORMANCE-RESERVE-PROPELLANT-MASS`
+- `quantitykind:FUEL-BIAS`
+- `quantitykind:GROSS-LIFT-OFF-WEIGHT`
+- `quantitykind:INERT-MASS`
+- `quantitykind:MASS-DELIVERED`
+- `quantitykind:MASS-GROWTH-ALLOWANCE`
+- `quantitykind:MASS-MARGIN`
+- `quantitykind:MASS-PROPERTY-UNCERTAINTY`
+- `quantitykind:NOMINAL-ASCENT-PROPELLANT-MASS`
+- `quantitykind:PREDICTED-MASS`
+- `quantitykind:PRODUCT-OF-INERTIA`
+- `quantitykind:RESERVE-MASS`
+- `quantitykind:TARGET-BOGIE-MASS`
+- `quantitykind:Debye-WallerFactor` (replacement: `quantitykind:DebyeWallerFactor`)
+- `quantitykind:ElectricChargeLinearDensity` (replacement: `quantitykind:LinearElectricChargeDensity`)
+- `quantitykind:EnergyInternal` (replacement: `quantitykind:InternalEnergy`)
+- `quantitykind:EnergyKinetic` (replacement: `quantitykind:KineticEnergy`)
+- `quantitykind:Half-Life` (replacement: `quantitykind:HalfLife`)
+- `quantitykind:Half-ValueThickness` (replacement: `quantitykind:HalfValueThickness`)
+- `quantitykind:IntinsicCarrierDensity` (replacement: `quantitykind:IntrinsicCarrierDensity`)
+- `quantitykind:Landau-GinzburgNumber` (replacement: `quantitykind:LandauGinzburgNumber`)
+- `quantitykind:Long-RangeOrderParameter` (replacement: `quantitykind:LongRangeOrderParameter`)
+- `quantitykind:MaximumBeta-ParticleEnergy` (replacement: `quantitykind:MaximumBetaParticleEnergy`)
+- `quantitykind:Non-LeakageProbability` (replacement: `quantitykind:NonLeakageProbability`)
+- `quantitykind:RF-Power` (replacement: `quantitykind:RFPower`)
+- `quantitykind:RelaxationTIme` (replacement: `quantitykind:RelaxationTime`)
+- `quantitykind:RiseOfOffStateVoltage` (replacement: `quantitykind:RateOfRiseOfOffStateVoltage`)
+- `quantitykind:Rotary-TranslatoryMotionConversion` (replacement: `quantitykind:RotaryTranslatoryMotionConversion`)
+- `quantitykind:Short-RangeOrderParameter` (replacement: `quantitykind:ShortRangeOrderParameter`)
+- `quantitykind:Slowing-DownArea` (replacement: `quantitykind:SlowingDownArea`)
+- `quantitykind:Slowing-DownDensity` (replacement: `quantitykind:SlowingDownDensity`)
+- `quantitykind:Slowing-DownLength` (replacement: `quantitykind:SlowingDownLength`)
+- `quantitykind:VaporPressure` (replacement: `quantitykind:VapourPressure`)
+- `quantitykind:WaterVaporDiffusionCoefficient` (replacement: `quantitykind:WaterVapourDiffusionCoefficient`)
 
 ### Fixed
 
 - Tracked down and fixed errors in the OWL schema that were causing problems in Protege
 - Fixed the `qudt:hasQuantityKind` of `unit:MicroS-PER-M`
 - Fixed the `rdfs:isDefinedBy` of `unit:MicroM-PER-SEC2`
+- Fixed a couple of hard-coded dcterms:modified dates so they auto-update during build
+- Added some missing metadata in the datatypes vocabulary graph, needed for publication
+- Improve definitions of arcmin, min_angle, min, arcsec
 
 ## [3.1.11] - 2026-02-19
 
