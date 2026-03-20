@@ -71,6 +71,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed a couple of hard-coded dcterms:modified dates so they auto-update during build
 - Added some missing metadata in the datatypes vocabulary graph, needed for publication
 - Improve definitions of arcmin, min_angle, min, arcsec
+- Corrected statfarad multiplier that was off by a factor of 1e6
 
 ## [3.1.11] - 2026-02-19
 
