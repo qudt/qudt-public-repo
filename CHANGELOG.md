@@ -79,6 +79,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added some missing metadata in the datatypes vocabulary graph, needed for publication
 - Improve definitions of arcmin, min_angle, min, arcsec
 - Corrected statfarad multiplier that was off by a factor of 1e6
+- Fixed various errors (mostly conversion multipliers) for DENIER, PENNYWEIGHT, DWT, THERM_EC, THERM_EEC, PT, HP_Brake (thanks to @larsbarring
+  )
 
 ## [3.1.11] - 2026-02-19
 
