@@ -77,7 +77,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed the `rdfs:isDefinedBy` of `unit:MicroM-PER-SEC2`
 - Fixed a couple of hard-coded dcterms:modified dates so they auto-update during build
 - Added some missing metadata in the datatypes vocabulary graph, needed for publication
-- Improve definitions of arcmin, min_angle, min, arcsec 
+- Improve definitions of arcmin, min_angle, min, arcsec
 - Corrected statfarad multiplier that was off by a factor of 1e6
 - Fixed various errors (mostly conversion multipliers) for DENIER, PENNYWEIGHT, DWT, THERM_EC, THERM_EEC, PT, HP_Brake (thanks to @larsbarring
   )
