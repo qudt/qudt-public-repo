@@ -9,4 +9,3 @@ This release brings a number of significant enhancements to QUDT.
     a. Addition of the datatype schemas (OWL and SHACL) and the datatype vocabulary, to our catalog at https://www.qudt.org/catalog/qudt-catalog.html.
 
     b. Enhancement of tools on our QUDT homepage, including a new explorer as a companion to the individual pages, showing incoming references to any entity.
-
