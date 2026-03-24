@@ -71,6 +71,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - `quantitykind:Slowing-DownLength` (replacement: `quantitykind:SlowingDownLength`)
 - `quantitykind:VaporPressure` (replacement: `quantitykind:VapourPressure`)
 - `quantitykind:WaterVaporDiffusionCoefficient` (replacement: `quantitykind:WaterVapourDiffusionCoefficient`)
+- `unit:CH` (replacement: `unit:CHAIN`)
+- `unit:CD_IN` (replacement: `unit:CD_IT`)
 
 ### Fixed
 
