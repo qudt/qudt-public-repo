@@ -28,7 +28,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Refactored the SHACL Datatypes schema and the Datatypes vocabulary
 - Renamed graph metadata object names (vaem:GMD_...) for consistency
 - Make use of correct symbol `var` for reactive power quantities
-- Expanded the use of the conversion multiplier calculation in the build
+- Expanded the use of the conversion multiplier calculation in the build to recalculate and validate existing values as well
 
 ### Deprecated
 
@@ -83,7 +83,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added some missing metadata in the datatypes vocabulary graph, needed for publication
 - Improve definitions of arcmin, min_angle, min, arcsec
 - Corrected statfarad multiplier that was off by a factor of 1e6
-- Fixed various errors (mostly conversion multipliers) for DENIER, PENNYWEIGHT, DWT, THERM_EC, THERM_EEC, PT, HP_Brake (thanks to @larsbarring
+- Fixed various errors (mostly conversion multipliers) for DENIER, PENNYWEIGHT, DWT, THERM_EC, THERM_EEC, PT, HP_Brake and more (thanks to @larsbarring
   )
 
 ## [3.1.11] - 2026-02-19
