@@ -23,8 +23,6 @@ WHERE {
 # Don't process units that contain "dot" in their IRI
               FILTER( !CONTAINS(STR($this), "dot") )
               OPTIONAL { $this qudt:conversionMultiplier ?actualMultiplier . }
-              FILTER(!BOUND(?actualMultiplier)                               # no actual multiplier, or zero? use calculated!
-                     || (?actualMultiplier = 0.0))                         
               $this qudt:hasFactorUnit ?factor .
 
 ?factor qudt:hasUnit ?unitInFactor ;
@@ -101,8 +99,6 @@ BIND( ?_unitPow * ?_prefPow AS ?factorContribution )
                 qudt:scalingOf/qudt:conversionMultiplier ?baseCM ;
                 qudt:prefix/qudt:prefixMultiplier ?prefixCM .
             OPTIONAL { $this qudt:conversionMultiplier ?actualMultiplier . }
-            FILTER(!BOUND(?actualMultiplier)                               # no actual multiplier? use calculated!
-                   || (?actualMultiplier != 0.0))                          # actual multiplier is 0? skip!!
             BIND (?baseCM * ?prefixCM as ?rawCalculatedMultiplier)
         }
     }
