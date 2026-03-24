@@ -13,6 +13,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `unit:PicoCI-PER-L` (picocuries per litre)
 - Added `unit:GRAIN-PER-LB_M` (grains per pound-mass): dimensionless mass-ratio unit
 - Added `quantitykind:SpecificHumidity`: ratio of mass of water vapour to total mass of air parcel, with `skos:broader quantitykind:MassRatio`
+- Added `unit:DU` (Dobson Unit), with thanks to @larsbarring.
 - Added `quantitykind:ZenithAngle`: angle from zenith to an object; broader: `PlaneAngle`
 - Added `quantitykind:ElectricEnergy`: integral of electric power over time (e.g. kWh); broader: `Energy`
 - Added `quantitykind:ThermalPower`: rate of thermal energy transfer (e.g. heating/cooling output); broader: `Power`
@@ -27,6 +28,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Refactored the SHACL Datatypes schema and the Datatypes vocabulary
 - Renamed graph metadata object names (vaem:GMD_...) for consistency
 - Make use of correct symbol `var` for reactive power quantities
+- Expanded the use of the conversion multiplier calculation in the build
 
 ### Deprecated
 
@@ -149,6 +151,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added an inference in the build that causes inheritance of rdfs:type down the skos:broader hierarchy.
 
 ### Changed
+
+- sh:prefixes now uses ontology declaration for datatypes sh:select queries
 
 - Fixed spelling errors in descriptions for CurrencyUnit, fieldCode, normativeReference, BaseDimensionMagnitude. For both OWL and SHACL schemas. ([Vlad Korolev](https://github.com/vladistan))
 
