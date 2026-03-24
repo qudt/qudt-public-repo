@@ -14,6 +14,13 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `unit:GRAIN-PER-LB_M` (grains per pound-mass): dimensionless mass-ratio unit
 - Added `quantitykind:SpecificHumidity`: ratio of mass of water vapour to total mass of air parcel, with `skos:broader quantitykind:MassRatio`
 - Added `unit:DU` (Dobson Unit), with thanks to @larsbarring.
+- Added `quantitykind:ZenithAngle`: angle from zenith to an object; broader: `PlaneAngle`
+- Added `quantitykind:ElectricEnergy`: integral of electric power over time (e.g. kWh); broader: `Energy`
+- Added `quantitykind:ThermalPower`: rate of thermal energy transfer (e.g. heating/cooling output); broader: `Power`
+- Added `quantitykind:ReactiveEnergy`: integral of reactive power over time (e.g. kvarh); broader: `Energy`
+- Added `quantitykind:ElectricCurrentImbalance`: phase current deviation from average in polyphase systems; broader: `DimensionlessRatio`
+- Added `quantitykind:VoltageImbalance`: phase voltage deviation from average in polyphase systems; broader: `DimensionlessRatio`
+- Changed `hasQuantityKind` on VAR-hour units (`VAR-HR`, `KiloVAR-HR`, `MegaVAR-HR` and their deprecated V-A Reactive equivalents) from `Energy` to `ReactiveEnergy`
 
 ### Changed
 
@@ -72,6 +79,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed a couple of hard-coded dcterms:modified dates so they auto-update during build
 - Added some missing metadata in the datatypes vocabulary graph, needed for publication
 - Improve definitions of arcmin, min_angle, min, arcsec
+- Corrected statfarad multiplier that was off by a factor of 1e6
+- Fixed various errors (mostly conversion multipliers) for DENIER, PENNYWEIGHT, DWT, THERM_EC, THERM_EEC, PT, HP_Brake (thanks to @larsbarring
+  )
 
 ## [3.1.11] - 2026-02-19
 
