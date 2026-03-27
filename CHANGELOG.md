@@ -20,6 +20,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Moved datatypes validation queries out of datatypes schema
 - Fixed IEC 61360 informative references
 - Copied some missing labels from deprecated quantity kinds to their replacement
+- Fixed unit:GRAIN-PER-LB_M that contained qudt:scalingOf. Not used for compound units.
 
 ## [3.2.0] - 2026-03-25
 
