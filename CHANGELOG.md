@@ -19,6 +19,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Addressed remaining issues raised in comments to PR 1418
 - Moved datatypes validation queries out of datatypes schema
 - Fixed IEC 61360 informative references
+- Copied some missing labels from deprecated quantity kinds to their replacement
 
 ## [3.2.0] - 2026-03-25
 
