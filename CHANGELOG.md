@@ -7,6 +7,17 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Deprecated
+
+### Fixed
+
+- Moved datatype instances from qudt: to datatype: namespace, along with all references to them
+- Addressed remaining issues raised in comments to PR 1418
+
 ## [3.2.0] - 2026-03-25
 
 ### Added
