@@ -16,6 +16,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Moved datatype instances from qudt: to datatype: namespace, along with all references to them
+- Addressed remaining issues raised in comments to PR 1418
 - Moved datatypes validation queries out of datatypes schema
 - Fixed IEC 61360 informative references
 
