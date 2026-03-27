@@ -7,6 +7,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed IEC 61360 informative references
+
 ## [3.2.0] - 2026-03-25
 
 ### Added
