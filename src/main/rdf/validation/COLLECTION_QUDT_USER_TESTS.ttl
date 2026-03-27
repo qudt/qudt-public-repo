@@ -67,6 +67,27 @@
     sh:prefix "xsd" ;
   ] .
 
+qudt:AllValuesMustHaveSameDataTypeShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+  rdfs:label "All Values must have same DataType Shape" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    sh:message "Data Item {$this} has type {?valueType}." ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertestPrefixes> ;
+    sh:select """
+        SELECT $this ?valueType
+        WHERE {
+              $this qudt:datatype/qudt:rdfsDatatype ?datatype .
+              $this qudt:value ?valueList.
+              ?valueList rdf:rest*/rdf:first ?value .
+              BIND(datatype(?value) as ?valueType) .
+              FILTER(?valueType != ?datatype)
+        }
+        """ ;
+  ] ;
+  sh:targetClass qudt:HomogeneousArray .
+
 qudt:ConsistentDimensionVectorConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
@@ -87,6 +108,32 @@ FILTER (?qkdv1 != ?qkdv2) .
 """ ;
   ] ;
   sh:targetClass qudt:Quantity .
+
+qudt:DimensionalityShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
+  rdfs:label "Dimensions Shape" ;
+  sh:severity sh:Warning ;
+  sh:sparql [
+    sh:message "\"{$this}\" has {$actualDimensions} dimensions extent and needs to have {$specifiedDimensions}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertestPrefixes> ;
+    sh:select """
+        SELECT $this $actualDimensions $specifiedDimensions
+        WHERE {
+            $this qudt:dimensionality $dimensionality .
+            $this qudt:dimensions ?dimensions .
+            ?dimensions rdf:rest*/rdf:first $specifiedDimensions .
+            { SELECT $this (COUNT(?listValue )AS $actualDimensions)
+              WHERE {
+              $this qudt:value/rdf:rest*/rdf:first ?listValue .
+              } GROUP BY $this
+            }
+            FILTER ($actualDimensions != $specifiedDimensions)
+          }
+        """ ;
+  ] ;
+  sh:targetClass qudt:Array ;
+  sh:targetClass qudt:List .
 
 qudt:DontReferToDeprecatedConceptConstraint
   a sh:NodeShape ;

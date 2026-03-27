@@ -3221,27 +3221,6 @@ qudt:zCoordinateDefinition
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Z-Coordinate definition" .
 
-qudt:AllValuesMustHaveSameDataTypeShape
-  a sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "All Values must have same DataType Shape" ;
-  sh:severity sh:Violation ;
-  sh:sparql [
-    sh:message "Data Item {$this} has type {?valueType}." ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    sh:select """
-        SELECT $this ?valueType
-        WHERE {
-              $this qudt:datatype/qudt:rdfsDatatype ?datatype .
-              $this qudt:value ?valueList.
-              ?valueList rdf:rest*/rdf:first ?value .
-              BIND(datatype(?value) as ?valueType) .
-              FILTER(?valueType != ?datatype)
-        }
-        """ ;
-  ] ;
-  sh:targetClass qudt:HomogeneousArray .
-
 qudt:Array-isHeterogeneous
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -3721,32 +3700,6 @@ qudt:DimensionalityPropertyShape
   sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:path qudt:dimensionality .
-
-qudt:DimensionalityShape
-  a sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Dimensions Shape" ;
-  sh:severity sh:Warning ;
-  sh:sparql [
-    sh:message "\"{$this}\" has {$actualDimensions} dimensions extent and needs to have {$specifiedDimensions}" ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    sh:select """
-        SELECT $this $actualDimensions $specifiedDimensions
-        WHERE {
-            $this qudt:dimensionality $dimensionality .
-            $this qudt:dimensions ?dimensions .
-            ?dimensions rdf:rest*/rdf:first $specifiedDimensions .
-            { SELECT $this (COUNT(?listValue )AS $actualDimensions)
-              WHERE {
-              $this qudt:value/rdf:rest*/rdf:first ?listValue .
-              } GROUP BY $this
-            }
-            FILTER ($actualDimensions != $specifiedDimensions)
-          }
-        """ ;
-  ] ;
-  sh:targetClass qudt:Array ;
-  sh:targetClass qudt:List .
 
 qudt:DimensionsPropertyShape
   a sh:PropertyShape ;
@@ -4753,31 +4706,13 @@ qudt:UnsignedType-signedness
   sh:hasValue datatype:Unsigned ;
   sh:path qudt:signedness .
 
-qudt:ValidateQuantityHasUnitShape
-  a sh:NodeShape ;
-  dcterms:description """
-  <p>Specifies and checks an optional property for a quantified value.
-  </p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  rdfs:label "Validate Quantity has Unit Shape" ;
-  sh:property qudt:MaybeQuantityPropertyShape ;
-  sh:property qudt:MaybeUnitPropertyShape ;
-  sh:severity sh:Warning ;
-  sh:sparql [
-    sh:message "Quantity \"{$this}\" must have a unit." ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    sh:select """
-        SELECT $this
-        WHERE {
-             $this qudt:quantity ?quantity .
-             FILTER NOT EXISTS {?quantity qudt:hasUnit ?unit} 
-             }
-        """ ;
-  ] ;
-  sh:targetClass qudt:Array ;
-  sh:targetClass qudt:List ;
-  sh:targetClass qudt:Quantity ;
-  sh:targetClass qudt:Vector .
+qudt:UserModifiableParameter
+  a qudt:ParameterModifiabilityType ;
+  dcterms:description "Parameter is modifiable by a user." ;
+  dtype:code "2" ;
+  dtype:literal "user" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "User modifiable parameter" .
 
 qudt:VariableLengthIntegerType-maxBits
   a sh:PropertyShape ;
