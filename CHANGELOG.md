@@ -7,8 +7,15 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Deprecated
+
 ### Fixed
 
+- Moved datatype instances from qudt: to datatype: namespace, along with all references to them
 - Fixed IEC 61360 informative references
 
 ## [3.2.0] - 2026-03-25
