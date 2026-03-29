@@ -3,6 +3,51 @@
 Welcome, contributor! This file explains how to build and modify the QUDT Quantities Units Dimensions andTypes
 ontology using the tools in this repository. If you're comfortable with RDF, SHACL, and ontologies but new to Maven or Git, don’t worry—we’ll walk you through it. Think of this as a recipe for turning our RDF sources into a polished, validated set of files, with some handy shortcuts for common tasks.
 
+## Quick Start
+
+If you already know the repository and just want the shortest command sequence, use the cases below.
+Each item links to the fuller explanation later in this file.
+
+### Only vocabularies changed
+
+See [Recommended Workflows](#recommended-workflows-what-to-run).
+
+```bash
+mvn install
+```
+
+### Main SHACL schema changed
+
+See [SHACL to OWL Schema Derivation](#shacl-to-owl-schema-derivation) and [Recommended Workflows](#recommended-workflows-what-to-run).
+
+```bash
+mvn -Powl-schema-derive antrun:run@derive-owl-schema
+mvn -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
+mvn install
+```
+
+### Datatype SHACL schema changed
+
+See [SHACL Datatypes to OWL Datatypes Schema Derivation](#shacl-datatypes-to-owl-datatypes-schema-derivation) and [Recommended Workflows](#recommended-workflows-what-to-run).
+
+```bash
+mvn -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
+mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
+mvn install
+```
+
+### Coordinates SHACL schema changed
+
+See [SHACL Coordinates to OWL Coordinates Schema Derivation](#shacl-coordinates-to-owl-coordinates-schema-derivation) and [Recommended Workflows](#recommended-workflows-what-to-run).
+
+```bash
+mvn -Powl-coordinates-derive antrun:run@derive-owl-coordinates-schema
+mvn -Powl-coordinates-inspect rdfio:pipeline@inspect-owl-coordinates-schema-diff
+mvn install
+```
+
+## TLDR
+
 ## What This Build Does
 
 The QUDT project uses Maven (a build tool) to:
@@ -182,6 +227,38 @@ Outputs are written to:
 
 This inspection is gated: by default, any unexpected named additions or removals fail the command (`datatype.schema.diff.max.unexpected.added=0` and `datatype.schema.diff.max.unexpected.removed=0`).
 
+## SHACL Coordinates to OWL Coordinates Schema Derivation
+
+For coordinates, SHACL is the source of truth:
+- `src/main/rdf/schema/shacl/SCHEMA_QUDT-COORDINATES_NoOWL.ttl`
+
+The OWL coordinates schema is derived to:
+- `src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl`
+
+The coordinates legacy baseline is kept at:
+- `src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl.backup`
+
+### Run coordinates derivation only
+
+```bash
+mvn -Powl-coordinates-derive antrun:run@derive-owl-coordinates-schema
+```
+
+This runs the `derive-owl-coordinates-schema` workflow explicitly via the `owl-coordinates-derive` profile (not part of the default lifecycle), regenerates `src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl`, and then serializes it with Spotless.
+
+### Inspect derived coordinates schema vs backup (gated)
+
+```bash
+mvn -Powl-coordinates-inspect rdfio:pipeline@inspect-owl-coordinates-schema-diff
+```
+
+Outputs are written to:
+- `target/inspection/coordinates-schema-diff/summary.txt`
+- `target/inspection/coordinates-schema-diff/unexpected-added.txt`
+- `target/inspection/coordinates-schema-diff/unexpected-removed.txt`
+
+This inspection is gated: by default, any unexpected named additions or removals fail the command (`coordinates.schema.diff.max.unexpected.added=0` and `coordinates.schema.diff.max.unexpected.removed=0`).
+
 ## Recommended Workflows (What To Run)
 
 Use these command sets depending on what changed.
@@ -197,8 +274,9 @@ mvn install
 Use this when changes are limited to vocab content and you are not changing:
 - `src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl`
 - `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl`
+- `src/main/rdf/schema/shacl/SCHEMA_QUDT-COORDINATES_NoOWL.ttl`
 
-### 2) SHACL main and/or SHACL datatypes schema changed
+### 2) SHACL main, datatype, and/or coordinates schema changed
 
 Run derivation + inspection for each changed schema, then run the normal build.
 
@@ -216,6 +294,13 @@ mvn -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
 mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
 ```
 
+If **coordinates SHACL schema** changed:
+
+```bash
+mvn -Powl-coordinates-derive antrun:run@derive-owl-coordinates-schema
+mvn -Powl-coordinates-inspect rdfio:pipeline@inspect-owl-coordinates-schema-diff
+```
+
 Then run:
 
 ```bash
@@ -227,13 +312,15 @@ mvn install
 This is for intentionally advancing the baseline used by inspection diffs.
 Do this only after reviewing and accepting schema changes.
 
-1. Regenerate and inspect both schemas:
+1. Regenerate and inspect all three schemas:
 
 ```bash
 mvn -Powl-schema-derive antrun:run@derive-owl-schema
 mvn -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
 mvn -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
 mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
+mvn -Powl-coordinates-derive antrun:run@derive-owl-coordinates-schema
+mvn -Powl-coordinates-inspect rdfio:pipeline@inspect-owl-coordinates-schema-diff
 ```
 
 2. Promote current derived OWL files into backup baseline files:
@@ -245,12 +332,14 @@ mvn -Powl-baseline-promote antrun:run@promote-owl-baselines
 This copies:
 - `src/main/rdf/schema/SCHEMA_QUDT.ttl` -> `src/main/rdf/schema/SCHEMA_QUDT.ttl.backup`
 - `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl` -> `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl.backup`
+- `src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl` -> `src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl.backup`
 
 3. Re-run inspections to confirm clean diffs against the new baseline, then commit.
 
 ```bash
 mvn -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
 mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
+mvn -Powl-coordinates-inspect rdfio:pipeline@inspect-owl-coordinates-schema-diff
 ```
 
 ## How It Works: Key Steps

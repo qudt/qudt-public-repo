@@ -14,6 +14,8 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
                                             INSERT {
                                                 GRAPH <work:schema:derived> {
                                                     <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> a owl:Ontology ;
+                                                        owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/coordinatesystems> ;
+                                                        owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> ;
                                                         owl:imports <http://www.linkedmodel.org/schema/dtype> ;
                                                         owl:imports <http://www.linkedmodel.org/schema/vaem> ;
                                                         owl:imports <http://www.w3.org/2004/02/skos/core> ;

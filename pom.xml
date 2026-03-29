@@ -15,6 +15,8 @@
         <schema.diff.max.unexpected.added>1000</schema.diff.max.unexpected.added>
         <datatype.schema.diff.max.unexpected.removed>0</datatype.schema.diff.max.unexpected.removed>
         <datatype.schema.diff.max.unexpected.added>0</datatype.schema.diff.max.unexpected.added>
+        <coordinates.schema.diff.max.unexpected.removed>0</coordinates.schema.diff.max.unexpected.removed>
+        <coordinates.schema.diff.max.unexpected.added>0</coordinates.schema.diff.max.unexpected.added>
     </properties>
     <scm>
         <connection>scm:git:https://github.com/qudt/qudt-public-repo.git</connection>
@@ -30,6 +32,8 @@
               mvn -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
               mvn -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
               mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
+              mvn -Powl-coordinates-derive antrun:run@derive-owl-coordinates-schema
+              mvn -Powl-coordinates-inspect rdfio:pipeline@inspect-owl-coordinates-schema-diff
               mvn -Powl-baseline-promote antrun:run@promote-owl-baselines
         -->
         <pluginManagement>
@@ -66,6 +70,10 @@
                                                    derive OWL datatype schema from SHACL into src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl and serialize it
                   -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
                                                    compare derived OWL datatype schema to backup and fail on unexpected diffs
+                  -Powl-coordinates-derive antrun:run@derive-owl-coordinates-schema
+                                                   derive OWL coordinates schema from SHACL into src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl and serialize it
+                  -Powl-coordinates-inspect rdfio:pipeline@inspect-owl-coordinates-schema-diff
+                                                   compare derived OWL coordinates schema to backup and fail on unexpected diffs
                   -Powl-baseline-promote antrun:run@promote-owl-baselines
                                                    copy currently-derived OWL schemas into *.backup baseline files (manual, release workflow only)
                   rdfio:pipeline@fix-src                  apply selected source repairs from generated data
@@ -408,6 +416,7 @@ validAspectDirs.each { aspectDir ->
                                             target/dist/vocab/**/*.ttl
                                             target/dist/schema/SCHEMA_QUDT.ttl
                                             target/dist/schema/SCHEMA_QUDT-DATATYPE.ttl
+                                            target/dist/schema/SCHEMA_QUDT-COORDINATES.ttl
                                         </include>
                                     </input>
                                     <filters>
@@ -3457,10 +3466,13 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         <echo message="Promoting OWL schema baselines (*.ttl -&gt; *.ttl.backup)." />
                                         <available file="src/main/rdf/schema/SCHEMA_QUDT.ttl" property="schema.main.exists" />
                                         <available file="src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl" property="schema.datatype.exists" />
+                                        <available file="src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl" property="schema.coordinates.exists" />
                                         <fail unless="schema.main.exists" message="Missing source file: src/main/rdf/schema/SCHEMA_QUDT.ttl" />
                                         <fail unless="schema.datatype.exists" message="Missing source file: src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl" />
+                                        <fail unless="schema.coordinates.exists" message="Missing source file: src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl" />
                                         <copy file="src/main/rdf/schema/SCHEMA_QUDT.ttl" tofile="src/main/rdf/schema/SCHEMA_QUDT.ttl.backup" overwrite="true" />
                                         <copy file="src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl" tofile="src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl.backup" overwrite="true" />
+                                        <copy file="src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl" tofile="src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl.backup" overwrite="true" />
                                         <echo message="Baseline promotion complete. Review and commit backup updates intentionally." />
                                     </target>
                                 </configuration>
@@ -4007,7 +4019,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         <file>src/build/schema-derivation-config/derivation/main/steps/50-set-canonical-derived-owl-metadata-graph-role.ru</file>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
-                                        <message>Link ontology to canonical graph metadata</message>
+                                        <message>Link ontology to canonical graph metadata and child schema imports</message>
                                         <file>src/build/schema-derivation-config/derivation/main/steps/51-link-ontology-to-canonical-graph-metadata.ru</file>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
@@ -4128,15 +4140,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                 <toGraph>work:datatype:derived</toGraph>
                                             </add>
                                             <add>
-                                                <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-COORDINATES_NoOWL.ttl</file>
-                                                <toGraph>work:datatype:derived</toGraph>
-                                            </add>
-                                            <add>
                                                 <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl</file>
-                                                <toGraph>work:datatype:shacl-source</toGraph>
-                                            </add>
-                                            <add>
-                                                <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-COORDINATES_NoOWL.ttl</file>
                                                 <toGraph>work:datatype:shacl-source</toGraph>
                                             </add>
                                             <add>
@@ -4149,10 +4153,6 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                             </add>
                                             <add>
                                                 <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl</file>
-                                                <toGraph>work:datatype:typing-evidence</toGraph>
-                                            </add>
-                                            <add>
-                                                <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-COORDINATES_NoOWL.ttl</file>
                                                 <toGraph>work:datatype:typing-evidence</toGraph>
                                             </add>
                                             <add>
@@ -4371,6 +4371,268 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
             </build>
         </profile>
         <profile>
+            <id>owl-coordinates-derive</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.github.qudtlib</groupId>
+                        <artifactId>rdfio-maven-plugin</artifactId>
+                        <version>1.5.5</version>
+                        <executions>
+                            <execution>
+                                <id>derive-owl-coordinates-schema-pipeline</id>
+                                <phase>none</phase>
+                                <goals>
+                                    <goal>pipeline</goal>
+                                </goals>
+                                <configuration>
+                                    <pipeline>
+                                        <id>derive-owl-coordinates-schema</id>
+                                        <steps>
+                                            <add>
+                                                <file>src/build/schema-derivation-config/derivation/OWL-derivation-prefixes.ttl</file>
+                                                <toGraph>work:coordinate:derived</toGraph>
+                                            </add>
+                                            <add>
+                                                <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-COORDINATES_NoOWL.ttl</file>
+                                                <toGraph>work:coordinate:derived</toGraph>
+                                            </add>
+                                            <add>
+                                                <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-COORDINATES_NoOWL.ttl</file>
+                                                <toGraph>work:coordinate:shacl-source</toGraph>
+                                            </add>
+                                            <add>
+                                                <file>src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl.backup</file>
+                                                <toGraph>work:coordinate:backup</toGraph>
+                                            </add>
+                                            <add>
+                                                <file>src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl</file>
+                                                <toGraph>work:coordinate:typing-evidence</toGraph>
+                                            </add>
+                                            <add>
+                                                <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl</file>
+                                                <toGraph>work:coordinate:typing-evidence</toGraph>
+                                            </add>
+                                            <add>
+                                                <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-COORDINATES_NoOWL.ttl</file>
+                                                <toGraph>work:coordinate:typing-evidence</toGraph>
+                                            </add>
+                                            <add>
+                                                <file>src/build/schema-derivation-config/derivation/OWL-derivation-overlay-coordinates.ttl</file>
+                                                <toGraph>work:coordinate:derived</toGraph>
+                                            </add>
+                                            <assert>
+                                                <message>Guard: disallow sh:class xsd:* in SHACL property shapes used for OWL derivation</message>
+                                                <failureMessage>
+                                                    Found SHACL property shapes using sh:class with an XSD datatype. Use sh:datatype instead.
+                                                </failureMessage>
+                                                <sparqlSelect><![CDATA[
+                                                    PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+                                                    SELECT ?ps ?xsdDatatype
+                                                    WHERE {
+                                                        GRAPH <work:coordinate:typing-evidence> {
+                                                            ?ps a sh:PropertyShape ;
+                                                                sh:class ?xsdDatatype .
+                                                            FILTER(
+                                                                isIRI(?xsdDatatype)
+                                                                && STRSTARTS(STR(?xsdDatatype), "http://www.w3.org/2001/XMLSchema#")
+                                                            )
+                                                        }
+                                                    }
+                                                ]]></sparqlSelect>
+                                            </assert>
+                                            <savepoint><id>01-inputs-loaded</id></savepoint>
+                                            <sparqlUpdate>
+                                                <message>Set ontology IRI, labels and definedBy for OWL coordinates schema</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/01-set-ontology-iri-labels-and-definedby-for-owl-coordinates-schema.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Convert SHACL node shapes to OWL classes</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/02-convert-shacl-node-shapes-to-owl-classes.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Derive rdfs:range from SHACL property shape class/datatype constraints and node-shape superclasses</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/03-derive-rdfs-range-from-shacl-property-shape-class-coordinates-constraints-a.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Derive OWL allValuesFrom class restrictions only when no direct rdfs:range exists</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/04-derive-owl-allvaluesfrom-class-restrictions-only-when-no-direct-rdfs-ran.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Derive OWL allValuesFrom datatype restrictions only when no direct rdfs:range exists</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/05-derive-owl-allvaluesfrom-coordinates-restrictions-only-when-no-direct-rdfs.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Derive OWL minimum cardinality restrictions</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/06-derive-owl-minimum-cardinality-restrictions.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Derive OWL maximum cardinality restrictions</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/07-derive-owl-maximum-cardinality-restrictions.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Derive OWL exact cardinality restrictions</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/08-derive-owl-exact-cardinality-restrictions.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Preserve SHACL list member values as concrete rdf:first IRIs before SHACL cleanup</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/09-preserve-shacl-list-member-values-as-concrete-rdf-first-iris-before-shac.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Retype named list resources from rdf:List to qudt:List</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/10-retype-named-list-resources-from-rdf-list-to-qudt-list.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Classify datatype properties from SHACL constraints</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/11-classify-coordinates-properties-from-shacl-constraints.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Classify object properties from SHACL constraints</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/12-classify-object-properties-from-shacl-constraints.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Infer owl:FunctionalProperty when all SHACL property shapes for a path have sh:maxCount 1</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/13-infer-owl-functionalproperty-when-all-shacl-property-shapes-for-a-path-h.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Fallback typing: convert remaining rdf:Property declarations to owl:AnnotationProperty</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/14-fallback-typing-convert-remaining-rdf-property-declarations-to-owl-annot.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove redundant rdf:Property types when a specific OWL property type exists</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/15-remove-redundant-rdf-property-types-when-a-specific-owl-property-type-ex.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove owl:AnnotationProperty typing when object/datatype typing exists</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/16-remove-owl-annotationproperty-typing-when-object-coordinates-typing-exists.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove OWL property characteristics from properties without object/datatype/annotation typing</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/17-remove-owl-property-characteristics-from-properties-without-object-datat.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove object/datatype-only OWL property characteristics from annotation properties</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/18-remove-object-coordinates-only-owl-property-characteristics-from-annotation.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove cardinality restrictions on properties without owl:ObjectProperty/owl:DatatypeProperty typing</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/19-remove-cardinality-restrictions-on-properties-without-owl-objectproperty.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Make SHACL dcterms:description values authoritative for coordinates OWL derivation</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/20-make-shacl-dcterms-description-values-authoritative-for-coordinates-owl-der.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove SHACL-only triples from derived OWL coordinates schema</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/21-remove-shacl-only-triples-from-derived-owl-coordinates-schema.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Normalize rdfs:isDefinedBy references away from SHACL coordinates schema IRIs</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/22-normalize-rdfs-isdefinedby-references-away-from-shacl-coordinates-schema-ir.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Keep only the canonical VAEM metadata instance for coordinates schema derivation</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/23-keep-only-the-canonical-vaem-metadata-instance-for-coordinates-schema-deriv.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Rename canonical coordinates metadata subject away from SHACL path</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/24-rename-canonical-coordinates-metadata-subject-away-from-shacl-path.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Normalize canonical coordinates metadata links from SHACL resources to OWL schema resources</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/25-normalize-canonical-coordinates-metadata-links-from-shacl-resources-to-owl.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Normalize canonical coordinates metadata literal fields by removing SHACL markers and shacl path segments</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/26-normalize-canonical-coordinates-metadata-literal-fields-by-removing-shacl-m.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Set canonical derived OWL coordinates metadata description and remove manual creator field</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/27-set-canonical-derived-owl-coordinates-metadata-description-and-remove-manua.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Set canonical derived OWL coordinates metadata graph role</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/28-set-canonical-derived-owl-coordinates-metadata-graph-role.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Link coordinates ontology to canonical graph metadata</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/29-link-coordinates-ontology-to-canonical-graph-metadata.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove remaining SHACL coordinates schema resources from derived OWL coordinates schema</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/30-remove-remaining-shacl-coordinates-schema-resources-from-derived-owl-dataty.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Add canonical rdfs:isDefinedBy for all QUDT coordinates entities</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/31-add-canonical-rdfs-isdefinedby-for-all-qudt-coordinates-entities.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove redundant rdf:type rdfs:Class when owl:Class is present</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/32-remove-redundant-rdf-type-rdfs-class-when-owl-class-is-present.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove rdfs:subClassOf rdfs:Resource from OWL classes</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/33-remove-rdfs-subclassof-rdfs-resource-from-owl-classes.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove malformed anonymous restrictions missing owl:Restriction type or owl:onProperty</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/34-remove-malformed-anonymous-restrictions-missing-owl-restriction-type-or.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove orphaned restriction blank nodes</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/35-remove-orphaned-restriction-blank-nodes.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove orphaned malformed cardinality blank nodes with no owl:onProperty</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/36-remove-orphaned-malformed-cardinality-blank-nodes-with-no-owl-onproperty.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove orphaned RDF list blank-node chains</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/37-remove-orphaned-rdf-list-blank-node-chains.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Carry over one backup dcterms:description when SHACL coordinates schema has none</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/38-carry-over-one-backup-dcterms-description-when-shacl-coordinates-schema-ha.ru</file>
+                                            </sparqlUpdate>
+                                            <write>
+                                                <graph>work:coordinate:derived</graph>
+                                                <toFile>src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl</toFile>
+                                            </write>
+                                            <savepoint><id>99-derived-coordinates-schema-written</id></savepoint>
+                                        </steps>
+                                    </pipeline>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <id>derive-owl-coordinates-schema</id>
+                                <phase>none</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <exec executable="mvn" failonerror="true">
+                                            <arg value="-q" />
+                                            <arg value="-Powl-coordinates-derive" />
+                                            <arg value="rdfio:pipeline@derive-owl-coordinates-schema-pipeline" />
+                                            <arg value="spotless:apply@reformat-src" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>owl-datatypes-inspect</id>
             <build>
                 <plugins>
@@ -4399,10 +4661,6 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                             </add>
                                             <add>
                                                 <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl</file>
-                                                <toGraph>schema:shacl</toGraph>
-                                            </add>
-                                            <add>
-                                                <file>src/main/rdf/schema/shacl/SCHEMA_QUDT-COORDINATES_NoOWL.ttl</file>
                                                 <toGraph>schema:shacl</toGraph>
                                             </add>
                                             <add>
@@ -5744,6 +6002,184 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                             }
                                                         }
                                                         FILTER(?count > ${datatype.schema.diff.max.unexpected.added})
+                                                    }
+                                                ]]></sparqlSelect>
+                                            </assert>
+                                        </steps>
+                                    </pipeline>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>owl-coordinates-inspect</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.github.qudtlib</groupId>
+                        <artifactId>rdfio-maven-plugin</artifactId>
+                        <version>1.5.5</version>
+                        <executions>
+                            <execution>
+                                <id>inspect-owl-coordinates-schema-diff</id>
+                                <phase>none</phase>
+                                <goals>
+                                    <goal>pipeline</goal>
+                                </goals>
+                                <configuration>
+                                    <pipeline>
+                                        <id>inspect-owl-coordinates-schema-diff</id>
+                                        <steps>
+                                            <add>
+                                                <file>src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl.backup</file>
+                                                <toGraph>schema:backup</toGraph>
+                                            </add>
+                                            <add>
+                                                <file>src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl</file>
+                                                <toGraph>schema:derived</toGraph>
+                                            </add>
+                                            <sparqlQuery>
+                                                <message>Summary counts for coordinates schema diff (named triples only)</message>
+                                                <toFile>target/inspection/coordinates-schema-diff/summary.txt</toFile>
+                                                <sparql><![CDATA[
+                                                    SELECT ?metric ?count
+                                                    WHERE {
+                                                        {
+                                                            SELECT ("backup_named_triples" AS ?metric) (COUNT(*) AS ?count)
+                                                            WHERE {
+                                                                GRAPH <schema:backup> {
+                                                                    ?s ?p ?o .
+                                                                    FILTER(!isBlank(?s) && !isBlank(?o))
+                                                                }
+                                                            }
+                                                        } UNION {
+                                                            SELECT ("derived_named_triples" AS ?metric) (COUNT(*) AS ?count)
+                                                            WHERE {
+                                                                GRAPH <schema:derived> {
+                                                                    ?s ?p ?o .
+                                                                    FILTER(!isBlank(?s) && !isBlank(?o))
+                                                                }
+                                                            }
+                                                        } UNION {
+                                                            SELECT ("unexpected_removed_named" AS ?metric) (COUNT(*) AS ?count)
+                                                            WHERE {
+                                                                GRAPH <schema:backup> {
+                                                                    ?s ?p ?o .
+                                                                    FILTER(!isBlank(?s) && !isBlank(?o))
+                                                                }
+                                                                FILTER NOT EXISTS {
+                                                                    GRAPH <schema:derived> {
+                                                                        ?s ?p ?o .
+                                                                    }
+                                                                }
+                                                            }
+                                                        } UNION {
+                                                            SELECT ("unexpected_added_named" AS ?metric) (COUNT(*) AS ?count)
+                                                            WHERE {
+                                                                GRAPH <schema:derived> {
+                                                                    ?s ?p ?o .
+                                                                    FILTER(!isBlank(?s) && !isBlank(?o))
+                                                                }
+                                                                FILTER NOT EXISTS {
+                                                                    GRAPH <schema:backup> {
+                                                                        ?s ?p ?o .
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                ]]></sparql>
+                                            </sparqlQuery>
+                                            <sparqlQuery>
+                                                <message>Unexpected coordinate schema removals</message>
+                                                <toFile>target/inspection/coordinates-schema-diff/unexpected-removed.txt</toFile>
+                                                <sparql><![CDATA[
+                                                    SELECT ?s ?p ?o
+                                                    WHERE {
+                                                        GRAPH <schema:backup> {
+                                                            ?s ?p ?o .
+                                                            FILTER(!isBlank(?s) && !isBlank(?o))
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            GRAPH <schema:derived> {
+                                                                ?s ?p ?o .
+                                                            }
+                                                        }
+                                                    }
+                                                    ORDER BY ?s ?p ?o
+                                                ]]></sparql>
+                                            </sparqlQuery>
+                                            <sparqlQuery>
+                                                <message>Unexpected coordinate schema additions</message>
+                                                <toFile>target/inspection/coordinates-schema-diff/unexpected-added.txt</toFile>
+                                                <sparql><![CDATA[
+                                                    SELECT ?s ?p ?o
+                                                    WHERE {
+                                                        GRAPH <schema:derived> {
+                                                            ?s ?p ?o .
+                                                            FILTER(!isBlank(?s) && !isBlank(?o))
+                                                        }
+                                                        FILTER NOT EXISTS {
+                                                            GRAPH <schema:backup> {
+                                                                ?s ?p ?o .
+                                                            }
+                                                        }
+                                                    }
+                                                    ORDER BY ?s ?p ?o
+                                                ]]></sparql>
+                                            </sparqlQuery>
+                                            <assert>
+                                                <message>Gate: fail if unexpected coordinate removals remain</message>
+                                                <failureMessage>
+                                                    Unexpected coordinate schema removals detected. See target/inspection/coordinates-schema-diff/unexpected-removed.txt and summary.txt.
+                                                </failureMessage>
+                                                <sparqlSelect><![CDATA[
+                                                    SELECT ?count
+                                                    WHERE {
+                                                        {
+                                                            SELECT (COUNT(*) AS ?count)
+                                                            WHERE {
+                                                                GRAPH <schema:backup> {
+                                                                    ?s ?p ?o .
+                                                                    FILTER(!isBlank(?s) && !isBlank(?o))
+                                                                }
+                                                                FILTER NOT EXISTS {
+                                                                    GRAPH <schema:derived> {
+                                                                        ?s ?p ?o .
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        FILTER(?count > ${coordinates.schema.diff.max.unexpected.removed})
+                                                    }
+                                                ]]></sparqlSelect>
+                                            </assert>
+                                            <assert>
+                                                <message>Gate: fail if unexpected coordinate additions remain</message>
+                                                <failureMessage>
+                                                    Unexpected coordinate schema additions detected. See target/inspection/coordinates-schema-diff/unexpected-added.txt and summary.txt.
+                                                </failureMessage>
+                                                <sparqlSelect><![CDATA[
+                                                    SELECT ?count
+                                                    WHERE {
+                                                        {
+                                                            SELECT (COUNT(*) AS ?count)
+                                                            WHERE {
+                                                                GRAPH <schema:derived> {
+                                                                    ?s ?p ?o .
+                                                                    FILTER(!isBlank(?s) && !isBlank(?o))
+                                                                }
+                                                                FILTER NOT EXISTS {
+                                                                    GRAPH <schema:backup> {
+                                                                        ?s ?p ?o .
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        FILTER(?count > ${coordinates.schema.diff.max.unexpected.added})
                                                     }
                                                 ]]></sparqlSelect>
                                             </assert>
