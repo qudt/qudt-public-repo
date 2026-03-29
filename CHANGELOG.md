@@ -11,6 +11,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
+- Refactored the datatypes schema and vocabulary to have a separate set for coordinate systems schema and vocabulary
+
 ### Deprecated
 
 ### Fixed
