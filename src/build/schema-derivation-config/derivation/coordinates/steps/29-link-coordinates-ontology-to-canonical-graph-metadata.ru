@@ -5,18 +5,18 @@ PREFIX vaem: <http://www.linkedmodel.org/schema/vaem#>
 
                                                     DELETE {
                                                         GRAPH <work:coordinate:derived> {
-                                                            <http://qudt.org/$$QUDT_VERSION$$/schema/coordinatesystems> vaem:hasGraphMetadata ?oldMetadata .
+                                                            <http://qudt.org/$$QUDT_VERSION$$/schema/coordinate> vaem:hasGraphMetadata ?oldMetadata .
                                                         }
                                                     }
                                                     INSERT {
                                                         GRAPH <work:coordinate:derived> {
-                                                            <http://qudt.org/$$QUDT_VERSION$$/schema/coordinatesystems> vaem:hasGraphMetadata vaem:GMD_SCHEMA-COORDINATES .
+                                                            <http://qudt.org/$$QUDT_VERSION$$/schema/coordinate> vaem:hasGraphMetadata vaem:GMD_SCHEMA-COORDINATES .
                                                         }
                                                     }
                                                     WHERE {
                                                         GRAPH <work:coordinate:derived> {
                                                             OPTIONAL {
-                                                                <http://qudt.org/$$QUDT_VERSION$$/schema/coordinatesystems> vaem:hasGraphMetadata ?oldMetadata .
+                                                                <http://qudt.org/$$QUDT_VERSION$$/schema/coordinate> vaem:hasGraphMetadata ?oldMetadata .
                                                             }
                                                         }
                                                     }

@@ -5,7 +5,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
                                                     INSERT {
                                                         GRAPH <work:coordinate:derived> {
-                                                            ?s rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinatesystems> .
+                                                            ?s rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinate> .
                                                         }
                                                     }
                                                     WHERE {
@@ -13,9 +13,9 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                                                             ?s ?anyP ?anyO .
                                                             FILTER(isIRI(?s))
                                                             FILTER(STRSTARTS(STR(?s), "http://qudt.org/schema/qudt/"))
-                                                            FILTER(?s != <http://qudt.org/$$QUDT_VERSION$$/schema/coordinatesystems>)
+                                                            FILTER(?s != <http://qudt.org/$$QUDT_VERSION$$/schema/coordinate>)
                                                             FILTER NOT EXISTS {
-                                                                ?s rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinatesystems> .
+                                                                ?s rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinate> .
                                                             }
                                                         }
                                                     }

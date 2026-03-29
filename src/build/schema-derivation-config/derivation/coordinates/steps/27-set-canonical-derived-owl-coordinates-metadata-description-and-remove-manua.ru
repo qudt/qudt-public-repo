@@ -25,15 +25,15 @@ PREFIX dcterms: <http://purl.org/dc/terms/>
                                                     INSERT {
                                                         GRAPH <work:coordinate:derived> {
                                                             vaem:GMD_SCHEMA-COORDINATES
-                                                                dcterms:description "<p>This OWL schema is derived from the SHACL schema found at http://qudt.org/$$QUDT_VERSION$$/schema/shacl/coordinatesystems. </p>"^^rdf:HTML ;
+                                                                dcterms:description "<p>This OWL schema is derived from the SHACL schema found at http://qudt.org/$$QUDT_VERSION$$/schema/shacl/coordinate. </p>"^^rdf:HTML ;
                                                                 dcterms:subject "Coordinate Systems" ;
                                                                 rdfs:label "QUDT Schema for Coordinate Systems - Version $$QUDT_VERSION$$" ;
                                                                 vaem:graphTitle "QUDT Schema for Coordinate Systems - Version $$QUDT_VERSION$$" ;
                                                                 vaem:title "QUDT Schema for Coordinate Systems - Version $$QUDT_VERSION$$" ;
                                                                 vaem:latestPublishedVersion "https://qudt.org/doc/$$CURRENT_YEAR$$/$$CURRENT_MONTH$$/DOC_SCHEMA-COORDINATES.html"^^xsd:anyURI ;
                                                                 vaem:previousPublishedVersion "https://qudt.org/doc/$$QUDT_PREV_RELEASE_YEAR$$/$$QUDT_PREV_RELEASE_MONTH$$/DOC_SCHEMA-COORDINATES.html"^^xsd:anyURI ;
-                                                                vaem:turtleFileURL "http://qudt.org/$$QUDT_VERSION$$/schema/coordinatesystems.ttl"^^xsd:anyURI .
-                                                            vaem:GMD_SCHEMA-COORDINATES prov:derivedFrom <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/coordinatesystems> .
+                                                                vaem:turtleFileURL "http://qudt.org/$$QUDT_VERSION$$/schema/coordinate.ttl"^^xsd:anyURI .
+                                                            vaem:GMD_SCHEMA-COORDINATES prov:derivedFrom <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/coordinate> .
                                                         }
                                                     }
                                                     WHERE {

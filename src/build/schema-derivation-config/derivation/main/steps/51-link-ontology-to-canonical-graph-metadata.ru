@@ -11,7 +11,7 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
                                             }
                                             INSERT {
                                                 GRAPH <work:schema:derived> {
-                                                    <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/coordinatesystems> .
+                                                    <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/coordinate> .
                                                     <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> .
                                                     <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> vaem:hasGraphMetadata vaem:GMD_QUDT-SCHEMA .
                                                 }
