@@ -9,6 +9,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added numerators and denominators to angular concepts
+
 ### Changed
 
 ### Deprecated
