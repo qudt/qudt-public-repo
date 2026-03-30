@@ -8,19 +8,19 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
                                                     DELETE {
                                                         GRAPH <work:coordinate:derived> {
                                                             ?oldOntology ?p ?o .
-                                                            ?s rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/coordinate> .
+                                                            ?s rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/coordinateSystems> .
                                                         }
                                                     }
                                                     INSERT {
                                                         GRAPH <work:coordinate:derived> {
-                                                            <http://qudt.org/$$QUDT_VERSION$$/schema/coordinate> a owl:Ontology ;
+                                                            <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> a owl:Ontology ;
                                                                 owl:imports <http://www.linkedmodel.org/schema/dtype> ;
                                                                 owl:imports <http://www.linkedmodel.org/schema/vaem> ;
                                                                 owl:imports <http://www.w3.org/2004/02/skos/core> ;
-                                                                owl:versionIRI <http://qudt.org/$$QUDT_VERSION$$/schema/coordinate> ;
-                                                                rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinate> ;
+                                                                owl:versionIRI <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
+                                                                rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
                                                                 rdfs:label "QUDT SCHEMA - Coordinate Systems" .
-                                                            ?s rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinate> .
+                                                            ?s rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> .
                                                         }
                                                     }
                                                     WHERE {
@@ -28,7 +28,7 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
                                                             OPTIONAL {
                                                                 ?oldOntology a owl:Ontology ;
                                                                              ?p ?o .
-                                                                FILTER(STR(?oldOntology) = "http://qudt.org/$$QUDT_VERSION$$/schema/shacl/coordinate")
+                                                                FILTER(STR(?oldOntology) = "http://qudt.org/$$QUDT_VERSION$$/schema/shacl/coordinateSystems")
                                                                 FILTER(
                                                                     ?p != owl:imports
                                                                     && ?p != owl:versionIRI
@@ -36,6 +36,6 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
                                                                     && ?p != sh:declare
                                                                 )
                                                             }
-                                                            OPTIONAL { ?s rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/coordinate> . }
+                                                            OPTIONAL { ?s rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/coordinateSystems> . }
                                                         }
                                                     }
