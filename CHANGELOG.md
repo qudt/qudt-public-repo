@@ -9,6 +9,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added numerators and denominators to angular concepts
+
 ### Changed
 
 - Refactored the datatypes schema and vocabulary to have a separate set for coordinate systems schema and vocabulary
