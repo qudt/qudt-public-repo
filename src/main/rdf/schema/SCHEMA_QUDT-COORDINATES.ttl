@@ -2,6 +2,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix coords: <http://qudt.org/vocab/coords/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
@@ -28,6 +29,8 @@ qudt:AerospaceCoordinateSystem
 qudt:AxialOrientationType
   a owl:Class ;
   dcterms:description "The axial orientation of a coordinate system frame axis." ;
+  owl:oneOf ( coords:PositiveZ coords:PositiveY coords:NegativeY coords:NegativeZ coords:PositiveX
+    coords:NegativeX ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
   rdfs:label "Axial Orientation Type" ;
   rdfs:subClassOf qudt:EnumeratedValue .
@@ -58,6 +61,8 @@ qudt:CoordinateCenterKind
   <p>An enumeration of coordinate centers for coordinate systems, such as:
    "Earth centered", "Mars centered", "Moon centered", "Sun centered",  and "Vehicle centered".
   </p>"""^^rdf:HTML ;
+  owl:oneOf ( coords:CCT_MarsCentered coords:CCT_EarthCentered coords:CCT_MoonCentered
+    coords:CCT_VehicleCentered coords:CCT_SunCentered ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
   rdfs:label "Coordinate Center Kind" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
@@ -113,12 +118,12 @@ qudt:CoordinateSystem
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:maxCardinality 1 ;
-    owl:onProperty qudt:coordinateCenter ;
+    owl:onProperty qudt:abbreviation ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:maxCardinality 1 ;
-    owl:onProperty qudt:abbreviation ;
+    owl:onProperty qudt:coordinateCenter ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
@@ -163,8 +168,23 @@ qudt:Coordinates-2D-DoublePrecision
   rdfs:subClassOf qudt:Coordinates-2D ;
   rdfs:subClassOf [
     a owl:Restriction ;
-    owl:maxCardinality 1 ;
+    owl:cardinality 1 ;
     owl:onProperty qudt:double_Y ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:minCardinality 1 ;
+    owl:onProperty qudt:double_Y ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:minCardinality 1 ;
+    owl:onProperty qudt:double_X ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:maxCardinality 1 ;
+    owl:onProperty qudt:double_X ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
@@ -173,22 +193,7 @@ qudt:Coordinates-2D-DoublePrecision
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
-    owl:minCardinality 1 ;
-    owl:onProperty qudt:double_X ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
     owl:maxCardinality 1 ;
-    owl:onProperty qudt:double_X ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:cardinality 1 ;
-    owl:onProperty qudt:double_Y ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:minCardinality 1 ;
     owl:onProperty qudt:double_Y ;
   ] .
 
@@ -203,8 +208,18 @@ qudt:Coordinates-2D-SinglePrecision
   rdfs:subClassOf qudt:Coordinates-2D ;
   rdfs:subClassOf [
     a owl:Restriction ;
+    owl:minCardinality 1 ;
+    owl:onProperty qudt:double_Y ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
     owl:maxCardinality 1 ;
     owl:onProperty qudt:double_Y ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:minCardinality 1 ;
+    owl:onProperty qudt:double_X ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
@@ -215,16 +230,6 @@ qudt:Coordinates-2D-SinglePrecision
     a owl:Restriction ;
     owl:maxCardinality 1 ;
     owl:onProperty qudt:double_X ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:minCardinality 1 ;
-    owl:onProperty qudt:double_X ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:minCardinality 1 ;
-    owl:onProperty qudt:double_Y ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
@@ -253,13 +258,13 @@ qudt:Coordinates-3D-DoublePrecision
   rdfs:subClassOf qudt:Coordinates-3D ;
   rdfs:subClassOf [
     a owl:Restriction ;
-    owl:cardinality 1 ;
-    owl:onProperty qudt:double_X ;
+    owl:maxCardinality 1 ;
+    owl:onProperty qudt:double_Y ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
-    owl:maxCardinality 1 ;
-    owl:onProperty qudt:double_Z ;
+    owl:cardinality 1 ;
+    owl:onProperty qudt:double_X ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
@@ -268,13 +273,23 @@ qudt:Coordinates-3D-DoublePrecision
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
+    owl:maxCardinality 1 ;
+    owl:onProperty qudt:double_X ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:minCardinality 1 ;
+    owl:onProperty qudt:double_X ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
     owl:minCardinality 1 ;
     owl:onProperty qudt:double_Y ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
-    owl:maxCardinality 1 ;
-    owl:onProperty qudt:double_X ;
+    owl:cardinality 1 ;
+    owl:onProperty qudt:double_Y ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
@@ -284,17 +299,7 @@ qudt:Coordinates-3D-DoublePrecision
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:maxCardinality 1 ;
-    owl:onProperty qudt:double_Y ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:minCardinality 1 ;
-    owl:onProperty qudt:double_X ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:cardinality 1 ;
-    owl:onProperty qudt:double_Y ;
+    owl:onProperty qudt:double_Z ;
   ] .
 
 qudt:Coordinates-3D-SinglePrecision
@@ -308,37 +313,7 @@ qudt:Coordinates-3D-SinglePrecision
   rdfs:subClassOf qudt:Coordinates-3D ;
   rdfs:subClassOf [
     a owl:Restriction ;
-    owl:maxCardinality 1 ;
-    owl:onProperty qudt:float_Y ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:maxCardinality 1 ;
-    owl:onProperty qudt:float_Z ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:maxCardinality 1 ;
-    owl:onProperty qudt:float_X ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
     owl:cardinality 1 ;
-    owl:onProperty qudt:float_Y ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:minCardinality 1 ;
-    owl:onProperty qudt:float_Z ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:cardinality 1 ;
-    owl:onProperty qudt:float_Z ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:minCardinality 1 ;
     owl:onProperty qudt:float_X ;
   ] ;
   rdfs:subClassOf [
@@ -349,7 +324,37 @@ qudt:Coordinates-3D-SinglePrecision
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:cardinality 1 ;
+    owl:onProperty qudt:float_Y ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:maxCardinality 1 ;
     owl:onProperty qudt:float_X ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:maxCardinality 1 ;
+    owl:onProperty qudt:float_Y ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:maxCardinality 1 ;
+    owl:onProperty qudt:float_Z ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:minCardinality 1 ;
+    owl:onProperty qudt:float_Z ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:minCardinality 1 ;
+    owl:onProperty qudt:float_X ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:cardinality 1 ;
+    owl:onProperty qudt:float_Z ;
   ] .
 
 qudt:Coordinates-3D-Type
@@ -386,6 +391,7 @@ qudt:FrameType
   <p>A <em>Frame Type</em> specifies the intertial type of a coordinate frame as either inertial, rotating, or non-rotating.
   </p>
   """^^rdf:HTML ;
+  owl:oneOf ( coords:FT_ROTATING coords:FT_NON-ROTATING coords:FT_INERTIAL ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
   rdfs:label "Frame Type" ;
   rdfs:subClassOf qudt:EnumeratedValue .
@@ -442,7 +448,7 @@ qudt:LunarCoordinateSystem
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:maxCardinality 1 ;
-    owl:onProperty qudt:yAxisDefinition ;
+    owl:onProperty qudt:realization ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
@@ -457,7 +463,7 @@ qudt:LunarCoordinateSystem
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:maxCardinality 1 ;
-    owl:onProperty qudt:realization ;
+    owl:onProperty qudt:yAxisDefinition ;
   ] .
 
 qudt:MarsCoordinateSystem
@@ -533,7 +539,17 @@ Reference frame may also refer to both an observational reference frame and an a
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:maxCardinality 1 ;
-    owl:onProperty qudt:realization ;
+    owl:onProperty qudt:zAxisDefinition ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:maxCardinality 1 ;
+    owl:onProperty qudt:yAxisDefinition ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:maxCardinality 1 ;
+    owl:onProperty qudt:yCoordinateDefinition ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
@@ -548,17 +564,7 @@ Reference frame may also refer to both an observational reference frame and an a
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:maxCardinality 1 ;
-    owl:onProperty qudt:zAxisDefinition ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:maxCardinality 1 ;
-    owl:onProperty qudt:yAxisDefinition ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:maxCardinality 1 ;
-    owl:onProperty qudt:yCoordinateDefinition ;
+    owl:onProperty qudt:realization ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
@@ -623,28 +629,28 @@ qudt:VehicleCoordinateSystem
   rdfs:subClassOf qudt:AerospaceCoordinateSystem ;
   rdfs:subClassOf [
     a owl:Restriction ;
-    owl:maxCardinality 1 ;
-    owl:onProperty qudt:yawRotationDefinition ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:maxCardinality 1 ;
-    owl:onProperty qudt:rollRotationDefinition ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
     owl:minCardinality 0 ;
     owl:onProperty qudt:yawRotationDefinition ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:minCardinality 0 ;
-    owl:onProperty qudt:rollRotationDefinition ;
   ] ;
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:maxCardinality 1 ;
     owl:onProperty qudt:pitchRotationDefinition ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:minCardinality 0 ;
+    owl:onProperty qudt:rollRotationDefinition ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:maxCardinality 1 ;
+    owl:onProperty qudt:rollRotationDefinition ;
+  ] ;
+  rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:maxCardinality 1 ;
+    owl:onProperty qudt:yawRotationDefinition ;
   ] .
 
 qudt:coordinateCenter
@@ -660,16 +666,6 @@ qudt:coordinateSystem
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
   rdfs:label "coordinate system" ;
   rdfs:range qudt:CoordinateSystem .
-
-qudt:elementDatatype
-  a owl:ObjectProperty ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
-  rdfs:range qudt:CoordinateMember .
-
-qudt:frameType
-  a owl:ObjectProperty ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
-  rdfs:range qudt:FrameType .
 
 qudt:pitchRotationDefinition
   a owl:ObjectProperty, owl:FunctionalProperty ;
@@ -699,25 +695,6 @@ qudt:yawRotationDefinition
   rdfs:range qudt:AxialOrientationType ;
   rdfs:subPropertyOf qudt:rotationDefinition .
 
-qudt:abbreviation
-  a owl:DatatypeProperty ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> .
-
-qudt:double_X
-  a owl:DatatypeProperty, owl:FunctionalProperty ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
-  rdfs:range xsd:double .
-
-qudt:double_Y
-  a owl:DatatypeProperty, owl:FunctionalProperty ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
-  rdfs:range xsd:double .
-
-qudt:double_Z
-  a owl:DatatypeProperty, owl:FunctionalProperty ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
-  rdfs:range xsd:double .
-
 qudt:float_X
   a owl:DatatypeProperty, owl:FunctionalProperty ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
@@ -735,16 +712,6 @@ qudt:float_Z
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
   rdfs:label "float Z" ;
   rdfs:range xsd:float .
-
-qudt:originDefinition
-  a owl:DatatypeProperty, owl:FunctionalProperty ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
-  rdfs:range xsd:string .
-
-qudt:realization
-  a owl:DatatypeProperty, owl:FunctionalProperty ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems> ;
-  rdfs:range xsd:string .
 
 qudt:xAxisDefinition
   a owl:DatatypeProperty, owl:FunctionalProperty ;

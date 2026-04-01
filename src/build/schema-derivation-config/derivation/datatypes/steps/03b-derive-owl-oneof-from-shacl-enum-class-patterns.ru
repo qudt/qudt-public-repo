@@ -1,0 +1,40 @@
+# owl-datatypes-derive step 03b
+# Message: Derive owl:oneOf from SHACL enum class patterns
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+INSERT {
+    GRAPH <work:datatype:derived> {
+        ?class owl:oneOf ?enumList .
+    }
+}
+WHERE {
+    GRAPH <work:datatype:derived> {
+        ?class a owl:Class .
+        FILTER(isIRI(?class))
+        {
+            ?class sh:in ?enumList .
+        } UNION {
+            ?class sh:oneOf ?enumList .
+        } UNION {
+            FILTER NOT EXISTS { ?class sh:in ?anyDirectEnumList . }
+            FILTER NOT EXISTS { ?class sh:oneOf ?anyDirectOneOfList . }
+            ?class sh:property ?ps .
+            ?ps a sh:PropertyShape ;
+                sh:in ?enumList ;
+                sh:path [ sh:inversePath rdf:type ] .
+        } UNION {
+            FILTER NOT EXISTS { ?class sh:in ?anyDirectEnumList . }
+            FILTER NOT EXISTS { ?class sh:oneOf ?anyDirectOneOfList . }
+            ?class sh:property ?ps .
+            ?ps a sh:PropertyShape ;
+                sh:oneOf ?enumList ;
+                sh:path [ sh:inversePath rdf:type ] .
+        }
+        FILTER NOT EXISTS {
+            ?class owl:oneOf ?existingEnumList .
+        }
+    }
+}

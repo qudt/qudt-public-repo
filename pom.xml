@@ -3061,6 +3061,10 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                             <excludes>
                                 <!-- keep this file as prefix declarations only; formatter removes unused prefixes -->
                                 <exclude>src/build/schema-derivation-config/derivation/OWL-derivation-prefixes.ttl</exclude>
+                                <!-- generated OWL schemas should preserve derivation serializer prefixes -->
+                                <exclude>src/main/rdf/schema/SCHEMA_QUDT.ttl</exclude>
+                                <exclude>src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl</exclude>
+                                <exclude>src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl</exclude>
                             </excludes>
                             <format>
                                 <failOnWarning>false</failOnWarning>
@@ -3190,6 +3194,8 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                     <exclude>src/build/sparql2shacl/**/validate.ttl</exclude>
                                     <exclude>src/build/schema-derivation-config/derivation/OWL-derivation-prefixes.ttl</exclude>
                                     <exclude>src/main/rdf/schema/SCHEMA_QUDT.ttl</exclude>
+                                    <exclude>src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl</exclude>
+                                    <exclude>src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl</exclude>
                                 </excludes>
                             </rdf>
                         </configuration>
@@ -3210,6 +3216,11 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                 <includes>
                                     <include>src/main/rdf/**/*.ttl</include>
                                 </includes>
+                                <excludes>
+                                    <exclude>src/main/rdf/schema/SCHEMA_QUDT.ttl</exclude>
+                                    <exclude>src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl</exclude>
+                                    <exclude>src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl</exclude>
+                                </excludes>
                             </rdf>
                         </configuration>
                     </execution>
@@ -3753,6 +3764,10 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         <file>src/build/schema-derivation-config/derivation/main/steps/03-derive-rdfs-range-from-shacl-property-shape-class-datatype-constraints-a.ru</file>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
+                                        <message>Derive owl:oneOf from SHACL enum class patterns</message>
+                                        <file>src/build/schema-derivation-config/derivation/main/steps/03b-derive-owl-oneof-from-shacl-enum-class-patterns.ru</file>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
                                         <message>Normalize OWL class typing from rdfs:Class declarations</message>
                                         <file>src/build/schema-derivation-config/derivation/main/steps/04-normalize-owl-class-typing-from-rdfs-class-declarations.ru</file>
                                     </sparqlUpdate>
@@ -4091,6 +4106,14 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         <message>Carry over one backup dcterms:description when SHACL has none</message>
                                         <file>src/build/schema-derivation-config/derivation/main/steps/64-carry-over-one-backup-dcterms-description-when-shacl-has-none.ru</file>
                                     </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Remove property definition triples for properties not owned by the main schema</message>
+                                        <file>src/build/schema-derivation-config/derivation/main/steps/65-remove-property-definition-triples-for-properties-not-owned-by-main-schema.ru</file>
+                                    </sparqlUpdate>
+                                    <add>
+                                        <file>src/build/schema-derivation-config/derivation/OWL-derivation-prefixes.ttl</file>
+                                        <toGraph>work:schema:derived</toGraph>
+                                    </add>
                                     <write>
                                         <graph>work:schema:derived</graph>
                                         <toFile>src/main/rdf/schema/SCHEMA_QUDT.ttl</toFile>
@@ -4208,6 +4231,10 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                             <sparqlUpdate>
                                                 <message>Derive rdfs:range from SHACL property shape class/datatype constraints and node-shape superclasses</message>
                                                 <file>src/build/schema-derivation-config/derivation/datatypes/steps/03-derive-rdfs-range-from-shacl-property-shape-class-datatype-constraints-a.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Derive owl:oneOf from SHACL enum class patterns</message>
+                                                <file>src/build/schema-derivation-config/derivation/datatypes/steps/03b-derive-owl-oneof-from-shacl-enum-class-patterns.ru</file>
                                             </sparqlUpdate>
                                             <sparqlUpdate>
                                                 <message>Derive OWL allValuesFrom class restrictions only when no direct rdfs:range exists</message>
@@ -4349,6 +4376,14 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                 <message>Carry over one backup dcterms:description when SHACL datatypes schema has none</message>
                                                 <file>src/build/schema-derivation-config/derivation/datatypes/steps/38-carry-over-one-backup-dcterms-description-when-shacl-datatypes-schema-ha.ru</file>
                                             </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove property definition triples for properties not owned by the datatype schema</message>
+                                                <file>src/build/schema-derivation-config/derivation/datatypes/steps/39-remove-property-definition-triples-for-properties-not-owned-by-datatype-schema.ru</file>
+                                            </sparqlUpdate>
+                                            <add>
+                                                <file>src/build/schema-derivation-config/derivation/OWL-derivation-prefixes.ttl</file>
+                                                <toGraph>work:datatype:derived</toGraph>
+                                            </add>
                                             <write>
                                                 <graph>work:datatype:derived</graph>
                                                 <toFile>src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl</toFile>
@@ -4470,6 +4505,10 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                             <sparqlUpdate>
                                                 <message>Derive rdfs:range from SHACL property shape class/datatype constraints and node-shape superclasses</message>
                                                 <file>src/build/schema-derivation-config/derivation/coordinates/steps/03-derive-rdfs-range-from-shacl-property-shape-class-coordinates-constraints-a.ru</file>
+                                            </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Derive owl:oneOf from SHACL enum class patterns</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/03b-derive-owl-oneof-from-shacl-enum-class-patterns.ru</file>
                                             </sparqlUpdate>
                                             <sparqlUpdate>
                                                 <message>Derive OWL allValuesFrom class restrictions only when no direct rdfs:range exists</message>
@@ -4611,6 +4650,14 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                 <message>Carry over one backup dcterms:description when SHACL coordinates schema has none</message>
                                                 <file>src/build/schema-derivation-config/derivation/coordinates/steps/38-carry-over-one-backup-dcterms-description-when-shacl-coordinates-schema-ha.ru</file>
                                             </sparqlUpdate>
+                                            <sparqlUpdate>
+                                                <message>Remove property definition triples for properties not owned by the coordinates schema</message>
+                                                <file>src/build/schema-derivation-config/derivation/coordinates/steps/39-remove-property-definition-triples-for-properties-not-owned-by-coordinates-schema.ru</file>
+                                            </sparqlUpdate>
+                                            <add>
+                                                <file>src/build/schema-derivation-config/derivation/OWL-derivation-prefixes.ttl</file>
+                                                <toGraph>work:coordinate:derived</toGraph>
+                                            </add>
                                             <write>
                                                 <graph>work:coordinate:derived</graph>
                                                 <toFile>src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl</toFile>
