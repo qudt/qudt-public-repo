@@ -25,7 +25,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed IEC 61360 informative references
 - Fixed unit:GRAIN-PER-LB_M that contained qudt:scalingOf. Not used for compound units.
 - Copied some missing labels from deprecated quantity kinds to their replacement
-- Fixed unit:GRAIN-PER-LB_M that contained qudt:scalingOf. Not used for compound units.
 
 ## [3.2.0] - 2026-03-25
 
