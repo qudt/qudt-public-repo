@@ -266,9 +266,75 @@ validAspectDirs.each { aspectDir ->
         pruneFile(Paths.get(buildDir, 'dist','vocab','unit','VOCAB_QUDT-UNITS-ALL.ttl'))
       ]]></script>
     </scripts>
-  </configuration>
-</execution>
-                </executions>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>serialize-derived-owl-schema</id>
+                    <phase>none</phase>
+                    <goals>
+                        <goal>execute</goal>
+                    </goals>
+                    <configuration>
+                        <scripts>
+                            <script><![CDATA[
+                                def scriptFile = new File(project.basedir, "src/build/schema-derivation-config/derivation/scripts/serialize-derived-owl.groovy")
+                                def binding = new Binding([
+                                    inputFile: new File(project.basedir, "src/main/rdf/schema/SCHEMA_QUDT.ttl"),
+                                    outputFile: new File(project.basedir, "src/main/rdf/schema/SCHEMA_QUDT.ttl"),
+                                    ontologyIri: 'http://qudt.org/$$QUDT_VERSION$$/schema/qudt',
+                                    prefixFile: new File(project.basedir, "src/build/schema-derivation-config/derivation/OWL-derivation-prefixes.ttl"),
+                                    log: log
+                                ])
+                                new GroovyShell(this.class.classLoader, binding).evaluate(scriptFile)
+                            ]]></script>
+                        </scripts>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>serialize-derived-owl-datatype-schema</id>
+                    <phase>none</phase>
+                    <goals>
+                        <goal>execute</goal>
+                    </goals>
+                    <configuration>
+                        <scripts>
+                            <script><![CDATA[
+                                def scriptFile = new File(project.basedir, "src/build/schema-derivation-config/derivation/scripts/serialize-derived-owl.groovy")
+                                def binding = new Binding([
+                                    inputFile: new File(project.basedir, "src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl"),
+                                    outputFile: new File(project.basedir, "src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl"),
+                                    ontologyIri: 'http://qudt.org/$$QUDT_VERSION$$/schema/datatype',
+                                    prefixFile: new File(project.basedir, "src/build/schema-derivation-config/derivation/OWL-derivation-prefixes.ttl"),
+                                    log: log
+                                ])
+                                new GroovyShell(this.class.classLoader, binding).evaluate(scriptFile)
+                            ]]></script>
+                        </scripts>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>serialize-derived-owl-coordinates-schema</id>
+                    <phase>none</phase>
+                    <goals>
+                        <goal>execute</goal>
+                    </goals>
+                    <configuration>
+                        <scripts>
+                            <script><![CDATA[
+                                def scriptFile = new File(project.basedir, "src/build/schema-derivation-config/derivation/scripts/serialize-derived-owl.groovy")
+                                def binding = new Binding([
+                                    inputFile: new File(project.basedir, "src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl"),
+                                    outputFile: new File(project.basedir, "src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl"),
+                                    ontologyIri: 'http://qudt.org/$$QUDT_VERSION$$/schema/coordinateSystems',
+                                    prefixFile: new File(project.basedir, "src/build/schema-derivation-config/derivation/OWL-derivation-prefixes.ttl"),
+                                    log: log
+                                ])
+                                new GroovyShell(this.class.classLoader, binding).evaluate(scriptFile)
+                            ]]></script>
+                        </scripts>
+                    </configuration>
+                </execution>
+</executions>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.groovy</groupId>
@@ -3061,7 +3127,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                             <excludes>
                                 <!-- keep this file as prefix declarations only; formatter removes unused prefixes -->
                                 <exclude>src/build/schema-derivation-config/derivation/OWL-derivation-prefixes.ttl</exclude>
-                                <!-- generated OWL schemas should preserve derivation serializer prefixes -->
+                                <!-- generated OWL schemas are canonicalized by the dedicated OWL serializer -->
                                 <exclude>src/main/rdf/schema/SCHEMA_QUDT.ttl</exclude>
                                 <exclude>src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl</exclude>
                                 <exclude>src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl</exclude>
@@ -4142,6 +4208,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                             <arg value="-Powl-schema-derive" />
                                             <arg value="rdfio:pipeline@derive-owl-schema-pipeline" />
                                             <arg value="spotless:apply@reformat-src" />
+                                            <arg value="org.codehaus.gmavenplus:gmavenplus-plugin:4.1.1:execute@serialize-derived-owl-schema" />
                                         </exec>
                                     </target>
                                 </configuration>
@@ -4412,6 +4479,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                             <arg value="-Powl-datatypes-derive" />
                                             <arg value="rdfio:pipeline@derive-owl-datatypes-schema-pipeline" />
                                             <arg value="spotless:apply@reformat-src" />
+                                            <arg value="org.codehaus.gmavenplus:gmavenplus-plugin:4.1.1:execute@serialize-derived-owl-datatype-schema" />
                                         </exec>
                                     </target>
                                 </configuration>
@@ -4686,6 +4754,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                             <arg value="-Powl-coordinates-derive" />
                                             <arg value="rdfio:pipeline@derive-owl-coordinates-schema-pipeline" />
                                             <arg value="spotless:apply@reformat-src" />
+                                            <arg value="org.codehaus.gmavenplus:gmavenplus-plugin:4.1.1:execute@serialize-derived-owl-coordinates-schema" />
                                         </exec>
                                     </target>
                                 </configuration>
