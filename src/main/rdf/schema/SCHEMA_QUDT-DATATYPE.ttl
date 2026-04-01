@@ -45,7 +45,7 @@ vaem:GMD_SCHEMA-DATATYPE
         vaem:releaseDate               "2016-05-09"^^xsd:date;
         vaem:title                     "QUDT Schema for Datatypes - Version $$QUDT_VERSION$$";
         vaem:turtleFileURL             "http://qudt.org/$$QUDT_VERSION$$/schema/datatype.ttl"^^xsd:anyURI;
-        vaem:usesNonImportedResource   coords:PositiveX , datatype:CharEncoding , datatype:UTF8-CHAR , datatype:CT_COUNTABLY-INFINITE , coords:NegativeY , coords:FT_INERTIAL , datatype:BigEndian , dcterms:creator , datatype:SignedIntegerEncoding , coords:PositiveY , dcterms:rights , datatype:LittleEndian , coords:CCT_VehicleCentered , dcterms:created , coords:NegativeZ , datatype:CT_FINITE , datatype:WordAligned , datatype:TIME , datatype:CT_UNCOUNTABLE , coords:CCT_MoonCentered , dcterms:abstract , coords:PositiveZ , datatype:PadWithOnes , datatype:ShortUnsignedIntegerEncoding , datatype:TotallyOrdered , datatype:UTF16-CHAR , datatype:BooleanEncoding , datatype:LongSignedIntegerEncoding , datatype:Unordered , datatype:ByteAligned , coords:FT_ROTATING , coords:CCT_EarthCentered , datatype:BitEncoding , <http://voag.linkedmodel.org/voag#QUDT-Attribution> , datatype:Signed , datatype:PartiallyOrdered , datatype:Major , datatype:ByRow , datatype:PadWithAny , datatype:Minor , datatype:Unsigned , datatype:UnsignedIntegerEncoding , datatype:BitAligned , dcterms:title , dcterms:modified , coords:FT_NON-ROTATING , datatype:PadWithZeros , datatype:OctetEncoding , coords:NegativeX , datatype:ByLeftMostIndex , coords:CCT_MarsCentered , datatype:ShortSignedIntegerEncoding , coords:CCT_SunCentered , datatype:LongUnsignedIntegerEncoding , datatype:ByColumn;
+        vaem:usesNonImportedResource   coords:PositiveX , datatype:CharEncoding , datatype:UTF8-CHAR , datatype:CT_COUNTABLY-INFINITE , coords:NegativeY , coords:FT_INERTIAL , datatype:BigEndian , dcterms:creator , datatype:SignedIntegerEncoding , coords:PositiveY , dcterms:rights , datatype:LittleEndian , coords:CCT_VehicleCentered , dcterms:created , coords:NegativeZ , datatype:CT_FINITE , datatype:WordAligned , datatype:TIME , datatype:CT_UNCOUNTABLE , coords:CCT_MoonCentered , dcterms:abstract , coords:PositiveZ , datatype:PadWithOnes , datatype:ShortUnsignedIntegerEncoding , datatype:TotallyOrdered , datatype:UTF16-CHAR , datatype:BooleanEncoding , datatype:LongSignedIntegerEncoding , datatype:Unordered , datatype:ByteAligned , coords:CCT_EarthCentered , coords:FT_ROTATING , datatype:BitEncoding , <http://voag.linkedmodel.org/voag#QUDT-Attribution> , datatype:Signed , datatype:PartiallyOrdered , datatype:Major , datatype:ByRow , datatype:PadWithAny , datatype:Minor , datatype:UnsignedIntegerEncoding , datatype:Unsigned , dcterms:title , datatype:BitAligned , dcterms:modified , coords:FT_NON-ROTATING , datatype:PadWithZeros , datatype:OctetEncoding , coords:NegativeX , datatype:ByLeftMostIndex , coords:CCT_MarsCentered , datatype:ShortSignedIntegerEncoding , coords:CCT_SunCentered , datatype:LongUnsignedIntegerEncoding , datatype:ByColumn;
         vaem:withAttributionTo         <http://voag.linkedmodel.org/voag#QUDT-Attribution>;
         prov:derivedFrom               <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> .
 
@@ -81,7 +81,7 @@ qudt:AbstractDatatype
         dcterms:description   "\n  <p>An \"Abstract Datatype\" (ADT) is a specification of a set of data and the set of operations that can be performed on the data. \n  Such a data type is abstract in the sense that it is independent of various concrete implementations. \n  The definition can be mathematical, or it can be programmed as an interface. \n  A first class ADT supports the creation of multiple instances of the ADT, and the interface normally provides a constructor,\n   which returns an abstract handle to new data, and several operations, \n   which are functions accepting the abstract handle as an argument.</p>\n  "^^rdf:HTML;
         prov:wasInfluencedBy  <http://en.wikipedia.org/wiki/Abstract_data_type> , <http://xlinux.nist.gov/dads/HTML/abstractDataType.html> .
 
-qudt:accuracy  rdf:type      owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:accuracy  rdf:type      owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "accuracy";
         rdfs:range           xsd:integer;
@@ -114,7 +114,7 @@ qudt:allowedPattern  rdf:type  owl:DatatypeProperty;
         rdfs:range           xsd:string;
         dcterms:description  "This property relates a date string encoding (c.f. type:DateStringEncodingType) to one or more XML Schema compliant regular expressions that together determine the allowed lexical expressions that can be unambiguously parsed to determine a temporal quantity." .
 
-qudt:ansiSQLName  rdf:type  owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:ansiSQLName  rdf:type  owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "ANSI SQL name";
         rdfs:range          xsd:string;
@@ -173,11 +173,7 @@ qudt:Array  rdf:type         owl:Class;
         rdfs:subClassOf      qudt:StructuredDatatype;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:isHeterogeneous
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  1;
-                               owl:onProperty      qudt:datatype
+                               owl:onProperty      qudt:dimensionality
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:minCardinality  1;
@@ -189,7 +185,11 @@ qudt:Array  rdf:type         owl:Class;
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:dimensionality
+                               owl:onProperty      qudt:datatype
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  1;
+                               owl:onProperty      qudt:isHeterogeneous
                              ];
         dcterms:description  "\n  <p>An <em>Array></em> is a data structure that stores a collection of elements, typically of the same type, in a contiguous block of memory. \n  Each element in an array is identified by an index or key, which is typically a numerical identifier, either starting at '0' or '1'.\n  </p>\n  <p>The key considerations for an Array are:\n  </p>\n  <ol>\n  <li>Fixed Size: The size of an array may be pre-determined when it is created and cannot be changed;</li>\n  <li>Index-Based Access: Elements can be accessed, updated, or modified using their index;</li>\n  <li>Contiguous Memory Allocation: The elements are stored in consecutive memory locations, which allows efficient access using the index.</li>\n  </ol>\n  <p>An Array is represented as ordered entries of values arranged according to its dimensionality.\n  The number of dimensions is specified in the attribute 'dimensionality'.\n  </p>\n  <p>An array can be multi-dimensional.\n  Multiple indices are used but they are treated as extensions of the same structure.\n  For Example: for a 2D array arr[2][3], indices refer to the row and column positions.\n  A 2D array is still represented as a list, where each member of the list is a list.\n  </p>\n  <p>Higher dimensional arrays can be represented as nested lists.\n  For each dimension a new nested list is defined.\n  </p>"^^rdf:HTML .
 
@@ -202,7 +202,7 @@ qudt:AssociativeArray
         dcterms:description  "\n  <p>An <em>Associative Array</em> (or <em>Map</em>) is an abstract data type composed of a collection of keys and a collection of values,\n   where each key is associated with one value. \n  The operation of finding the value associated with a key is called a lookup or indexing,\n   and this is the most important operation supported by an associative array.\n  The relationship between a key and its value is sometimes called a mapping or binding.\n  </p>\n  "^^rdf:HTML .
 
 qudt:auralCueEnumeration
-        rdf:type            owl:ObjectProperty , owl:FunctionalProperty;
+        rdf:type            owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "aural cue enumeration";
         rdfs:subPropertyOf  qudt:modalCueEnumeration .
@@ -215,17 +215,17 @@ qudt:AuralCue  rdf:type      owl:Class;
                                owl:maxCardinality  1;
                                owl:onProperty      qudt:sound
                              ];
-        rdfs:subClassOf      [ rdf:type         owl:Restriction;
-                               owl:cardinality  1;
-                               owl:onProperty   qudt:sound
-                             ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:minCardinality  1;
                                owl:onProperty      qudt:sound
                              ];
+        rdfs:subClassOf      [ rdf:type         owl:Restriction;
+                               owl:cardinality  1;
+                               owl:onProperty   qudt:sound
+                             ];
         dcterms:description  "\n  <p>An aural cue is a sound produced by a device or a system that is used to alert personnel of of an advisory, cautionary, warning, or emergency state.\n  </p>"^^rdf:HTML .
 
-qudt:auralCue  rdf:type     owl:ObjectProperty , owl:FunctionalProperty;
+qudt:auralCue  rdf:type     owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "aural cue";
         rdfs:subPropertyOf  qudt:modalCue .
@@ -240,7 +240,7 @@ qudt:BalancedTree  rdf:type  owl:Class;
                              ];
         dcterms:description  "\n  <p>A <em>Balanced Tree</em> is a data type that defines the properties of data structures that represent balanced trees. \n  A balanced tree is a tree where no leaf is much farther away from the root than any other leaf. \n  Different balancing schemes allow different definitions of \"much farther\" and different amounts of work to keep them balanced.\n  </p>\n  "^^rdf:HTML .
 
-qudt:base  rdf:type       owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:base  rdf:type       owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "base";
         rdfs:range        xsd:integer .
@@ -274,12 +274,12 @@ qudt:BitField  rdf:type      rdfs:Datatype;
         rdfs:subClassOf      xsd:string;
         dcterms:description  "\n  <p>A bit field is a common idiom used in computer programming to store a set of Boolean datatype flags compactly, as a series of bits. \n  The bit field is stored in an integral type of known, fixed bit-width. \n  Each Boolean flag is stored in a separate bit. \n  Usually the source code will define a set of constants, each a power of two, that semantically associate each individual bit with its respective Boolean flag. \n  The bitwise operators and, or, and not are used in combination to set, reset and test the flags.\n  </p>\n  "^^rdf:HTML .
 
-qudt:bitOrder  rdf:type   owl:ObjectProperty , owl:FunctionalProperty;
+qudt:bitOrder  rdf:type   owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "bit order";
         rdfs:range        qudt:EndianType .
 
-qudt:bits  rdf:type       owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:bits  rdf:type       owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "bits";
         rdfs:range        xsd:integer .
@@ -304,13 +304,13 @@ qudt:BooleanType  rdf:type   owl:Class;
         rdfs:subClassOf      qudt:OrdinalType;
         dcterms:description  "A boolean data type can take on only two values." .
 
-qudt:bounded  rdf:type       owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:bounded  rdf:type       owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "bounded";
         rdfs:range           xsd:boolean;
         dcterms:description  "A datatype is bounded if its value space has either a finite upper and lower bound. Either bound may be inclusive or exclusive. " .
 
-qudt:byRow  rdf:type      owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:byRow  rdf:type      owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "by row";
         rdfs:range        xsd:boolean .
@@ -322,13 +322,13 @@ qudt:ByteEncodingType
         rdfs:subClassOf      qudt:Encoding;
         dcterms:description  "This class contains the various ways that information may be encoded into bytes." .
 
-qudt:byteOrder  rdf:type     owl:ObjectProperty , owl:FunctionalProperty;
+qudt:byteOrder  rdf:type     owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "byte order";
         rdfs:range           qudt:EndianType;
         dcterms:description  "Byte order is an enumeration of two values: 'Big Endian' and 'Little Endian' and is used to denote whether the most signiticant byte is either first or last, respectively." .
 
-qudt:bytes  rdf:type      owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:bytes  rdf:type      owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "bytes";
         rdfs:range        xsd:integer .
@@ -347,7 +347,7 @@ qudt:CardinalityType  rdf:type     owl:Class;
         owl:oneOf                  ( datatype:CT_COUNTABLY-INFINITE datatype:CT_UNCOUNTABLE datatype:CT_FINITE );
         prov:wasInfluencedBy       <http://en.wikipedia.org/wiki/Cardinal_number> , <http://en.wikipedia.org/wiki/Cardinality> .
 
-qudt:cardinality  rdf:type  owl:ObjectProperty , owl:FunctionalProperty;
+qudt:cardinality  rdf:type  owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "cardinality";
         rdfs:range        qudt:CardinalityType .
@@ -363,10 +363,10 @@ qudt:CharEncodingType
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Char Encoding Type";
         rdfs:subClassOf      qudt:Encoding;
-        dcterms:description  "\n  <p>The class of all character encoding schemes.\n  Each defines a rule or algorithm for encoding character data as a sequence of bits or bytes.\n  </p>"^^rdf:HTML , "The class of all character encoding schemes, each of which defines a rule or algorithm for encoding character data as a sequence of bits or bytes.";
+        dcterms:description  "The class of all character encoding schemes, each of which defines a rule or algorithm for encoding character data as a sequence of bits or bytes." , "\n  <p>The class of all character encoding schemes.\n  Each defines a rule or algorithm for encoding character data as a sequence of bits or bytes.\n  </p>"^^rdf:HTML;
         owl:oneOf            ( datatype:CharEncoding ) .
 
-qudt:cName  rdf:type         owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:cName  rdf:type         owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "C Language name" , "C name";
         rdfs:range           xsd:string;
@@ -383,21 +383,21 @@ qudt:ColorCue  rdf:type      owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Color Cue";
         rdfs:subClassOf      qudt:VisualCue;
-        rdfs:subClassOf      [ rdf:type         owl:Restriction;
-                               owl:cardinality  1;
-                               owl:onProperty   qudt:rgbCode
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  1;
+                               owl:onProperty      qudt:rgbCode
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:minCardinality  1;
                                owl:onProperty      qudt:rgbCode
                              ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  1;
-                               owl:onProperty      qudt:rgbCode
+        rdfs:subClassOf      [ rdf:type         owl:Restriction;
+                               owl:cardinality  1;
+                               owl:onProperty   qudt:rgbCode
                              ];
         dcterms:description  "\n  <p>A visual cue that uses color to distinguish it from other cues. \n  Each color cue has exactly one corresponding coordinate point in the RGB space.\n  </p>"^^rdf:HTML .
 
-qudt:columns  rdf:type    owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:columns  rdf:type    owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "columns";
         rdfs:range        xsd:integer .
@@ -438,6 +438,10 @@ qudt:CompositionTree  rdf:type  owl:Class;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "Composition Tree";
         rdfs:subClassOf   qudt:Tree;
+        rdfs:subClassOf   [ rdf:type         owl:Restriction;
+                            owl:cardinality  1;
+                            owl:onProperty   qudt:function
+                          ];
         rdfs:subClassOf   [ rdf:type            owl:Restriction;
                             owl:minCardinality  1;
                             owl:onProperty      qudt:function
@@ -445,10 +449,6 @@ qudt:CompositionTree  rdf:type  owl:Class;
         rdfs:subClassOf   [ rdf:type            owl:Restriction;
                             owl:maxCardinality  1;
                             owl:onProperty      qudt:function
-                          ];
-        rdfs:subClassOf   [ rdf:type         owl:Restriction;
-                            owl:cardinality  1;
-                            owl:onProperty   qudt:function
                           ] .
 
 qudt:CRC32  rdf:type      rdfs:Datatype;
@@ -462,24 +462,24 @@ qudt:DataEncoding  rdf:type  owl:Class;
         rdfs:subClassOf      qudt:Aspect;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
+                               owl:onProperty      qudt:bitOrder
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  1;
                                owl:onProperty      qudt:encoding
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
                                owl:onProperty      qudt:byteOrder
                              ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  1;
-                               owl:onProperty      qudt:bitOrder
-                             ];
         dcterms:description  "\n  <p><em>Data Encoding</em> expresses the properties that specify how data is represented at the bit and byte level. \n  These properties are applicable to describing raw data.\n  </p>"^^rdf:HTML .
 
-qudt:dataEncoding  rdf:type  owl:ObjectProperty , owl:FunctionalProperty;
+qudt:dataEncoding  rdf:type  owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "data encoding";
         rdfs:range        qudt:DataEncoding .
 
-qudt:dataOrder  rdf:type  owl:ObjectProperty , owl:FunctionalProperty;
+qudt:dataOrder  rdf:type  owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "data order";
         rdfs:range        qudt:MatrixElementOrder .
@@ -492,25 +492,25 @@ qudt:DataSetElement  rdf:type  owl:Class;
                                owl:maxCardinality  1;
                                owl:onProperty      qudt:elementLabel
                              ];
-        rdfs:subClassOf      [ rdf:type         owl:Restriction;
-                               owl:cardinality  1;
-                               owl:onProperty   qudt:elementLabel
-                             ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  1;
-                               owl:onProperty      qudt:hasQuantityKind
+                               owl:minCardinality  0;
+                               owl:onProperty      qudt:optional
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
                                owl:onProperty      qudt:optional
+                             ];
+        rdfs:subClassOf      [ rdf:type         owl:Restriction;
+                               owl:cardinality  1;
+                               owl:onProperty   qudt:elementLabel
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:minCardinality  1;
                                owl:onProperty      qudt:elementLabel
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:minCardinality  0;
-                               owl:onProperty      qudt:optional
+                               owl:maxCardinality  1;
+                               owl:onProperty      qudt:hasQuantityKind
                              ];
         dcterms:description  "\n  A field is a tuple that carries a name, a type and optionally other properties that characterize a member element of a composite data structure.\n  " .
 
@@ -519,16 +519,52 @@ qudt:Datatype  rdf:type            owl:Class;
         rdfs:label                 "Datatype";
         rdfs:subClassOf            qudt:Concept;
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  1;
-                                     owl:onProperty      qudt:matlabName
+                                     owl:minCardinality  0;
+                                     owl:onProperty      qudt:ansiSQLName
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  1;
+                                     owl:minCardinality  0;
                                      owl:onProperty      qudt:pythonName
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  0;
+                                     owl:onProperty      qudt:jsName
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  0;
+                                     owl:onProperty      qudt:oracleSQLName
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  1;
+                                     owl:onProperty      qudt:oracleSQLName
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  1;
+                                     owl:onProperty      qudt:bounded
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  1;
+                                     owl:onProperty      qudt:jsName
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  0;
                                      owl:onProperty      qudt:microsoftSQLServerName
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  0;
+                                     owl:onProperty      qudt:vbName
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  0;
+                                     owl:onProperty      qudt:matlabName
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  0;
+                                     owl:onProperty      qudt:cName
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  1;
+                                     owl:onProperty      qudt:cName
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  1;
@@ -536,107 +572,71 @@ qudt:Datatype  rdf:type            owl:Class;
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  1;
-                                     owl:onProperty      qudt:bounded
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  0;
-                                     owl:onProperty      qudt:oracleSQLName
+                                     owl:onProperty      qudt:javaName
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  1;
                                      owl:onProperty      qudt:orderedType
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  1;
-                                     owl:onProperty      qudt:oleDBName
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  1;
-                                     owl:onProperty      qudt:javaName
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  1;
-                                     owl:onProperty      qudt:cName
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  0;
-                                     owl:onProperty      qudt:pythonName
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  1;
-                                     owl:onProperty      qudt:protocolBuffersName
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:minCardinality  0;
                                      owl:onProperty      qudt:oleDBName
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  0;
-                                     owl:onProperty      qudt:cName
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  0;
-                                     owl:onProperty      qudt:jsName
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  1;
-                                     owl:onProperty      qudt:jsName
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  1;
-                                     owl:onProperty      qudt:cardinality
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  1;
                                      owl:onProperty      qudt:vbName
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  1;
-                                     owl:onProperty      qudt:odbcName
+                                     owl:minCardinality  0;
+                                     owl:onProperty      qudt:javaName
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  1;
-                                     owl:onProperty      qudt:oracleSQLName
+                                     owl:onProperty      qudt:microsoftSQLServerName
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  1;
+                                     owl:onProperty      qudt:pythonName
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  1;
+                                     owl:onProperty      qudt:matlabName
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  1;
+                                     owl:onProperty      qudt:oleDBName
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  1;
                                      owl:onProperty      qudt:basis
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  0;
-                                     owl:onProperty      qudt:javaName
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  0;
-                                     owl:onProperty      qudt:protocolBuffersName
+                                     owl:maxCardinality  1;
+                                     owl:onProperty      qudt:cardinality
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:minCardinality  0;
                                      owl:onProperty      qudt:odbcName
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  0;
-                                     owl:onProperty      qudt:vbName
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  0;
-                                     owl:onProperty      qudt:ansiSQLName
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  0;
-                                     owl:onProperty      qudt:matlabName
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  0;
-                                     owl:onProperty      qudt:microsoftSQLServerName
+                                     owl:maxCardinality  1;
+                                     owl:onProperty      qudt:protocolBuffersName
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  1;
-                                     owl:onProperty      qudt:ansiSQLName
+                                     owl:onProperty      qudt:odbcName
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:minCardinality  0;
                                      owl:onProperty      qudt:mySQLName
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  0;
+                                     owl:onProperty      qudt:protocolBuffersName
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  1;
+                                     owl:onProperty      qudt:ansiSQLName
                                    ];
         dcterms:description        "\n  <p>A <em>Datatype</em> is a definition of the type of the \"value\" of a data item (for example, \"all integers between 0 and 10\"),\n   and the allowable operations on those values; the meaning of the data; and the way values of that type can be stored.\n  Some types are primitive - built-in to the language, with no visible internal structure.\n  For example \"Boolean\"; others are composite - constructed from one or more other types (of either kind).\n  For example lists, arrays, structures, unions.\n  Some languages provide strong typing, others allow implicit type conversion and/or explicit type conversion.\n  </p>"^^rdf:HTML;
         qudt:informativeReference  "http://foldoc.org/data+type"^^xsd:anyURI , "http://www.princeton.edu/~achaney/tmve/wiki100k/docs/Data_type.html"^^xsd:anyURI , "https://en.wikipedia.org/wiki/Data_type"^^xsd:anyURI .
@@ -685,7 +685,7 @@ qudt:DateTypeUnion  rdf:type  qudt:List;
 qudt:defaultValue  rdf:type  owl:ObjectProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "Default Value";
-        rdfs:range        qudt:AuralCue , qudt:EnumeratedValue , qudt:IconicCue , qudt:KinestheticCue , qudt:ModalCue , qudt:VisualCue .
+        rdfs:range        qudt:VisualCue , qudt:ModalCue , qudt:IconicCue , qudt:KinestheticCue , qudt:EnumeratedValue , qudt:AuralCue .
 
 qudt:descriptor  rdf:type  owl:AnnotationProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
@@ -761,13 +761,13 @@ qudt:elementKind  rdf:type   owl:AnnotationProperty;
         rdfs:subPropertyOf   qudt:elementKind;
         dcterms:description  "This property is used to describe the quantity kind for a dimensional data type." .
 
-qudt:elementLabel  rdf:type  owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:elementLabel  rdf:type  owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "element label";
         rdfs:range           xsd:string;
         dcterms:description  "This property is used to label the field of a composite data structure." .
 
-qudt:elementName  rdf:type  owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:elementName  rdf:type  owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "element name";
         rdfs:range        xsd:string .
@@ -784,7 +784,7 @@ qudt:elementTypeList  rdf:type  owl:AnnotationProperty;
         rdfs:label           "element type list";
         dcterms:description  "\n  This property is used to define the data type of the elements of a structured data type. \n  It is used for structured data types with elements that are of different types.\n  " .
 
-qudt:elementUnit  rdf:type  owl:ObjectProperty , owl:FunctionalProperty;
+qudt:elementUnit  rdf:type  owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "element unit";
         rdfs:range        qudt:Unit .
@@ -795,11 +795,11 @@ qudt:Encoding  rdf:type      owl:Class;
         rdfs:subClassOf      skos:Concept;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:bits
+                               owl:onProperty      qudt:bytes
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:bytes
+                               owl:onProperty      qudt:bits
                              ];
         dcterms:description  "\n  <p>An encoding is a rule or algorithm that is used to convert data from a native, or unspecified form into a specific form that satisfies the encoding rules. \n  Examples of encodings include character encodings, such as UTF-8.\n  </p>"^^rdf:HTML .
 
@@ -827,7 +827,7 @@ qudt:EnumerationScale
         rdf:type             owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Enumeration scale";
-        rdfs:subClassOf      dtype:Enumeration , qudt:Scale;
+        rdfs:subClassOf      qudt:Scale , dtype:Enumeration;
         dcterms:description  "\n  A sub-type of 'DTYPE Enumeration'.\n  " .
 
 qudt:Enumeration  rdf:type   owl:Class;
@@ -857,7 +857,7 @@ qudt:fieldLabels  rdf:type   owl:AnnotationProperty;
         rdfs:label           "field labels";
         dcterms:description  "This property is used to list the field labels for a record type." .
 
-qudt:fieldLabel  rdf:type  owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:fieldLabel  rdf:type  owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "field label";
         rdfs:range        xsd:string .
@@ -870,9 +870,9 @@ qudt:FieldType  rdf:type     owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Field Type";
         rdfs:subClassOf      qudt:CompositeDatatype;
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  1;
-                               owl:onProperty      qudt:fieldLabel
+        rdfs:subClassOf      [ rdf:type         owl:Restriction;
+                               owl:cardinality  1;
+                               owl:onProperty   qudt:elementName
                              ];
         rdfs:subClassOf      [ rdf:type         owl:Restriction;
                                owl:cardinality  1;
@@ -883,16 +883,16 @@ qudt:FieldType  rdf:type     owl:Class;
                                owl:onProperty      qudt:fieldType
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  1;
+                               owl:onProperty      qudt:elementName
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:minCardinality  1;
                                owl:onProperty      qudt:elementName
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:elementName
-                             ];
-        rdfs:subClassOf      [ rdf:type         owl:Restriction;
-                               owl:cardinality  1;
-                               owl:onProperty   qudt:elementName
+                               owl:onProperty      qudt:fieldLabel
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:minCardinality  1;
@@ -942,7 +942,7 @@ qudt:frameType  rdf:type  owl:AnnotationProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "frame type" .
 
-qudt:functionArity  rdf:type  owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:functionArity  rdf:type  owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "function arity";
         rdfs:range           xsd:integer;
@@ -953,6 +953,10 @@ qudt:FunctionDatatype
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Function Data Type";
         rdfs:subClassOf      qudt:StructuredDatatype;
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  1;
+                               owl:onProperty      qudt:returnType
+                             ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:minCardinality  0;
                                owl:onProperty      qudt:returnType
@@ -966,10 +970,6 @@ qudt:FunctionDatatype
                                owl:onProperty   qudt:functionArity
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  1;
-                               owl:onProperty      qudt:returnType
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:minCardinality  1;
                                owl:onProperty      qudt:functionArity
                              ];
@@ -980,7 +980,7 @@ qudt:Function  rdf:type   owl:Class;
         rdfs:label        "Function";
         rdfs:subClassOf   qudt:Concept .
 
-qudt:function  rdf:type   owl:ObjectProperty , owl:FunctionalProperty;
+qudt:function  rdf:type   owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "function";
         rdfs:range        qudt:CompositionFunction .
@@ -1030,7 +1030,7 @@ qudt:HexBinaryType  rdf:type  owl:Class;
         rdfs:subClassOf      qudt:TextStringType;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:length
+                               owl:onProperty      qudt:pattern
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
@@ -1038,15 +1038,15 @@ qudt:HexBinaryType  rdf:type  owl:Class;
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:pattern
+                               owl:onProperty      qudt:maxLength
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:maxLength
+                               owl:onProperty      qudt:length
                              ];
         dcterms:description  "A string composed of hex characters." .
 
-qudt:hexbinary  rdf:type  owl:Class , rdfs:Datatype;
+qudt:hexbinary  rdf:type  rdfs:Datatype , owl:Class;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "hexbinary";
         rdfs:subClassOf   xsd:string .
@@ -1059,7 +1059,7 @@ qudt:HomogeneousArray
         dcterms:description  "\n  <p>An <em>Array></em> is a data structure that stores a collection of elements, typically of the same type, in a contiguous block of memory. \n  Each element in an array is identified by an index or key, which is typically a numerical identifier, either starting at '0' or '1'.\n  </p>\n  <p>The key considerations for an Array are:\n  </p>\n  <ol>\n  <li>Fixed Size: The size of an array may be pre-determined when it is created and cannot be changed;</li>\n  <li>Index-Based Access: Elements can be accessed, updated, or modified using their index;</li>\n  <li>Homogeneous Elements: all elements in an array must be of the same datatype;</li>\n  <li>Contiguous Memory Allocation: The elements are stored in consecutive memory locations, which allows efficient access using the index.</li>\n  </ol>\n  <p>An Array is represented as ordered entries of values arranged according to its dimensionality.\n  The number of dimensions is specified in the attribute 'dimensionality'.\n  </p>\n  <p>The property 'qudt:datatype' refers to the datatype of the elements.  \n  </p>\n  <p>An array can be multi-dimensional.\n  Multiple indices are used but they are treated as extensions of the same structure.\n  For Example: for a 2D array arr[2][3], indices refer to the row and column positions.\n  A 2D array is still represented as a list, where each member of the list is a list.\n  </p>\n  <p>Higher dimensional arrays can be represented as nested lists.\n  For each dimension a new nested list is defined.\n  </p>"^^rdf:HTML .
 
 qudt:iconicCueEnumeration
-        rdf:type            owl:ObjectProperty , owl:FunctionalProperty;
+        rdf:type            owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "iconic cue enumeration";
         rdfs:subPropertyOf  qudt:modalCueEnumeration .
@@ -1069,7 +1069,7 @@ qudt:IconicCue  rdf:type  owl:Class;
         rdfs:label        "Iconic enumeration literal";
         rdfs:subClassOf   qudt:ModalCue;
         rdfs:subClassOf   [ rdf:type            owl:Restriction;
-                            owl:minCardinality  1;
+                            owl:maxCardinality  1;
                             owl:onProperty      qudt:image
                           ];
         rdfs:subClassOf   [ rdf:type         owl:Restriction;
@@ -1077,17 +1077,17 @@ qudt:IconicCue  rdf:type  owl:Class;
                             owl:onProperty   qudt:image
                           ];
         rdfs:subClassOf   [ rdf:type            owl:Restriction;
-                            owl:maxCardinality  1;
+                            owl:minCardinality  1;
                             owl:onProperty      qudt:image
                           ] .
 
-qudt:iconicCue  rdf:type    owl:ObjectProperty , owl:FunctionalProperty;
+qudt:iconicCue  rdf:type    owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "iconic cue";
         rdfs:subPropertyOf  qudt:modalCue .
 
 qudt:incrementDatatype
-        rdf:type          owl:ObjectProperty , owl:FunctionalProperty;
+        rdf:type          owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "increment datatype";
         rdfs:range        qudt:TimeStringType .
@@ -1095,7 +1095,7 @@ qudt:incrementDatatype
 qudt:IntegerDatatype  rdf:type  owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Integer Datatype";
-        rdfs:subClassOf      qudt:NumericType , qudt:OrdinalType;
+        rdfs:subClassOf      qudt:OrdinalType , qudt:NumericType;
         dcterms:description  "An Integer Type is a data type that specifies how integer numbers are represented and stored in machine memory." .
 
 qudt:IntegerEncodingType
@@ -1125,35 +1125,35 @@ qudt:InterpolatedTable
         rdfs:subClassOf      qudt:Table;
         dcterms:description  "A sub-type of 'Table Type'." .
 
-qudt:inverted  rdf:type   owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:inverted  rdf:type   owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "inverted";
         rdfs:range        xsd:boolean .
 
-qudt:isByteString  rdf:type  owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:isByteString  rdf:type  owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "is byte string";
         rdfs:range        xsd:boolean .
 
-qudt:isHeterogeneous  rdf:type  owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:isHeterogeneous  rdf:type  owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "is heterogeneous";
         rdfs:range        xsd:boolean .
 
-qudt:javaName  rdf:type     owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:javaName  rdf:type     owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "java name";
         rdfs:range          xsd:string;
         rdfs:subPropertyOf  qudt:id .
 
-qudt:jsName  rdf:type       owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:jsName  rdf:type       owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "Javascript name";
         rdfs:range          xsd:string;
         rdfs:subPropertyOf  qudt:id .
 
 qudt:kinestheticCueEnumeration
-        rdf:type            owl:ObjectProperty , owl:FunctionalProperty;
+        rdf:type            owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "kinesthetic cue enumeration";
         rdfs:subPropertyOf  qudt:modalCueEnumeration .
@@ -1163,7 +1163,7 @@ qudt:KinestheticCue  rdf:type  owl:Class;
         rdfs:label        "Kinesthetic Cue";
         rdfs:subClassOf   qudt:ModalCue .
 
-qudt:kinestheticCue  rdf:type  owl:ObjectProperty , owl:FunctionalProperty;
+qudt:kinestheticCue  rdf:type  owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "kinesthetic cue";
         rdfs:subPropertyOf  qudt:modalCue .
@@ -1180,7 +1180,7 @@ qudt:LargeObject  rdf:type   owl:Class;
         rdfs:subClassOf      qudt:CompositeDatatype;
         dcterms:description  "\n  A 'LargeObject' datatype is used to store blocks of unstructured data (such as text, graphic images, video clips, and sound waveforms). \n  They often are used to allow efficient, random, piece-wise access to the data.\n  " .
 
-qudt:length  rdf:type        owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:length  rdf:type        owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "length";
         rdfs:range           xsd:integer;
@@ -1196,14 +1196,6 @@ qudt:List  rdf:type          owl:Class;
         rdfs:label           "List";
         rdfs:subClassOf      qudt:DataItem;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:minCardinality  1;
-                               owl:onProperty      qudt:datatype
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  1;
-                               owl:onProperty      qudt:datatype
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
                                owl:onProperty      qudt:hasUnit
                              ];
@@ -1212,8 +1204,16 @@ qudt:List  rdf:type          owl:Class;
                                owl:onProperty   qudt:datatype
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:minCardinality  1;
+                               owl:onProperty      qudt:datatype
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
                                owl:onProperty      qudt:quantity
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  1;
+                               owl:onProperty      qudt:datatype
                              ];
         dcterms:description  "A sub-type of 'AbstractDataItem'." .
 
@@ -1247,7 +1247,7 @@ qudt:Map  rdf:type           owl:Class;
         dcterms:description  "A Map Type is an abstract data type that defines the properties of map data structures. A Map (or Associative Array) is an abstract data structure composed of a collection of keys and a collection of values, where each key is associated with one value. The operation of finding the value associated with a key is called a lookup or indexing, and this is the most important operation supported by an associative array. The relationship between a key and its value is sometimes called a mapping or binding." .
 
 qudt:MassPropertiesArray
-        rdf:type             owl:Class , rdf:Class;
+        rdf:type             rdf:Class , owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Mass Properties Array";
         rdfs:subClassOf      qudt:HeterogenousArray;
@@ -1260,7 +1260,7 @@ qudt:MathsFunctionType
         rdfs:subClassOf      qudt:Concept;
         dcterms:description  "A sub-type of 'QUDT Concept'." .
 
-qudt:matlabName  rdf:type   owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:matlabName  rdf:type   owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "matlab name";
         rdfs:range          xsd:string;
@@ -1288,19 +1288,19 @@ qudt:maxBits  rdf:type    owl:DatatypeProperty;
         rdfs:label        "maximum bits";
         rdfs:range        xsd:integer .
 
-qudt:maxDepth  rdf:type   owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:maxDepth  rdf:type   owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "max depth";
         rdfs:range        xsd:integer .
 
-qudt:maxExclusive  rdf:type  owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:maxExclusive  rdf:type  owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "max exclusive";
         rdfs:range           xsd:string;
         rdfs:subPropertyOf   qudt:upperBound;
         dcterms:description  "maxExclusive is the exclusive upper bound of the value space for a datatype with the ordered property. The value of maxExclusive must be in the value space of the base type or be equal to {value} in {base type definition}." .
 
-qudt:maxExponent  rdf:type  owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:maxExponent  rdf:type  owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "max exponent";
         rdfs:range        xsd:integer .
@@ -1311,7 +1311,7 @@ qudt:maxInclusive  rdf:type  owl:DatatypeProperty;
         rdfs:subPropertyOf   qudt:upperBound;
         dcterms:description  "maxInclusive is the inclusive upper bound of the value space for a datatype with the ordered property. The value of maxInclusive must be in the value space of the base type." .
 
-qudt:maxLength  rdf:type  owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:maxLength  rdf:type  owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "max length";
         rdfs:range        xsd:integer .
@@ -1339,7 +1339,7 @@ qudt:MemoryOrderType  rdf:type  owl:Class;
         dcterms:description  "A sub-type of 'Enumerated Value'." .
 
 qudt:microsoftSQLServerName
-        rdf:type            owl:DatatypeProperty , owl:FunctionalProperty;
+        rdf:type            owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "Microsoft SQL Server name";
         rdfs:range          xsd:string;
@@ -1362,7 +1362,7 @@ qudt:minInclusive  rdf:type  owl:AnnotationProperty;
         rdfs:subPropertyOf   qudt:lowerBound;
         dcterms:description  "minInclusive is the inclusive lower bound of the value space for a datatype with the ordered property. The value of minInclusive must be in the value space of the base type." .
 
-qudt:minLength  rdf:type  owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:minLength  rdf:type  owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "min length";
         rdfs:range        xsd:integer .
@@ -1426,15 +1426,15 @@ qudt:MultiModalEnumeration
         rdfs:subClassOf      qudt:Enumeration;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
+                               owl:onProperty      qudt:kinestheticCueEnumeration
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  1;
                                owl:onProperty      qudt:visualCueEnumeration
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
                                owl:onProperty      qudt:auralCueEnumeration
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  1;
-                               owl:onProperty      qudt:kinestheticCueEnumeration
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
@@ -1448,11 +1448,7 @@ qudt:MultiModalType  rdf:type  owl:Class;
         rdfs:subClassOf      qudt:EnumeratedValue;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:auralCue
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  1;
-                               owl:onProperty      qudt:kinestheticCue
+                               owl:onProperty      qudt:visualCue
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
@@ -1460,7 +1456,11 @@ qudt:MultiModalType  rdf:type  owl:Class;
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:visualCue
+                               owl:onProperty      qudt:kinestheticCue
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  1;
+                               owl:onProperty      qudt:auralCue
                              ];
         dcterms:description  "A sub-type of 'Enumerated Value'." .
 
@@ -1515,11 +1515,11 @@ qudt:NumericType  rdf:type   owl:Class;
         rdfs:subClassOf      qudt:ScalarDatatype;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:accuracy
+                               owl:onProperty      qudt:signedness
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:signedness
+                               owl:onProperty      qudt:accuracy
                              ];
         dcterms:description  "Numeric data types are data types whose values denote quantities as defined by a mathematical number system." .
 
@@ -1529,7 +1529,7 @@ qudt:OctetType  rdf:type     owl:Class;
         rdfs:subClassOf      qudt:UnsignedIntegerType;
         dcterms:description  "An 8 bit unsigned integer" .
 
-qudt:odbcName  rdf:type     owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:odbcName  rdf:type     owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "ODBC name";
         rdfs:range          xsd:string;
@@ -1562,12 +1562,12 @@ qudt:OnOffStateType  rdf:type  owl:Class;
         rdfs:label        "On off state type";
         rdfs:subClassOf   qudt:DiscreteState .
 
-qudt:optional  rdf:type   owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:optional  rdf:type   owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "optional";
         rdfs:range        xsd:boolean .
 
-qudt:oracleSQLName  rdf:type  owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:oracleSQLName  rdf:type  owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "ORACLE SQL name";
         rdfs:range          xsd:string;
@@ -1587,7 +1587,7 @@ qudt:OrderedCollection
 qudt:OrderedTree  rdf:type   owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Ordered Tree Type";
-        rdfs:subClassOf      qudt:OrderedCollection , qudt:Tree;
+        rdfs:subClassOf      qudt:Tree , qudt:OrderedCollection;
         dcterms:description  "\n  <p>An \"Ordered Tree Type\" is a data type that defines the properties of data structures that represent ordered trees. \n  An ordered tree is a tree where the children of every node are ordered, that is, there is a first child, second child, third child, etc. \n  Typically a type specification for an ordered tree will include the comparison operator (such as <b>lt</b> or <b>gt</b>) that is used to order the nodes.\n  </p>"^^rdf:HTML .
 
 qudt:OrderedType  rdf:type   owl:Class;
@@ -1597,13 +1597,13 @@ qudt:OrderedType  rdf:type   owl:Class;
         dcterms:description  "Describes how a data or information structure is ordered.";
         owl:oneOf            ( datatype:Unordered datatype:PartiallyOrdered datatype:TotallyOrdered ) .
 
-qudt:orderedType  rdf:type  owl:ObjectProperty , owl:FunctionalProperty;
+qudt:orderedType  rdf:type  owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "ordered type";
         rdfs:range        qudt:OrderedType .
 
 qudt:orderingRelation
-        rdf:type             owl:ObjectProperty , owl:FunctionalProperty;
+        rdf:type             owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Ordering Relation";
         rdfs:range           dtype:ComparisonOperator;
@@ -1632,7 +1632,7 @@ qudt:PaddingType  rdf:type   owl:Class;
         dcterms:description  "\n  <p>This describes how unused bits of a field are filled. \n  Unused bits could be set to one or zero. \n  A third option is \"don't care\".\n  </p>"^^rdf:HTML;
         owl:oneOf            ( datatype:PadWithOnes datatype:PadWithZeros datatype:PadWithAny ) .
 
-qudt:padding  rdf:type    owl:ObjectProperty , owl:FunctionalProperty;
+qudt:padding  rdf:type    owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "padding";
         rdfs:range        qudt:PaddingType .
@@ -1650,7 +1650,7 @@ qudt:PartialArray  rdf:type  owl:Class;
         rdfs:subClassOf      qudt:Array;
         dcterms:description  "\n  A partial array is an Array with two attributes that define the starting and ending indices of the elements that are provided.\n  "^^rdf:HTML .
 
-qudt:pattern  rdf:type       owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:pattern  rdf:type       owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "pattern";
         rdfs:range           xsd:string;
@@ -1672,7 +1672,7 @@ qudt:PositiveBigIntegerType
         rdf:type             owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Positive Big Integer Type";
-        rdfs:subClassOf      qudt:IntegerDatatype , qudt:UnsignedType;
+        rdfs:subClassOf      qudt:UnsignedType , qudt:IntegerDatatype;
         dcterms:description  "Positive Integers are integers that are either non-zero and non-negative." .
 
 qudt:positiveDeltaLimit
@@ -1685,23 +1685,23 @@ qudt:PositiveIntegerType
         rdf:type             owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Positive Integer Type";
-        rdfs:subClassOf      qudt:IntegerDatatype , qudt:UnsignedType;
+        rdfs:subClassOf      qudt:UnsignedType , qudt:IntegerDatatype;
         dcterms:description  "Positive Integers are integers that are either non-zero and non-negative." .
 
-qudt:precision  rdf:type     owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:precision  rdf:type     owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "precision";
         rdfs:range           xsd:integer;
         dcterms:description  "\n  <p>Precision is the number of digits used to perform a given computation. \n  The concepts of accuracy and precision are both closely related and often confused. \n  While the accuracy of a number x is given by the number of significant decimal (or other) digits to the right of the decimal point in x,\n   the precision of x is the total number of significant decimal (or other) digits.\n  </p>\n  <p>For a given numeric data type, the value of type:precision (?p) is related to the values of type:maxMantissa (?M) and type:base (?b) by the formula:\n  </p>\n  <p>?p := log(?b, ?M)\n  </p>\n  <p>where log(a,y) = x iff y=a^x.\n  </p>\n  "^^rdf:HTML .
 
 qudt:protocolBuffersName
-        rdf:type            owl:DatatypeProperty , owl:FunctionalProperty;
+        rdf:type            owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "protocol buffers name";
         rdfs:range          xsd:string;
         rdfs:subPropertyOf  qudt:id .
 
-qudt:pythonName  rdf:type   owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:pythonName  rdf:type   owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "python name";
         rdfs:range          xsd:string;
@@ -1715,7 +1715,7 @@ qudt:Quantifiable  rdf:type  owl:Class;
                              ];
         vaem:isElaboratedIn  <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> .
 
-qudt:quantify  rdf:type   owl:ObjectProperty , owl:FunctionalProperty;
+qudt:quantify  rdf:type   owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "quantify";
         rdfs:range        qudt:Quantity .
@@ -1751,7 +1751,7 @@ qudt:RawValueTupleMember
         rdfs:subClassOf      qudt:TupleMember;
         dcterms:description  "A sub-type of 'Tuple Member Type'." .
 
-qudt:rdfsDatatype  rdf:type  owl:ObjectProperty , owl:FunctionalProperty;
+qudt:rdfsDatatype  rdf:type  owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "rdfs datatype";
         rdfs:range        rdfs:Datatype .
@@ -1762,15 +1762,15 @@ qudt:RealDatatype  rdf:type  owl:Class;
         rdfs:subClassOf      qudt:NumericType;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:precision
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  1;
                                owl:onProperty      qudt:maxExponent
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
                                owl:onProperty      qudt:base
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  1;
+                               owl:onProperty      qudt:precision
                              ];
         dcterms:description  "\n  <p>A real number is represented as a factor, called the mantissa, multiplied by a power (the exponent) of a base. \n  Different bases yield different approximations to real numbers, and conversion between them is limited in accuracy.\n  Four floating-point types are defined in 'IEEE-754 Standard for Binary Floating-Point'. \n  These types are 'single', 'extended single', 'double', and 'extended double'.\n  </p>\n  "^^rdf:HTML .
 
@@ -1778,7 +1778,7 @@ qudt:RealDoublePrecisionType
         rdf:type             owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Real Double Precision Type";
-        rdfs:subClassOf      qudt:DoublePrecisionType , qudt:RealDatatype;
+        rdfs:subClassOf      qudt:RealDatatype , qudt:DoublePrecisionType;
         dcterms:description  "\n  <p>A real double precision data type specifies how a real number, or an approximation of a real number is stored in memory.\n  Typically this occupies two words in computer memory, where the byte length of a word depends on machine address size of the computer processor. \n  For example, on 32-bit machine architectures, a word is four bytes.\n  An example of a real double precision data type specification is the IEEE 754 standard for encoding binary or decimal floating point numbers in 8 bytes for storage on 32-bit machine architectures.\n  </p>"^^rdf:HTML .
 
 qudt:realization  rdf:type  owl:AnnotationProperty;
@@ -1795,7 +1795,7 @@ qudt:RealSinglePrecisionType
         rdf:type             owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Real Single Precision Type";
-        rdfs:subClassOf      qudt:RealDatatype , qudt:SinglePrecisionType;
+        rdfs:subClassOf      qudt:SinglePrecisionType , qudt:RealDatatype;
         dcterms:description  "\n  <p>A real single precision data type specifies how a real number,\n   or an approximation of a real number is stored in memory that occupies one word in computer memory, \n   where the byte length of a word depends on machine address size of the computer processor.\n  </p>\n  <p> \n  For example, on 32-bit machine architectures, a word is four bytes. \n  An example of a real single precision data type specification is the IEEE 754 standard for encoding binary\n   or decimal floating point numbers in 4 bytes for storage on 32-bit machine architectures.\n  </p>\n  "^^rdf:HTML .
 
 qudt:Record  rdf:type        owl:Class;
@@ -1804,19 +1804,19 @@ qudt:Record  rdf:type        owl:Class;
         rdfs:subClassOf      qudt:CompositeDatatype;
         dcterms:description  "\n  A Record Type is a type whose values are records, i.e. aggregates of several items of possibly different types. \n  The aggregated items are called fields or members and are usually identified or indexed by field labels.\n  " .
 
-qudt:returnType  rdf:type    owl:ObjectProperty , owl:FunctionalProperty;
+qudt:returnType  rdf:type    owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "return type";
         rdfs:range           qudt:Datatype;
         rdfs:subPropertyOf   qudt:elementDatatype;
         dcterms:description  "This property is used to state the return type of a function type." .
 
-qudt:rgbCode  rdf:type    owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:rgbCode  rdf:type    owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "rgb code";
         rdfs:range        xsd:string .
 
-qudt:rows  rdf:type       owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:rows  rdf:type       owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "rows";
         rdfs:range        xsd:integer .
@@ -1827,23 +1827,15 @@ qudt:ScalarDatatype  rdf:type  owl:Class;
         rdfs:subClassOf      rdfs:Datatype;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:maxInclusive
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  1;
-                               owl:onProperty      qudt:maxExclusive
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  1;
                                owl:onProperty      qudt:bits
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:encoding
+                               owl:onProperty      qudt:maxInclusive
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:bytes
+                               owl:onProperty      qudt:length
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
@@ -1851,15 +1843,23 @@ qudt:ScalarDatatype  rdf:type  owl:Class;
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
+                               owl:onProperty      qudt:bytes
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  1;
                                owl:onProperty      qudt:bitOrder
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:rdfsDatatype
+                               owl:onProperty      qudt:maxExclusive
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:length
+                               owl:onProperty      qudt:encoding
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  1;
+                               owl:onProperty      qudt:rdfsDatatype
                              ];
         vaem:isElaboratedIn  <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> .
 
@@ -1901,7 +1901,7 @@ qudt:SignedIntegerType
         rdf:type             owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Signed Integer Type";
-        rdfs:subClassOf      qudt:IntegerDatatype , qudt:SignedType;
+        rdfs:subClassOf      qudt:SignedType , qudt:IntegerDatatype;
         dcterms:description  "Signed Integers are integers can take on both positive and negative values." .
 
 qudt:SignedLongIntegerType
@@ -1934,7 +1934,7 @@ qudt:SignedShortIntegerType
         rdf:type             owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Signed Short Integer Type";
-        rdfs:subClassOf      qudt:ShortIntegerType , qudt:SignedIntegerType;
+        rdfs:subClassOf      qudt:SignedIntegerType , qudt:ShortIntegerType;
         dcterms:description  "A Signed Short Integer is a signed integer that can be represented in four octets (32 bits) of machine memory." .
 
 qudt:SignedType  rdf:type    owl:Class;
@@ -1947,7 +1947,7 @@ qudt:SignedVariableLengthIntegerType
         rdf:type             owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Signed Variable Length Integer Type";
-        rdfs:subClassOf      qudt:SignedIntegerType , qudt:VariableLengthIntegerType;
+        rdfs:subClassOf      qudt:VariableLengthIntegerType , qudt:SignedIntegerType;
         dcterms:description  "A Signed Variable Length Integer data type defines a data structure for representing signed integers that uses a variable number of bits depending on the magnitude of the integer. Typically, variable length integer data types are between one and 64 bits in length." .
 
 qudt:significantDigits
@@ -1962,7 +1962,7 @@ qudt:SinglePrecisionType
         rdfs:subClassOf      qudt:NumericType;
         dcterms:description  "\n  A single precision data type specifies how a numeric value, such as an integer or real number,\n   is stored in memory that occupies one word in computer memory,\n   where the byte length of a word depends on machine address size of the computer processor. \n  For example, on 32-bit machine architectures, a word is four bytes.\n  A single precision data value on a 32-bit machine architecture occupies four bytes of memory.\n  " .
 
-qudt:sound  rdf:type         owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:sound  rdf:type         owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "sound";
         rdfs:range           xsd:anyURI;
@@ -1993,7 +1993,7 @@ qudt:StringEncodingType
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "String Encoding Type";
         rdfs:subClassOf      qudt:Encoding;
-        dcterms:description  "\n  <p><em>String Encoding Type</em> is an \"Encoding\" with the following instance(s):\n   \"UTF-16 String\", \"UTF-8 Encoding\".\n   </p>\n  "^^rdf:HTML , "\n  An \"Encoding\" with the following instance(s): \"datatype:UTF8-StringEncoding\", \"datatype:UTF16-StringEncoding\".\n  " .
+        dcterms:description  "\n  An \"Encoding\" with the following instance(s): \"datatype:UTF8-StringEncoding\", \"datatype:UTF16-StringEncoding\".\n  " , "\n  <p><em>String Encoding Type</em> is an \"Encoding\" with the following instance(s):\n   \"UTF-16 String\", \"UTF-8 Encoding\".\n   </p>\n  "^^rdf:HTML .
 
 qudt:StringType  rdf:type    owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
@@ -2001,24 +2001,24 @@ qudt:StringType  rdf:type    owl:Class;
         rdfs:subClassOf      qudt:ScalarDatatype;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:maxLength
+                               owl:onProperty      qudt:isByteString
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:isByteString
+                               owl:onProperty      qudt:maxLength
                              ];
         dcterms:description  "\n  <p>A <em>String Type</em> is a data type that specifies the properties of a list structure that holds characters.\n  </p>\n  "^^rdf:HTML .
 
 qudt:StringUTF16  rdf:type   owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "String UTF16";
-        rdfs:subClassOf      qudt:StringType , qudt:TextStringType;
+        rdfs:subClassOf      qudt:TextStringType , qudt:StringType;
         dcterms:description  "\n  <p><em>String UTF-16</em> is a string data type that specifies the properties of string data structures which encode strings using the UTF-16 encoding. \n  UTF-16 is the native internal representation of text in many software systems, for example:\n  </p>\n  <ol>\n  <li>Microsoft Windows NT/Windows 2000/Windows XP/Windows CE;</li>\n  <li>Qualcomm BREW, and Symbian operating systems;</li>\n  <li>the Java and .NET byte code environments;</li>\n  <li>Mac OS X's Cocoa and Core Foundation frameworks;</li>\n  <li>Qt cross-platform graphical widget toolkit.</li>\n  </ol>\n  "^^rdf:HTML .
 
 qudt:StringUTF8  rdf:type    owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "String UTF8 Type";
-        rdfs:subClassOf      qudt:StringType , qudt:TextStringType;
+        rdfs:subClassOf      qudt:TextStringType , qudt:StringType;
         dcterms:description  "\n  String UTF-8 Type is a string data type that specifies the properties of string data structures which encode strings using the UTF-8 encoding. \n  UTF-8 includes ASCII, otherwise referred to as IA-5 (International Alphabet 5, as standardized by International Organization for Standardization [ISO]) as the first 128 values. \n  The Internet Engineering Task Force (IETF) requires all Internet protocols to identify the encoding used for character data with UTF-8 as at least one supported encoding. \n  The Internet Mail Consortium (IMC) recommends that all e-mail programs must be able to display and create mail using UTF-8.\n  ";
         vaem:isElaboratedIn  <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> .
 
@@ -2052,11 +2052,11 @@ qudt:Table  rdf:type         owl:Class;
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:byRow
+                               owl:onProperty      qudt:columns
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
-                               owl:onProperty      qudt:columns
+                               owl:onProperty      qudt:byRow
                              ];
         dcterms:description  "\n  A Table Type is a data type that specifies the properties of table data structures. \n  A table is both a mode of visual communication and a means of arranging data. \n  The precise conventions and terminology for describing tables varies depending on the context. \n  Moreover, tables differ significantly in variety, structure, flexibility, notation, representation and use.\n  " .
 
@@ -2093,7 +2093,7 @@ qudt:ThreeTuple  rdf:type    owl:Class;
 qudt:TimeDataType  rdf:type  owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Time data type";
-        rdfs:subClassOf      qudt:Enumeration , qudt:ScalarDatatype;
+        rdfs:subClassOf      qudt:ScalarDatatype , qudt:Enumeration;
         dcterms:description  "A sub-type of 'QUDT Enumeration'.";
         dtype:value          datatype:TIME .
 
@@ -2119,9 +2119,13 @@ qudt:TimeSeriesArray  rdf:type  owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Time Series Array";
         rdfs:subClassOf      qudt:Array;
-        rdfs:subClassOf      [ rdf:type         owl:Restriction;
-                               owl:cardinality  1;
-                               owl:onProperty   qudt:incrementDatatype
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:minCardinality  1;
+                               owl:onProperty      qudt:vector
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:minCardinality  1;
+                               owl:onProperty      qudt:incrementDatatype
                              ];
         rdfs:subClassOf      [ rdf:type         owl:Restriction;
                                owl:cardinality  1;
@@ -2132,23 +2136,19 @@ qudt:TimeSeriesArray  rdf:type  owl:Class;
                                owl:onProperty      qudt:vector
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:minCardinality  1;
-                               owl:onProperty      qudt:vector
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  1;
                                owl:onProperty      qudt:incrementDatatype
                              ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:minCardinality  1;
-                               owl:onProperty      qudt:incrementDatatype
+        rdfs:subClassOf      [ rdf:type         owl:Restriction;
+                               owl:cardinality  1;
+                               owl:onProperty   qudt:incrementDatatype
                              ];
         dcterms:description  "\n  A Time Series Array is a data type that specifies the properties of arrays that hold time series data. \n  A time series is a sequence of data points, measured at successive time intervals. \n  The time intervals may be uniformly or non-uniformly spaced.\n  " .
 
 qudt:TimeStringType  rdf:type  owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Time Type";
-        rdfs:subClassOf      qudt:DateTimeStringType , qudt:TextStringType;
+        rdfs:subClassOf      qudt:TextStringType , qudt:DateTimeStringType;
         dcterms:description  "Time takes a number of forms, depending on the units used (e.g., year, day, minute, millisecond, or combinations thereof) and the origin (i.e., time zero) to which the time value is related." .
 
 qudt:Time  rdf:type          owl:Class;
@@ -2186,11 +2186,11 @@ qudt:TupleType  rdf:type     owl:Class;
         rdfs:label           "Tuple Type";
         rdfs:subClassOf      qudt:CompositeDatatype;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:minCardinality  0;
+                               owl:maxCardinality  1;
                                owl:onProperty      qudt:length
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  1;
+                               owl:minCardinality  0;
                                owl:onProperty      qudt:length
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
@@ -2205,14 +2205,14 @@ qudt:Tuple  rdf:type         owl:Class;
         rdfs:subClassOf      qudt:CompositeDatatype;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:minCardinality  0;
-                               owl:onProperty      qudt:elementTypeCount
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  1;
                                owl:onProperty      qudt:length
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:minCardinality  0;
+                               owl:onProperty      qudt:elementTypeCount
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  1;
                                owl:onProperty      qudt:length
                              ];
         dcterms:description  "\n  <p>The term <em>Tuple</em> originated as an abstraction of the sequence: single, double, triple, quadruple, quintuple, n-tuple. \n  In mathematics, a tuple is a finite sequence (also known as an <em>Ordered List</em> of objects, each of a specified type. \n  The <em>n</em> can be any non-negative integer.\n  </p>"^^rdf:HTML .
@@ -2273,21 +2273,21 @@ qudt:UnsignedBigIntegerType
         rdf:type             owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Unsigned Big Integer Type";
-        rdfs:subClassOf      qudt:BigIntegerType , qudt:UnsignedIntegerType;
+        rdfs:subClassOf      qudt:UnsignedIntegerType , qudt:BigIntegerType;
         dcterms:description  "An Unsgned Big Integer is an unsigned integer that can be represented in eight octets (64 bits) of machine memory." .
 
 qudt:UnsignedIntegerType
         rdf:type             owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Unsigned Integer Type";
-        rdfs:subClassOf      qudt:IntegerDatatype , qudt:UnsignedType;
+        rdfs:subClassOf      qudt:UnsignedType , qudt:IntegerDatatype;
         dcterms:description  "Unsgned Integers are integers that are either strictly non-negative or non-positive." .
 
 qudt:UnsignedLongIntegerType
         rdf:type             owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Unsigned Long Integer Type";
-        rdfs:subClassOf      qudt:LongIntegerType , qudt:UnsignedIntegerType;
+        rdfs:subClassOf      qudt:UnsignedIntegerType , qudt:LongIntegerType;
         dcterms:description  "An Unsigned Long Integer is an unsigned integer that can be represented in four octets (32 bits) of machine memory." .
 
 qudt:UnsignedMediumIntegerType
@@ -2314,7 +2314,7 @@ qudt:UnsignedVariableLengthIntegerType
         rdf:type             owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label           "Unsigned Variable Length Integer Type";
-        rdfs:subClassOf      qudt:UnsignedIntegerType , qudt:VariableLengthIntegerType;
+        rdfs:subClassOf      qudt:VariableLengthIntegerType , qudt:UnsignedIntegerType;
         dcterms:description  "\n  An \"Unsigned Variable Length Integer\" data type defines a data structure for representing unsigned integers that uses a variable number of bits depending on the magnitude of the integer. \n  Typically, variable length integer data types are between one and 64 bits in length.\n  " .
 
 qudt:upperBound  rdf:type  owl:DatatypeProperty;
@@ -2363,7 +2363,7 @@ qudt:VariableLengthIntegerType
         rdfs:subClassOf      qudt:IntegerDatatype;
         dcterms:description  "\n  A \"Variable Length Integer\" data type defines a data structure for representing integers that uses a variable number of bits depending on the magnitude of the integer. \n  Typically, variable length integer data types are between one and 64 bits in length.\n  " .
 
-qudt:vbName  rdf:type       owl:DatatypeProperty , owl:FunctionalProperty;
+qudt:vbName  rdf:type       owl:FunctionalProperty , owl:DatatypeProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "Visual Basic name";
         rdfs:range          xsd:string;
@@ -2379,13 +2379,13 @@ qudt:Vector  rdf:type        owl:Class;
                              ];
         dcterms:description  "\n  <p>A <em>Vector</em> is an array data type that can have a dimensionality of one, or more elements.\n  Vectors can represent physical quantities, such as velocity, force, displacement;\n  mathematical objects such as points or directions in space;\n  and abstract representations for things such as colors, features, or embeddings in computational contexts.\n  </p>\n  <p>As a one-dimensional mathematical object it can represent a quantity with both magnitude and direction in space.\n  One-dimensional vectors can be thought of as a special case of a 1D array.\n  For example a 3D vector can be expressed as a list of coordinates: [x,y,z].\n  </p>\n  <p>\n  A vector in n-dimensional space can represent a point, a direction, or a linear combination of basis vectors.\n  </p>\n  <p>\n  Vectors can represent quantifiable values.\n  For example a car moving at 60 m/hr to the north, assuming north is along the y-axis, can be represented in 2D as:\n  </p>\n  <dl>\n  <dd>[0, 60]</dd>\n  </dl>\n  <p>\n  In machine learning a <em>Feature Vector</em> can be expressed for a dataset entry as:\n  <p>\n  <dl>\n  <dd>[5.1, 3.5, 1.4, 0.2]</dd>\n  </dl>\n  <p>\n  In AI for text processing a <em>Word Embedding Vector</em> is expressed as a N-dimensional space, where N can be a large number.\n  </p>\n  "^^rdf:HTML .
 
-qudt:vector  rdf:type     owl:ObjectProperty , owl:FunctionalProperty;
+qudt:vector  rdf:type     owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "vector";
         rdfs:range        qudt:Vector .
 
 qudt:visualCueEnumeration
-        rdf:type            owl:ObjectProperty , owl:FunctionalProperty;
+        rdf:type            owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "visual cue enumeration";
         rdfs:subPropertyOf  qudt:modalCueEnumeration .
@@ -2395,7 +2395,7 @@ qudt:VisualCue  rdf:type  owl:Class;
         rdfs:label        "Visual Cue";
         rdfs:subClassOf   qudt:ModalCue .
 
-qudt:visualCue  rdf:type    owl:ObjectProperty , owl:FunctionalProperty;
+qudt:visualCue  rdf:type    owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label          "visual cue";
         rdfs:subPropertyOf  qudt:modalCue .
@@ -2403,7 +2403,7 @@ qudt:visualCue  rdf:type    owl:ObjectProperty , owl:FunctionalProperty;
 qudt:WetDryStateType  rdf:type  owl:Class;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype>;
         rdfs:label        "Wet dry state type";
-        rdfs:subClassOf   qudt:DiscreteState , qudt:EnumeratedValue .
+        rdfs:subClassOf   qudt:EnumeratedValue , qudt:DiscreteState .
 
 qudt:XSDatomicTypeUnion
         rdf:type             qudt:List;
