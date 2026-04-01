@@ -19,6 +19,7 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                                             WHERE {
                                                 VALUES ?p {
                                                     qudt:exponent
+                                                    qudt:value
                                                 }
                                                 GRAPH <work:schema:derived> {
                                                     OPTIONAL { ?p a owl:DatatypeProperty . }

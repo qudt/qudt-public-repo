@@ -210,6 +210,10 @@ qudt:Aspect  rdf:type        qudt:AspectClass , owl:Class;
         rdfs:label           "QUDT Aspect";
         dcterms:description  "An aspect is an abstract type class that defines properties that can be reused."^^rdf:HTML .
 
+qudt:baseCGSUnitDimensions
+        rdf:type          owl:DatatypeProperty;
+        rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> .
+
 qudt:baseDimensionEnumeration
         rdf:type             owl:FunctionalProperty , owl:ObjectProperty;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
@@ -223,39 +227,51 @@ qudt:BaseDimensionMagnitude
         rdfs:label                 "Base Dimension Magnitude";
         rdfs:subClassOf            qudt:Concept;
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:vectorMagnitude
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:vectorMagnitude
-                                   ];
-        rdfs:subClassOf            [ rdf:type         owl:Restriction;
-                                     owl:cardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty   qudt:hasBaseQuantityKind
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  "1"^^xsd:nonNegativeInteger;
                                      owl:onProperty      qudt:hasBaseQuantityKind
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:QuantityKind;
-                                     owl:onProperty     qudt:hasBaseQuantityKind
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:vectorMagnitude
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  xsd:float;
-                                     owl:onProperty     qudt:vectorMagnitude
                                    ];
         rdfs:subClassOf            [ rdf:type         owl:Restriction;
                                      owl:cardinality  "1"^^xsd:nonNegativeInteger;
                                      owl:onProperty   qudt:vectorMagnitude
                                    ];
+        rdfs:subClassOf            [ rdf:type         owl:Restriction;
+                                     owl:cardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty   qudt:hasBaseQuantityKind
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  xsd:float;
+                                     owl:onProperty     qudt:vectorMagnitude
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:hasBaseQuantityKind
+                                   ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:hasBaseQuantityKind
+                                     owl:onProperty      qudt:vectorMagnitude
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:QuantityKind;
+                                     owl:onProperty     qudt:hasBaseQuantityKind
                                    ];
         dcterms:description        "\n  <p>A <em>Dimension</em> expresses a magnitude for a base quantity kind such as mass, length and time.\n  </p>\n  <p>DEPRECATED - each exponent is expressed as a property. \n  Keep until a validation of this has been done.\n  </p>"^^rdf:HTML;
         qudt:informativeReference  "https://en.wikipedia.org/wiki/Dimensional_analysis"^^xsd:anyURI , "http://web.mit.edu/2.25/www/pdf/DA_unified.pdf"^^xsd:anyURI .
+
+qudt:baseImperialUnitDimensions
+        rdf:type          owl:DatatypeProperty;
+        rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> .
+
+qudt:baseISOUnitDimensions
+        rdf:type          owl:DatatypeProperty;
+        rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> .
+
+qudt:baseSIUnitDimensions
+        rdf:type          owl:DatatypeProperty;
+        rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> .
 
 qudt:baseUnitOfSystem
         rdf:type             owl:ObjectProperty;
@@ -264,6 +280,10 @@ qudt:baseUnitOfSystem
         rdfs:subPropertyOf   qudt:definedUnitOfSystem;
         dcterms:description  "\n  This property relates a unit of measure to the system of units in which it is defined as a base unit for the system. \n  The base units of a system are used to define the derived units of the system by expressing the derived units as products of the base units raised to a rational power.\n  ";
         owl:inverseOf        qudt:hasBaseUnit .
+
+qudt:baseUSCustomaryUnitDimensions
+        rdf:type          owl:DatatypeProperty;
+        rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> .
 
 qudt:belongsToSystemOfQuantities
         rdf:type          owl:ObjectProperty;
@@ -291,13 +311,17 @@ qudt:Citation  rdf:type      owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label           "Citation";
         rdfs:subClassOf      qudt:Concept;
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      dcterms:description
-                             ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  xsd:anyURI;
                                owl:onProperty     qudt:url
+                             ];
+        rdfs:subClassOf      [ rdf:type         owl:Restriction;
+                               owl:cardinality  "1"^^xsd:nonNegativeInteger;
+                               owl:onProperty   dcterms:description
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                               owl:onProperty      qudt:url
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:minCardinality  "1"^^xsd:nonNegativeInteger;
@@ -305,11 +329,7 @@ qudt:Citation  rdf:type      owl:Class;
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:url
-                             ];
-        rdfs:subClassOf      [ rdf:type         owl:Restriction;
-                               owl:cardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty   dcterms:description
+                               owl:onProperty      dcterms:description
                              ];
         dcterms:description  "Provides a simple way of making citations."^^rdf:HTML .
 
@@ -342,40 +362,32 @@ qudt:Concept  rdf:type       owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label           "QUDT Concept";
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  xsd:boolean;
-                               owl:onProperty     qudt:deprecated
+                               owl:allValuesFrom  qudt:Rule;
+                               owl:onProperty     qudt:hasRule
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  xsd:string;
                                owl:onProperty     qudt:id
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  qudt:Concept;
-                               owl:onProperty     qudt:exactMatch
+                               owl:allValuesFrom  xsd:boolean;
+                               owl:onProperty     qudt:deprecated
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  qudt:Rule;
-                               owl:onProperty     qudt:hasRule
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:deprecated
+                               owl:allValuesFrom  xsd:string;
+                               owl:onProperty     qudt:abbreviation
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
                                owl:onProperty      qudt:abbreviation
                              ];
-        rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  xsd:string;
-                               owl:onProperty     qudt:deprecatedInVersion
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                               owl:onProperty      qudt:deprecatedInVersion
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:id
-                             ];
-        rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  xsd:string;
-                               owl:onProperty     qudt:abbreviation
+                               owl:onProperty      qudt:deprecated
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  rdf:HTML;
@@ -383,7 +395,15 @@ qudt:Concept  rdf:type       owl:Class;
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:deprecatedInVersion
+                               owl:onProperty      qudt:id
+                             ];
+        rdfs:subClassOf      [ rdf:type           owl:Restriction;
+                               owl:allValuesFrom  xsd:string;
+                               owl:onProperty     qudt:deprecatedInVersion
+                             ];
+        rdfs:subClassOf      [ rdf:type           owl:Restriction;
+                               owl:allValuesFrom  qudt:Concept;
+                               owl:onProperty     qudt:exactMatch
                              ];
         dcterms:description  "The root class for all QUDT concepts."^^rdf:HTML .
 
@@ -468,12 +488,12 @@ qudt:CurrencyUnit  rdf:type  owl:Class;
                                owl:onProperty     qudt:currencyNumber
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  xsd:integer;
-                               owl:onProperty     qudt:currencyExponent
-                             ];
-        rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  xsd:string;
                                owl:onProperty     qudt:currencyCode
+                             ];
+        rdfs:subClassOf      [ rdf:type           owl:Restriction;
+                               owl:allValuesFrom  xsd:integer;
+                               owl:onProperty     qudt:currencyExponent
                              ];
         dcterms:description  "\n  Currency Units have their own subclass of unit because:\n   (a) they have additional properties such as 'country' and\n   (b) their URIs do not conform to the same rules as other units.\n  "^^rdf:HTML .
 
@@ -481,10 +501,6 @@ qudt:DataItem  rdf:type      owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label           "Data Item";
         rdfs:subClassOf      qudt:Concept;
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:value
-                             ];
         dcterms:description  "\n  <p>A <em>Data Item</em> holds a value that maybe a scalar or structured datatype.\n  <em>Quantity Value</em> specifies which case applies.\n  </p>"^^rdf:HTML .
 
 qudt:dataStructure  rdf:type  owl:FunctionalProperty , owl:DatatypeProperty;
@@ -497,6 +513,9 @@ qudt:Datatype  rdf:type      owl:Class;
         rdfs:label           "Datatype";
         rdfs:subClassOf      qudt:Concept;
         dcterms:description  "\n   <p>A <em>Datatype</em> is a definition of the type of the \"value\" of a data item (for example, \"all integers between 0 and 10\"),\n   and the allowable operations on those values; the meaning of the data; and the way values of that type can be stored. \n  Some types are primitive - built-in to the language, with no visible internal structure.\n  For example \"Boolean\"; others are composite - constructed from one or more other types (of either kind).\n  For example lists, arrays, structures, unions. \n  Some languages provide strong typing, others allow implicit type conversion and/or explicit type conversion.\n  </p>"^^rdf:HTML .
+
+qudt:datatype  rdf:type   owl:ObjectProperty;
+        rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> .
 
 qudt:dbpediaMatch  rdf:type  owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
@@ -581,16 +600,16 @@ qudt:DigitalCurrencyUnit
         rdfs:label                 "Digital Currency Unit"@en;
         rdfs:subClassOf            qudt:CurrencyUnit;
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  xsd:integer;
-                                     owl:onProperty     qudt:currencyExponent
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  xsd:string;
                                      owl:onProperty     qudt:blockchainNetwork
                                    ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  xsd:string;
+                                     owl:onProperty     qudt:currencyCode
+                                   ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:currencyCode
+                                     owl:onProperty      qudt:blockchainNetwork
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
@@ -598,19 +617,19 @@ qudt:DigitalCurrencyUnit
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:blockchainNetwork
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  xsd:string;
-                                     owl:onProperty     qudt:currencyCode
+                                     owl:onProperty      qudt:currencyExponent
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  xsd:string;
                                      owl:onProperty     qudt:hasDTICode
                                    ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  xsd:integer;
+                                     owl:onProperty     qudt:currencyExponent
+                                   ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:currencyExponent
+                                     owl:onProperty      qudt:currencyCode
                                    ];
         dcterms:description        "A currency-like unit for cryptographic or tokenized assets. Instances should reference an ISO 24165 Digital Token Identifier (DTI) when available."@en;
         qudt:informativeReference  <https://dtif.org/> , <https://www.iso.org/standard/79891.html> .
@@ -696,9 +715,9 @@ qudt:EnumeratedQuantity
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label        "Enumerated Quantity";
         rdfs:subClassOf   qudt:Concept;
-        rdfs:subClassOf   [ rdf:type           owl:Restriction;
-                            owl:allValuesFrom  qudt:Enumeration;
-                            owl:onProperty     qudt:enumeration
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                            owl:onProperty      qudt:enumeration
                           ];
         rdfs:subClassOf   [ rdf:type            owl:Restriction;
                             owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
@@ -708,19 +727,15 @@ qudt:EnumeratedQuantity
                             owl:allValuesFrom  qudt:EnumeratedValue;
                             owl:onProperty     qudt:enumeratedValue
                           ];
-        rdfs:subClassOf   [ rdf:type            owl:Restriction;
-                            owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                            owl:onProperty      qudt:enumeration
+        rdfs:subClassOf   [ rdf:type           owl:Restriction;
+                            owl:allValuesFrom  qudt:Enumeration;
+                            owl:onProperty     qudt:enumeration
                           ] .
 
 qudt:EnumeratedValue  rdf:type     owl:Class;
         rdfs:isDefinedBy           <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label                 "Enumerated Value";
         rdfs:subClassOf            qudt:Verifiable , dtype:EnumeratedValue;
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  xsd:string;
-                                     owl:onProperty     qudt:abbreviation
-                                   ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
                                      owl:onProperty      dcterms:description
@@ -729,16 +744,23 @@ qudt:EnumeratedValue  rdf:type     owl:Class;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
                                      owl:onProperty      qudt:abbreviation
                                    ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  xsd:string;
+                                     owl:onProperty     qudt:abbreviation
+                                   ];
         dcterms:description        "\n  <p>An <em>Enumerated Value</em> class defines the members of an enumeration. \n  An enumeration is a set of literals from which a single value is selected. \n  Each literal can have a tag as an integer within a standard encoding appropriate to the range of integer values. \n  Consistency of enumeration types will allow them, and the enumerated values, to be referred to unambiguously either through symbolic name or encoding. \n  </p>\n  <p>Enumerated values are also controlled vocabularies and as such need to be standardized. \n  Without this consistency enumeration literals can be stated differently and result in  data conflicts and misinterpretations.\n  </p>\n  <p>The tags are a set of positive whole numbers, not necessarily contiguous and having no numerical significance, each corresponding to the associated literal identifier. \n  An order attribute can also be given on the enumeration elements. \n  An enumeration can itself be a member of an enumeration. \n  This allows enumerations to be enumerated in a selection. \n  </p>\n  <p>Enumerations are also subclasses of Scalar Datatype. \n  This allows them to be used as the reference of a datatype specification.\n  </p>\n  "^^rdf:HTML;
         qudt:informativeReference  "https://en.wikipedia.org/wiki/Enumeration"^^xsd:anyURI .
+
+qudt:enumeratedValue  rdf:type  owl:ObjectProperty;
+        rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> .
 
 qudt:Enumeration  rdf:type         owl:Class;
         rdfs:isDefinedBy           <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label                 "Enumeration";
         rdfs:subClassOf            qudt:Concept;
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  xsd:string;
-                                     owl:onProperty     qudt:abbreviation
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:abbreviation
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:minCardinality  "1"^^xsd:nonNegativeInteger;
@@ -746,30 +768,33 @@ qudt:Enumeration  rdf:type         owl:Class;
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:abbreviation
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
                                      owl:onProperty      qudt:default
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:EnumeratedValue;
-                                     owl:onProperty     qudt:element
+                                     owl:allValuesFrom  xsd:string;
+                                     owl:onProperty     qudt:abbreviation
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  qudt:EnumeratedValue;
                                      owl:onProperty     qudt:default
                                    ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:EnumeratedValue;
+                                     owl:onProperty     qudt:element
+                                   ];
         dcterms:description        "\n  <p>An <em>Enumeration</em> is a set of literals from which a single value is selected. \n  Each literal can have a tag as an integer within a standard encoding appropriate to the range of integer values. \n  Consistency of enumeration types will allow them, and the enumerated values, to be referred to unambiguously either through symbolic name or encoding. \n  Enumerated values are also controlled vocabularies and as such need to be standardized. \n  Without this consistency enumeration literals can be stated differently and result in  data conflicts and misinterpretations.\n  </p>\n  <p>The tags are a set of positive whole numbers, not necessarily contiguous and having no numerical significance, each corresponding to the associated literal identifier. \n  An order attribute can also be given on the enumeration elements. An enumeration can itself be a member of an enumeration. This allows enumerations to be enumerated in a selection. \n  Enumerations are also subclasses of <em>Scalar Datatype</em>. \n  This allows them to be used as the reference of a datatype specification.\n  </p>\n  "^^rdf:HTML;
         qudt:dbpediaMatch          "http://dbpedia.org/resource/Enumeration"^^xsd:anyURI;
         qudt:informativeReference  "https://en.wikipedia.org/wiki/Enumeration"^^xsd:anyURI , "https://en.wikipedia.org/wiki/Enumerated_type"^^xsd:anyURI .
+
+qudt:enumeration  rdf:type  owl:ObjectProperty;
+        rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> .
 
 qudt:exactConstant  rdf:type  owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label        "exact constant";
         rdfs:range        xsd:boolean .
 
-qudt:exactMatch  rdf:type  qudt:SymmetricRelation , owl:ObjectProperty;
+qudt:exactMatch  rdf:type  owl:ObjectProperty , qudt:SymmetricRelation;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label        "exact match";
         rdfs:range        qudt:Concept .
@@ -801,16 +826,16 @@ qudt:FactorUnit  rdf:type    owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label           "Factor Unit" , "Reified Factor";
         rdfs:subClassOf      qudt:Concept;
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:minCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:hasUnit
-                             ];
         rdfs:subClassOf      [ rdf:type         owl:Restriction;
                                owl:cardinality  "1"^^xsd:nonNegativeInteger;
                                owl:onProperty   qudt:hasUnit
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                               owl:onProperty      qudt:hasUnit
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:minCardinality  "1"^^xsd:nonNegativeInteger;
                                owl:onProperty      qudt:hasUnit
                              ];
         dcterms:description  "\n  <p>A <em>Factor Unit</em> is a type specification for a unit, exponent pair that is a component of a derived unit.\n  </p>"^^rdf:HTML;
@@ -835,21 +860,17 @@ qudt:Figure  rdf:type     owl:Class;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label        "Figure";
         rdfs:subClassOf   qudt:Concept;
-        rdfs:subClassOf   [ rdf:type            owl:Restriction;
-                            owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                            owl:onProperty      qudt:width
-                          ];
         rdfs:subClassOf   [ rdf:type           owl:Restriction;
                             owl:allValuesFrom  xsd:string;
                             owl:onProperty     qudt:height
                           ];
-        rdfs:subClassOf   [ rdf:type           owl:Restriction;
-                            owl:allValuesFrom  xsd:string;
-                            owl:onProperty     qudt:width
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                            owl:onProperty      qudt:width
                           ];
-        rdfs:subClassOf   [ rdf:type           owl:Restriction;
-                            owl:allValuesFrom  xsd:boolean;
-                            owl:onProperty     qudt:landscape
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                            owl:onProperty      qudt:figureCaption
                           ];
         rdfs:subClassOf   [ rdf:type            owl:Restriction;
                             owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
@@ -859,21 +880,13 @@ qudt:Figure  rdf:type     owl:Class;
                             owl:allValuesFrom  xsd:anyURI;
                             owl:onProperty     qudt:imageLocation
                           ];
-        rdfs:subClassOf   [ rdf:type            owl:Restriction;
-                            owl:minCardinality  "1"^^xsd:nonNegativeInteger;
-                            owl:onProperty      qudt:imageLocation
+        rdfs:subClassOf   [ rdf:type           owl:Restriction;
+                            owl:allValuesFrom  xsd:string;
+                            owl:onProperty     qudt:width
                           ];
-        rdfs:subClassOf   [ rdf:type            owl:Restriction;
-                            owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                            owl:onProperty      qudt:image
-                          ];
-        rdfs:subClassOf   [ rdf:type            owl:Restriction;
-                            owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                            owl:onProperty      qudt:height
-                          ];
-        rdfs:subClassOf   [ rdf:type            owl:Restriction;
-                            owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                            owl:onProperty      qudt:figureCaption
+        rdfs:subClassOf   [ rdf:type         owl:Restriction;
+                            owl:cardinality  "1"^^xsd:nonNegativeInteger;
+                            owl:onProperty   qudt:imageLocation
                           ];
         rdfs:subClassOf   [ rdf:type            owl:Restriction;
                             owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
@@ -883,21 +896,33 @@ qudt:Figure  rdf:type     owl:Class;
                             owl:allValuesFrom  xsd:anyURI;
                             owl:onProperty     qudt:image
                           ];
+        rdfs:subClassOf   [ rdf:type           owl:Restriction;
+                            owl:allValuesFrom  xsd:string;
+                            owl:onProperty     qudt:figureCaption
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                            owl:onProperty      qudt:image
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:minCardinality  "1"^^xsd:nonNegativeInteger;
+                            owl:onProperty      qudt:imageLocation
+                          ];
         rdfs:subClassOf   [ rdf:type            owl:Restriction;
                             owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
                             owl:onProperty      qudt:figureLabel
                           ];
-        rdfs:subClassOf   [ rdf:type         owl:Restriction;
-                            owl:cardinality  "1"^^xsd:nonNegativeInteger;
-                            owl:onProperty   qudt:imageLocation
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                            owl:onProperty      qudt:height
                           ];
         rdfs:subClassOf   [ rdf:type           owl:Restriction;
                             owl:allValuesFrom  xsd:string;
                             owl:onProperty     qudt:figureLabel
                           ];
         rdfs:subClassOf   [ rdf:type           owl:Restriction;
-                            owl:allValuesFrom  xsd:string;
-                            owl:onProperty     qudt:figureCaption
+                            owl:allValuesFrom  xsd:boolean;
+                            owl:onProperty     qudt:landscape
                           ] .
 
 qudt:figure  rdf:type        owl:AnnotationProperty;
@@ -957,7 +982,7 @@ qudt:hasDerivedCoherentUnit
         rdfs:isDefinedBy    <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label          "derived coherent unit";
         rdfs:range          qudt:Unit;
-        rdfs:subPropertyOf  qudt:hasDerivedUnit , qudt:hasCoherentUnit;
+        rdfs:subPropertyOf  qudt:hasCoherentUnit , qudt:hasDerivedUnit;
         owl:inverseOf       qudt:derivedCoherentUnitOfSystem .
 
 qudt:hasDerivedNonCoherentUnit
@@ -1131,7 +1156,7 @@ qudt:latexDefinition  rdf:type  owl:DatatypeProperty;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label        "latex definition" .
 
-qudt:LatexString  rdf:type   rdfs:Datatype , owl:Class;
+qudt:LatexString  rdf:type   owl:Class , rdfs:Datatype;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label           "Latex String";
         rdfs:subClassOf      xsd:string;
@@ -1208,14 +1233,6 @@ qudt:OrdinalScale  rdf:type        owl:Class;
         rdfs:label                 "Ordinal scale";
         rdfs:seeAlso               qudt:RatioScale , qudt:NominalScale , qudt:IntervalScale;
         rdfs:subClassOf            qudt:Scale;
-        rdfs:subClassOf            [ rdf:type         owl:Restriction;
-                                     owl:cardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty   qudt:order
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:order
-                                   ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  xsd:nonNegativeInteger;
                                      owl:onProperty     qudt:order
@@ -1223,6 +1240,14 @@ qudt:OrdinalScale  rdf:type        owl:Class;
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
                                      owl:onProperty      qudt:order
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:order
+                                   ];
+        rdfs:subClassOf            [ rdf:type         owl:Restriction;
+                                     owl:cardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty   qudt:order
                                    ];
         dcterms:description        "\n  <p>The ordinal type allows for rank order (1st, 2nd, 3rd, etc.) by which data can be sorted,\n   but still does not allow for relative degree of difference between them. \n  Examples include, on one hand, dichotomous data with dichotomous (or dichotomized) values such as:\n   'sick' vs. 'healthy' when measuring health, 'guilty' vs. 'innocent' when making judgments in courts,\n   'wrong/false' vs. 'right/true' when measuring truth value, and, on the other hand, non-dichotomous data consisting of a spectrum of values, such as:\n   'completely agree', 'mostly agree', 'mostly disagree', 'completely disagree' when measuring opinion.\n  </p>"^^rdf:HTML;
         qudt:informativeReference  "https://en.wikipedia.org/wiki/Level_of_measurement"^^xsd:anyURI .
@@ -1263,39 +1288,23 @@ qudt:PhysicalConstant
         rdfs:subClassOf      qudt:Quantity;
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  xsd:anyURI;
-                               owl:onProperty     qudt:dbpediaMatch
-                             ];
-        rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  xsd:anyURI;
                                owl:onProperty     qudt:isoNormativeReference
-                             ];
-        rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  xsd:anyURI;
-                               owl:onProperty     qudt:normativeReference
-                             ];
-        rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  qudt:SystemOfUnits;
-                               owl:onProperty     qudt:applicableSystem
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:minCardinality  "0"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:dbpediaMatch
-                             ];
-        rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  qudt:Unit;
-                               owl:onProperty     qudt:applicableUnit
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:mathMLdefinition
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:minCardinality  "0"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:iec61360Code
+                               owl:onProperty      qudt:latexDefinition
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  qudt:QuantityKindDimensionVector;
-                               owl:onProperty     qudt:hasDimensionVector
+                               owl:allValuesFrom  xsd:anyURI;
+                               owl:onProperty     qudt:dbpediaMatch
+                             ];
+        rdfs:subClassOf      [ rdf:type           owl:Restriction;
+                               owl:allValuesFrom  xsd:string;
+                               owl:onProperty     qudt:mathMLdefinition
+                             ];
+        rdfs:subClassOf      [ rdf:type           owl:Restriction;
+                               owl:allValuesFrom  xsd:string;
+                               owl:onProperty     qudt:iec61360Code
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  xsd:boolean;
@@ -1305,17 +1314,33 @@ qudt:PhysicalConstant
                                owl:minCardinality  "0"^^xsd:nonNegativeInteger;
                                owl:onProperty      qudt:latexSymbol
                              ];
+        rdfs:subClassOf      [ rdf:type           owl:Restriction;
+                               owl:allValuesFrom  qudt:QuantityKindDimensionVector;
+                               owl:onProperty     qudt:hasDimensionVector
+                             ];
+        rdfs:subClassOf      [ rdf:type           owl:Restriction;
+                               owl:allValuesFrom  qudt:SystemOfUnits;
+                               owl:onProperty     qudt:applicableSystem
+                             ];
+        rdfs:subClassOf      [ rdf:type           owl:Restriction;
+                               owl:allValuesFrom  xsd:anyURI;
+                               owl:onProperty     qudt:normativeReference
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:minCardinality  "0"^^xsd:nonNegativeInteger;
+                               owl:onProperty      qudt:iec61360Code
+                             ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:latexDefinition
+                               owl:onProperty      qudt:mathMLdefinition
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  xsd:string;
-                               owl:onProperty     qudt:mathMLdefinition
+                               owl:allValuesFrom  qudt:Unit;
+                               owl:onProperty     qudt:applicableUnit
                              ];
-        rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  xsd:string;
-                               owl:onProperty     qudt:iec61360Code
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:minCardinality  "0"^^xsd:nonNegativeInteger;
+                               owl:onProperty      qudt:dbpediaMatch
                              ];
         dcterms:description  "\n  <p>A <em>Physical constant</em> is a physical quantity that is generally believed to be both universal in nature and constant in time. \n  It can be contrasted with a mathematical constant, which is a fixed numerical value but does not directly involve any physical measurement. \n  </p>\n  <p>There are many physical constants in science, some of the most widely recognized being:\n   the speed of light in vacuum c, Newton's gravitational constant G, Planck's constant h,\n   the electric permittivity of free space ε0, and the elementary charge e.\n  </p>\n  <p>Physical constants can take many dimensional forms, or may be dimensionless depending on the system of quantities and units used.\n  </p>"^^rdf:HTML;
         qudt:dbpediaMatch    "http://dbpedia.org/resource/Physical_constant"^^xsd:anyURI .
@@ -1348,29 +1373,29 @@ qudt:Prefix  rdf:type     owl:Class;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label        "Prefix";
         rdfs:subClassOf   qudt:Verifiable , qudt:Concept;
+        rdfs:subClassOf   [ rdf:type           owl:Restriction;
+                            owl:allValuesFrom  xsd:double;
+                            owl:onProperty     qudt:prefixMultiplierSN
+                          ];
         rdfs:subClassOf   [ rdf:type            owl:Restriction;
                             owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
                             owl:onProperty      qudt:prefixMultiplierSN
                           ];
-        rdfs:subClassOf   [ rdf:type            owl:Restriction;
-                            owl:minCardinality  "0"^^xsd:nonNegativeInteger;
-                            owl:onProperty      qudt:latexSymbol
+        rdfs:subClassOf   [ rdf:type           owl:Restriction;
+                            owl:allValuesFrom  xsd:string;
+                            owl:onProperty     qudt:ucumCode
                           ];
         rdfs:subClassOf   [ rdf:type           owl:Restriction;
                             owl:allValuesFrom  xsd:decimal;
                             owl:onProperty     qudt:prefixMultiplier
                           ];
         rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:minCardinality  "0"^^xsd:nonNegativeInteger;
+                            owl:onProperty      qudt:latexSymbol
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
                             owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
                             owl:onProperty      qudt:prefixMultiplier
-                          ];
-        rdfs:subClassOf   [ rdf:type           owl:Restriction;
-                            owl:allValuesFrom  xsd:double;
-                            owl:onProperty     qudt:prefixMultiplierSN
-                          ];
-        rdfs:subClassOf   [ rdf:type           owl:Restriction;
-                            owl:allValuesFrom  xsd:string;
-                            owl:onProperty     qudt:ucumCode
                           ] .
 
 qudt:prefix  rdf:type        owl:ObjectProperty;
@@ -1395,19 +1420,15 @@ qudt:Quantifiable  rdf:type  owl:Class;
         rdfs:subClassOf      qudt:Aspect;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:relativeStandardUncertainty
+                               owl:onProperty      qudt:hasUnit
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:hasUnit
+                               owl:onProperty      qudt:standardUncertaintySN
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  xsd:double;
-                               owl:onProperty     qudt:relativeStandardUncertainty
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:standardUncertainty
+                               owl:onProperty     qudt:standardUncertaintySN
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  xsd:decimal;
@@ -1415,11 +1436,15 @@ qudt:Quantifiable  rdf:type  owl:Class;
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:value
+                               owl:onProperty      qudt:relativeStandardUncertainty
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:standardUncertaintySN
+                               owl:onProperty      qudt:standardUncertainty
+                             ];
+        rdfs:subClassOf      [ rdf:type           owl:Restriction;
+                               owl:allValuesFrom  qudt:Unit;
+                               owl:onProperty     qudt:hasUnit
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
@@ -1427,11 +1452,7 @@ qudt:Quantifiable  rdf:type  owl:Class;
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  xsd:double;
-                               owl:onProperty     qudt:standardUncertaintySN
-                             ];
-        rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  qudt:Unit;
-                               owl:onProperty     qudt:hasUnit
+                               owl:onProperty     qudt:relativeStandardUncertainty
                              ];
         dcterms:description  "\n  <p><em>Quantifiable</em> is an aspect class that affords to an entity properties for being measurable,\n   observable, or countable.\n  </p>"^^rdf:HTML .
 
@@ -1493,9 +1514,21 @@ qudt:QuantityKindDimensionVector
         rdfs:isDefinedBy           <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label                 "Quantity Kind Dimension Vector";
         rdfs:subClassOf            qudt:Concept;
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  xsd:integer;
-                                     owl:onProperty     qudt:dimensionExponentForElectricCurrent
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:dimensionExponentForElectricCurrent
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  "0"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:latexSymbol
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:latexDefinition
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:dimensionExponentForElectricCurrent
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  qudt:QuantityKind;
@@ -1505,21 +1538,9 @@ qudt:QuantityKindDimensionVector
                                      owl:cardinality  "1"^^xsd:nonNegativeInteger;
                                      owl:onProperty   qudt:dimensionExponentForElectricCurrent
                                    ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:dimensionExponentForElectricCurrent
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:latexDefinition
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:dimensionExponentForElectricCurrent
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  "0"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:latexSymbol
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  xsd:integer;
+                                     owl:onProperty     qudt:dimensionExponentForElectricCurrent
                                    ];
         dcterms:description        "\n $\\text{Quantity Kind Dimension Vector}$ describes the dimensionality of a quantity kind in the context of a system of units. \n In the SI system of units, the dimensions of a quantity kind are expressed as a product of the basic\n  physical dimensions mass ($M$), length ($L$), time ($T$) current ($I$), amount of substance ($N$),\n   luminous intensity ($J$) and absolute temperature \n   ($\\theta$) as $dim \\, Q = L^{\\alpha} \\, M^{\\beta} \\, T^{\\gamma} \\, I ^{\\delta} \\, \\theta ^{\\epsilon} \\, N^{\\eta} \\, J ^{\\nu}$.\n\n\n  The rational powers of the dimensional exponents, $\\alpha, \\, \\beta, \\, \\gamma, \\, \\delta, \\, \\epsilon, \\, \\eta, \\, \\nu$, are positive, negative, or zero.\n\n  For example, the dimension of the physical quantity kind $\\it{speed}$ is $\\boxed{length/time}$, $L/T$ or $LT^{-1}$,\n   and the dimension of the physical quantity kind force is $\\boxed{mass \\times acceleration}$ or $\\boxed{mass \\times (length/time)/time}$, $ML/T^2$ or $MLT^{-2}$ respectively.\n "^^qudt:LatexString;
         qudt:informativeReference  "https://en.wikipedia.org/wiki/Dimensional_analysis"^^xsd:anyURI , "http://web.mit.edu/2.25/www/pdf/DA_unified.pdf"^^xsd:anyURI .
@@ -1529,88 +1550,32 @@ qudt:QuantityKind  rdf:type        owl:Class;
         rdfs:label                 "Quantity Kind";
         rdfs:subClassOf            qudt:Verifiable , qudt:AbstractQuantityKind;
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:hasDimensionVector
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:dimensionVectorForSI
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:mathMLdefinition
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:QuantityKindDimensionVector_SI;
-                                     owl:onProperty     qudt:dimensionVectorForSI
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:Unit;
-                                     owl:onProperty     qudt:applicableSIUnit
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:Unit;
-                                     owl:onProperty     qudt:applicableUSCustomaryUnit
+                                     owl:onProperty      qudt:baseImperialUnitDimensions
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
                                      owl:onProperty      qudt:latexDefinition
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:QuantityKindDimensionVector;
-                                     owl:onProperty     qudt:qkdvNumerator
-                                   ];
-        rdfs:subClassOf            [ rdf:type         owl:Restriction;
-                                     owl:cardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty   qudt:hasDimensionVector
+                                     owl:allValuesFrom  qudt:Unit;
+                                     owl:onProperty     qudt:applicableUnit
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:Unit;
-                                     owl:onProperty     qudt:applicableImperialUnit
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:hasDimensionVector
+                                     owl:allValuesFrom  qudt:QuantityKindDimensionVector;
+                                     owl:onProperty     qudt:qkdvNumerator
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
                                      owl:onProperty      qudt:baseISOUnitDimensions
                                    ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:baseUSCustomaryUnitDimensions
-                                   ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  qudt:QuantityKindDimensionVector;
                                      owl:onProperty     qudt:hasDimensionVector
                                    ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:Unit;
-                                     owl:onProperty     qudt:applicableCGSUnit
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  xsd:string;
-                                     owl:onProperty     qudt:mathMLdefinition
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  "0"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:applicableUSCustomaryUnit
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:SystemOfQuantityKinds;
-                                     owl:onProperty     qudt:belongsToSystemOfQuantities
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:Unit;
-                                     owl:onProperty     qudt:applicableISOUnit
-                                   ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:baseCGSUnitDimensions
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  xsd:string;
-                                     owl:onProperty     qudt:iec61360Code
+                                     owl:onProperty      qudt:qkdvNumerator
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:minCardinality  "0"^^xsd:nonNegativeInteger;
@@ -1618,43 +1583,99 @@ qudt:QuantityKind  rdf:type        owl:Class;
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:minCardinality  "0"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:applicableUnit
+                                     owl:onProperty      qudt:applicableISOUnit
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:qkdvNumerator
+                                     owl:onProperty      qudt:baseUSCustomaryUnitDimensions
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  xsd:string;
+                                     owl:onProperty     qudt:mathMLdefinition
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:Unit;
+                                     owl:onProperty     qudt:applicableUSCustomaryUnit
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  xsd:string;
+                                     owl:onProperty     qudt:iec61360Code
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:baseCGSUnitDimensions
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:mathMLdefinition
+                                   ];
+        rdfs:subClassOf            [ rdf:type         owl:Restriction;
+                                     owl:cardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty   qudt:hasDimensionVector
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:QuantityKindDimensionVector;
+                                     owl:onProperty     qudt:qkdvDenominator
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:SystemOfQuantityKinds;
+                                     owl:onProperty     qudt:belongsToSystemOfQuantities
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:hasDimensionVector
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:baseSIUnitDimensions
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:QuantityKindDimensionVector_SI;
+                                     owl:onProperty     qudt:dimensionVectorForSI
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:Unit;
+                                     owl:onProperty     qudt:applicableISOUnit
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  "0"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:applicableUnit
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  "0"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:applicableCGSUnit
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:Unit;
+                                     owl:onProperty     qudt:applicableSIUnit
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:hasDimensionVector
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
                                      owl:onProperty      qudt:qkdvDenominator
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:dimensionVectorForSI
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  "0"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:applicableUSCustomaryUnit
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:minCardinality  "0"^^xsd:nonNegativeInteger;
                                      owl:onProperty      qudt:applicableSIUnit
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:QuantityKindDimensionVector;
-                                     owl:onProperty     qudt:qkdvDenominator
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  "0"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:applicableISOUnit
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:baseImperialUnitDimensions
+                                     owl:allValuesFrom  qudt:Unit;
+                                     owl:onProperty     qudt:applicableCGSUnit
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  qudt:Unit;
-                                     owl:onProperty     qudt:applicableUnit
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:baseSIUnitDimensions
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  "0"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:applicableCGSUnit
+                                     owl:onProperty     qudt:applicableImperialUnit
                                    ];
         dcterms:description        "\n  <p>A <em>Quantity Kind</em> is any observable property that can be  measured and quantified numerically. \n  Familiar examples include physical properties such as length, mass, time, force, energy, power, electric charge, etc. \n  Less familiar examples include currency, interest rate, price to earning ratio, and information capacity.\n  </p>"^^rdf:HTML;
         qudt:informativeReference  "http://www.electropedia.org/iev/iev.nsf/display?openform&ievref=112-01-04"^^xsd:anyURI .
@@ -1672,7 +1693,7 @@ qudt:QuantityType  rdf:type  owl:Class;
 qudt:QuantityValue  rdf:type  owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label           "Quantity value";
-        rdfs:subClassOf      qudt:Verifiable , qudt:Concept , qudt:Quantifiable;
+        rdfs:subClassOf      qudt:Verifiable , qudt:Quantifiable , qudt:Concept;
         dcterms:description  "\n  <p>A <em>Quantity Value</em> \n  </p>"^^rdf:HTML .
 
 qudt:quantityValue  rdf:type  owl:ObjectProperty;
@@ -1685,20 +1706,20 @@ qudt:Quantity  rdf:type      owl:Class;
         rdfs:label           "Quantity";
         rdfs:subClassOf      qudt:Quantifiable , qudt:Concept , qudt:Verifiable;
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  xsd:boolean;
-                               owl:onProperty     qudt:isDeltaQuantity
+                               owl:allValuesFrom  qudt:QuantityValue;
+                               owl:onProperty     qudt:quantityValue
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:minCardinality  "0"^^xsd:nonNegativeInteger;
                                owl:onProperty      qudt:hasQuantityKind
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  qudt:QuantityValue;
-                               owl:onProperty     qudt:quantityValue
-                             ];
-        rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  qudt:QuantityKind;
                                owl:onProperty     qudt:hasQuantityKind
+                             ];
+        rdfs:subClassOf      [ rdf:type           owl:Restriction;
+                               owl:allValuesFrom  xsd:boolean;
+                               owl:onProperty     qudt:isDeltaQuantity
                              ];
         dcterms:description  "\n  <p>A <b>Quantity</b> is the measurement of an observable property of a particular object, event, or physical system. \n  A quantity is always associated with the context of measurement (i.e. the thing measured, the measured value, the accuracy of measurement, etc.) whereas the \n  underlying <b>quantity kind</b> is independent of any particular measurement. Thus, length is a quantity kind while the height of a rocket is a specific \n  quantity of length; its magnitude that may be expressed in meters, feet, inches, etc. Examples of physical quantities include physical constants, such as \n  the speed of light in a vacuum, Planck's constant, the electric permittivity of free space, and the fine structure constant. </p>\n<p>In other words, quantities are quantifiable aspects of the world, such as the duration of a movie, the distance between two points, \nvelocity of a car, the pressure of the atmosphere, and a person's weight; and units are used to describe their numerical measure.</p> \n<p>Many <b>quantity kinds</b> are related to each other by various physical laws, and as a result, the associated units of some quantity \nkinds can be expressed as products (or ratios) of powers of other quantity kinds (e.g., momentum is mass times velocity and velocity is defined as distance \ndivided by time). In this way, some quantities can be calculated from other measured quantities using their associations to the quantity kinds in these \nexpressions. These quantity kind relationships are also discussed in dimensional analysis. Those that cannot be so expressed can be regarded \nas \"fundamental\" in this sense.</p>\n<p>A quantity is distinguished from a \"quantity kind\" in that the former carries a value and the latter is a type specifier.\n</p>"^^rdf:HTML;
         qudt:dbpediaMatch    "http://dbpedia.org/resource/Quantity"^^xsd:anyURI .
@@ -1761,13 +1782,13 @@ qudt:Rule  rdf:type       owl:Class;
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label        "Rule";
         rdfs:subClassOf   qudt:Concept , qudt:Verifiable;
-        rdfs:subClassOf   [ rdf:type            owl:Restriction;
-                            owl:minCardinality  "0"^^xsd:nonNegativeInteger;
-                            owl:onProperty      qudt:rationale
-                          ];
         rdfs:subClassOf   [ rdf:type           owl:Restriction;
                             owl:allValuesFrom  qudt:RuleType;
                             owl:onProperty     qudt:ruleType
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:minCardinality  "0"^^xsd:nonNegativeInteger;
+                            owl:onProperty      qudt:rationale
                           ];
         rdfs:subClassOf   [ rdf:type           owl:Restriction;
                             owl:allValuesFrom  rdf:HTML;
@@ -1778,17 +1799,13 @@ qudt:ScalarDataItem  rdf:type  owl:Class;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label           "Scalar Data Item";
         rdfs:subClassOf      qudt:Concept;
-        rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  qudt:ScalarDatatype;
-                               owl:onProperty     qudt:datatype
-                             ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
                                owl:onProperty      qudt:datatype
                              ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:value
+        rdfs:subClassOf      [ rdf:type           owl:Restriction;
+                               owl:allValuesFrom  qudt:ScalarDatatype;
+                               owl:onProperty     qudt:datatype
                              ];
         dcterms:description  "\n  <p>A <em>Data Item</em> holds a value that is compliant with a specified <em>Datatype</em>.\n  </p>"^^rdf:HTML .
 
@@ -1831,19 +1848,11 @@ qudt:Scale  rdf:type         owl:Class;
         rdfs:subClassOf      qudt:Concept , qudt:Verifiable;
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:scaleType
-                             ];
-        rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  xsd:string;
-                               owl:onProperty     qudt:dataStructure
+                               owl:onProperty      qudt:dataStructure
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:dataStructure
-                             ];
-        rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  qudt:MathsFunctionType;
-                               owl:onProperty     qudt:permissibleMaths
+                               owl:onProperty      qudt:scaleType
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  qudt:TransformType;
@@ -1852,6 +1861,14 @@ qudt:Scale  rdf:type         owl:Class;
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  qudt:ScaleType;
                                owl:onProperty     qudt:scaleType
+                             ];
+        rdfs:subClassOf      [ rdf:type           owl:Restriction;
+                               owl:allValuesFrom  qudt:MathsFunctionType;
+                               owl:onProperty     qudt:permissibleMaths
+                             ];
+        rdfs:subClassOf      [ rdf:type           owl:Restriction;
+                               owl:allValuesFrom  xsd:string;
+                               owl:onProperty     qudt:dataStructure
                              ];
         dcterms:description  "\n  <p>Scales (also called \"scales of measurement\" or \"levels of measurement\") are expressions that typically are based on scale types.\n  </p>"^^rdf:HTML .
 
@@ -1936,23 +1953,7 @@ qudt:SystemOfQuantityKinds
         rdfs:subClassOf      qudt:Verifiable , qudt:Concept;
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  qudt:QuantityKind;
-                               owl:onProperty     qudt:hasQuantityKind
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:minCardinality  "0"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:hasQuantityKind
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:hasUnitSystem
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:minCardinality  "0"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:systemDerivedQuantityKind
-                             ];
-        rdfs:subClassOf      [ rdf:type            owl:Restriction;
-                               owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:baseDimensionEnumeration
+                               owl:onProperty     qudt:hasBaseQuantityKind
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  qudt:Enumeration;
@@ -1960,19 +1961,35 @@ qudt:SystemOfQuantityKinds
                              ];
         rdfs:subClassOf      [ rdf:type            owl:Restriction;
                                owl:minCardinality  "0"^^xsd:nonNegativeInteger;
-                               owl:onProperty      qudt:hasBaseQuantityKind
-                             ];
-        rdfs:subClassOf      [ rdf:type           owl:Restriction;
-                               owl:allValuesFrom  qudt:QuantityKind;
-                               owl:onProperty     qudt:hasBaseQuantityKind
+                               owl:onProperty      qudt:systemDerivedQuantityKind
                              ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  qudt:QuantityKind;
                                owl:onProperty     qudt:systemDerivedQuantityKind
                              ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                               owl:onProperty      qudt:hasUnitSystem
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:minCardinality  "0"^^xsd:nonNegativeInteger;
+                               owl:onProperty      qudt:hasQuantityKind
+                             ];
         rdfs:subClassOf      [ rdf:type           owl:Restriction;
                                owl:allValuesFrom  qudt:SystemOfUnits;
                                owl:onProperty     qudt:hasUnitSystem
+                             ];
+        rdfs:subClassOf      [ rdf:type           owl:Restriction;
+                               owl:allValuesFrom  qudt:QuantityKind;
+                               owl:onProperty     qudt:hasQuantityKind
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                               owl:onProperty      qudt:baseDimensionEnumeration
+                             ];
+        rdfs:subClassOf      [ rdf:type            owl:Restriction;
+                               owl:minCardinality  "0"^^xsd:nonNegativeInteger;
+                               owl:onProperty      qudt:hasBaseQuantityKind
                              ];
         dcterms:description  "\n  <p>A <em>System of Quantity Kinds</em> is a set of one or more quantity kinds together with a set of zero or more algebraic equations that define relationships between quantity kinds in the set. \n  In the physical sciences, the equations relating quantity kinds are typically physical laws and definitional relations, and constants of proportionality. \n  Examples include Newton's First Law of Motion, Coulomb's Law, and the definition of velocity as the instantaneous change in position.  \n  In almost all cases, the system identifies a subset of base quantity kinds. \n  </p>\n  <p>The base set is chosen so that all other quantity kinds of interest can be derived from the base quantity kinds and the algebraic equations. \n  If the unit system is explicitly associated with a quantity kind system, then the unit system must define at least one unit for each quantity kind.  \n  From a scientific point of view, the division of quantities into base quantities and derived quantities is a matter of convention.\n  </p>"^^rdf:HTML .
 
@@ -1982,7 +1999,11 @@ qudt:SystemOfUnits  rdf:type       owl:Class;
         rdfs:subClassOf            qudt:Concept , qudt:Verifiable;
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  qudt:Unit;
-                                     owl:onProperty     qudt:hasDefinedUnit
+                                     owl:onProperty     qudt:hasAllowedUnit
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:Unit;
+                                     owl:onProperty     qudt:hasCoherentUnit
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  qudt:PhysicalConstant;
@@ -1990,23 +2011,15 @@ qudt:SystemOfUnits  rdf:type       owl:Class;
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  qudt:Unit;
-                                     owl:onProperty     qudt:hasBaseUnit
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:Unit;
                                      owl:onProperty     qudt:hasUnit
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  qudt:Unit;
-                                     owl:onProperty     qudt:hasAllowedUnit
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:Prefix;
-                                     owl:onProperty     qudt:prefix
+                                     owl:onProperty     qudt:hasDerivedUnit
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  qudt:Unit;
-                                     owl:onProperty     qudt:hasCoherentUnit
+                                     owl:onProperty     qudt:hasBaseUnit
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  qudt:Unit;
@@ -2014,7 +2027,11 @@ qudt:SystemOfUnits  rdf:type       owl:Class;
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  qudt:Unit;
-                                     owl:onProperty     qudt:hasDerivedUnit
+                                     owl:onProperty     qudt:hasDefinedUnit
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:Prefix;
+                                     owl:onProperty     qudt:prefix
                                    ];
         dcterms:description        "\n  <p>A <em>System of Units</em> is a set of units which are chosen as the reference scales for some set of quantity kinds together with the definitions of each unit. \n  Units may be defined by experimental observation or by proportion to another unit not included in the system. \n  If the unit system is explicitly associated with a quantity kind system, then the unit system must define at least one unit for each quantity kind.\n  </p>"^^rdf:HTML;
         qudt:informativeReference  "http://www.ieeeghn.org/wiki/index.php/System_of_Measurement_Units"^^xsd:anyURI , "http://dbpedia.org/resource/Category:Systems_of_units"^^xsd:anyURI .
@@ -2034,7 +2051,7 @@ qudt:ucumCode  rdf:type      owl:DatatypeProperty;
         dcterms:description  "<p><em>ucumCode</em> associates a QUDT unit with its UCUM code (case-sensitive). </p><p>In SHACL the values are derived from specific ucum properties using 'sh:values'.</p>"^^rdf:HTML;
         dcterms:source       "https://ucum.org/ucum.html"^^xsd:anyURI .
 
-qudt:UCUMcs  rdf:type        rdfs:Datatype , owl:Class;
+qudt:UCUMcs  rdf:type        owl:Class , rdfs:Datatype;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label           "case-sensitive UCUM code";
         rdfs:seeAlso         <https://ucum.org/ucum.html>;
@@ -2067,36 +2084,44 @@ qudt:Unit  rdf:type                owl:Class;
         rdfs:label                 "Unit";
         rdfs:subClassOf            qudt:Verifiable , qudt:Concept;
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:qkdvDenominator
+                                     owl:minCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:hasDimensionVector
                                    ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  xsd:decimal;
-                                     owl:onProperty     qudt:factorUnitScalar
+        rdfs:subClassOf            [ rdf:type         owl:Restriction;
+                                     owl:cardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty   qudt:hasDimensionVector
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:hasDimensionVector
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  xsd:double;
-                                     owl:onProperty     qudt:conversionOffsetSN
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:Prefix;
-                                     owl:onProperty     qudt:prefix
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:SystemOfUnits;
-                                     owl:onProperty     qudt:derivedCoherentUnitOfSystem
+                                     owl:onProperty      qudt:conversionOffsetSN
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  xsd:string;
                                      owl:onProperty     qudt:mathMLdefinition
                                    ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:SystemOfUnits;
+                                     owl:onProperty     qudt:derivedUnitOfSystem
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  xsd:decimal;
+                                     owl:onProperty     qudt:conversionOffset
+                                   ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:factorUnitScalar
+                                     owl:onProperty      qudt:qkdvNumerator
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:mathMLdefinition
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:conversionMultiplierSN
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  xsd:string;
+                                     owl:onProperty     qudt:udunitsCode
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
@@ -2104,27 +2129,55 @@ qudt:Unit  rdf:type                owl:Class;
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:conversionOffset
+                                     owl:onProperty      qudt:scalingOf
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  xsd:decimal;
+                                     owl:onProperty     qudt:factorUnitScalar
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  xsd:double;
-                                     owl:onProperty     qudt:conversionMultiplierSN
+                                     owl:onProperty     qudt:conversionOffsetSN
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:hasDimensionVector
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:Unit;
+                                     owl:onProperty     qudt:hasReciprocalUnit
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  qudt:QuantityKindDimensionVector;
                                      owl:onProperty     qudt:qkdvNumerator
                                    ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:SystemOfUnits;
-                                     owl:onProperty     qudt:applicableSystem
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:ucumCode
                                    ];
-        rdfs:subClassOf            [ rdf:type         owl:Restriction;
-                                     owl:cardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty   qudt:hasDimensionVector
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:conversionOffset
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:QuantityKindDimensionVector;
-                                     owl:onProperty     qudt:qkdvDenominator
+                                     owl:allValuesFrom  qudt:QuantityKind;
+                                     owl:onProperty     qudt:hasQuantityKind
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:Unit;
+                                     owl:onProperty     qudt:scalingOf
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:conversionMultiplier
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  xsd:string;
+                                     owl:onProperty     qudt:uneceCommonCode
+                                   ];
+        rdfs:subClassOf            [ rdf:type            owl:Restriction;
+                                     owl:minCardinality  "0"^^xsd:nonNegativeInteger;
+                                     owl:onProperty      qudt:latexSymbol
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  xsd:string;
@@ -2134,97 +2187,61 @@ qudt:Unit  rdf:type                owl:Class;
                                      owl:minCardinality  "1"^^xsd:nonNegativeInteger;
                                      owl:onProperty      qudt:hasQuantityKind
                                    ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:conversionMultiplier
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:scalingOf
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:conversionOffsetSN
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:Unit;
-                                     owl:onProperty     qudt:hasReciprocalUnit
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:QuantityKindDimensionVector;
-                                     owl:onProperty     qudt:hasDimensionVector
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  xsd:decimal;
-                                     owl:onProperty     qudt:conversionMultiplier
-                                   ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  qudt:SystemOfUnits;
                                      owl:onProperty     qudt:isUnitOfSystem
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:minCardinality  "0"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:latexSymbol
+                                     owl:onProperty      qudt:siUnitsExpression
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:qkdvNumerator
+                                     owl:onProperty      qudt:factorUnitScalar
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:ucumCode
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:conversionMultiplierSN
+                                     owl:onProperty      qudt:qkdvDenominator
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  xsd:string;
-                                     owl:onProperty     qudt:uneceCommonCode
+                                     owl:allValuesFrom  qudt:SystemOfUnits;
+                                     owl:onProperty     qudt:applicableSystem
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  xsd:decimal;
-                                     owl:onProperty     qudt:conversionOffset
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:hasDimensionVector
+                                     owl:allValuesFrom  qudt:SystemOfUnits;
+                                     owl:onProperty     qudt:definedUnitOfSystem
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  xsd:string;
-                                     owl:onProperty     qudt:udunitsCode
+                                     owl:allValuesFrom  qudt:SystemOfUnits;
+                                     owl:onProperty     qudt:derivedCoherentUnitOfSystem
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:QuantityKindDimensionVector;
+                                     owl:onProperty     qudt:qkdvDenominator
                                    ];
         rdfs:subClassOf            [ rdf:type            owl:Restriction;
                                      owl:minCardinality  "0"^^xsd:nonNegativeInteger;
                                      owl:onProperty      qudt:latexDefinition
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:Unit;
-                                     owl:onProperty     qudt:scalingOf
-                                   ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:mathMLdefinition
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:SystemOfUnits;
-                                     owl:onProperty     qudt:derivedUnitOfSystem
-                                   ];
-        rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:QuantityKind;
-                                     owl:onProperty     qudt:hasQuantityKind
+                                     owl:allValuesFrom  xsd:decimal;
+                                     owl:onProperty     qudt:conversionMultiplier
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
                                      owl:allValuesFrom  xsd:string;
                                      owl:onProperty     qudt:iec61360Code
                                    ];
-        rdfs:subClassOf            [ rdf:type            owl:Restriction;
-                                     owl:minCardinality  "0"^^xsd:nonNegativeInteger;
-                                     owl:onProperty      qudt:siUnitsExpression
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  qudt:QuantityKindDimensionVector;
+                                     owl:onProperty     qudt:hasDimensionVector
                                    ];
         rdfs:subClassOf            [ rdf:type           owl:Restriction;
-                                     owl:allValuesFrom  qudt:SystemOfUnits;
-                                     owl:onProperty     qudt:definedUnitOfSystem
+                                     owl:allValuesFrom  qudt:Prefix;
+                                     owl:onProperty     qudt:prefix
+                                   ];
+        rdfs:subClassOf            [ rdf:type           owl:Restriction;
+                                     owl:allValuesFrom  xsd:double;
+                                     owl:onProperty     qudt:conversionMultiplierSN
                                    ];
         dcterms:description        "\n  A unit of measure, or unit, is a particular quantity value that has been chosen as a scale for measuring other quantities the same kind (more generally of equivalent dimension). \n  For example, the meter is a quantity of length that has been rigorously defined and standardized by the BIPM (International Board of Weights and Measures). \n  Any measurement of the length can be expressed as a number multiplied by the unit meter. \n  More formally, the value of a physical quantity Q with respect to a unit (U) is expressed as the scalar multiple of a real number (n) and U, as  $Q = nU$.\n  "^^qudt:LatexString;
         qudt:informativeReference  "http://www.allmeasures.com/Fullconversion.asp"^^xsd:anyURI , "http://dbpedia.org/resource/Category:Units_of_measure"^^xsd:anyURI .
@@ -2239,21 +2256,21 @@ qudt:UserQuantityKind
         rdfs:isDefinedBy  <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label        "User Quantity Kind";
         rdfs:subClassOf   qudt:AbstractQuantityKind;
-        rdfs:subClassOf   [ rdf:type            owl:Restriction;
-                            owl:minCardinality  "1"^^xsd:nonNegativeInteger;
-                            owl:onProperty      qudt:hasQuantityKind
-                          ];
         rdfs:subClassOf   [ rdf:type         owl:Restriction;
                             owl:cardinality  "1"^^xsd:nonNegativeInteger;
                             owl:onProperty   qudt:hasQuantityKind
                           ];
-        rdfs:subClassOf   [ rdf:type            owl:Restriction;
-                            owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
-                            owl:onProperty      qudt:hasQuantityKind
-                          ];
         rdfs:subClassOf   [ rdf:type           owl:Restriction;
                             owl:allValuesFrom  qudt:QuantityKind;
                             owl:onProperty     qudt:hasQuantityKind
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:minCardinality  "1"^^xsd:nonNegativeInteger;
+                            owl:onProperty      qudt:hasQuantityKind
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:maxCardinality  "1"^^xsd:nonNegativeInteger;
+                            owl:onProperty      qudt:hasQuantityKind
                           ] .
 
 qudt:valueQuantity  rdf:type  owl:ObjectProperty;
@@ -2266,10 +2283,9 @@ qudt:valueSN  rdf:type       owl:AnnotationProperty;
         rdfs:label           "value scientific";
         dcterms:description  "A property to relate an observable thing with a value expressed in scientific notation"^^rdf:HTML .
 
-qudt:value  rdf:type         owl:ObjectProperty;
+qudt:value  rdf:type         rdf:Property;
         rdfs:isDefinedBy     <http://qudt.org/$$QUDT_VERSION$$/schema/qudt>;
         rdfs:label           "value";
-        rdfs:range           rdf:List;
         dcterms:description  "A property to relate an observable thing with a value expressed as a decimal"^^rdf:HTML .
 
 qudt:vectorMagnitude  rdf:type  owl:FunctionalProperty , owl:DatatypeProperty;
