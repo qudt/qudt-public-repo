@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.2.1] - 2026-04-02
+
 ### Added
 
 - Added numerators and denominators to angular concepts
@@ -14,8 +16,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Changed
 
 - Refactored the datatypes schema and vocabulary to have a separate set for coordinate systems schema and vocabulary
-
-### Deprecated
 
 ### Fixed
 
@@ -712,7 +712,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.2.1...HEAD
+[3.2.1]: https://github.com/qudt/qudt-public-repo/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/qudt/qudt-public-repo/compare/v3.1.11...v3.2.0
 [3.1.11]: https://github.com/qudt/qudt-public-repo/compare/v3.1.10...v3.1.11
 [3.1.10]: https://github.com/qudt/qudt-public-repo/compare/v3.1.9...v3.1.10
