@@ -7,6 +7,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Deprecated
+
+### Fixed
+
+- Removed some erroneous references from the datatypes schema metadata to the coordinate systems schema under construction
+
 ## [3.2.1] - 2026-04-02
 
 ### Added
