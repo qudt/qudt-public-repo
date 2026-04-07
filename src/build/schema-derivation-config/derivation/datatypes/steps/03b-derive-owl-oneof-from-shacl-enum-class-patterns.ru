@@ -17,20 +17,10 @@ WHERE {
         {
             ?class sh:in ?enumList .
         } UNION {
-            ?class sh:oneOf ?enumList .
-        } UNION {
             FILTER NOT EXISTS { ?class sh:in ?anyDirectEnumList . }
-            FILTER NOT EXISTS { ?class sh:oneOf ?anyDirectOneOfList . }
             ?class sh:property ?ps .
             ?ps a sh:PropertyShape ;
                 sh:in ?enumList ;
-                sh:path [ sh:inversePath rdf:type ] .
-        } UNION {
-            FILTER NOT EXISTS { ?class sh:in ?anyDirectEnumList . }
-            FILTER NOT EXISTS { ?class sh:oneOf ?anyDirectOneOfList . }
-            ?class sh:property ?ps .
-            ?ps a sh:PropertyShape ;
-                sh:oneOf ?enumList ;
                 sh:path [ sh:inversePath rdf:type ] .
         }
         FILTER NOT EXISTS {
