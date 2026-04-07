@@ -17,17 +17,7 @@ WHERE {
         {
             ?class sh:in ?enumList .
         } UNION {
-            ?class owl:oneOf ?enumList .
-        } UNION {
             FILTER NOT EXISTS { ?class sh:in ?anyDirectEnumList . }
-            FILTER NOT EXISTS { ?class owl:oneOf ?anyDirectOneOfList . }
-            ?class sh:property ?ps .
-            ?ps a sh:PropertyShape ;
-                sh:in ?enumList ;
-                sh:path [ sh:inversePath rdf:type ] .
-        } UNION {
-            FILTER NOT EXISTS { ?class sh:in ?anyDirectEnumList . }
-            FILTER NOT EXISTS { ?class owl:oneOf ?anyDirectOneOfList . }
             ?class sh:property ?ps .
             ?ps a sh:PropertyShape ;
                 sh:in ?enumList ;
