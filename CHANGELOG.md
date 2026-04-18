@@ -10,8 +10,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - Added quantitykind:ProductOfInertia as a replacement for the deprecated quantitykind:PRODUCT-OF-INERTIA
+- Added `unit:A-HR-PER-K` (ampere hour per kelvin, A·h/K) based on IEC change, a revision of `unit:A-HR-PER-DEG_C`.
 
 ### Changed
+
+- Updated unit `unit:A-HR-PER-DEG_C` to indicate it has been replaced by `unit:A-HR-PER-K`.
 
 ### Deprecated
 
