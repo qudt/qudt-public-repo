@@ -13,6 +13,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
+- Migrated 31 quantity kinds that are specific to the field of propulsion to the extensions folder.
+
 ### Deprecated
 
 ### Fixed
