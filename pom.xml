@@ -2539,6 +2539,28 @@ validAspectDirs.each { aspectDir ->
                                             ]]>
                                         </sparql>
                                     </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Generate propulsion extension conversion multipliers in xsd:double format where it's missing</message>
+                                        <sparql>
+                                            <![CDATA[
+                                            INSERT {
+                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                    ?unit qudt:conversionMultiplierSN ?cmsn
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                    ?unit a qudt:Unit ;
+                                                          qudt:conversionMultiplier ?cm .
+                                                    FILTER NOT EXISTS {
+                                                        ?unit qudt:conversionMultiplierSN ?any .
+                                                    }
+                                                    BIND(qfn:decimalToDouble(?cm) as ?cmsn)
+                                                }
+                                            }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
                                     <savepoint><id>11-infer-conversionMultiplier</id></savepoint>
 
                                     <sparqlUpdate>
@@ -2593,6 +2615,24 @@ validAspectDirs.each { aspectDir ->
                                         </sparql>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
+                                        <message>Add propulsion extension rdfs:isDefinedBy triple if missing</message>
+                                        <sparql>
+                                            <![CDATA[
+                                            INSERT {
+                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                    ?u rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/extension/propulsion/vocab/unit> .
+                                                }
+                                            }
+                                            WHERE {
+                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                    ?u a qudt:Unit .
+                                                    FILTER NOT EXISTS {?u rdfs:isDefinedBy ?any .}
+                                                }
+                                            }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
                                         <message>Declare a compound unit as ContextualUnit if factor is ContextualUnit</message>
                                         <sparql>
                                             <![CDATA[
@@ -2606,6 +2646,31 @@ validAspectDirs.each { aspectDir ->
                                                 ?u a qudt:ContextualUnit .
                                                 ?compound qudt:hasFactorUnit/qudt:hasUnit ?u .
                                                 FILTER NOT EXISTS {?compound a qudt:ContextualUnit}
+                                                }
+                                            }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Declare a propulsion extension compound unit as ContextualUnit if factor is ContextualUnit</message>
+                                        <sparql>
+                                            <![CDATA[
+                                            INSERT {
+                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                    ?compound a qudt:ContextualUnit .
+                                                }
+                                            }
+                                            WHERE {
+                                                VALUES ?sourceGraph {
+                                                    <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl>
+                                                    <${qudt.supported.extensions.propulsion.units.dist.graph}>
+                                                }
+                                                GRAPH ?sourceGraph {
+                                                    ?u a qudt:ContextualUnit .
+                                                }
+                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                    ?compound qudt:hasFactorUnit/qudt:hasUnit ?u .
+                                                    FILTER NOT EXISTS {?compound a qudt:ContextualUnit}
                                                 }
                                             }
                                             ]]>
@@ -2789,6 +2854,25 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                               ?u  qudt:hasFactorUnit ?fu .
                                               FILTER(isBlank(?fu))
                                               FILTER NOT EXISTS { ?fu a qudt:FactorUnit }
+                                                }
+                                            }
+                                          ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <sparqlUpdate>
+                                        <message>Declare the type of all propulsion extension FactorUnit bnodes</message>
+                                        <sparql>
+                                            <![CDATA[
+                                            INSERT {
+                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                    ?fu a qudt:FactorUnit
+                                                }
+                                            }
+                                            WHERE  {
+                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                    ?u qudt:hasFactorUnit ?fu .
+                                                    FILTER(isBlank(?fu))
+                                                    FILTER NOT EXISTS { ?fu a qudt:FactorUnit }
                                                 }
                                             }
                                           ]]>
