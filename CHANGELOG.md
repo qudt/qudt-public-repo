@@ -10,6 +10,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - Added quantitykind:ProductOfInertia as a replacement for the deprecated quantitykind:PRODUCT-OF-INERTIA
+- Added unit:OHM-FT (Ohm Foot), the imperial counterpart to unit:OHM-M, for resistivity in well-logging and petrophysics applications
 
 ### Changed
 
