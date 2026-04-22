@@ -385,6 +385,7 @@ validAspectDirs.each { aspectDir ->
                                         <include>
                                             src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
                                             src/main/rdf/vocab/**/*.ttl
+                                            src/main/rdf/community/**/*.ttl
                                             src/main/rdf/examples/EXAMPLES_QUDT-DATATYPES.ttl
                                         </include>
                                     </data>
@@ -553,12 +554,14 @@ validAspectDirs.each { aspectDir ->
                                         -->
                                         <files>
                                             <include>target/dist/vocab/**/*.ttl</include>
+                                            <include>target/dist/community/**/*.ttl</include>
                                         </files>
                                         <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                     </add>
                                     <add>
                                         <files>
                                             <include>src/main/rdf/vocab/**/*.ttl</include>
+                                            <include>src/main/rdf/community/**/*.ttl</include>
                                         </files>
                                         <toGraphsPattern>src:vocab:${name}</toGraphsPattern>
                                     </add>
@@ -1155,12 +1158,14 @@ validAspectDirs.each { aspectDir ->
                                 <add>
                                     <files>
                                         <include>src/main/rdf/vocab/**/*.ttl</include>
+                                        <include>src/main/rdf/community/**/*.ttl</include>
                                     </files>
                                     <toGraphsPattern>src:vocab:${name}</toGraphsPattern>
                                 </add>
                                 <add>
                                     <files>
                                         <include>target/dist/vocab/**/*.ttl</include>
+                                        <include>target/dist/community/**/*.ttl</include>
                                     </files>
                                     <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                 </add>
@@ -1252,6 +1257,8 @@ validAspectDirs.each { aspectDir ->
                                                 ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
                                                 ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
                                                 ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl> <dist:vocab:VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl> <dist:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl> )
                                               }
 
                                               GRAPH ?srcGraph {
@@ -1313,6 +1320,8 @@ validAspectDirs.each { aspectDir ->
                                                 ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
                                                 ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
                                                 ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl> <dist:vocab:VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl> )
+                                                ( <src:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl> <dist:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl> )
                                               }
 
                                               GRAPH ?distGraph {
@@ -1367,6 +1376,7 @@ validAspectDirs.each { aspectDir ->
                                         -->
                                         <files>
                                             <include>target/work/vocab/**/*.ttl</include>
+                                            <include>target/work/community/**/*.ttl</include>
                                         </files>
                                         <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                     </add>
@@ -1545,6 +1555,25 @@ validAspectDirs.each { aspectDir ->
                                     <add>
                                         <graph>inferred:factorUnits</graph>
                                         <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                    </add>
+                                    <shaclInfer> <!-- infer the factor units for the propulsion extension units -->
+                                        <message>Inferring qudt:hasFactorUnit for propulsion extension units</message>
+                                        <shapes>
+                                            <file>target/sparql2shacl/factorUnits/infer.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:factorUnits-propulsion</graph>
+                                            <file>target/inferred/factorUnits-propulsion.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:factorUnits-propulsion</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl</toGraph>
                                     </add>
                                     <savepoint><id>05-infer-factor-units</id></savepoint>
                                     <shaclInfer>
@@ -2525,10 +2554,11 @@ validAspectDirs.each { aspectDir ->
                                         </sparql>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
-                                      <message>Inherit rdf:type from skos:broader (dist vocab only)</message>
+                                      <message>Inherit rdf:type from skos:broader (dist vocab and community only)</message>
                                       <add>
                                         <files>
                                           <include>target/dist/vocab/**/*.ttl</include>
+                                          <include>target/dist/community/**/*.ttl</include>
                                         </files>
                                       </add>
 
@@ -2708,6 +2738,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                     <add>
                                         <files>
                                             <include>src/main/rdf/vocab/**/*.ttl</include>
+                                            <include>src/main/rdf/community/**/*.ttl</include>
                                         </files>
                                         <toGraphsPattern>src:vocab:${name}</toGraphsPattern>
                                     </add>
@@ -2764,6 +2795,8 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
                                                         ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
                                                         ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl> <dist:vocab:VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl> <dist:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl> )
                                                       }
 
                                                       GRAPH ?distGraph {
@@ -2815,6 +2848,8 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
                                                         ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
                                                         ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl> <dist:vocab:VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl> )
+                                                        ( <src:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl> <dist:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl> )
                                                       }
 
                                                       GRAPH ?srcGraph {
@@ -2878,6 +2913,8 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
                                                                 ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
                                                                 ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl> <dist:vocab:VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl> <dist:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl> )
                                                               }
 
                                                               GRAPH ?distGraph {
@@ -2930,6 +2967,8 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
                                                                 ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
                                                                 ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl> <dist:vocab:VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl> )
+                                                                ( <src:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl> <dist:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl> )
                                                               }
 
                                                               GRAPH ?srcGraph {
@@ -3009,6 +3048,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                     <add>
                                         <files>
                                             <include>target/dist/vocab/**/*.ttl</include>
+                                            <include>target/dist/community/**/*.ttl</include>
                                         </files>
                                         <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                     </add>
@@ -3070,6 +3110,20 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         </data>
                                         <validationReport>
                                             <file>target/validation/validationReport-factorUnits.ttl</file>
+                                        </validationReport>
+                                    </shaclValidate>
+                                    <shaclValidate>
+                                        <message>Validating propulsion extension factor units</message>
+                                        <shapes>
+                                            <file>target/sparql2shacl/factorUnits/validate.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <graph>dist:schema:SCHEMA_QUDT.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                        </data>
+                                        <validationReport>
+                                            <file>target/validation/validationReport-factorUnits-propulsion.ttl</file>
                                         </validationReport>
                                     </shaclValidate>
                                     <shaclValidate>
