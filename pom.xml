@@ -18,20 +18,19 @@
         <coordinates.schema.diff.max.unexpected.removed>0</coordinates.schema.diff.max.unexpected.removed>
         <coordinates.schema.diff.max.unexpected.added>0</coordinates.schema.diff.max.unexpected.added>
         <!--
-            Explicitly supported extension graphs for integrated build steps.
-            Add new extensions here intentionally as they are promoted into the
-            validation/repair pipeline.
+            Extensions promoted into the integrated validation/repair pipeline.
+            Default is intentionally empty so ordinary builds use only the main
+            graphs. Opt in with comma-separated single-word IDs expanded by
+            convention in defineAdditionalProperties, e.g.:
+            mvn -Dqudt.supported.extensions=propulsion install
         -->
-        <qudt.supported.extensions.propulsion.quantitykinds.src.file>src/main/rdf/community/extensions/propulsion/VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl</qudt.supported.extensions.propulsion.quantitykinds.src.file>
-        <qudt.supported.extensions.propulsion.quantitykinds.work.file>target/work/community/extensions/propulsion/VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl</qudt.supported.extensions.propulsion.quantitykinds.work.file>
-        <qudt.supported.extensions.propulsion.quantitykinds.dist.file>target/dist/community/extensions/propulsion/VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl</qudt.supported.extensions.propulsion.quantitykinds.dist.file>
-        <qudt.supported.extensions.propulsion.quantitykinds.src.graph>src:vocab:VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl</qudt.supported.extensions.propulsion.quantitykinds.src.graph>
-        <qudt.supported.extensions.propulsion.quantitykinds.dist.graph>dist:vocab:VOCAB_QUDT-PROPULSION-QUANTITY-KINDS.ttl</qudt.supported.extensions.propulsion.quantitykinds.dist.graph>
-        <qudt.supported.extensions.propulsion.units.src.file>src/main/rdf/community/extensions/propulsion/VOCAB_QUDT-PROPULSION-UNITS.ttl</qudt.supported.extensions.propulsion.units.src.file>
-        <qudt.supported.extensions.propulsion.units.work.file>target/work/community/extensions/propulsion/VOCAB_QUDT-PROPULSION-UNITS.ttl</qudt.supported.extensions.propulsion.units.work.file>
-        <qudt.supported.extensions.propulsion.units.dist.file>target/dist/community/extensions/propulsion/VOCAB_QUDT-PROPULSION-UNITS.ttl</qudt.supported.extensions.propulsion.units.dist.file>
-        <qudt.supported.extensions.propulsion.units.src.graph>src:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl</qudt.supported.extensions.propulsion.units.src.graph>
-        <qudt.supported.extensions.propulsion.units.dist.graph>dist:vocab:VOCAB_QUDT-PROPULSION-UNITS.ttl</qudt.supported.extensions.propulsion.units.dist.graph>
+        <qudt.supported.extensions></qudt.supported.extensions>
+        <!--
+            Optional local-only all-in-one extension bundle selection. CI should
+            leave this empty. Example:
+            mvn -Dqudt.allInOne.extensions=propulsion,loop3d install
+        -->
+        <qudt.allInOne.extensions></qudt.allInOne.extensions>
     </properties>
     <scm>
         <connection>scm:git:https://github.com/qudt/qudt-public-repo.git</connection>
@@ -124,7 +123,269 @@
                                     def currentYear = now.format(DateTimeFormatter.ofPattern("YYYY"))
                                     project.properties.setProperty('qudt.current.month', currentMonth)
                                     project.properties.setProperty('qudt.current.year', currentYear)
+
+                                    def propertyValue = { propertyName ->
+                                        def userValue = session.userProperties.getProperty(propertyName)
+                                        userValue != null ? userValue : project.properties.getProperty(propertyName)
+                                    }
+
+                                    def parseExtensionIds = { propertyName ->
+                                        def raw = (propertyValue(propertyName) ?: '').trim()
+                                        if (!raw) {
+                                            return []
+                                        }
+                                        def ids = raw.split(',').collect { it.trim() }.findAll { it }
+                                        def invalidIds = ids.findAll { !(it ==~ /[a-z][a-z0-9-]*/) }
+                                        if (!invalidIds.isEmpty()) {
+                                            throw new Exception("${propertyName} contains invalid extension id(s): ${invalidIds.join(', ')}. Use comma-separated ids matching [a-z][a-z0-9-]*.")
+                                        }
+                                        return ids.unique()
+                                    }
+
+                                    def extensionStem = { extensionId ->
+                                        extensionId.toUpperCase(Locale.ROOT).replaceAll(/[^A-Z0-9]+/, '-')
+                                    }
+
+                                    def conventionExtension = { extensionId ->
+                                        def stem = extensionStem(extensionId)
+                                        def folder = "community/extensions/${extensionId}"
+                                        [
+                                            id: extensionId,
+                                            unitsSrcFile: "src/main/rdf/${folder}/VOCAB_QUDT-${stem}-UNITS.ttl",
+                                            unitsSrcGraph: "src:vocab:VOCAB_QUDT-${stem}-UNITS.ttl",
+                                            unitsDistGraph: "dist:vocab:VOCAB_QUDT-${stem}-UNITS.ttl",
+                                            unitsIsDefinedBy: "http://qudt.org/\$\$QUDT_VERSION\$\$/extension/${extensionId}/vocab/unit",
+                                            quantityKindsSrcFile: "src/main/rdf/${folder}/VOCAB_QUDT-${stem}-QUANTITY-KINDS.ttl",
+                                            quantityKindsSrcGraph: "src:vocab:VOCAB_QUDT-${stem}-QUANTITY-KINDS.ttl",
+                                            quantityKindsDistGraph: "dist:vocab:VOCAB_QUDT-${stem}-QUANTITY-KINDS.ttl"
+                                        ]
+                                    }
+
+                                    def recreateDir = { File dir ->
+                                        if (dir.exists()) {
+                                            dir.deleteDir()
+                                        }
+                                        dir.mkdirs()
+                                    }
+
+                                    def copyToDir = { List<String> relativePaths, File destDir ->
+                                        recreateDir(destDir)
+                                        relativePaths.each { relativePath ->
+                                            def source = new File(project.basedir, relativePath)
+                                            def target = new File(destDir, source.name)
+                                            target.bytes = source.bytes
+                                        }
+                                    }
+
+                                    def supportedExtensions = parseExtensionIds('qudt.supported.extensions').collect { conventionExtension(it) }
+                                    def missingSupportedFiles = supportedExtensions.collectMany { extension ->
+                                        [extension.unitsSrcFile, extension.quantityKindsSrcFile].findAll { !(new File(project.basedir, it).isFile()) }
+                                    }
+                                    if (!missingSupportedFiles.isEmpty()) {
+                                        throw new Exception("Supported extension source file(s) not found by convention:\n - ${missingSupportedFiles.join('\n - ')}")
+                                    }
+
+                                    def generatedSupportedExtensionsDir = new File(project.basedir, "target/generated/supported-extensions")
+                                    generatedSupportedExtensionsDir.mkdirs()
+                                    copyToDir(
+                                        supportedExtensions.collectMany { [it.quantityKindsSrcFile, it.unitsSrcFile] },
+                                        new File(generatedSupportedExtensionsDir, "src"))
+                                    def coreGraphPairs = [
+                                        ['src:vocab:VOCAB_QUDT-QUANTITIES.ttl', 'dist:vocab:VOCAB_QUDT-QUANTITIES.ttl'],
+                                        ['src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl', 'dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl'],
+                                        ['src:vocab:VOCAB_QUDT-DATATYPES.ttl', 'dist:vocab:VOCAB_QUDT-DATATYPES.ttl'],
+                                        ['src:vocab:VOCAB_QUDT-COORDINATES.ttl', 'dist:vocab:VOCAB_QUDT-COORDINATES.ttl'],
+                                        ['src:vocab:VOCAB_QUDT-PREFIXES.ttl', 'dist:vocab:VOCAB_QUDT-PREFIXES.ttl'],
+                                        ['src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl', 'dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl'],
+                                        ['src:vocab:VOCAB_QUDT-UNITS-ALL.ttl', 'dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl'],
+                                        ['src:vocab:VOCAB_QUDT-CONSTANTS.ttl', 'dist:vocab:VOCAB_QUDT-CONSTANTS.ttl'],
+                                        ['src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl', 'dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl'],
+                                        ['src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl', 'dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl'],
+                                        ['src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl', 'dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl']
+                                    ]
+                                    def configFile = new File(generatedSupportedExtensionsDir, "config.ttl")
+                                    configFile.text = """@prefix extbuild: <urn:qudt-build:extensions#> .
+
+${coreGraphPairs.collect { pair -> "<${pair[0]}> extbuild:distGraph <${pair[1]}> ." }.join('\n')}
+
+${supportedExtensions.collect { extension -> """<${extension.quantityKindsSrcGraph}> extbuild:distGraph <${extension.quantityKindsDistGraph}> .
+<${extension.unitsSrcGraph}> extbuild:distGraph <${extension.unitsDistGraph}> .
+<${extension.quantityKindsDistGraph}> a extbuild:SupportedQuantityKindGraph .
+<${extension.unitsDistGraph}> a extbuild:SupportedUnitGraph ;
+    extbuild:isDefinedBy <${extension.unitsIsDefinedBy}> .
+""" }.join('\n')}"""
                                 ]]></script>
+                        </scripts>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>prepare-supported-extension-target-files</id>
+                    <phase>process-resources</phase>
+                    <goals>
+                        <goal>execute</goal>
+                    </goals>
+                    <configuration>
+                        <scripts>
+                            <script><![CDATA[
+                                def propertyValue = { propertyName ->
+                                    def userValue = session.userProperties.getProperty(propertyName)
+                                    userValue != null ? userValue : project.properties.getProperty(propertyName)
+                                }
+
+                                def parseExtensionIds = { propertyName ->
+                                    def raw = (propertyValue(propertyName) ?: '').trim()
+                                    if (!raw) {
+                                        return []
+                                    }
+                                    def ids = raw.split(',').collect { it.trim() }.findAll { it }
+                                    def invalidIds = ids.findAll { !(it ==~ /[a-z][a-z0-9-]*/) }
+                                    if (!invalidIds.isEmpty()) {
+                                        throw new Exception("${propertyName} contains invalid extension id(s): ${invalidIds.join(', ')}. Use comma-separated ids matching [a-z][a-z0-9-]*.")
+                                    }
+                                    return ids.unique()
+                                }
+                                def extensionStem = { extensionId ->
+                                    extensionId.toUpperCase(Locale.ROOT).replaceAll(/[^A-Z0-9]+/, '-')
+                                }
+                                def conventionFiles = { extensionId, root ->
+                                    def stem = extensionStem(extensionId)
+                                    def folder = "${root}/community/extensions/${extensionId}"
+                                    [
+                                        "${folder}/VOCAB_QUDT-${stem}-QUANTITY-KINDS.ttl",
+                                        "${folder}/VOCAB_QUDT-${stem}-UNITS.ttl"
+                                    ]
+                                }
+                                def recreateDir = { File dir ->
+                                    if (dir.exists()) {
+                                        dir.deleteDir()
+                                    }
+                                    dir.mkdirs()
+                                }
+                                def copyToDir = { List<String> relativePaths, String stripPrefix, File destDir ->
+                                    recreateDir(destDir)
+                                    relativePaths.each { relativePath ->
+                                        def source = new File(project.basedir, relativePath)
+                                        if (!source.isFile()) {
+                                            throw new Exception("Expected supported extension file not found: ${source}")
+                                        }
+                                        def targetPath = relativePath.replaceFirst("^${stripPrefix}/", "")
+                                        def target = new File(destDir, targetPath)
+                                        target.parentFile.mkdirs()
+                                        target.bytes = source.bytes
+                                    }
+                                }
+
+                                def ids = parseExtensionIds('qudt.supported.extensions')
+                                def generatedDir = new File(project.basedir, "target/generated/supported-extensions")
+                                copyToDir(ids.collectMany { conventionFiles(it, 'target/work') }, 'target/work', new File(generatedDir, "work"))
+                                copyToDir(ids.collectMany { conventionFiles(it, 'target/dist') }, 'target/dist', new File(generatedDir, "dist"))
+                            ]]></script>
+                        </scripts>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>refresh-supported-extension-dist-files</id>
+                    <phase>process-test-sources</phase>
+                    <goals>
+                        <goal>execute</goal>
+                    </goals>
+                    <configuration>
+                        <scripts>
+                            <script><![CDATA[
+                                def propertyValue = { propertyName ->
+                                    def userValue = session.userProperties.getProperty(propertyName)
+                                    userValue != null ? userValue : project.properties.getProperty(propertyName)
+                                }
+
+                                def parseExtensionIds = { propertyName ->
+                                    def raw = (propertyValue(propertyName) ?: '').trim()
+                                    if (!raw) {
+                                        return []
+                                    }
+                                    def ids = raw.split(',').collect { it.trim() }.findAll { it }
+                                    def invalidIds = ids.findAll { !(it ==~ /[a-z][a-z0-9-]*/) }
+                                    if (!invalidIds.isEmpty()) {
+                                        throw new Exception("${propertyName} contains invalid extension id(s): ${invalidIds.join(', ')}. Use comma-separated ids matching [a-z][a-z0-9-]*.")
+                                    }
+                                    return ids.unique()
+                                }
+                                def extensionStem = { extensionId ->
+                                    extensionId.toUpperCase(Locale.ROOT).replaceAll(/[^A-Z0-9]+/, '-')
+                                }
+                                def conventionFiles = { extensionId ->
+                                    def stem = extensionStem(extensionId)
+                                    def folder = "target/dist/community/extensions/${extensionId}"
+                                    [
+                                        "${folder}/VOCAB_QUDT-${stem}-QUANTITY-KINDS.ttl",
+                                        "${folder}/VOCAB_QUDT-${stem}-UNITS.ttl"
+                                    ]
+                                }
+                                def destDir = new File(project.basedir, "target/generated/supported-extensions/dist")
+                                if (destDir.exists()) {
+                                    destDir.deleteDir()
+                                }
+                                destDir.mkdirs()
+                                parseExtensionIds('qudt.supported.extensions').collectMany { conventionFiles(it) }.each { relativePath ->
+                                    def source = new File(project.basedir, relativePath)
+                                    if (!source.isFile()) {
+                                        throw new Exception("Expected supported extension dist file not found: ${source}")
+                                    }
+                                    def targetPath = relativePath.replaceFirst("^target/dist/", "")
+                                    def target = new File(destDir, targetPath)
+                                    target.parentFile.mkdirs()
+                                    target.bytes = source.bytes
+                                }
+                            ]]></script>
+                        </scripts>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>prepare-all-in-one-extension-files</id>
+                    <phase>process-test-sources</phase>
+                    <goals>
+                        <goal>execute</goal>
+                    </goals>
+                    <configuration>
+                        <scripts>
+                            <script><![CDATA[
+                                def propertyValue = { propertyName ->
+                                    def userValue = session.userProperties.getProperty(propertyName)
+                                    userValue != null ? userValue : project.properties.getProperty(propertyName)
+                                }
+
+                                def parseExtensionIds = { propertyName ->
+                                    def raw = (propertyValue(propertyName) ?: '').trim()
+                                    if (!raw) {
+                                        return []
+                                    }
+                                    def ids = raw.split(',').collect { it.trim() }.findAll { it }
+                                    def invalidIds = ids.findAll { !(it ==~ /[a-z][a-z0-9-]*/) }
+                                    if (!invalidIds.isEmpty()) {
+                                        throw new Exception("${propertyName} contains invalid extension id(s): ${invalidIds.join(', ')}. Use comma-separated ids matching [a-z][a-z0-9-]*.")
+                                    }
+                                    return ids.unique()
+                                }
+                                def destDir = new File(project.basedir, "target/generated/all-in-one-extensions/dist")
+                                if (destDir.exists()) {
+                                    destDir.deleteDir()
+                                }
+                                destDir.mkdirs()
+                                parseExtensionIds('qudt.allInOne.extensions').each { extensionId ->
+                                    def srcDir = new File(project.basedir, "target/dist/community/extensions/${extensionId}")
+                                    if (!srcDir.isDirectory()) {
+                                        throw new Exception("All-in-one extension '${extensionId}' not found at ${srcDir}")
+                                    }
+                                    def ttlFiles = srcDir.listFiles()?.findAll { it.isFile() && it.name.endsWith('.ttl') }?.sort { it.name } ?: []
+                                    if (ttlFiles.isEmpty()) {
+                                        throw new Exception("All-in-one extension '${extensionId}' has no .ttl files in ${srcDir}")
+                                    }
+                                    def extensionDestDir = new File(destDir, extensionId)
+                                    extensionDestDir.mkdirs()
+                                    ttlFiles.each { source ->
+                                        new File(extensionDestDir, source.name).bytes = source.bytes
+                                    }
+                                }
+                            ]]></script>
                         </scripts>
                     </configuration>
                 </execution>
@@ -185,7 +446,7 @@ validAspectDirs.each { aspectDir ->
     def inferTemplateFile = new File(aspectDir, "infer-template.ttl")
     def validateTemplateFile = new File(aspectDir, "validate-template.ttl")
 
-    def queryText = queryFile.text
+    def queryText = queryFile.getText('UTF-8')
     def queryWithoutPrefixes = queryText
         .replaceAll('(?is)^\\s*(PREFIX\\s+[^\\n]*\\n)*\\s*', '')
         .replaceAll('(?is)\\s*$', '')
@@ -200,13 +461,13 @@ validAspectDirs.each { aspectDir ->
     [[source: inferTemplateFile, target: "infer.ttl"],
      [source: validateTemplateFile, target: "validate.ttl"]]
     .each { template ->
-        def content = template.source.text
+        def content = template.source.getText('UTF-8')
         def outputContent = content
             .replace('{{QUERY_WITHOUT_PREFIXES}}', queryWithoutPrefixes)
             .replace('{{AUTOGENERATED_WARNING_DO_NOT_EDIT}}',
                      " Auto-generated file - ALL EDITS WILL BE LOST! Edit the '-template.ttl' file instead!")
         def outputFile = new File(aspectOutputDir, template.target)
-        outputFile.text = outputContent
+        outputFile.setText(outputContent, 'UTF-8')
         println "Generated: ${outputFile}"
     }
 }
@@ -400,8 +661,7 @@ validAspectDirs.each { aspectDir ->
                                         <include>
                                             src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
                                             src/main/rdf/vocab/**/*.ttl
-                                            ${qudt.supported.extensions.propulsion.quantitykinds.src.file}
-                                            ${qudt.supported.extensions.propulsion.units.src.file}
+                                            target/generated/supported-extensions/src/*.ttl
                                             src/main/rdf/examples/EXAMPLES_QUDT-DATATYPES.ttl
                                         </include>
                                     </data>
@@ -477,6 +737,7 @@ validAspectDirs.each { aspectDir ->
                                             target/dist/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
                                             target/dist/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl
                                             target/dist/validation/COLLECTION_QUDT_USER_TESTS.ttl
+                                            target/generated/all-in-one-extensions/dist/**/*.ttl
                                         </include>
                                     </input>
                                     <filters>
@@ -516,6 +777,7 @@ validAspectDirs.each { aspectDir ->
                                             target/dist/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
                                             target/dist/schema/SCHEMA_QUDT.ttl
                                             target/dist/schema/SCHEMA_QUDT-DATATYPE.ttl
+                                            target/generated/all-in-one-extensions/dist/**/*.ttl
                                         </include>
                                     </input>
                                     <filters>
@@ -570,16 +832,14 @@ validAspectDirs.each { aspectDir ->
                                         -->
                                         <files>
                                             <include>target/dist/vocab/**/*.ttl</include>
-                                            <include>${qudt.supported.extensions.propulsion.quantitykinds.dist.file}</include>
-                                            <include>${qudt.supported.extensions.propulsion.units.dist.file}</include>
+                                            <include>target/generated/supported-extensions/dist/**/*.ttl</include>
                                         </files>
                                         <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                     </add>
                                     <add>
                                         <files>
                                             <include>src/main/rdf/vocab/**/*.ttl</include>
-                                            <include>${qudt.supported.extensions.propulsion.quantitykinds.src.file}</include>
-                                            <include>${qudt.supported.extensions.propulsion.units.src.file}</include>
+                                            <include>target/generated/supported-extensions/src/*.ttl</include>
                                         </files>
                                         <toGraphsPattern>src:vocab:${name}</toGraphsPattern>
                                     </add>
@@ -1174,18 +1434,20 @@ validAspectDirs.each { aspectDir ->
                                     <file>src/build/validation/qudt-shacl-functions.ttl</file>
                                 </shaclFunctions>
                                 <add>
+                                    <file>target/generated/supported-extensions/config.ttl</file>
+                                    <toGraph>build:supported-extensions</toGraph>
+                                </add>
+                                <add>
                                     <files>
                                         <include>src/main/rdf/vocab/**/*.ttl</include>
-                                        <include>${qudt.supported.extensions.propulsion.quantitykinds.src.file}</include>
-                                        <include>${qudt.supported.extensions.propulsion.units.src.file}</include>
+                                        <include>target/generated/supported-extensions/src/*.ttl</include>
                                     </files>
                                     <toGraphsPattern>src:vocab:${name}</toGraphsPattern>
                                 </add>
                                 <add>
                                     <files>
                                         <include>target/dist/vocab/**/*.ttl</include>
-                                        <include>${qudt.supported.extensions.propulsion.quantitykinds.dist.file}</include>
-                                        <include>${qudt.supported.extensions.propulsion.units.dist.file}</include>
+                                        <include>target/generated/supported-extensions/dist/**/*.ttl</include>
                                     </files>
                                     <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                 </add>
@@ -1265,20 +1527,8 @@ validAspectDirs.each { aspectDir ->
                                                 qudt:latexDefinition
                                                 rdfs:isDefinedBy
                                               }
-                                              VALUES (?srcGraph ?distGraph) {
-                                                ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-COORDINATES.ttl> <dist:vocab:VOCAB_QUDT-COORDINATES.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
-                                                ( <${qudt.supported.extensions.propulsion.quantitykinds.src.graph}> <${qudt.supported.extensions.propulsion.quantitykinds.dist.graph}> )
-                                                ( <${qudt.supported.extensions.propulsion.units.src.graph}> <${qudt.supported.extensions.propulsion.units.dist.graph}> )
+                                              GRAPH <build:supported-extensions> {
+                                                ?srcGraph <urn:qudt-build:extensions#distGraph> ?distGraph .
                                               }
 
                                               GRAPH ?srcGraph {
@@ -1328,20 +1578,8 @@ validAspectDirs.each { aspectDir ->
                                                 qudt:latexDefinition                                                                                                
                                                 rdfs:isDefinedBy
                                                 }
-                                              VALUES (?srcGraph ?distGraph) {
-                                                ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-COORDINATES.ttl> <dist:vocab:VOCAB_QUDT-COORDINATES.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
-                                                ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
-                                                ( <${qudt.supported.extensions.propulsion.quantitykinds.src.graph}> <${qudt.supported.extensions.propulsion.quantitykinds.dist.graph}> )
-                                                ( <${qudt.supported.extensions.propulsion.units.src.graph}> <${qudt.supported.extensions.propulsion.units.dist.graph}> )
+                                              GRAPH <build:supported-extensions> {
+                                                ?srcGraph <urn:qudt-build:extensions#distGraph> ?distGraph .
                                               }
 
                                               GRAPH ?distGraph {
@@ -1388,6 +1626,10 @@ validAspectDirs.each { aspectDir ->
                                     <shaclFunctions>
                                         <file>src/build/validation/qudt-shacl-functions.ttl</file>
                                     </shaclFunctions>
+                                    <add>
+                                        <file>target/generated/supported-extensions/config.ttl</file>
+                                        <toGraph>build:supported-extensions</toGraph>
+                                    </add>
                                     <!-- first, handle the IEC links -->
                                     <add>
                                         <!--
@@ -1396,8 +1638,7 @@ validAspectDirs.each { aspectDir ->
                                         -->
                                         <files>
                                             <include>target/work/vocab/**/*.ttl</include>
-                                            <include>${qudt.supported.extensions.propulsion.quantitykinds.work.file}</include>
-                                            <include>${qudt.supported.extensions.propulsion.units.work.file}</include>
+                                            <include>target/generated/supported-extensions/work/**/*.ttl</include>
                                         </files>
                                         <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                     </add>
@@ -1429,7 +1670,14 @@ validAspectDirs.each { aspectDir ->
                                                     GRAPH <rdfio:pipeline:metadata> {
                                                         ?file rdfio:loadsInto ?graph .
                                                     }
-                                                    BIND (IRI(REPLACE(STR(?file), "target/work", "target/dist")) AS ?newFile)
+                                                    BIND (
+                                                        IRI(
+                                                            IF(
+                                                                CONTAINS(STR(?file), "target/generated/supported-extensions/work/"),
+                                                                REPLACE(STR(?file), "target/generated/supported-extensions/work", "target/dist"),
+                                                                REPLACE(STR(?file), "target/work", "target/dist")
+                                                            )
+                                                        ) AS ?newFile)
                                                 }
                                             ]]>
                                         </sparql>
@@ -1487,8 +1735,43 @@ validAspectDirs.each { aspectDir ->
                                         <graph>inferred:applicableUnits</graph>
                                         <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
                                     </add>
+                                    <clear>
+                                        <graph>dist:supported-extensions:quantitykinds</graph>
+                                        <graph>dist:supported-extensions:units</graph>
+                                    </clear>
+                                    <sparqlUpdate>
+                                        <message>Refresh supported extension aggregate graphs</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                INSERT {
+                                                    GRAPH <dist:supported-extensions:quantitykinds> {
+                                                        ?quantityKindSubject ?quantityKindProperty ?quantityKindValue .
+                                                    }
+                                                    GRAPH <dist:supported-extensions:units> {
+                                                        ?unitSubject ?unitProperty ?unitValue .
+                                                    }
+                                                } WHERE {
+                                                    {
+                                                        GRAPH <build:supported-extensions> {
+                                                            ?quantityKindGraph a <urn:qudt-build:extensions#SupportedQuantityKindGraph> .
+                                                        }
+                                                        GRAPH ?quantityKindGraph {
+                                                            ?quantityKindSubject ?quantityKindProperty ?quantityKindValue .
+                                                        }
+                                                    } UNION {
+                                                        GRAPH <build:supported-extensions> {
+                                                            ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                        }
+                                                        GRAPH ?unitGraph {
+                                                            ?unitSubject ?unitProperty ?unitValue .
+                                                        }
+                                                    }
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
                                     <sparqlQuery>
-                                        <message>Loading core quantity kind hierarchy as support for propulsion applicableUnit inference</message>
+                                        <message>Loading core quantity kind hierarchy as support for supported extension applicableUnit inference</message>
                                         <sparql>
                                             <![CDATA[
                                                 CONSTRUCT {
@@ -1500,30 +1783,57 @@ validAspectDirs.each { aspectDir ->
                                                 }
                                             ]]>
                                         </sparql>
-                                        <toGraph>support:applicableUnits-propulsion-core-qk-broader</toGraph>
-                                        <toFile>target/inferred/applicableUnits-propulsion-core-qk-broader.ttl</toFile>
+                                        <toGraph>support:applicableUnits-supported-extensions-core-qk-broader</toGraph>
+                                        <toFile>target/inferred/applicableUnits-supported-extensions-core-qk-broader.ttl</toFile>
                                     </sparqlQuery>
-                                    <shaclInfer> <!-- do the quantitykinds inference for the propulsion extension -->
-                                        <message>Inferring qudt:applicableUnit triples for propulsion extension quantity kinds</message>
+                                    <shaclInfer> <!-- do the quantitykinds inference for supported extensions -->
+                                        <message>Inferring qudt:applicableUnit triples for supported extension quantity kinds</message>
                                         <shapes>
                                             <graph>shapes:applicableUnits</graph>
                                         </shapes>
                                         <data>
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>support:applicableUnits-propulsion-core-qk-broader</graph>
-                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                            <graph>${qudt.supported.extensions.propulsion.quantitykinds.dist.graph}</graph>
-                                            <graph>${qudt.supported.extensions.propulsion.units.dist.graph}</graph>
+                                            <graphs>
+                                                <include>
+                                                    support:applicableUnits-supported-extensions-core-qk-broader
+                                                    dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl
+                                                    dist:supported-extensions:quantitykinds
+                                                    dist:supported-extensions:units
+                                                </include>
+                                            </graphs>
                                         </data>
                                         <inferred>
-                                            <graph>inferred:applicableUnits-propulsion</graph>
-                                            <file>target/inferred/applicableUnits-propulsion.ttl</file>
+                                            <graph>inferred:applicableUnits-supported-extensions</graph>
+                                            <file>target/inferred/applicableUnits-supported-extensions.ttl</file>
                                         </inferred>
                                     </shaclInfer>
-                                    <add> <!-- add the propulsion quantitykinds inference results -->
-                                        <graph>inferred:applicableUnits-propulsion</graph>
-                                        <toGraph>${qudt.supported.extensions.propulsion.quantitykinds.dist.graph}</toGraph>
-                                    </add>
+                                    <sparqlUpdate>
+                                        <message>Add supported extension applicableUnit inference results to owning quantity kind graphs</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                INSERT {
+                                                    GRAPH ?quantityKindGraph {
+                                                        ?quantityKind ?property ?value .
+                                                    }
+                                                } WHERE {
+                                                    GRAPH <build:supported-extensions> {
+                                                        ?quantityKindGraph a <urn:qudt-build:extensions#SupportedQuantityKindGraph> .
+                                                    }
+                                                    GRAPH <inferred:applicableUnits-supported-extensions> {
+                                                        ?quantityKind ?property ?value .
+                                                    }
+                                                    GRAPH ?quantityKindGraph {
+                                                        ?quantityKind ?ownerProperty ?ownerValue .
+                                                    }
+                                                    FILTER NOT EXISTS {
+                                                        GRAPH ?quantityKindGraph {
+                                                            ?quantityKind ?property ?value .
+                                                        }
+                                                    }
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
 
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
                                     <savepoint><id>02-applicableUnits</id></savepoint>
@@ -1614,25 +1924,79 @@ validAspectDirs.each { aspectDir ->
                                         <graph>inferred:factorUnits</graph>
                                         <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
-                                    <shaclInfer> <!-- infer the factor units for the propulsion extension units -->
-                                        <message>Inferring qudt:hasFactorUnit for propulsion extension units</message>
+                                    <shaclInfer> <!-- infer the factor units for supported extension units -->
+                                        <message>Inferring qudt:hasFactorUnit for supported extension units</message>
                                         <shapes>
                                             <file>target/sparql2shacl/factorUnits/infer.ttl</file>
                                         </shapes>
                                         <data>
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>${qudt.supported.extensions.propulsion.units.dist.graph}</graph>
-                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                            <graphs>
+                                                <include>
+                                                    dist:supported-extensions:units
+                                                    dist:vocab:VOCAB_QUDT-PREFIXES.ttl
+                                                </include>
+                                            </graphs>
                                         </data>
                                         <inferred>
-                                            <graph>inferred:factorUnits-propulsion</graph>
-                                            <file>target/inferred/factorUnits-propulsion.ttl</file>
+                                            <graph>inferred:factorUnits-supported-extensions</graph>
+                                            <file>target/inferred/factorUnits-supported-extensions.ttl</file>
                                         </inferred>
                                     </shaclInfer>
-                                    <add>
-                                        <graph>inferred:factorUnits-propulsion</graph>
-                                        <toGraph>${qudt.supported.extensions.propulsion.units.dist.graph}</toGraph>
-                                    </add>
+                                    <sparqlUpdate>
+                                        <message>Add supported extension factor-unit inference results to owning unit graphs</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                INSERT {
+                                                    GRAPH ?unitGraph {
+                                                        ?unit ?property ?value .
+                                                        ?value ?factorUnitProperty ?factorUnitValue .
+                                                    }
+                                                } WHERE {
+                                                    GRAPH <build:supported-extensions> {
+                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                    }
+                                                    GRAPH <inferred:factorUnits-supported-extensions> {
+                                                        ?unit ?property ?value .
+                                                        OPTIONAL {
+                                                            ?value ?factorUnitProperty ?factorUnitValue .
+                                                            FILTER(isBlank(?value))
+                                                        }
+                                                    }
+                                                    GRAPH ?unitGraph {
+                                                        ?unit ?ownerProperty ?ownerValue .
+                                                    }
+                                                    FILTER NOT EXISTS {
+                                                        GRAPH ?unitGraph {
+                                                            ?unit ?property ?value .
+                                                        }
+                                                    }
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <clear>
+                                        <graph>dist:supported-extensions:units</graph>
+                                    </clear>
+                                    <sparqlUpdate>
+                                        <message>Refresh supported extension unit aggregate graph after factor-unit inference</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                INSERT {
+                                                    GRAPH <dist:supported-extensions:units> {
+                                                        ?s ?p ?o .
+                                                    }
+                                                } WHERE {
+                                                    GRAPH <build:supported-extensions> {
+                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                    }
+                                                    GRAPH ?unitGraph {
+                                                        ?s ?p ?o .
+                                                    }
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
                                     <savepoint><id>05-infer-factor-units</id></savepoint>
                                     <shaclInfer>
                                         <message>Inferring qudt:scalingOf</message>
@@ -1653,6 +2017,74 @@ validAspectDirs.each { aspectDir ->
                                         <graph>inferred:scalingOf</graph>
                                         <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
+                                    <shaclInfer>
+                                        <message>Inferring qudt:scalingOf for supported extension units</message>
+                                        <shapes>
+                                            <file>target/sparql2shacl/scalingOf/infer.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graphs>
+                                                <include>
+                                                    dist:supported-extensions:units
+                                                    dist:vocab:VOCAB_QUDT-PREFIXES.ttl
+                                                </include>
+                                            </graphs>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:scalingOf-supported-extensions</graph>
+                                            <file>target/inferred/scalingOf-supported-extensions.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <sparqlUpdate>
+                                        <message>Add supported extension scalingOf inference results to owning unit graphs</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                INSERT {
+                                                    GRAPH ?unitGraph {
+                                                        ?unit ?property ?value .
+                                                    }
+                                                } WHERE {
+                                                    GRAPH <build:supported-extensions> {
+                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                    }
+                                                    GRAPH <inferred:scalingOf-supported-extensions> {
+                                                        ?unit ?property ?value .
+                                                    }
+                                                    GRAPH ?unitGraph {
+                                                        ?unit ?ownerProperty ?ownerValue .
+                                                    }
+                                                    FILTER NOT EXISTS {
+                                                        GRAPH ?unitGraph {
+                                                            ?unit ?property ?value .
+                                                        }
+                                                    }
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <clear>
+                                        <graph>dist:supported-extensions:units</graph>
+                                    </clear>
+                                    <sparqlUpdate>
+                                        <message>Refresh supported extension unit aggregate graph after scalingOf inference</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                INSERT {
+                                                    GRAPH <dist:supported-extensions:units> {
+                                                        ?s ?p ?o .
+                                                    }
+                                                } WHERE {
+                                                    GRAPH <build:supported-extensions> {
+                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                    }
+                                                    GRAPH ?unitGraph {
+                                                        ?s ?p ?o .
+                                                    }
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
                                     <savepoint><id>06.1-infer-scalingOf-with-errors</id></savepoint>
                                     <sparqlUpdate>
                                         <message>Fix unit:GM/unit:KiloGM qudt:scalingOf situation</message>
@@ -1982,6 +2414,442 @@ validAspectDirs.each { aspectDir ->
                                         </sparqlAsk>
                                     </until>
                                     <savepoint><id>08.5-infer-ucumCode</id></savepoint>
+                                    <sparqlQuery>
+                                        <message>Loading direct core unit lookup properties as support for supported extension unit repair inference</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                CONSTRUCT {
+                                                    ?unit ?property ?value .
+                                                } WHERE {
+                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                        ?unit ?property ?value .
+                                                        FILTER(?property IN (qudt:hasDimensionVector, qudt:symbol, qudt:ucumCode))
+                                                    }
+                                                }
+                                            ]]>
+                                        </sparql>
+                                        <toGraph>support:supported-extensions-core-unit-derived-properties</toGraph>
+                                        <toFile>target/inferred/supported-extensions-core-unit-derived-properties.ttl</toFile>
+                                    </sparqlQuery>
+                                    <shaclValidate>
+                                        <message>Validating supported extension qudt:hasDimensionVector (making sure none are missing that cannot be derived)</message>
+                                        <shapes>
+                                            <file>src/build/sparql2shacl/dimensionVector/prerequisite.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graphs>
+                                                <include>
+                                                    support:supported-extensions-core-unit-derived-properties
+                                                    dist:supported-extensions:units
+                                                    dist:vocab:VOCAB_QUDT-PREFIXES.ttl
+                                                </include>
+                                            </graphs>
+                                        </data>
+                                        <validationReport>
+                                            <graph>validation:dimensionVector-underivable-supported-extensions.ttl</graph>
+                                            <file>target/validation/dimensionVector-underivable-supported-extensions.ttl</file>
+                                        </validationReport>
+                                    </shaclValidate>
+                                    <until>
+                                        <message>Add missing supported extension dimension vectors that can be inferred</message>
+                                        <indexVar>index_dv_supported_extensions</indexVar>
+                                        <body>
+                                            <clear>
+                                                <graph>dist:supported-extensions:units</graph>
+                                            </clear>
+                                            <sparqlUpdate>
+                                                <message>Refresh supported extension unit aggregate graph before dimension-vector inference iteration</message>
+                                                <sparql>
+                                                    <![CDATA[
+                                                        INSERT {
+                                                            GRAPH <dist:supported-extensions:units> {
+                                                                ?s ?p ?o .
+                                                            }
+                                                        } WHERE {
+                                                            GRAPH <build:supported-extensions> {
+                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                            }
+                                                            GRAPH ?unitGraph {
+                                                                ?s ?p ?o .
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparql>
+                                            </sparqlUpdate>
+                                            <shaclInfer>
+                                                <message>Inferring missing supported extension qudt:dimensionVector</message>
+                                                <iterateUntilStable>true</iterateUntilStable>
+                                                <iterationOutputFilePattern>target/inferred/dimensionVector-supported-extensions-${index_dv_supported_extensions}_${index}.ttl</iterationOutputFilePattern>
+                                                <shapes>
+                                                    <file>target/sparql2shacl/dimensionVector/infer.ttl</file>
+                                                </shapes>
+                                                <data>
+                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                    <graphs>
+                                                        <include>
+                                                            support:supported-extensions-core-unit-derived-properties
+                                                            dist:supported-extensions:units
+                                                            dist:vocab:VOCAB_QUDT-PREFIXES.ttl
+                                                        </include>
+                                                    </graphs>
+                                                </data>
+                                                <inferred>
+                                                    <graph>inferred:dimensionVector_supported_extensions_${index_dv_supported_extensions}</graph>
+                                                    <file>target/inferred/dimensionVector_supported_extensions_${index_dv_supported_extensions}.ttl</file>
+                                                </inferred>
+                                            </shaclInfer>
+                                            <sparqlUpdate>
+                                                <message>Add inferred supported extension dimension vectors to owning unit graphs</message>
+                                                <sparql>
+                                                    <![CDATA[
+                                                        INSERT {
+                                                            GRAPH ?unitGraph {
+                                                                ?unit ?property ?value .
+                                                            }
+                                                        } WHERE {
+                                                            GRAPH <build:supported-extensions> {
+                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                            }
+                                                            BIND(IRI(CONCAT("inferred:dimensionVector_supported_extensions_",STR(?index_dv_supported_extensions))) AS ?inferredGraph)
+                                                            GRAPH ?inferredGraph {
+                                                                ?unit ?property ?value .
+                                                            }
+                                                            GRAPH ?unitGraph {
+                                                                ?unit ?ownerProperty ?ownerValue .
+                                                            }
+                                                            FILTER NOT EXISTS {
+                                                                GRAPH ?unitGraph {
+                                                                    ?unit ?property ?value .
+                                                                }
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparql>
+                                            </sparqlUpdate>
+                                        </body>
+                                        <sparqlAsk>
+                                            ASK {
+                                                BIND(IRI(CONCAT("inferred:dimensionVector_supported_extensions_",STR(?index_dv_supported_extensions))) as ?graph)
+                                                FILTER NOT EXISTS {
+                                                    GRAPH ?graph {
+                                                        ?s ?p ?o
+                                                    }
+                                                }
+                                            }
+                                        </sparqlAsk>
+                                    </until>
+                                    <until>
+                                        <message>Checking supported extension units for missing/wrong symbols that can be corrected/inferred</message>
+                                        <indexVar>iteration_supported_extensions_symbol</indexVar>
+                                        <body>
+                                            <clear>
+                                                <graph>dist:supported-extensions:units</graph>
+                                            </clear>
+                                            <sparqlUpdate>
+                                                <message>Refresh supported extension unit aggregate graph before symbol repair iteration</message>
+                                                <sparql>
+                                                    <![CDATA[
+                                                        INSERT {
+                                                            GRAPH <dist:supported-extensions:units> {
+                                                                ?s ?p ?o .
+                                                            }
+                                                        } WHERE {
+                                                            GRAPH <build:supported-extensions> {
+                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                            }
+                                                            GRAPH ?unitGraph {
+                                                                ?s ?p ?o .
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparql>
+                                            </sparqlUpdate>
+                                            <clear>
+                                                <graph>inferred:symbol-supported-extensions</graph>
+                                                <graph>delete:symbol-supported-extensions</graph>
+                                            </clear>
+                                            <shaclValidate>
+                                                <failOnSeverity>None</failOnSeverity>
+                                                <message>Preventing supported extension qudt:symbol values that do not match the symbol calculated from base unit(s)</message>
+                                                <shapes>
+                                                    <file>target/sparql2shacl/symbol/validate.ttl</file>
+                                                </shapes>
+                                                <data>
+                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                    <graphs>
+                                                        <include>
+                                                            support:supported-extensions-core-unit-derived-properties
+                                                            dist:supported-extensions:units
+                                                            dist:vocab:VOCAB_QUDT-PREFIXES.ttl
+                                                        </include>
+                                                    </graphs>
+                                                    <file>src/build/sparql2shacl/symbol/units-overriding-inferred-symbol.ttl</file>
+                                                </data>
+                                                <validationReport>
+                                                    <graph>delete:symbol-supported-extensions</graph>
+                                                    <file>target/fix/symbol/delete-supported-extensions-${iteration_supported_extensions_symbol}.ttl</file>
+                                                </validationReport>
+                                            </shaclValidate>
+                                            <when>
+                                                <sparqlAsk>
+                                                    <![CDATA[
+                                                        ASK WHERE {
+                                                            GRAPH <delete:symbol-supported-extensions> {
+                                                                [] a sh:ValidationReport ;
+                                                                   sh:conforms false .
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparqlAsk>
+                                                <body>
+                                                    <sparqlUpdate>
+                                                        <message>Deleting invalid supported extension symbols</message>
+                                                        <sparql>
+                                                            <![CDATA[
+                                                        DELETE {
+                                                            GRAPH ?unitGraph {
+                                                                ?unit qudt:symbol ?incorrectSymbol .
+                                                            }
+                                                        }
+                                                        WHERE {
+                                                            GRAPH <build:supported-extensions> {
+                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                            }
+                                                            GRAPH ?unitGraph {
+                                                                ?unit qudt:symbol ?incorrectSymbol .
+                                                            }
+                                                            GRAPH <delete:symbol-supported-extensions> {
+                                                                ?res
+                                                                    rdf:type                      sh:ValidationResult;
+                                                                    sh:resultPath                 qudt:symbol;
+                                                                    sh:resultSeverity             sh:Violation;
+                                                                    sh:value                      ?unit
+                                                            }
+                                                        }
+                                                        ]]>
+                                                        </sparql>
+                                                    </sparqlUpdate>
+                                                    <shaclInfer>
+                                                        <message>Inferring missing supported extension qudt:symbol</message>
+                                                        <iterateUntilStable>false</iterateUntilStable>
+                                                        <shapes>
+                                                            <file>target/sparql2shacl/symbol/infer.ttl</file>
+                                                        </shapes>
+                                                        <data>
+                                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                            <graphs>
+                                                                <include>
+                                                                    support:supported-extensions-core-unit-derived-properties
+                                                                    dist:supported-extensions:units
+                                                                    dist:vocab:VOCAB_QUDT-PREFIXES.ttl
+                                                                </include>
+                                                            </graphs>
+                                                            <file>src/build/sparql2shacl/symbol/units-overriding-inferred-symbol.ttl</file>
+                                                        </data>
+                                                        <inferred>
+                                                            <graph>inferred:symbol-supported-extensions</graph>
+                                                            <file>target/fix/symbol/inferred-supported-extensions-${iteration_supported_extensions_symbol}.ttl</file>
+                                                        </inferred>
+                                                    </shaclInfer>
+                                                    <sparqlUpdate>
+                                                        <message>Add inferred supported extension symbols to owning unit graphs</message>
+                                                        <sparql>
+                                                            <![CDATA[
+                                                                INSERT {
+                                                                    GRAPH ?unitGraph {
+                                                                        ?unit ?property ?value .
+                                                                    }
+                                                                } WHERE {
+                                                                    GRAPH <build:supported-extensions> {
+                                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                                    }
+                                                                    GRAPH <inferred:symbol-supported-extensions> {
+                                                                        ?unit ?property ?value .
+                                                                    }
+                                                                    GRAPH ?unitGraph {
+                                                                        ?unit ?ownerProperty ?ownerValue .
+                                                                    }
+                                                                    FILTER NOT EXISTS {
+                                                                        GRAPH ?unitGraph {
+                                                                            ?unit ?property ?value .
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]]>
+                                                        </sparql>
+                                                    </sparqlUpdate>
+                                                </body>
+                                            </when>
+                                        </body>
+                                        <sparqlAsk>
+                                            <![CDATA[
+                                            ASK WHERE {
+                                              FILTER NOT EXISTS {
+                                                    GRAPH <inferred:symbol-supported-extensions> {
+                                                        ?s ?p ?o
+                                                    }
+                                                }
+                                            }
+                                        ]]>
+                                        </sparqlAsk>
+                                    </until>
+                                    <until>
+                                        <message>Checking supported extension units for missing/wrong ucumCodes that can be corrected/inferred</message>
+                                        <indexVar>iteration_supported_extensions_ucum</indexVar>
+                                        <body>
+                                            <clear>
+                                                <graph>dist:supported-extensions:units</graph>
+                                            </clear>
+                                            <sparqlUpdate>
+                                                <message>Refresh supported extension unit aggregate graph before ucumCode repair iteration</message>
+                                                <sparql>
+                                                    <![CDATA[
+                                                        INSERT {
+                                                            GRAPH <dist:supported-extensions:units> {
+                                                                ?s ?p ?o .
+                                                            }
+                                                        } WHERE {
+                                                            GRAPH <build:supported-extensions> {
+                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                            }
+                                                            GRAPH ?unitGraph {
+                                                                ?s ?p ?o .
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparql>
+                                            </sparqlUpdate>
+                                            <clear>
+                                                <graph>inferred:ucumCode-supported-extensions</graph>
+                                                <graph>delete:ucumCode-supported-extensions</graph>
+                                            </clear>
+                                            <shaclValidate>
+                                                <failOnSeverity>None</failOnSeverity>
+                                                <message>Preventing supported extension qudt:ucumCode values that do not match the ucumCode calculated from base unit(s)</message>
+                                                <shapes>
+                                                    <file>target/sparql2shacl/ucumCode/validate.ttl</file>
+                                                </shapes>
+                                                <data>
+                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                    <graphs>
+                                                        <include>
+                                                            support:supported-extensions-core-unit-derived-properties
+                                                            dist:supported-extensions:units
+                                                            dist:vocab:VOCAB_QUDT-PREFIXES.ttl
+                                                        </include>
+                                                    </graphs>
+                                                    <file>src/build/sparql2shacl/ucumCode/units-overriding-inferred-ucum-code.ttl</file>
+                                                </data>
+                                                <validationReport>
+                                                    <graph>delete:ucumCode-supported-extensions</graph>
+                                                    <file>target/fix/ucumCode/delete-supported-extensions-${iteration_supported_extensions_ucum}.ttl</file>
+                                                </validationReport>
+                                            </shaclValidate>
+                                            <when>
+                                                <sparqlAsk>
+                                                    <![CDATA[
+                                                        ASK WHERE {
+                                                            GRAPH <delete:ucumCode-supported-extensions> {
+                                                                [] a sh:ValidationReport ;
+                                                                   sh:conforms false .
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparqlAsk>
+                                                <body>
+                                                    <sparqlUpdate>
+                                                        <message>Deleting invalid supported extension ucumCodes</message>
+                                                        <sparql>
+                                                            <![CDATA[
+                                                        DELETE {
+                                                            GRAPH ?unitGraph {
+                                                                ?unit qudt:ucumCode ?incorrectUcumCode .
+                                                            }
+                                                        }
+                                                        WHERE {
+                                                            GRAPH <build:supported-extensions> {
+                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                            }
+                                                            GRAPH ?unitGraph {
+                                                                ?unit qudt:ucumCode ?incorrectUcumCode .
+                                                            }
+                                                            GRAPH <delete:ucumCode-supported-extensions> {
+                                                                ?res
+                                                                    rdf:type                      sh:ValidationResult;
+                                                                    sh:resultPath                 qudt:ucumCode;
+                                                                    sh:resultSeverity             sh:Violation;
+                                                                    sh:value                      ?unit
+                                                            }
+                                                        }
+                                                        ]]>
+                                                        </sparql>
+                                                    </sparqlUpdate>
+                                                    <shaclInfer>
+                                                        <message>Inferring missing supported extension qudt:ucumCode</message>
+                                                        <iterateUntilStable>false</iterateUntilStable>
+                                                        <shapes>
+                                                            <file>target/sparql2shacl/ucumCode/infer.ttl</file>
+                                                        </shapes>
+                                                        <data>
+                                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                            <graphs>
+                                                                <include>
+                                                                    support:supported-extensions-core-unit-derived-properties
+                                                                    dist:supported-extensions:units
+                                                                    dist:vocab:VOCAB_QUDT-PREFIXES.ttl
+                                                                </include>
+                                                            </graphs>
+                                                            <file>src/build/sparql2shacl/ucumCode/units-overriding-inferred-ucum-code.ttl</file>
+                                                        </data>
+                                                        <inferred>
+                                                            <graph>inferred:ucumCode-supported-extensions</graph>
+                                                            <file>target/fix/ucumCode/inferred-supported-extensions-${iteration_supported_extensions_ucum}.ttl</file>
+                                                        </inferred>
+                                                    </shaclInfer>
+                                                    <sparqlUpdate>
+                                                        <message>Add inferred supported extension ucumCodes to owning unit graphs</message>
+                                                        <sparql>
+                                                            <![CDATA[
+                                                                INSERT {
+                                                                    GRAPH ?unitGraph {
+                                                                        ?unit ?property ?value .
+                                                                    }
+                                                                } WHERE {
+                                                                    GRAPH <build:supported-extensions> {
+                                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                                    }
+                                                                    GRAPH <inferred:ucumCode-supported-extensions> {
+                                                                        ?unit ?property ?value .
+                                                                    }
+                                                                    GRAPH ?unitGraph {
+                                                                        ?unit ?ownerProperty ?ownerValue .
+                                                                    }
+                                                                    FILTER NOT EXISTS {
+                                                                        GRAPH ?unitGraph {
+                                                                            ?unit ?property ?value .
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]]>
+                                                        </sparql>
+                                                    </sparqlUpdate>
+                                                </body>
+                                            </when>
+                                        </body>
+                                        <sparqlAsk>
+                                            <![CDATA[
+                                            ASK WHERE {
+                                              FILTER NOT EXISTS {
+                                                    GRAPH <inferred:ucumCode-supported-extensions> {
+                                                        ?s ?p ?o
+                                                    }
+                                                }
+                                            }
+                                        ]]>
+                                        </sparqlAsk>
+                                    </until>
+                                    <savepoint><id>08.6-infer-supported-extension-unit-repairs</id></savepoint>
 
                                     <sparqlQuery>
                                         <message>Calculating default labels units that don't have them from 'en' labels</message>
@@ -2540,16 +3408,19 @@ validAspectDirs.each { aspectDir ->
                                         </sparql>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
-                                        <message>Generate propulsion extension conversion multipliers in xsd:double format where it's missing</message>
+                                        <message>Generate supported extension conversion multipliers in xsd:double format where missing</message>
                                         <sparql>
                                             <![CDATA[
                                             INSERT {
-                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                GRAPH ?unitGraph {
                                                     ?unit qudt:conversionMultiplierSN ?cmsn
                                                 }
                                             }
                                             WHERE {
-                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                GRAPH <build:supported-extensions> {
+                                                    ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                }
+                                                GRAPH ?unitGraph {
                                                     ?unit a qudt:Unit ;
                                                           qudt:conversionMultiplier ?cm .
                                                     FILTER NOT EXISTS {
@@ -2615,16 +3486,20 @@ validAspectDirs.each { aspectDir ->
                                         </sparql>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
-                                        <message>Add propulsion extension rdfs:isDefinedBy triple if missing</message>
+                                        <message>Add supported extension rdfs:isDefinedBy triple if missing</message>
                                         <sparql>
                                             <![CDATA[
                                             INSERT {
-                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
-                                                    ?u rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/extension/propulsion/vocab/unit> .
+                                                GRAPH ?unitGraph {
+                                                    ?u rdfs:isDefinedBy ?isDefinedBy .
                                                 }
                                             }
                                             WHERE {
-                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                GRAPH <build:supported-extensions> {
+                                                    ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> ;
+                                                        <urn:qudt-build:extensions#isDefinedBy> ?isDefinedBy .
+                                                }
+                                                GRAPH ?unitGraph {
                                                     ?u a qudt:Unit .
                                                     FILTER NOT EXISTS {?u rdfs:isDefinedBy ?any .}
                                                 }
@@ -2652,23 +3527,29 @@ validAspectDirs.each { aspectDir ->
                                         </sparql>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
-                                        <message>Declare a propulsion extension compound unit as ContextualUnit if factor is ContextualUnit</message>
+                                        <message>Declare a supported extension compound unit as ContextualUnit if factor is ContextualUnit</message>
                                         <sparql>
                                             <![CDATA[
                                             INSERT {
-                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                GRAPH ?unitGraph {
                                                     ?compound a qudt:ContextualUnit .
                                                 }
                                             }
                                             WHERE {
-                                                VALUES ?sourceGraph {
-                                                    <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl>
-                                                    <${qudt.supported.extensions.propulsion.units.dist.graph}>
+                                                GRAPH <build:supported-extensions> {
+                                                    ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                }
+                                                {
+                                                    BIND(<dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> AS ?sourceGraph)
+                                                } UNION {
+                                                    GRAPH <build:supported-extensions> {
+                                                        ?sourceGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                    }
                                                 }
                                                 GRAPH ?sourceGraph {
                                                     ?u a qudt:ContextualUnit .
                                                 }
-                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                GRAPH ?unitGraph {
                                                     ?compound qudt:hasFactorUnit/qudt:hasUnit ?u .
                                                     FILTER NOT EXISTS {?compound a qudt:ContextualUnit}
                                                 }
@@ -2681,8 +3562,7 @@ validAspectDirs.each { aspectDir ->
                                       <add>
                                         <files>
                                           <include>target/dist/vocab/**/*.ttl</include>
-                                          <include>${qudt.supported.extensions.propulsion.quantitykinds.dist.file}</include>
-                                          <include>${qudt.supported.extensions.propulsion.units.dist.file}</include>
+                                          <include>target/generated/supported-extensions/dist/**/*.ttl</include>
                                         </files>
                                       </add>
 
@@ -2860,16 +3740,19 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         </sparql>
                                     </sparqlUpdate>
                                     <sparqlUpdate>
-                                        <message>Declare the type of all propulsion extension FactorUnit bnodes</message>
+                                        <message>Declare the type of all supported extension FactorUnit bnodes</message>
                                         <sparql>
                                             <![CDATA[
                                             INSERT {
-                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                GRAPH ?unitGraph {
                                                     ?fu a qudt:FactorUnit
                                                 }
                                             }
                                             WHERE  {
-                                                GRAPH <${qudt.supported.extensions.propulsion.units.dist.graph}> {
+                                                GRAPH <build:supported-extensions> {
+                                                    ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                }
+                                                GRAPH ?unitGraph {
                                                     ?u qudt:hasFactorUnit ?fu .
                                                     FILTER(isBlank(?fu))
                                                     FILTER NOT EXISTS { ?fu a qudt:FactorUnit }
@@ -2881,8 +3764,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                     <add>
                                         <files>
                                             <include>src/main/rdf/vocab/**/*.ttl</include>
-                                            <include>${qudt.supported.extensions.propulsion.quantitykinds.src.file}</include>
-                                            <include>${qudt.supported.extensions.propulsion.units.src.file}</include>
+                                            <include>target/generated/supported-extensions/src/*.ttl</include>
                                         </files>
                                         <toGraphsPattern>src:vocab:${name}</toGraphsPattern>
                                     </add>
@@ -2927,20 +3809,8 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         qudt:latexDefinition
                                                           rdfs:isDefinedBy
                                                       }
-                                                      VALUES (?srcGraph ?distGraph) {
-                                                        ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-COORDINATES.ttl> <dist:vocab:VOCAB_QUDT-COORDINATES.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
-                                                        ( <${qudt.supported.extensions.propulsion.quantitykinds.src.graph}> <${qudt.supported.extensions.propulsion.quantitykinds.dist.graph}> )
-                                                        ( <${qudt.supported.extensions.propulsion.units.src.graph}> <${qudt.supported.extensions.propulsion.units.dist.graph}> )
+                                                      GRAPH <build:supported-extensions> {
+                                                        ?srcGraph <urn:qudt-build:extensions#distGraph> ?distGraph .
                                                       }
 
                                                       GRAPH ?distGraph {
@@ -2980,20 +3850,8 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         qudt:latexDefinition
                                                           rdfs:isDefinedBy
                                                       }
-                                                      VALUES (?srcGraph ?distGraph) {
-                                                        ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-COORDINATES.ttl> <dist:vocab:VOCAB_QUDT-COORDINATES.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
-                                                        ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
-                                                        ( <${qudt.supported.extensions.propulsion.quantitykinds.src.graph}> <${qudt.supported.extensions.propulsion.quantitykinds.dist.graph}> )
-                                                        ( <${qudt.supported.extensions.propulsion.units.src.graph}> <${qudt.supported.extensions.propulsion.units.dist.graph}> )
+                                                      GRAPH <build:supported-extensions> {
+                                                        ?srcGraph <urn:qudt-build:extensions#distGraph> ?distGraph .
                                                       }
 
                                                       GRAPH ?srcGraph {
@@ -3045,20 +3903,8 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 qudt:latexDefinition
                                                                 rdfs:isDefinedBy
                                                               }
-                                                              VALUES (?srcGraph ?distGraph) {
-                                                                ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-COORDINATES.ttl> <dist:vocab:VOCAB_QUDT-COORDINATES.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
-                                                                ( <${qudt.supported.extensions.propulsion.quantitykinds.src.graph}> <${qudt.supported.extensions.propulsion.quantitykinds.dist.graph}> )
-                                                                ( <${qudt.supported.extensions.propulsion.units.src.graph}> <${qudt.supported.extensions.propulsion.units.dist.graph}> )
+                                                              GRAPH <build:supported-extensions> {
+                                                                ?srcGraph <urn:qudt-build:extensions#distGraph> ?distGraph .
                                                               }
 
                                                               GRAPH ?distGraph {
@@ -3099,20 +3945,8 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 qudt:latexDefinition
                                                                 rdfs:isDefinedBy
                                                 }
-                                                              VALUES (?srcGraph ?distGraph) {
-                                                                ( <src:vocab:VOCAB_QUDT-QUANTITIES.ttl> <dist:vocab:VOCAB_QUDT-QUANTITIES.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-DATATYPES.ttl> <dist:vocab:VOCAB_QUDT-DATATYPES.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-COORDINATES.ttl> <dist:vocab:VOCAB_QUDT-COORDINATES.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-PREFIXES.ttl> <dist:vocab:VOCAB_QUDT-PREFIXES.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-CONSTANTS.ttl> <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> <dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> <dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl> )
-                                                                ( <src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> )
-                                                                ( <${qudt.supported.extensions.propulsion.quantitykinds.src.graph}> <${qudt.supported.extensions.propulsion.quantitykinds.dist.graph}> )
-                                                                ( <${qudt.supported.extensions.propulsion.units.src.graph}> <${qudt.supported.extensions.propulsion.units.dist.graph}> )
+                                                              GRAPH <build:supported-extensions> {
+                                                                ?srcGraph <urn:qudt-build:extensions#distGraph> ?distGraph .
                                                               }
 
                                                               GRAPH ?srcGraph {
@@ -3190,10 +4024,13 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         <file>src/build/validation/qudt-shacl-functions.ttl</file>
                                     </shaclFunctions>
                                     <add>
+                                        <file>target/generated/supported-extensions/config.ttl</file>
+                                        <toGraph>build:supported-extensions</toGraph>
+                                    </add>
+                                    <add>
                                         <files>
                                             <include>target/dist/vocab/**/*.ttl</include>
-                                            <include>${qudt.supported.extensions.propulsion.quantitykinds.dist.file}</include>
-                                            <include>${qudt.supported.extensions.propulsion.units.dist.file}</include>
+                                            <include>target/generated/supported-extensions/dist/**/*.ttl</include>
                                         </files>
                                         <toGraphsPattern>dist:vocab:${name}</toGraphsPattern>
                                     </add>
@@ -3203,6 +4040,28 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         </files>
                                         <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
                                     </add>
+                                    <clear>
+                                        <graph>dist:supported-extensions:units</graph>
+                                    </clear>
+                                    <sparqlUpdate>
+                                        <message>Refresh supported extension unit aggregate graph for validation</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                INSERT {
+                                                    GRAPH <dist:supported-extensions:units> {
+                                                        ?s ?p ?o .
+                                                    }
+                                                } WHERE {
+                                                    GRAPH <build:supported-extensions> {
+                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                    }
+                                                    GRAPH ?unitGraph {
+                                                        ?s ?p ?o .
+                                                    }
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
                                     <shaclValidate>
                                         <message>Validating QUDT build output (target/dist/)</message>
                                         <!--skip>true</skip-->
@@ -3258,17 +4117,21 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         </validationReport>
                                     </shaclValidate>
                                     <shaclValidate>
-                                        <message>Validating propulsion extension factor units</message>
+                                        <message>Validating supported extension factor units</message>
                                         <shapes>
                                             <file>target/sparql2shacl/factorUnits/validate.ttl</file>
                                         </shapes>
                                         <data>
-                                            <graph>dist:schema:SCHEMA_QUDT.ttl</graph>
-                                            <graph>${qudt.supported.extensions.propulsion.units.dist.graph}</graph>
-                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                            <graphs>
+                                                <include>
+                                                    dist:schema:SCHEMA_QUDT.ttl
+                                                    dist:supported-extensions:units
+                                                    dist:vocab:VOCAB_QUDT-PREFIXES.ttl
+                                                </include>
+                                            </graphs>
                                         </data>
                                         <validationReport>
-                                            <file>target/validation/validationReport-factorUnits-propulsion.ttl</file>
+                                            <file>target/validation/validationReport-factorUnits-supported-extensions.ttl</file>
                                         </validationReport>
                                     </shaclValidate>
                                     <shaclValidate>
