@@ -149,13 +149,17 @@
                                     def conventionExtension = { extensionId ->
                                         def stem = extensionStem(extensionId)
                                         def folder = "community/extensions/${extensionId}"
+                                        def unitsSrcFile = "src/main/rdf/${folder}/VOCAB_QUDT-${stem}-UNITS.ttl"
+                                        def quantityKindsSrcFile = "src/main/rdf/${folder}/VOCAB_QUDT-${stem}-QUANTITY-KINDS.ttl"
                                         [
                                             id: extensionId,
-                                            unitsSrcFile: "src/main/rdf/${folder}/VOCAB_QUDT-${stem}-UNITS.ttl",
+                                            unitsSrcFile: unitsSrcFile,
+                                            hasUnitsSrcFile: new File(project.basedir, unitsSrcFile).isFile(),
                                             unitsSrcGraph: "src:vocab:VOCAB_QUDT-${stem}-UNITS.ttl",
                                             unitsDistGraph: "dist:vocab:VOCAB_QUDT-${stem}-UNITS.ttl",
                                             unitsIsDefinedBy: "http://qudt.org/\$\$QUDT_VERSION\$\$/extension/${extensionId}/vocab/unit",
-                                            quantityKindsSrcFile: "src/main/rdf/${folder}/VOCAB_QUDT-${stem}-QUANTITY-KINDS.ttl",
+                                            quantityKindsSrcFile: quantityKindsSrcFile,
+                                            hasQuantityKindsSrcFile: new File(project.basedir, quantityKindsSrcFile).isFile(),
                                             quantityKindsSrcGraph: "src:vocab:VOCAB_QUDT-${stem}-QUANTITY-KINDS.ttl",
                                             quantityKindsDistGraph: "dist:vocab:VOCAB_QUDT-${stem}-QUANTITY-KINDS.ttl"
                                         ]
@@ -178,17 +182,22 @@
                                     }
 
                                     def supportedExtensions = parseExtensionIds('qudt.supported.extensions').collect { conventionExtension(it) }
-                                    def missingSupportedFiles = supportedExtensions.collectMany { extension ->
-                                        [extension.unitsSrcFile, extension.quantityKindsSrcFile].findAll { !(new File(project.basedir, it).isFile()) }
+                                    def unsupportedExtensions = supportedExtensions.findAll { extension ->
+                                        !extension.hasUnitsSrcFile && !extension.hasQuantityKindsSrcFile
                                     }
-                                    if (!missingSupportedFiles.isEmpty()) {
-                                        throw new Exception("Supported extension source file(s) not found by convention:\n - ${missingSupportedFiles.join('\n - ')}")
+                                    if (!unsupportedExtensions.isEmpty()) {
+                                        throw new Exception("Supported extension source file(s) not found by convention. Each listed extension must provide at least one of the expected vocabularies:\n - ${unsupportedExtensions.collect { extension -> "${extension.id}: ${extension.unitsSrcFile} or ${extension.quantityKindsSrcFile}" }.join('\n - ')}")
                                     }
 
                                     def generatedSupportedExtensionsDir = new File(project.basedir, "target/generated/supported-extensions")
                                     generatedSupportedExtensionsDir.mkdirs()
                                     copyToDir(
-                                        supportedExtensions.collectMany { [it.quantityKindsSrcFile, it.unitsSrcFile] },
+                                        supportedExtensions.collectMany { extension ->
+                                            [
+                                                extension.hasQuantityKindsSrcFile ? extension.quantityKindsSrcFile : null,
+                                                extension.hasUnitsSrcFile ? extension.unitsSrcFile : null
+                                            ].findAll { it != null }
+                                        },
                                         new File(generatedSupportedExtensionsDir, "src"))
                                     def coreGraphPairs = [
                                         ['src:vocab:VOCAB_QUDT-QUANTITIES.ttl', 'dist:vocab:VOCAB_QUDT-QUANTITIES.ttl'],
@@ -208,12 +217,19 @@
 
 ${coreGraphPairs.collect { pair -> "<${pair[0]}> extbuild:distGraph <${pair[1]}> ." }.join('\n')}
 
-${supportedExtensions.collect { extension -> """<${extension.quantityKindsSrcGraph}> extbuild:distGraph <${extension.quantityKindsDistGraph}> .
-<${extension.unitsSrcGraph}> extbuild:distGraph <${extension.unitsDistGraph}> .
-<${extension.quantityKindsDistGraph}> a extbuild:SupportedQuantityKindGraph .
-<${extension.unitsDistGraph}> a extbuild:SupportedUnitGraph ;
-    extbuild:isDefinedBy <${extension.unitsIsDefinedBy}> .
-""" }.join('\n')}"""
+${supportedExtensions.collectMany { extension ->
+    def statements = []
+    if (extension.hasQuantityKindsSrcFile) {
+        statements << "<${extension.quantityKindsSrcGraph}> extbuild:distGraph <${extension.quantityKindsDistGraph}> ."
+        statements << "<${extension.quantityKindsDistGraph}> a extbuild:SupportedQuantityKindGraph ."
+    }
+    if (extension.hasUnitsSrcFile) {
+        statements << "<${extension.unitsSrcGraph}> extbuild:distGraph <${extension.unitsDistGraph}> ."
+        statements << """<${extension.unitsDistGraph}> a extbuild:SupportedUnitGraph ;
+    extbuild:isDefinedBy <${extension.unitsIsDefinedBy}> ."""
+    }
+    statements
+}.join('\n')}"""
                                 ]]></script>
                         </scripts>
                     </configuration>
@@ -253,7 +269,7 @@ ${supportedExtensions.collect { extension -> """<${extension.quantityKindsSrcGra
                                     [
                                         "${folder}/VOCAB_QUDT-${stem}-QUANTITY-KINDS.ttl",
                                         "${folder}/VOCAB_QUDT-${stem}-UNITS.ttl"
-                                    ]
+                                    ].findAll { new File(project.basedir, it).isFile() }
                                 }
                                 def recreateDir = { File dir ->
                                     if (dir.exists()) {
@@ -277,6 +293,14 @@ ${supportedExtensions.collect { extension -> """<${extension.quantityKindsSrcGra
 
                                 def ids = parseExtensionIds('qudt.supported.extensions')
                                 def generatedDir = new File(project.basedir, "target/generated/supported-extensions")
+                                def missingWorkExtensions = ids.findAll { conventionFiles(it, 'target/work').isEmpty() }
+                                if (!missingWorkExtensions.isEmpty()) {
+                                    throw new Exception("Supported extension work file(s) not found by convention. Each listed extension must provide at least one of the expected vocabularies under target/work:\n - ${missingWorkExtensions.join('\n - ')}")
+                                }
+                                def missingDistExtensions = ids.findAll { conventionFiles(it, 'target/dist').isEmpty() }
+                                if (!missingDistExtensions.isEmpty()) {
+                                    throw new Exception("Supported extension dist file(s) not found by convention. Each listed extension must provide at least one of the expected vocabularies under target/dist:\n - ${missingDistExtensions.join('\n - ')}")
+                                }
                                 copyToDir(ids.collectMany { conventionFiles(it, 'target/work') }, 'target/work', new File(generatedDir, "work"))
                                 copyToDir(ids.collectMany { conventionFiles(it, 'target/dist') }, 'target/dist', new File(generatedDir, "dist"))
                             ]]></script>
@@ -318,13 +342,17 @@ ${supportedExtensions.collect { extension -> """<${extension.quantityKindsSrcGra
                                     [
                                         "${folder}/VOCAB_QUDT-${stem}-QUANTITY-KINDS.ttl",
                                         "${folder}/VOCAB_QUDT-${stem}-UNITS.ttl"
-                                    ]
+                                    ].findAll { new File(project.basedir, it).isFile() }
                                 }
                                 def destDir = new File(project.basedir, "target/generated/supported-extensions/dist")
                                 if (destDir.exists()) {
                                     destDir.deleteDir()
                                 }
                                 destDir.mkdirs()
+                                def missingDistExtensions = parseExtensionIds('qudt.supported.extensions').findAll { conventionFiles(it).isEmpty() }
+                                if (!missingDistExtensions.isEmpty()) {
+                                    throw new Exception("Supported extension dist file(s) not found by convention. Each listed extension must provide at least one of the expected vocabularies under target/dist:\n - ${missingDistExtensions.join('\n - ')}")
+                                }
                                 parseExtensionIds('qudt.supported.extensions').collectMany { conventionFiles(it) }.each { relativePath ->
                                     def source = new File(project.basedir, relativePath)
                                     if (!source.isFile()) {
