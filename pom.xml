@@ -143,8 +143,6 @@
                                     }
 
                                     def classifyExtensionFile = { String name ->
-                                        if (name ==~ /VOCAB_QUDT-.*-UNITS\.ttl/) return 'SupportedUnitGraph'
-                                        if (name ==~ /VOCAB_QUDT-.*-QUANTITY-KINDS\.ttl/) return 'SupportedQuantityKindGraph'
                                         if (name ==~ /VOCAB_QUDT-.*\.ttl/) return 'SupportedVocabGraph'
                                         if (name ==~ /SCHEMA_QUDT-.*\.ttl/) return 'SupportedSchemaGraph'
                                         return null
@@ -221,8 +219,8 @@ ${supportedExtensions.collectMany { ext ->
             statements << "<${f.srcGraph}> extbuild:distGraph <${f.distGraph}> ."
         }
         statements << "<${f.distGraph}> a extbuild:${f.graphType} ."
-        if (f.graphType == 'SupportedUnitGraph') {
-            statements << "<${f.distGraph}> extbuild:isDefinedBy <http://qudt.org/\$\$QUDT_VERSION\$\$/extension/${ext.id}/vocab/unit> ."
+        if (f.graphType == 'SupportedVocabGraph') {
+            statements << "<${f.distGraph}> extbuild:isDefinedBy <http://qudt.org/\$\$QUDT_VERSION\$\$/extension/${ext.id}/vocab> ."
         }
         statements
     }
@@ -1753,35 +1751,22 @@ validAspectDirs.each { aspectDir ->
                                         <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
                                     </add>
                                     <clear>
-                                        <graph>dist:supported-extensions:quantitykinds</graph>
-                                        <graph>dist:supported-extensions:units</graph>
+                                        <graph>dist:supported-extensions:vocab</graph>
                                     </clear>
                                     <sparqlUpdate>
-                                        <message>Refresh supported extension aggregate graphs</message>
+                                        <message>Refresh supported extension aggregate graph</message>
                                         <sparql>
                                             <![CDATA[
                                                 INSERT {
-                                                    GRAPH <dist:supported-extensions:quantitykinds> {
-                                                        ?quantityKindSubject ?quantityKindProperty ?quantityKindValue .
-                                                    }
-                                                    GRAPH <dist:supported-extensions:units> {
-                                                        ?unitSubject ?unitProperty ?unitValue .
+                                                    GRAPH <dist:supported-extensions:vocab> {
+                                                        ?s ?p ?o .
                                                     }
                                                 } WHERE {
-                                                    {
-                                                        GRAPH <build:supported-extensions> {
-                                                            ?quantityKindGraph a <urn:qudt-build:extensions#SupportedQuantityKindGraph> .
-                                                        }
-                                                        GRAPH ?quantityKindGraph {
-                                                            ?quantityKindSubject ?quantityKindProperty ?quantityKindValue .
-                                                        }
-                                                    } UNION {
-                                                        GRAPH <build:supported-extensions> {
-                                                            ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
-                                                        }
-                                                        GRAPH ?unitGraph {
-                                                            ?unitSubject ?unitProperty ?unitValue .
-                                                        }
+                                                    GRAPH <build:supported-extensions> {
+                                                        ?vocabGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
+                                                    }
+                                                    GRAPH ?vocabGraph {
+                                                        ?s ?p ?o .
                                                     }
                                                 }
                                             ]]>
@@ -1814,8 +1799,7 @@ validAspectDirs.each { aspectDir ->
                                                 <include>
                                                     support:applicableUnits-supported-extensions-core-qk-broader
                                                     dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl
-                                                    dist:supported-extensions:quantitykinds
-                                                    dist:supported-extensions:units
+                                                    dist:supported-extensions:vocab
                                                 </include>
                                             </graphs>
                                         </data>
@@ -1834,7 +1818,7 @@ validAspectDirs.each { aspectDir ->
                                                     }
                                                 } WHERE {
                                                     GRAPH <build:supported-extensions> {
-                                                        ?quantityKindGraph a <urn:qudt-build:extensions#SupportedQuantityKindGraph> .
+                                                        ?quantityKindGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                     }
                                                     GRAPH <inferred:applicableUnits-supported-extensions> {
                                                         ?quantityKind ?property ?value .
@@ -1950,7 +1934,7 @@ validAspectDirs.each { aspectDir ->
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
                                             <graphs>
                                                 <include>
-                                                    dist:supported-extensions:units
+                                                    dist:supported-extensions:vocab
                                                     dist:vocab:VOCAB_QUDT-PREFIXES.ttl
                                                 </include>
                                             </graphs>
@@ -1971,7 +1955,7 @@ validAspectDirs.each { aspectDir ->
                                                     }
                                                 } WHERE {
                                                     GRAPH <build:supported-extensions> {
-                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                     }
                                                     GRAPH <inferred:factorUnits-supported-extensions> {
                                                         ?unit ?property ?value .
@@ -1993,19 +1977,19 @@ validAspectDirs.each { aspectDir ->
                                         </sparql>
                                     </sparqlUpdate>
                                     <clear>
-                                        <graph>dist:supported-extensions:units</graph>
+                                        <graph>dist:supported-extensions:vocab</graph>
                                     </clear>
                                     <sparqlUpdate>
                                         <message>Refresh supported extension unit aggregate graph after factor-unit inference</message>
                                         <sparql>
                                             <![CDATA[
                                                 INSERT {
-                                                    GRAPH <dist:supported-extensions:units> {
+                                                    GRAPH <dist:supported-extensions:vocab> {
                                                         ?s ?p ?o .
                                                     }
                                                 } WHERE {
                                                     GRAPH <build:supported-extensions> {
-                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                     }
                                                     GRAPH ?unitGraph {
                                                         ?s ?p ?o .
@@ -2043,7 +2027,7 @@ validAspectDirs.each { aspectDir ->
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
                                             <graphs>
                                                 <include>
-                                                    dist:supported-extensions:units
+                                                    dist:supported-extensions:vocab
                                                     dist:vocab:VOCAB_QUDT-PREFIXES.ttl
                                                 </include>
                                             </graphs>
@@ -2063,7 +2047,7 @@ validAspectDirs.each { aspectDir ->
                                                     }
                                                 } WHERE {
                                                     GRAPH <build:supported-extensions> {
-                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                     }
                                                     GRAPH <inferred:scalingOf-supported-extensions> {
                                                         ?unit ?property ?value .
@@ -2081,19 +2065,19 @@ validAspectDirs.each { aspectDir ->
                                         </sparql>
                                     </sparqlUpdate>
                                     <clear>
-                                        <graph>dist:supported-extensions:units</graph>
+                                        <graph>dist:supported-extensions:vocab</graph>
                                     </clear>
                                     <sparqlUpdate>
                                         <message>Refresh supported extension unit aggregate graph after scalingOf inference</message>
                                         <sparql>
                                             <![CDATA[
                                                 INSERT {
-                                                    GRAPH <dist:supported-extensions:units> {
+                                                    GRAPH <dist:supported-extensions:vocab> {
                                                         ?s ?p ?o .
                                                     }
                                                 } WHERE {
                                                     GRAPH <build:supported-extensions> {
-                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                     }
                                                     GRAPH ?unitGraph {
                                                         ?s ?p ?o .
@@ -2458,7 +2442,7 @@ validAspectDirs.each { aspectDir ->
                                             <graphs>
                                                 <include>
                                                     support:supported-extensions-core-unit-derived-properties
-                                                    dist:supported-extensions:units
+                                                    dist:supported-extensions:vocab
                                                     dist:vocab:VOCAB_QUDT-PREFIXES.ttl
                                                 </include>
                                             </graphs>
@@ -2473,19 +2457,19 @@ validAspectDirs.each { aspectDir ->
                                         <indexVar>index_dv_supported_extensions</indexVar>
                                         <body>
                                             <clear>
-                                                <graph>dist:supported-extensions:units</graph>
+                                                <graph>dist:supported-extensions:vocab</graph>
                                             </clear>
                                             <sparqlUpdate>
                                                 <message>Refresh supported extension unit aggregate graph before dimension-vector inference iteration</message>
                                                 <sparql>
                                                     <![CDATA[
                                                         INSERT {
-                                                            GRAPH <dist:supported-extensions:units> {
+                                                            GRAPH <dist:supported-extensions:vocab> {
                                                                 ?s ?p ?o .
                                                             }
                                                         } WHERE {
                                                             GRAPH <build:supported-extensions> {
-                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                             }
                                                             GRAPH ?unitGraph {
                                                                 ?s ?p ?o .
@@ -2506,7 +2490,7 @@ validAspectDirs.each { aspectDir ->
                                                     <graphs>
                                                         <include>
                                                             support:supported-extensions-core-unit-derived-properties
-                                                            dist:supported-extensions:units
+                                                            dist:supported-extensions:vocab
                                                             dist:vocab:VOCAB_QUDT-PREFIXES.ttl
                                                         </include>
                                                     </graphs>
@@ -2526,7 +2510,7 @@ validAspectDirs.each { aspectDir ->
                                                             }
                                                         } WHERE {
                                                             GRAPH <build:supported-extensions> {
-                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                             }
                                                             BIND(IRI(CONCAT("inferred:dimensionVector_supported_extensions_",STR(?index_dv_supported_extensions))) AS ?inferredGraph)
                                                             GRAPH ?inferredGraph {
@@ -2561,19 +2545,19 @@ validAspectDirs.each { aspectDir ->
                                         <indexVar>iteration_supported_extensions_symbol</indexVar>
                                         <body>
                                             <clear>
-                                                <graph>dist:supported-extensions:units</graph>
+                                                <graph>dist:supported-extensions:vocab</graph>
                                             </clear>
                                             <sparqlUpdate>
                                                 <message>Refresh supported extension unit aggregate graph before symbol repair iteration</message>
                                                 <sparql>
                                                     <![CDATA[
                                                         INSERT {
-                                                            GRAPH <dist:supported-extensions:units> {
+                                                            GRAPH <dist:supported-extensions:vocab> {
                                                                 ?s ?p ?o .
                                                             }
                                                         } WHERE {
                                                             GRAPH <build:supported-extensions> {
-                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                             }
                                                             GRAPH ?unitGraph {
                                                                 ?s ?p ?o .
@@ -2597,7 +2581,7 @@ validAspectDirs.each { aspectDir ->
                                                     <graphs>
                                                         <include>
                                                             support:supported-extensions-core-unit-derived-properties
-                                                            dist:supported-extensions:units
+                                                            dist:supported-extensions:vocab
                                                             dist:vocab:VOCAB_QUDT-PREFIXES.ttl
                                                         </include>
                                                     </graphs>
@@ -2631,7 +2615,7 @@ validAspectDirs.each { aspectDir ->
                                                         }
                                                         WHERE {
                                                             GRAPH <build:supported-extensions> {
-                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                             }
                                                             GRAPH ?unitGraph {
                                                                 ?unit qudt:symbol ?incorrectSymbol .
@@ -2658,7 +2642,7 @@ validAspectDirs.each { aspectDir ->
                                                             <graphs>
                                                                 <include>
                                                                     support:supported-extensions-core-unit-derived-properties
-                                                                    dist:supported-extensions:units
+                                                                    dist:supported-extensions:vocab
                                                                     dist:vocab:VOCAB_QUDT-PREFIXES.ttl
                                                                 </include>
                                                             </graphs>
@@ -2679,7 +2663,7 @@ validAspectDirs.each { aspectDir ->
                                                                     }
                                                                 } WHERE {
                                                                     GRAPH <build:supported-extensions> {
-                                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                                     }
                                                                     GRAPH <inferred:symbol-supported-extensions> {
                                                                         ?unit ?property ?value .
@@ -2716,19 +2700,19 @@ validAspectDirs.each { aspectDir ->
                                         <indexVar>iteration_supported_extensions_ucum</indexVar>
                                         <body>
                                             <clear>
-                                                <graph>dist:supported-extensions:units</graph>
+                                                <graph>dist:supported-extensions:vocab</graph>
                                             </clear>
                                             <sparqlUpdate>
                                                 <message>Refresh supported extension unit aggregate graph before ucumCode repair iteration</message>
                                                 <sparql>
                                                     <![CDATA[
                                                         INSERT {
-                                                            GRAPH <dist:supported-extensions:units> {
+                                                            GRAPH <dist:supported-extensions:vocab> {
                                                                 ?s ?p ?o .
                                                             }
                                                         } WHERE {
                                                             GRAPH <build:supported-extensions> {
-                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                             }
                                                             GRAPH ?unitGraph {
                                                                 ?s ?p ?o .
@@ -2752,7 +2736,7 @@ validAspectDirs.each { aspectDir ->
                                                     <graphs>
                                                         <include>
                                                             support:supported-extensions-core-unit-derived-properties
-                                                            dist:supported-extensions:units
+                                                            dist:supported-extensions:vocab
                                                             dist:vocab:VOCAB_QUDT-PREFIXES.ttl
                                                         </include>
                                                     </graphs>
@@ -2786,7 +2770,7 @@ validAspectDirs.each { aspectDir ->
                                                         }
                                                         WHERE {
                                                             GRAPH <build:supported-extensions> {
-                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                             }
                                                             GRAPH ?unitGraph {
                                                                 ?unit qudt:ucumCode ?incorrectUcumCode .
@@ -2813,7 +2797,7 @@ validAspectDirs.each { aspectDir ->
                                                             <graphs>
                                                                 <include>
                                                                     support:supported-extensions-core-unit-derived-properties
-                                                                    dist:supported-extensions:units
+                                                                    dist:supported-extensions:vocab
                                                                     dist:vocab:VOCAB_QUDT-PREFIXES.ttl
                                                                 </include>
                                                             </graphs>
@@ -2834,7 +2818,7 @@ validAspectDirs.each { aspectDir ->
                                                                     }
                                                                 } WHERE {
                                                                     GRAPH <build:supported-extensions> {
-                                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                                     }
                                                                     GRAPH <inferred:ucumCode-supported-extensions> {
                                                                         ?unit ?property ?value .
@@ -3435,7 +3419,7 @@ validAspectDirs.each { aspectDir ->
                                             }
                                             WHERE {
                                                 GRAPH <build:supported-extensions> {
-                                                    ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                    ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                 }
                                                 GRAPH ?unitGraph {
                                                     ?unit a qudt:Unit ;
@@ -3513,12 +3497,12 @@ validAspectDirs.each { aspectDir ->
                                             }
                                             WHERE {
                                                 GRAPH <build:supported-extensions> {
-                                                    ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> ;
+                                                    ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> ;
                                                         <urn:qudt-build:extensions#isDefinedBy> ?isDefinedBy .
                                                 }
                                                 GRAPH ?unitGraph {
                                                     ?u a qudt:Unit .
-                                                    FILTER NOT EXISTS {?u rdfs:isDefinedBy ?any .}
+                                                    FILTER NOT EXISTS { ?u rdfs:isDefinedBy ?any . }
                                                 }
                                             }
                                             ]]>
@@ -3554,13 +3538,13 @@ validAspectDirs.each { aspectDir ->
                                             }
                                             WHERE {
                                                 GRAPH <build:supported-extensions> {
-                                                    ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                    ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                 }
                                                 {
                                                     BIND(<dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> AS ?sourceGraph)
                                                 } UNION {
                                                     GRAPH <build:supported-extensions> {
-                                                        ?sourceGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                        ?sourceGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                     }
                                                 }
                                                 GRAPH ?sourceGraph {
@@ -3767,7 +3751,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                             }
                                             WHERE  {
                                                 GRAPH <build:supported-extensions> {
-                                                    ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                    ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                 }
                                                 GRAPH ?unitGraph {
                                                     ?u qudt:hasFactorUnit ?fu .
@@ -4058,19 +4042,19 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
                                     </add>
                                     <clear>
-                                        <graph>dist:supported-extensions:units</graph>
+                                        <graph>dist:supported-extensions:vocab</graph>
                                     </clear>
                                     <sparqlUpdate>
                                         <message>Refresh supported extension unit aggregate graph for validation</message>
                                         <sparql>
                                             <![CDATA[
                                                 INSERT {
-                                                    GRAPH <dist:supported-extensions:units> {
+                                                    GRAPH <dist:supported-extensions:vocab> {
                                                         ?s ?p ?o .
                                                     }
                                                 } WHERE {
                                                     GRAPH <build:supported-extensions> {
-                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedUnitGraph> .
+                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                     }
                                                     GRAPH ?unitGraph {
                                                         ?s ?p ?o .
@@ -4142,7 +4126,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                             <graphs>
                                                 <include>
                                                     dist:schema:SCHEMA_QUDT.ttl
-                                                    dist:supported-extensions:units
+                                                    dist:supported-extensions:vocab
                                                     dist:vocab:VOCAB_QUDT-PREFIXES.ttl
                                                 </include>
                                             </graphs>
