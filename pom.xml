@@ -2003,219 +2003,128 @@ validAspectDirs.each { aspectDir ->
                                         </sparqlAsk>
                                     </until>
                                     <savepoint><id>07-infer-dimensionVector</id></savepoint>
-                                    <until>
-                                        <message>Checking for missing/wrong symbols that can be corrected/inferred</message>
-                                        <indexVar>iteration</indexVar>
+                                    <forEachItem>
+                                        <item id="symbol">
+                                            <property name="name">symbol</property>
+                                            <property name="property">qudt:symbol</property>
+                                            <property name="incorrectVar">incorrectSymbol</property>
+                                            <property name="overrideFile">src/build/sparql2shacl/symbol/units-overriding-inferred-symbol.ttl</property>
+                                        </item>
+                                        <item id="ucumCode">
+                                            <property name="name">ucumCode</property>
+                                            <property name="property">qudt:ucumCode</property>
+                                            <property name="incorrectVar">incorrectUcumCode</property>
+                                            <property name="overrideFile">src/build/sparql2shacl/ucumCode/units-overriding-inferred-ucum-code.ttl</property>
+                                        </item>
                                         <body>
-                                            <clear>
-                                                <graph>inferred:symbol</graph>
-                                                <graph>delete:symbol</graph>
-                                            </clear>
-                                            <shaclValidate>
-                                                <failOnSeverity>None</failOnSeverity>
-                                                <message>Preventing qudt:symbol that does not match the symbol calculated from base unit(s)</message>
-                                                <shapes>
-                                                    <file>target/sparql2shacl/symbol/validate.ttl</file>
-                                                </shapes>
-                                                <data>
-                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                                    <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                                    <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
-                                                    <file>src/build/sparql2shacl/symbol/units-overriding-inferred-symbol.ttl</file>
-                                                </data>
-                                                <validationReport>
-                                                    <graph>delete:symbol</graph>
-                                                    <file>target/fix/symbol/delete-${iteration}.ttl</file>
-                                                </validationReport>
-                                            </shaclValidate>
-                                            <when>
-                                                <sparqlAsk>
-                                                    <![CDATA[
-                                                        ASK WHERE {
-                                                            GRAPH <delete:symbol> {
-                                                                [] a sh:ValidationReport ;
-                                                                   sh:conforms false .
-                                                            }
-                                                        }
-                                                    ]]>
-                                                </sparqlAsk>
+                                            <until>
+                                                <message>Checking for missing/wrong ${item.name}s that can be corrected/inferred</message>
+                                                <indexVar>iteration</indexVar>
                                                 <body>
-                                                    <sparqlUpdate>
-                                                        <message>Deleting invalid symbols</message>
-                                                        <sparql>
-                                                            <![CDATA[
-                                                        DELETE {
-                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                                ?unit qudt:symbol ?incorrectSymbol .
-                                                            }
-                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                                ?unit qudt:symbol ?incorrectSymbol .
-                                                            }
-                                                        }
-                                                        WHERE {
-                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                                {
-                                                                    ?unit qudt:symbol ?incorrectSymbol .
-                                                                }
-                                                            }
-                                                            GRAPH <delete:symbol> {
-                                                                ?res
-                                                                    rdf:type                      sh:ValidationResult;
-                                                                    sh:resultPath                 qudt:symbol;
-                                                                    sh:resultSeverity             sh:Violation;
-                                                                    sh:value                      ?unit
-                                                            }
-                                                        }
-                                                        ]]>
-                                                        </sparql>
-                                                    </sparqlUpdate>
-                                                    <shaclInfer>
-                                                        <message>Inferring missing qudt:symbol</message>
-                                                        <!-- it would be nice to iterate, but if we do that, we end up adding triples without
-                                                            deleting the incorrect versions. we have to go through main-fixSrc-main-fixSrc...
-                                                            as often as it takes.
-                                                        -->
-                                                        <iterateUntilStable>false</iterateUntilStable>
+                                                    <clear>
+                                                        <graph>inferred:${item.name}</graph>
+                                                        <graph>delete:${item.name}</graph>
+                                                    </clear>
+                                                    <shaclValidate>
+                                                        <failOnSeverity>None</failOnSeverity>
+                                                        <message>Preventing ${item.property} that does not match the ${item.name} calculated from base unit(s)</message>
                                                         <shapes>
-                                                            <file>target/sparql2shacl/symbol/infer.ttl</file>
+                                                            <file>target/sparql2shacl/${item.name}/validate.ttl</file>
                                                         </shapes>
                                                         <data>
                                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
                                                             <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
                                                             <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
-                                                            <file>src/build/sparql2shacl/symbol/units-overriding-inferred-symbol.ttl</file>
+                                                            <file>${item.overrideFile}</file>
                                                         </data>
-                                                        <inferred>
-                                                            <graph>inferred:symbol</graph>
-                                                            <file>target/fix/symbol/inferred-${iteration}.ttl</file>
-                                                        </inferred>
-                                                    </shaclInfer>
-                                                    <add>
-                                                        <graph>inferred:symbol</graph>
-                                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
-                                                    </add>
+                                                        <validationReport>
+                                                            <graph>delete:${item.name}</graph>
+                                                            <file>target/fix/${item.name}/delete-${iteration}.ttl</file>
+                                                        </validationReport>
+                                                    </shaclValidate>
+                                                    <when>
+                                                        <sparqlAsk>
+                                                            <![CDATA[
+                                                                ASK WHERE {
+                                                                    GRAPH <delete:${item.name}> {
+                                                                        [] a sh:ValidationReport ;
+                                                                           sh:conforms false .
+                                                                    }
+                                                                }
+                                                            ]]>
+                                                        </sparqlAsk>
+                                                        <body>
+                                                            <sparqlUpdate>
+                                                                <message>Deleting invalid ${item.name}s</message>
+                                                                <sparql>
+                                                                    <![CDATA[
+                                                                DELETE {
+                                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                        ?unit ${item.property} ?${item.incorrectVar} .
+                                                                    }
+                                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                        ?unit ${item.property} ?${item.incorrectVar} .
+                                                                    }
+                                                                }
+                                                                WHERE {
+                                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                        {
+                                                                            ?unit ${item.property} ?${item.incorrectVar} .
+                                                                        }
+                                                                    }
+                                                                    GRAPH <delete:${item.name}> {
+                                                                        ?res
+                                                                            rdf:type                      sh:ValidationResult;
+                                                                            sh:resultPath                 ${item.property};
+                                                                            sh:resultSeverity             sh:Violation;
+                                                                            sh:value                      ?unit
+                                                                    }
+                                                                }
+                                                                    ]]>
+                                                                </sparql>
+                                                            </sparqlUpdate>
+                                                            <shaclInfer>
+                                                                <message>Inferring missing ${item.property}</message>
+                                                                <!-- it would be nice to iterate, but if we do that, we end up adding triples without
+                                                                    deleting the incorrect versions. we have to go through main-fixSrc-main-fixSrc...
+                                                                    as often as it takes.
+                                                                -->
+                                                                <iterateUntilStable>false</iterateUntilStable>
+                                                                <shapes>
+                                                                    <file>target/sparql2shacl/${item.name}/infer.ttl</file>
+                                                                </shapes>
+                                                                <data>
+                                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                                    <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                                    <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                                    <file>${item.overrideFile}</file>
+                                                                </data>
+                                                                <inferred>
+                                                                    <graph>inferred:${item.name}</graph>
+                                                                    <file>target/fix/${item.name}/inferred-${iteration}.ttl</file>
+                                                                </inferred>
+                                                            </shaclInfer>
+                                                            <add>
+                                                                <graph>inferred:${item.name}</graph>
+                                                                <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                                            </add>
+                                                        </body>
+                                                    </when>
                                                 </body>
-                                            </when>
-                                        </body>
-                                        <sparqlAsk>
-                                            <![CDATA[
-                                            ASK WHERE {
-                                              FILTER NOT EXISTS {
-                                                    GRAPH <inferred:symbol> {
-                                                        ?s ?p ?o
-                                                    }
-                                                }
-                                            }
-                                        ]]>
-                                        </sparqlAsk>
-                                    </until>
-                                    <savepoint><id>08-infer-symbol</id></savepoint>
-                                    <until>
-                                        <message>Checking for missing/wrong ucumCodes that can be corrected/inferred</message>
-                                        <indexVar>iteration</indexVar>
-                                        <body>
-                                            <clear>
-                                                <graph>inferred:ucumCode</graph>
-                                                <graph>delete:ucumCode</graph>
-                                            </clear>
-                                            <shaclValidate>
-                                                <failOnSeverity>None</failOnSeverity>
-                                                <message>Preventing qudt:ucumCode that does not match the ucumCode calculated from base unit(s)</message>
-                                                <shapes>
-                                                    <file>target/sparql2shacl/ucumCode/validate.ttl</file>
-                                                </shapes>
-                                                <data>
-                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                                    <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                                    <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
-                                                    <file>src/build/sparql2shacl/ucumCode/units-overriding-inferred-ucum-code.ttl</file>
-                                                </data>
-                                                <validationReport>
-                                                    <graph>delete:ucumCode</graph>
-                                                    <file>target/fix/ucumCode/delete-${iteration}.ttl</file>
-                                                </validationReport>
-                                            </shaclValidate>
-                                            <when>
                                                 <sparqlAsk>
                                                     <![CDATA[
-                                                        ASK WHERE {
-                                                            GRAPH <delete:ucumCode> {
-                                                                [] a sh:ValidationReport ;
-                                                                   sh:conforms false .
+                                                    ASK WHERE {
+                                                      FILTER NOT EXISTS {
+                                                            GRAPH <inferred:${item.name}> {
+                                                                ?s ?p ?o
                                                             }
                                                         }
+                                                    }
                                                     ]]>
                                                 </sparqlAsk>
-                                                <body>
-                                                    <sparqlUpdate>
-                                                        <message>Deleting invalid ucumCodes</message>
-                                                        <sparql>
-                                                            <![CDATA[
-                                                        DELETE {
-                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                                ?unit qudt:ucumCode ?incorrectUcumCode .
-                                                            }
-                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                                ?unit qudt:ucumCode ?incorrectUcumCode .
-                                                            }
-                                                        }
-                                                        WHERE {
-                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                                {
-                                                                    ?unit qudt:ucumCode ?incorrectUcumCode .
-                                                                }
-                                                            }
-                                                            GRAPH <delete:ucumCode> {
-                                                                ?res
-                                                                    rdf:type                      sh:ValidationResult;
-                                                                    sh:resultPath                 qudt:ucumCode;
-                                                                    sh:resultSeverity             sh:Violation;
-                                                                    sh:value                      ?unit
-                                                            }
-                                                        }
-                                                        ]]>
-                                                        </sparql>
-                                                    </sparqlUpdate>
-                                                    <shaclInfer>
-                                                        <message>Inferring missing qudt:ucumCode</message>
-                                                        <!-- it would be nice to iterate, but if we do that, we end up adding triples without
-                                                            deleting the incorrect versions. we have to go through main-fixSrc-main-fixSrc...
-                                                            as often as it takes.
-                                                        -->
-                                                        <iterateUntilStable>false</iterateUntilStable>
-                                                        <shapes>
-                                                            <file>target/sparql2shacl/ucumCode/infer.ttl</file>
-                                                        </shapes>
-                                                        <data>
-                                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
-                                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
-                                                            <file>src/build/sparql2shacl/ucumCode/units-overriding-inferred-ucum-code.ttl</file>
-                                                        </data>
-                                                        <inferred>
-                                                            <graph>inferred:ucumCode</graph>
-                                                            <file>target/fix/ucumCode/inferred-${iteration}.ttl</file>
-                                                        </inferred>
-                                                    </shaclInfer>
-                                                    <add>
-                                                        <graph>inferred:ucumCode</graph>
-                                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
-                                                    </add>
-                                                </body>
-                                            </when>
+                                            </until>
                                         </body>
-                                        <sparqlAsk>
-                                            <![CDATA[
-                                            ASK WHERE {
-                                              FILTER NOT EXISTS {
-                                                    GRAPH <inferred:ucumCode> {
-                                                        ?s ?p ?o
-                                                    }
-                                                }
-                                            }
-                                        ]]>
-                                        </sparqlAsk>
-                                    </until>
+                                    </forEachItem>
                                     <savepoint><id>08.5-infer-ucumCode</id></savepoint>
                                     <sparqlQuery>
                                         <message>Loading direct core unit lookup properties as support for supported extension unit repair inference</message>
@@ -2432,81 +2341,36 @@ validAspectDirs.each { aspectDir ->
                                             }
                                         </sparqlAsk>
                                     </until>
-                                    <until>
-                                        <message>Checking supported extension units for missing/wrong symbols that can be corrected/inferred</message>
-                                        <indexVar>iteration_supported_extensions_symbol</indexVar>
+                                    <forEachItem>
+                                        <item id="symbol">
+                                            <property name="name">symbol</property>
+                                            <property name="property">qudt:symbol</property>
+                                            <property name="incorrectVar">incorrectSymbol</property>
+                                            <property name="overrideFile">src/build/sparql2shacl/symbol/units-overriding-inferred-symbol.ttl</property>
+                                            <property name="indexVar">iteration_supported_extensions_symbol</property>
+                                        </item>
+                                        <item id="ucumCode">
+                                            <property name="name">ucumCode</property>
+                                            <property name="property">qudt:ucumCode</property>
+                                            <property name="incorrectVar">incorrectUcumCode</property>
+                                            <property name="overrideFile">src/build/sparql2shacl/ucumCode/units-overriding-inferred-ucum-code.ttl</property>
+                                            <property name="indexVar">iteration_supported_extensions_ucum</property>
+                                        </item>
                                         <body>
-                                            <invoke stepRef="refresh-supported-extensions-vocab"/>
-                                            <clear>
-                                                <graph>inferred:symbol-supported-extensions</graph>
-                                                <graph>delete:symbol-supported-extensions</graph>
-                                            </clear>
-                                            <shaclValidate>
-                                                <failOnSeverity>None</failOnSeverity>
-                                                <message>Preventing supported extension qudt:symbol values that do not match the symbol calculated from base unit(s)</message>
-                                                <shapes>
-                                                    <file>target/sparql2shacl/symbol/validate.ttl</file>
-                                                </shapes>
-                                                <data>
-                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                                    <graphs>
-                                                        <include>
-                                                            support:supported-extensions-core-unit-derived-properties
-                                                            dist:supported-extensions:vocab
-                                                            dist:vocab:VOCAB_QUDT-PREFIXES.ttl
-                                                        </include>
-                                                    </graphs>
-                                                    <file>src/build/sparql2shacl/symbol/units-overriding-inferred-symbol.ttl</file>
-                                                </data>
-                                                <validationReport>
-                                                    <graph>delete:symbol-supported-extensions</graph>
-                                                    <file>target/fix/symbol/delete-supported-extensions-${iteration_supported_extensions_symbol}.ttl</file>
-                                                </validationReport>
-                                            </shaclValidate>
-                                            <when>
-                                                <sparqlAsk>
-                                                    <![CDATA[
-                                                        ASK WHERE {
-                                                            GRAPH <delete:symbol-supported-extensions> {
-                                                                [] a sh:ValidationReport ;
-                                                                   sh:conforms false .
-                                                            }
-                                                        }
-                                                    ]]>
-                                                </sparqlAsk>
+                                            <until>
+                                                <message>Checking supported extension units for missing/wrong ${item.name}s that can be corrected/inferred</message>
+                                                <indexVar>${item.indexVar}</indexVar>
                                                 <body>
-                                                    <sparqlUpdate>
-                                                        <message>Deleting invalid supported extension symbols</message>
-                                                        <sparql>
-                                                            <![CDATA[
-                                                        DELETE {
-                                                            GRAPH ?unitGraph {
-                                                                ?unit qudt:symbol ?incorrectSymbol .
-                                                            }
-                                                        }
-                                                        WHERE {
-                                                            GRAPH <build:supported-extensions> {
-                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
-                                                            }
-                                                            GRAPH ?unitGraph {
-                                                                ?unit qudt:symbol ?incorrectSymbol .
-                                                            }
-                                                            GRAPH <delete:symbol-supported-extensions> {
-                                                                ?res
-                                                                    rdf:type                      sh:ValidationResult;
-                                                                    sh:resultPath                 qudt:symbol;
-                                                                    sh:resultSeverity             sh:Violation;
-                                                                    sh:value                      ?unit
-                                                            }
-                                                        }
-                                                        ]]>
-                                                        </sparql>
-                                                    </sparqlUpdate>
-                                                    <shaclInfer>
-                                                        <message>Inferring missing supported extension qudt:symbol</message>
-                                                        <iterateUntilStable>false</iterateUntilStable>
+                                                    <invoke stepRef="refresh-supported-extensions-vocab"/>
+                                                    <clear>
+                                                        <graph>inferred:${item.name}-supported-extensions</graph>
+                                                        <graph>delete:${item.name}-supported-extensions</graph>
+                                                    </clear>
+                                                    <shaclValidate>
+                                                        <failOnSeverity>None</failOnSeverity>
+                                                        <message>Preventing supported extension ${item.property} values that do not match the ${item.name} calculated from base unit(s)</message>
                                                         <shapes>
-                                                            <file>target/sparql2shacl/symbol/infer.ttl</file>
+                                                            <file>target/sparql2shacl/${item.name}/validate.ttl</file>
                                                         </shapes>
                                                         <data>
                                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
@@ -2517,189 +2381,118 @@ validAspectDirs.each { aspectDir ->
                                                                     dist:vocab:VOCAB_QUDT-PREFIXES.ttl
                                                                 </include>
                                                             </graphs>
-                                                            <file>src/build/sparql2shacl/symbol/units-overriding-inferred-symbol.ttl</file>
+                                                            <file>${item.overrideFile}</file>
                                                         </data>
-                                                        <inferred>
-                                                            <graph>inferred:symbol-supported-extensions</graph>
-                                                            <file>target/fix/symbol/inferred-supported-extensions-${iteration_supported_extensions_symbol}.ttl</file>
-                                                        </inferred>
-                                                    </shaclInfer>
-                                                    <sparqlUpdate>
-                                                        <message>Add inferred supported extension symbols to owning unit graphs</message>
-                                                        <sparql>
+                                                        <validationReport>
+                                                            <graph>delete:${item.name}-supported-extensions</graph>
+                                                            <file>target/fix/${item.name}/delete-supported-extensions-${${item.indexVar}}.ttl</file>
+                                                        </validationReport>
+                                                    </shaclValidate>
+                                                    <when>
+                                                        <sparqlAsk>
                                                             <![CDATA[
-                                                                INSERT {
-                                                                    GRAPH ?unitGraph {
-                                                                        ?unit ?property ?value .
-                                                                    }
-                                                                } WHERE {
-                                                                    GRAPH <build:supported-extensions> {
-                                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
-                                                                    }
-                                                                    GRAPH <inferred:symbol-supported-extensions> {
-                                                                        ?unit ?property ?value .
-                                                                    }
-                                                                    GRAPH ?unitGraph {
-                                                                        ?unit ?ownerProperty ?ownerValue .
-                                                                    }
-                                                                    FILTER NOT EXISTS {
-                                                                        GRAPH ?unitGraph {
-                                                                            ?unit ?property ?value .
-                                                                        }
+                                                                ASK WHERE {
+                                                                    GRAPH <delete:${item.name}-supported-extensions> {
+                                                                        [] a sh:ValidationReport ;
+                                                                           sh:conforms false .
                                                                     }
                                                                 }
                                                             ]]>
-                                                        </sparql>
-                                                    </sparqlUpdate>
+                                                        </sparqlAsk>
+                                                        <body>
+                                                            <sparqlUpdate>
+                                                                <message>Deleting invalid supported extension ${item.name}s</message>
+                                                                <sparql>
+                                                                    <![CDATA[
+                                                                DELETE {
+                                                                    GRAPH ?unitGraph {
+                                                                        ?unit ${item.property} ?${item.incorrectVar} .
+                                                                    }
+                                                                }
+                                                                WHERE {
+                                                                    GRAPH <build:supported-extensions> {
+                                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
+                                                                    }
+                                                                    GRAPH ?unitGraph {
+                                                                        ?unit ${item.property} ?${item.incorrectVar} .
+                                                                    }
+                                                                    GRAPH <delete:${item.name}-supported-extensions> {
+                                                                        ?res
+                                                                            rdf:type                      sh:ValidationResult;
+                                                                            sh:resultPath                 ${item.property};
+                                                                            sh:resultSeverity             sh:Violation;
+                                                                            sh:value                      ?unit
+                                                                    }
+                                                                }
+                                                                    ]]>
+                                                                </sparql>
+                                                            </sparqlUpdate>
+                                                            <shaclInfer>
+                                                                <message>Inferring missing supported extension ${item.property}</message>
+                                                                <iterateUntilStable>false</iterateUntilStable>
+                                                                <shapes>
+                                                                    <file>target/sparql2shacl/${item.name}/infer.ttl</file>
+                                                                </shapes>
+                                                                <data>
+                                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                                    <graphs>
+                                                                        <include>
+                                                                            support:supported-extensions-core-unit-derived-properties
+                                                                            dist:supported-extensions:vocab
+                                                                            dist:vocab:VOCAB_QUDT-PREFIXES.ttl
+                                                                        </include>
+                                                                    </graphs>
+                                                                    <file>${item.overrideFile}</file>
+                                                                </data>
+                                                                <inferred>
+                                                                    <graph>inferred:${item.name}-supported-extensions</graph>
+                                                                    <file>target/fix/${item.name}/inferred-supported-extensions-${${item.indexVar}}.ttl</file>
+                                                                </inferred>
+                                                            </shaclInfer>
+                                                            <sparqlUpdate>
+                                                                <message>Add inferred supported extension ${item.name}s to owning unit graphs</message>
+                                                                <sparql>
+                                                                    <![CDATA[
+                                                                        INSERT {
+                                                                            GRAPH ?unitGraph {
+                                                                                ?unit ?property ?value .
+                                                                            }
+                                                                        } WHERE {
+                                                                            GRAPH <build:supported-extensions> {
+                                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
+                                                                            }
+                                                                            GRAPH <inferred:${item.name}-supported-extensions> {
+                                                                                ?unit ?property ?value .
+                                                                            }
+                                                                            GRAPH ?unitGraph {
+                                                                                ?unit ?ownerProperty ?ownerValue .
+                                                                            }
+                                                                            FILTER NOT EXISTS {
+                                                                                GRAPH ?unitGraph {
+                                                                                    ?unit ?property ?value .
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    ]]>
+                                                                </sparql>
+                                                            </sparqlUpdate>
+                                                        </body>
+                                                    </when>
                                                 </body>
-                                            </when>
-                                        </body>
-                                        <sparqlAsk>
-                                            <![CDATA[
-                                            ASK WHERE {
-                                              FILTER NOT EXISTS {
-                                                    GRAPH <inferred:symbol-supported-extensions> {
-                                                        ?s ?p ?o
-                                                    }
-                                                }
-                                            }
-                                        ]]>
-                                        </sparqlAsk>
-                                    </until>
-                                    <until>
-                                        <message>Checking supported extension units for missing/wrong ucumCodes that can be corrected/inferred</message>
-                                        <indexVar>iteration_supported_extensions_ucum</indexVar>
-                                        <body>
-                                            <invoke stepRef="refresh-supported-extensions-vocab"/>
-                                            <clear>
-                                                <graph>inferred:ucumCode-supported-extensions</graph>
-                                                <graph>delete:ucumCode-supported-extensions</graph>
-                                            </clear>
-                                            <shaclValidate>
-                                                <failOnSeverity>None</failOnSeverity>
-                                                <message>Preventing supported extension qudt:ucumCode values that do not match the ucumCode calculated from base unit(s)</message>
-                                                <shapes>
-                                                    <file>target/sparql2shacl/ucumCode/validate.ttl</file>
-                                                </shapes>
-                                                <data>
-                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                                    <graphs>
-                                                        <include>
-                                                            support:supported-extensions-core-unit-derived-properties
-                                                            dist:supported-extensions:vocab
-                                                            dist:vocab:VOCAB_QUDT-PREFIXES.ttl
-                                                        </include>
-                                                    </graphs>
-                                                    <file>src/build/sparql2shacl/ucumCode/units-overriding-inferred-ucum-code.ttl</file>
-                                                </data>
-                                                <validationReport>
-                                                    <graph>delete:ucumCode-supported-extensions</graph>
-                                                    <file>target/fix/ucumCode/delete-supported-extensions-${iteration_supported_extensions_ucum}.ttl</file>
-                                                </validationReport>
-                                            </shaclValidate>
-                                            <when>
                                                 <sparqlAsk>
                                                     <![CDATA[
-                                                        ASK WHERE {
-                                                            GRAPH <delete:ucumCode-supported-extensions> {
-                                                                [] a sh:ValidationReport ;
-                                                                   sh:conforms false .
+                                                    ASK WHERE {
+                                                      FILTER NOT EXISTS {
+                                                            GRAPH <inferred:${item.name}-supported-extensions> {
+                                                                ?s ?p ?o
                                                             }
                                                         }
+                                                    }
                                                     ]]>
                                                 </sparqlAsk>
-                                                <body>
-                                                    <sparqlUpdate>
-                                                        <message>Deleting invalid supported extension ucumCodes</message>
-                                                        <sparql>
-                                                            <![CDATA[
-                                                        DELETE {
-                                                            GRAPH ?unitGraph {
-                                                                ?unit qudt:ucumCode ?incorrectUcumCode .
-                                                            }
-                                                        }
-                                                        WHERE {
-                                                            GRAPH <build:supported-extensions> {
-                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
-                                                            }
-                                                            GRAPH ?unitGraph {
-                                                                ?unit qudt:ucumCode ?incorrectUcumCode .
-                                                            }
-                                                            GRAPH <delete:ucumCode-supported-extensions> {
-                                                                ?res
-                                                                    rdf:type                      sh:ValidationResult;
-                                                                    sh:resultPath                 qudt:ucumCode;
-                                                                    sh:resultSeverity             sh:Violation;
-                                                                    sh:value                      ?unit
-                                                            }
-                                                        }
-                                                        ]]>
-                                                        </sparql>
-                                                    </sparqlUpdate>
-                                                    <shaclInfer>
-                                                        <message>Inferring missing supported extension qudt:ucumCode</message>
-                                                        <iterateUntilStable>false</iterateUntilStable>
-                                                        <shapes>
-                                                            <file>target/sparql2shacl/ucumCode/infer.ttl</file>
-                                                        </shapes>
-                                                        <data>
-                                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                                            <graphs>
-                                                                <include>
-                                                                    support:supported-extensions-core-unit-derived-properties
-                                                                    dist:supported-extensions:vocab
-                                                                    dist:vocab:VOCAB_QUDT-PREFIXES.ttl
-                                                                </include>
-                                                            </graphs>
-                                                            <file>src/build/sparql2shacl/ucumCode/units-overriding-inferred-ucum-code.ttl</file>
-                                                        </data>
-                                                        <inferred>
-                                                            <graph>inferred:ucumCode-supported-extensions</graph>
-                                                            <file>target/fix/ucumCode/inferred-supported-extensions-${iteration_supported_extensions_ucum}.ttl</file>
-                                                        </inferred>
-                                                    </shaclInfer>
-                                                    <sparqlUpdate>
-                                                        <message>Add inferred supported extension ucumCodes to owning unit graphs</message>
-                                                        <sparql>
-                                                            <![CDATA[
-                                                                INSERT {
-                                                                    GRAPH ?unitGraph {
-                                                                        ?unit ?property ?value .
-                                                                    }
-                                                                } WHERE {
-                                                                    GRAPH <build:supported-extensions> {
-                                                                        ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
-                                                                    }
-                                                                    GRAPH <inferred:ucumCode-supported-extensions> {
-                                                                        ?unit ?property ?value .
-                                                                    }
-                                                                    GRAPH ?unitGraph {
-                                                                        ?unit ?ownerProperty ?ownerValue .
-                                                                    }
-                                                                    FILTER NOT EXISTS {
-                                                                        GRAPH ?unitGraph {
-                                                                            ?unit ?property ?value .
-                                                                        }
-                                                                    }
-                                                                }
-                                                            ]]>
-                                                        </sparql>
-                                                    </sparqlUpdate>
-                                                </body>
-                                            </when>
+                                            </until>
                                         </body>
-                                        <sparqlAsk>
-                                            <![CDATA[
-                                            ASK WHERE {
-                                              FILTER NOT EXISTS {
-                                                    GRAPH <inferred:ucumCode-supported-extensions> {
-                                                        ?s ?p ?o
-                                                    }
-                                                }
-                                            }
-                                        ]]>
-                                        </sparqlAsk>
-                                    </until>
+                                    </forEachItem>
                                     <savepoint><id>08.6-infer-supported-extension-unit-repairs</id></savepoint>
 
                                     <sparqlQuery>
