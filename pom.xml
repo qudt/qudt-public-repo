@@ -1,4 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  QUDT Public Repo — Build Quick Reference
+  Full documentation: BUILDING.md
+  Build execution flow: https://github.com/qudt/qudt-public-repo/wiki/QUDT_Build_Execution_Flow
+
+  ── EVERYDAY BUILDS ──────────────────────────────────────────────────────────
+
+  Standard build (vocabulary changes only):
+      mvn install
+      Output: target/dist/vocab/
+
+  Build with release ZIP:
+      mvn -Pzip install
+      Output: <artifactId>-<version>.zip in the project root
+
+  Build with community extensions:
+      mvn -Dqudt.supported.extensions=id1,id2 install
+      Also produce a combined all-in-one extension bundle:
+      mvn -Dqudt.supported.extensions=id1,id2 -Dqudt.allInOne.extensions=id1,id2 install
+      Extension IDs map to folders under src/main/rdf/community/extensions/
+
+  ── FIXING SOURCE ERRORS ─────────────────────────────────────────────────────
+
+  When 'mvn install' fails reporting data errors in src:
+      1. mvn install          (build fails and generates repair candidates in target/)
+      2. mvn -Pfix install    (applies repairs to src/, then completes the build)
+
+  Repair output:     target/fix/<topic>/delete-<iteration>.ttl
+  Manual overrides:  src/build/sparql2shacl/symbol/units-overriding-inferred-symbol.ttl
+                     src/build/sparql2shacl/ucumCode/units-overriding-inferred-ucum-code.ttl
+
+  ── INSPECTION ───────────────────────────────────────────────────────────────
+
+  Inspect build artifacts after a completed build:
+      mvn rdfio:pipeline@inspect
+      Output: target/inspection/  (dimension vectors, symbols, ucumCodes, labels, etc.)
+
+  ── SOURCE REFORMATTING ──────────────────────────────────────────────────────
+
+  Reformat all src/ RDF files:
+      mvn spotless:apply@reformat-src   (or just: mvn spotless:apply)
+
+  ── OWL SCHEMA DERIVATION (only when SHACL shapes change) ───────────────────
+
+  Main SHACL schema  (src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl):
+      mvn -Powl-schema-derive antrun:run@derive-owl-schema
+      mvn -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
+      Output: target/inspection/schema-diff/
+
+  Datatype schema  (SCHEMA_QUDT-DATATYPES_NoOWL.ttl):
+      mvn -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
+      mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
+      Output: target/inspection/datatype-schema-diff/
+
+  Coordinates schema  (SCHEMA_QUDT-COORDINATES_NoOWL.ttl):
+      mvn -Powl-coordinates-derive antrun:run@derive-owl-coordinates-schema
+      mvn -Powl-coordinates-inspect rdfio:pipeline@inspect-owl-coordinates-schema-diff
+      Output: target/inspection/coordinates-schema-diff/
+
+  Promote derived schemas to new baseline (after intentionally accepting changes):
+      mvn -Powl-baseline-promote antrun:run@promote-owl-baselines
+
+  ── DEPRECATED-ENTITY EXTRACTION ─────────────────────────────────────────────
+
+  Extract deprecated entities from a prior release (for client migration support):
+      mvn -DdeprecatedInVersion=<version> clean install   e.g. -DdeprecatedInVersion=2.1.47
+      Output: target/deprecated-in-<version>/
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.qudt</groupId>
@@ -39,17 +107,6 @@
       <tag>HEAD</tag>
   </scm>
     <build>
-        <!--
-            Build command guide lives in BUILDING.md.
-            Key schema commands:
-              mvn -Powl-schema-derive antrun:run@derive-owl-schema
-              mvn -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
-              mvn -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
-              mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
-              mvn -Powl-coordinates-derive antrun:run@derive-owl-coordinates-schema
-              mvn -Powl-coordinates-inspect rdfio:pipeline@inspect-owl-coordinates-schema-diff
-              mvn -Powl-baseline-promote antrun:run@promote-owl-baselines
-        -->
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -74,25 +131,6 @@
                   process-test-classes     format-dist
                   test                     validate-dist
                   install                  [Profile -Pzip: release-zip]
-
-                Explicit (phase 'none') workflows:
-                  -Powl-schema-derive antrun:run@derive-owl-schema
-                                                   derive OWL schema from SHACL into src/main/rdf/schema/SCHEMA_QUDT.ttl and serialize it
-                  -Powl-schema-inspect rdfio:pipeline@inspect-owl-schema-diff
-                                                   compare derived OWL schema to backup and fail on unexpected diffs
-                  -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
-                                                   derive OWL datatype schema from SHACL into src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl and serialize it
-                  -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
-                                                   compare derived OWL datatype schema to backup and fail on unexpected diffs
-                  -Powl-coordinates-derive antrun:run@derive-owl-coordinates-schema
-                                                   derive OWL coordinates schema from SHACL into src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl and serialize it
-                  -Powl-coordinates-inspect rdfio:pipeline@inspect-owl-coordinates-schema-diff
-                                                   compare derived OWL coordinates schema to backup and fail on unexpected diffs
-                  -Powl-baseline-promote antrun:run@promote-owl-baselines
-                                                   copy currently-derived OWL schemas into *.backup baseline files (manual, release workflow only)
-                  rdfio:pipeline@fix-src                  apply selected source repairs from generated data
-                  rdfio:pipeline@inspect                  generate inspection reports (mainly target/dist)
-                  spotless:apply@reformat-src             reformat source RDF files
             -->
 
             <plugin>
