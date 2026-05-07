@@ -12,6 +12,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added quantitykind:ProductOfInertia as a replacement for the deprecated quantitykind:PRODUCT-OF-INERTIA
 - Added unit:OHM-FT (Ohm Foot), the imperial counterpart to unit:OHM-M, for resistivity in well-logging and petrophysics applications
 - Added unit:HectoHZ (Hectohertz), the 100-fold SI prefix scaling of unit:HZ
+- Added unit:BAR-PER-M (Bar per Metre), unit:PSI-PER-FT (Psi per Foot), and unit:PSI-PER-M (Psi per Metre) for pressure gradients
 
 ### Changed
 
