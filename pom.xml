@@ -696,7 +696,7 @@ validAspectDirs.each { aspectDir ->
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>rdfio-maven-plugin</artifactId>
-                <version>1.5.5</version>
+                <version>1.6.3-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <!--
@@ -2041,50 +2041,50 @@ validAspectDirs.each { aspectDir ->
                                         </sparqlAsk>
                                     </until>
                                     <savepoint><id>07-infer-dimensionVector</id></savepoint>
-                                    <forEachItem>
-                                        <item id="symbol">
+                                    <forEachEnv>
+                                        <env id="symbol">
                                             <property name="name">symbol</property>
                                             <property name="property">qudt:symbol</property>
                                             <property name="incorrectVar">incorrectSymbol</property>
                                             <property name="overrideFile">src/build/sparql2shacl/symbol/units-overriding-inferred-symbol.ttl</property>
-                                        </item>
-                                        <item id="ucumCode">
+                                        </env>
+                                        <env id="ucumCode">
                                             <property name="name">ucumCode</property>
                                             <property name="property">qudt:ucumCode</property>
                                             <property name="incorrectVar">incorrectUcumCode</property>
                                             <property name="overrideFile">src/build/sparql2shacl/ucumCode/units-overriding-inferred-ucum-code.ttl</property>
-                                        </item>
+                                        </env>
                                         <body>
                                             <until>
-                                                <message>Checking for missing/wrong ${item.name}s that can be corrected/inferred</message>
+                                                <message>Checking for missing/wrong ${name}s that can be corrected/inferred</message>
                                                 <indexVar>iteration</indexVar>
                                                 <body>
                                                     <clear>
-                                                        <graph>inferred:${item.name}</graph>
-                                                        <graph>delete:${item.name}</graph>
+                                                        <graph>inferred:${name}</graph>
+                                                        <graph>delete:${name}</graph>
                                                     </clear>
                                                     <shaclValidate>
                                                         <failOnSeverity>None</failOnSeverity>
-                                                        <message>Preventing ${item.property} that does not match the ${item.name} calculated from base unit(s)</message>
+                                                        <message>Preventing ${property} that does not match the ${name} calculated from base unit(s)</message>
                                                         <shapes>
-                                                            <file>target/sparql2shacl/${item.name}/validate.ttl</file>
+                                                            <file>target/sparql2shacl/${name}/validate.ttl</file>
                                                         </shapes>
                                                         <data>
                                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
                                                             <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
                                                             <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
-                                                            <file>${item.overrideFile}</file>
+                                                            <file>${overrideFile}</file>
                                                         </data>
                                                         <validationReport>
-                                                            <graph>delete:${item.name}</graph>
-                                                            <file>target/fix/${item.name}/delete-${iteration}.ttl</file>
+                                                            <graph>delete:${name}</graph>
+                                                            <file>target/fix/${name}/delete-${iteration}.ttl</file>
                                                         </validationReport>
                                                     </shaclValidate>
                                                     <when>
                                                         <sparqlAsk>
                                                             <![CDATA[
                                                                 ASK WHERE {
-                                                                    GRAPH <delete:${item.name}> {
+                                                                    GRAPH <delete:${name}> {
                                                                         [] a sh:ValidationReport ;
                                                                            sh:conforms false .
                                                                     }
@@ -2093,27 +2093,27 @@ validAspectDirs.each { aspectDir ->
                                                         </sparqlAsk>
                                                         <body>
                                                             <sparqlUpdate>
-                                                                <message>Deleting invalid ${item.name}s</message>
+                                                                <message>Deleting invalid ${name}s</message>
                                                                 <sparql>
                                                                     <![CDATA[
                                                                 DELETE {
                                                                     GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                                        ?unit ${item.property} ?${item.incorrectVar} .
+                                                                        ?unit ${property} ?${incorrectVar} .
                                                                     }
                                                                     GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                                                        ?unit ${item.property} ?${item.incorrectVar} .
+                                                                        ?unit ${property} ?${incorrectVar} .
                                                                     }
                                                                 }
                                                                 WHERE {
                                                                     GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                         {
-                                                                            ?unit ${item.property} ?${item.incorrectVar} .
+                                                                            ?unit ${property} ?${incorrectVar} .
                                                                         }
                                                                     }
-                                                                    GRAPH <delete:${item.name}> {
+                                                                    GRAPH <delete:${name}> {
                                                                         ?res
                                                                             rdf:type                      sh:ValidationResult;
-                                                                            sh:resultPath                 ${item.property};
+                                                                            sh:resultPath                 ${property};
                                                                             sh:resultSeverity             sh:Violation;
                                                                             sh:value                      ?unit
                                                                     }
@@ -2122,28 +2122,28 @@ validAspectDirs.each { aspectDir ->
                                                                 </sparql>
                                                             </sparqlUpdate>
                                                             <shaclInfer>
-                                                                <message>Inferring missing ${item.property}</message>
+                                                                <message>Inferring missing ${property}</message>
                                                                 <!-- it would be nice to iterate, but if we do that, we end up adding triples without
                                                                     deleting the incorrect versions. we have to go through main-fixSrc-main-fixSrc...
                                                                     as often as it takes.
                                                                 -->
                                                                 <iterateUntilStable>false</iterateUntilStable>
                                                                 <shapes>
-                                                                    <file>target/sparql2shacl/${item.name}/infer.ttl</file>
+                                                                    <file>target/sparql2shacl/${name}/infer.ttl</file>
                                                                 </shapes>
                                                                 <data>
                                                                     <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
                                                                     <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
                                                                     <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
-                                                                    <file>${item.overrideFile}</file>
+                                                                    <file>${overrideFile}</file>
                                                                 </data>
                                                                 <inferred>
-                                                                    <graph>inferred:${item.name}</graph>
-                                                                    <file>target/fix/${item.name}/inferred-${iteration}.ttl</file>
+                                                                    <graph>inferred:${name}</graph>
+                                                                    <file>target/fix/${name}/inferred-${iteration}.ttl</file>
                                                                 </inferred>
                                                             </shaclInfer>
                                                             <add>
-                                                                <graph>inferred:${item.name}</graph>
+                                                                <graph>inferred:${name}</graph>
                                                                 <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                                             </add>
                                                         </body>
@@ -2153,7 +2153,7 @@ validAspectDirs.each { aspectDir ->
                                                     <![CDATA[
                                                     ASK WHERE {
                                                       FILTER NOT EXISTS {
-                                                            GRAPH <inferred:${item.name}> {
+                                                            GRAPH <inferred:${name}> {
                                                                 ?s ?p ?o
                                                             }
                                                         }
@@ -2162,7 +2162,7 @@ validAspectDirs.each { aspectDir ->
                                                 </sparqlAsk>
                                             </until>
                                         </body>
-                                    </forEachItem>
+                                    </forEachEnv>
                                     <savepoint><id>08.5-infer-ucumCode</id></savepoint>
                                     <sparqlQuery>
                                         <message>Loading direct core unit lookup properties as support for supported extension unit repair inference</message>
@@ -2379,36 +2379,34 @@ validAspectDirs.each { aspectDir ->
                                             }
                                         </sparqlAsk>
                                     </until>
-                                    <forEachItem>
-                                        <item id="symbol">
+                                    <forEachEnv>
+                                        <env id="symbol">
                                             <property name="name">symbol</property>
                                             <property name="property">qudt:symbol</property>
                                             <property name="incorrectVar">incorrectSymbol</property>
                                             <property name="overrideFile">src/build/sparql2shacl/symbol/units-overriding-inferred-symbol.ttl</property>
-                                            <property name="indexVar">iteration_supported_extensions_symbol</property>
-                                        </item>
-                                        <item id="ucumCode">
+                                        </env>
+                                        <env id="ucumCode">
                                             <property name="name">ucumCode</property>
                                             <property name="property">qudt:ucumCode</property>
                                             <property name="incorrectVar">incorrectUcumCode</property>
                                             <property name="overrideFile">src/build/sparql2shacl/ucumCode/units-overriding-inferred-ucum-code.ttl</property>
-                                            <property name="indexVar">iteration_supported_extensions_ucum</property>
-                                        </item>
+                                        </env>
                                         <body>
                                             <until>
-                                                <message>Checking supported extension units for missing/wrong ${item.name}s that can be corrected/inferred</message>
-                                                <indexVar>${item.indexVar}</indexVar>
+                                                <message>Checking supported extension units for missing/wrong ${name}s that can be corrected/inferred</message>
+                                                <indexVar>iteration_ext</indexVar>
                                                 <body>
                                                     <invoke stepRef="refresh-supported-extensions-vocab"/>
                                                     <clear>
-                                                        <graph>inferred:${item.name}-supported-extensions</graph>
-                                                        <graph>delete:${item.name}-supported-extensions</graph>
+                                                        <graph>inferred:${name}-supported-extensions</graph>
+                                                        <graph>delete:${name}-supported-extensions</graph>
                                                     </clear>
                                                     <shaclValidate>
                                                         <failOnSeverity>None</failOnSeverity>
-                                                        <message>Preventing supported extension ${item.property} values that do not match the ${item.name} calculated from base unit(s)</message>
+                                                        <message>Preventing supported extension ${property} values that do not match the ${name} calculated from base unit(s)</message>
                                                         <shapes>
-                                                            <file>target/sparql2shacl/${item.name}/validate.ttl</file>
+                                                            <file>target/sparql2shacl/${name}/validate.ttl</file>
                                                         </shapes>
                                                         <data>
                                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
@@ -2419,18 +2417,18 @@ validAspectDirs.each { aspectDir ->
                                                                     dist:vocab:VOCAB_QUDT-PREFIXES.ttl
                                                                 </include>
                                                             </graphs>
-                                                            <file>${item.overrideFile}</file>
+                                                            <file>${overrideFile}</file>
                                                         </data>
                                                         <validationReport>
-                                                            <graph>delete:${item.name}-supported-extensions</graph>
-                                                            <file>target/fix/${item.name}/delete-supported-extensions-${${item.indexVar}}.ttl</file>
+                                                            <graph>delete:${name}-supported-extensions</graph>
+                                                            <file>target/fix/${name}/delete-supported-extensions-${iteration_ext}.ttl</file>
                                                         </validationReport>
                                                     </shaclValidate>
                                                     <when>
                                                         <sparqlAsk>
                                                             <![CDATA[
                                                                 ASK WHERE {
-                                                                    GRAPH <delete:${item.name}-supported-extensions> {
+                                                                    GRAPH <delete:${name}-supported-extensions> {
                                                                         [] a sh:ValidationReport ;
                                                                            sh:conforms false .
                                                                     }
@@ -2439,12 +2437,12 @@ validAspectDirs.each { aspectDir ->
                                                         </sparqlAsk>
                                                         <body>
                                                             <sparqlUpdate>
-                                                                <message>Deleting invalid supported extension ${item.name}s</message>
+                                                                <message>Deleting invalid supported extension ${name}s</message>
                                                                 <sparql>
                                                                     <![CDATA[
                                                                 DELETE {
                                                                     GRAPH ?unitGraph {
-                                                                        ?unit ${item.property} ?${item.incorrectVar} .
+                                                                        ?unit ${property} ?${incorrectVar} .
                                                                     }
                                                                 }
                                                                 WHERE {
@@ -2452,12 +2450,12 @@ validAspectDirs.each { aspectDir ->
                                                                         ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                                     }
                                                                     GRAPH ?unitGraph {
-                                                                        ?unit ${item.property} ?${item.incorrectVar} .
+                                                                        ?unit ${property} ?${incorrectVar} .
                                                                     }
-                                                                    GRAPH <delete:${item.name}-supported-extensions> {
+                                                                    GRAPH <delete:${name}-supported-extensions> {
                                                                         ?res
                                                                             rdf:type                      sh:ValidationResult;
-                                                                            sh:resultPath                 ${item.property};
+                                                                            sh:resultPath                 ${property};
                                                                             sh:resultSeverity             sh:Violation;
                                                                             sh:value                      ?unit
                                                                     }
@@ -2466,10 +2464,10 @@ validAspectDirs.each { aspectDir ->
                                                                 </sparql>
                                                             </sparqlUpdate>
                                                             <shaclInfer>
-                                                                <message>Inferring missing supported extension ${item.property}</message>
+                                                                <message>Inferring missing supported extension ${property}</message>
                                                                 <iterateUntilStable>false</iterateUntilStable>
                                                                 <shapes>
-                                                                    <file>target/sparql2shacl/${item.name}/infer.ttl</file>
+                                                                    <file>target/sparql2shacl/${name}/infer.ttl</file>
                                                                 </shapes>
                                                                 <data>
                                                                     <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
@@ -2480,15 +2478,15 @@ validAspectDirs.each { aspectDir ->
                                                                             dist:vocab:VOCAB_QUDT-PREFIXES.ttl
                                                                         </include>
                                                                     </graphs>
-                                                                    <file>${item.overrideFile}</file>
+                                                                    <file>${overrideFile}</file>
                                                                 </data>
                                                                 <inferred>
-                                                                    <graph>inferred:${item.name}-supported-extensions</graph>
-                                                                    <file>target/fix/${item.name}/inferred-supported-extensions-${${item.indexVar}}.ttl</file>
+                                                                    <graph>inferred:${name}-supported-extensions</graph>
+                                                                    <file>target/fix/${name}/inferred-supported-extensions-${iteration_ext}.ttl</file>
                                                                 </inferred>
                                                             </shaclInfer>
                                                             <sparqlUpdate>
-                                                                <message>Add inferred supported extension ${item.name}s to owning unit graphs</message>
+                                                                <message>Add inferred supported extension ${name}s to owning unit graphs</message>
                                                                 <sparql>
                                                                     <![CDATA[
                                                                         INSERT {
@@ -2499,7 +2497,7 @@ validAspectDirs.each { aspectDir ->
                                                                             GRAPH <build:supported-extensions> {
                                                                                 ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
                                                                             }
-                                                                            GRAPH <inferred:${item.name}-supported-extensions> {
+                                                                            GRAPH <inferred:${name}-supported-extensions> {
                                                                                 ?unit ?property ?value .
                                                                             }
                                                                             GRAPH ?unitGraph {
@@ -2521,7 +2519,7 @@ validAspectDirs.each { aspectDir ->
                                                     <![CDATA[
                                                     ASK WHERE {
                                                       FILTER NOT EXISTS {
-                                                            GRAPH <inferred:${item.name}-supported-extensions> {
+                                                            GRAPH <inferred:${name}-supported-extensions> {
                                                                 ?s ?p ?o
                                                             }
                                                         }
@@ -2530,7 +2528,7 @@ validAspectDirs.each { aspectDir ->
                                                 </sparqlAsk>
                                             </until>
                                         </body>
-                                    </forEachItem>
+                                    </forEachEnv>
                                     <savepoint><id>08.6-infer-supported-extension-unit-repairs</id></savepoint>
 
                                     <sparqlQuery>
@@ -3702,6 +3700,30 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                             <pipeline>
                                 <id>validate-dist</id>
                                 <steps>
+                                    <stepDef id="refresh-supported-extensions-vocab">
+                                        <clear>
+                                            <graph>dist:supported-extensions:vocab</graph>
+                                        </clear>
+                                        <sparqlUpdate>
+                                            <message>Refresh supported extension aggregate graph</message>
+                                            <sparql>
+                                                <![CDATA[
+                                                    INSERT {
+                                                        GRAPH <dist:supported-extensions:vocab> {
+                                                            ?s ?p ?o .
+                                                        }
+                                                    } WHERE {
+                                                        GRAPH <build:supported-extensions> {
+                                                            ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
+                                                        }
+                                                        GRAPH ?unitGraph {
+                                                            ?s ?p ?o .
+                                                        }
+                                                    }
+                                                ]]>
+                                            </sparql>
+                                        </sparqlUpdate>
+                                    </stepDef>
                                     <shaclFunctions>
                                         <file>src/build/validation/qudt-shacl-functions.ttl</file>
                                     </shaclFunctions>
@@ -4364,7 +4386,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
-                        <version>1.5.5</version>
+                        <version>1.6.3-SNAPSHOT</version>
                         <executions>
                             <execution>
                                 <!--
@@ -4462,7 +4484,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
-                        <version>1.5.5</version>
+                        <version>1.6.3-SNAPSHOT</version>
                         <executions>
                     <execution>
                         <id>derive-owl-schema-pipeline</id>
@@ -4960,7 +4982,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
-                        <version>1.5.5</version>
+                        <version>1.6.3-SNAPSHOT</version>
                         <executions>
                             <execution>
                                 <id>derive-owl-datatypes-schema-pipeline</id>
@@ -5231,7 +5253,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
-                        <version>1.5.5</version>
+                        <version>1.6.3-SNAPSHOT</version>
                         <executions>
                             <execution>
                                 <id>derive-owl-coordinates-schema-pipeline</id>
@@ -5506,7 +5528,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
-                        <version>1.5.5</version>
+                        <version>1.6.3-SNAPSHOT</version>
                         <executions>
                             <execution>
                                 <id>inspect-owl-datatypes-schema-diff</id>
@@ -6888,7 +6910,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
-                        <version>1.5.5</version>
+                        <version>1.6.3-SNAPSHOT</version>
                         <executions>
                             <execution>
                                 <id>inspect-owl-coordinates-schema-diff</id>
@@ -7066,7 +7088,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
-                        <version>1.5.5</version>
+                        <version>1.6.3-SNAPSHOT</version>
                         <executions>
                     <execution>
                         <!--
