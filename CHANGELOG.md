@@ -11,6 +11,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Added quantitykind:ProductOfInertia as a replacement for the deprecated quantitykind:PRODUCT-OF-INERTIA
 - Added unit:OHM-FT (Ohm Foot), the imperial counterpart to unit:OHM-M, for resistivity in well-logging and petrophysics applications
+- Added unit:HectoHZ (Hectohertz), the 100-fold SI prefix scaling of unit:HZ
+- Added unit:BAR-PER-M (Bar per Metre), unit:PSI-PER-FT (Psi per Foot), and unit:PSI-PER-M (Psi per Metre) for pressure gradients
 
 ### Changed
 
@@ -20,6 +22,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Removed some erroneous references from the datatypes schema metadata to the coordinate systems schema under construction
 - Fixed some small errors in qudt:ArrayDataOrder, qudt:MassPropertiesArray, qkdv:A0E1L0I0M-1H0T0D0, and unit:RT
+- Fixed the types of datatype:ONstate, datatype:OFFstate, datatype:WDST_WET, and datatype:WDST_DRY
+- Removed datatype:True and datatype:Yes (use datatype:TRUE and datatype:YES instead)
 - Fixed disjoint datatypes
 
 ## [3.2.1] - 2026-04-02
