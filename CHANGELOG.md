@@ -9,12 +9,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added support for community extensions: domain-specific vocabularies and even schema changes can now be maintained separately in `src/main/rdf/community/extensions/{id}/` and included in the build using `-Dqudt.supported.extensions=id1,id2`. Extensions are validated and inference-corrected alongside core vocabulary. This capability is fully backward compatible — users who do not supply extension IDs see no change in build behaviour or output.
 - Added quantitykind:ProductOfInertia as a replacement for the deprecated quantitykind:PRODUCT-OF-INERTIA
 - Added unit:OHM-FT (Ohm Foot), the imperial counterpart to unit:OHM-M, for resistivity in well-logging and petrophysics applications
 - Added unit:HectoHZ (Hectohertz), the 100-fold SI prefix scaling of unit:HZ
 - Added  quantitykind:ApparentEnergy and completed the ElectricEnergy specialization hierarchy
+- Added unit:BAR-PER-M (Bar per Metre), unit:PSI-PER-FT (Psi per Foot), and unit:PSI-PER-M (Psi per Metre) for pressure gradients
 
 ### Changed
+
+- Migrated 31 quantity kinds that are specific to the field of propulsion to the extensions folder.
 
 ### Deprecated
 
@@ -22,6 +26,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Removed some erroneous references from the datatypes schema metadata to the coordinate systems schema under construction
 - Fixed some small errors in qudt:ArrayDataOrder, qudt:MassPropertiesArray, qkdv:A0E1L0I0M-1H0T0D0, and unit:RT
+- Fixed the types of datatype:ONstate, datatype:OFFstate, datatype:WDST_WET, and datatype:WDST_DRY
+- Removed datatype:True and datatype:Yes (use datatype:TRUE and datatype:YES instead)
 
 ## [3.2.1] - 2026-04-02
 
