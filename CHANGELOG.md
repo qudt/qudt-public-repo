@@ -21,11 +21,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Housecleaning: Removed zero-valued conversion offset triples since they are assumed to be zero if missing.
 - Migrated 31 quantity kinds that are specific to the field of propulsion to the extensions folder.
+- Dimension vector exponent properties (`qudt:dimensionExponentFor*`, `qudt:dimensionlessExponent`) are now inferred from the dimension vector IRI local name during the build rather than stored explicitly in source. `VOCAB_QUDT-DIMENSION-VECTORS.ttl` is ~2200 lines shorter as a result. The sole exception is `qkdv:NotApplicable`, which has no parseable IRI structure.
 
 ### Deprecated
 
+- `qkdv:A0E-2L2I0M1H-1T-2.5D0` — replaced by `qkdv:A0E-2L2I0M1H-1T-2dot5D0`; standardises on `dot` encoding for fractional exponents in dimension vector IRIs
+- `unit:J-PER-M2-SEC0pt5-K` — replaced by `unit:J-PER-M2-SEC0dot5-K`; standardises on `dot` encoding in unit IRIs
+
 ### Fixed
 
+- Fixed missing `a qudt:DerivedUnit, qudt:Unit` declarations on `unit:J-PER-M2-SEC0pt5-K` and `unit:J-PER-M2-SEC0dot5-K`
 - Removed some erroneous references from the datatypes schema metadata to the coordinate systems schema under construction
 - Fixed some small errors in qudt:ArrayDataOrder, qudt:MassPropertiesArray, qkdv:A0E1L0I0M-1H0T0D0, and unit:RT
 - Fixed the types of datatype:ONstate, datatype:OFFstate, datatype:WDST_WET, and datatype:WDST_DRY
