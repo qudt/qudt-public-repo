@@ -31,6 +31,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Fixed missing `a qudt:DerivedUnit, qudt:Unit` declarations on `unit:J-PER-M2-SEC0pt5-K` and `unit:J-PER-M2-SEC0dot5-K`
+- Added missing `qudt:hasFactorUnit` triples (J¹·m⁻²·s⁻⁰·⁵·K⁻¹) to `unit:J-PER-M2-SEC0dot5-K` and `unit:J-PER-M2-SEC0pt5-K`, following the pattern of `unit:MegaPA-M0dot5`
+- Fixed build pipeline filters in four `sparql2shacl` queries (`factorUnits`, `conversionMultiplier`, `conversionMultiplierPrecision`, `scalingOf`): the exclusion for units with fractional-exponent IRIs used `CONTAINS(...,"dot")`, missing units with the older `pt` decimal encoding; updated to a regex covering both
 - Removed some erroneous references from the datatypes schema metadata to the coordinate systems schema under construction
 - Fixed some small errors in qudt:ArrayDataOrder, qudt:MassPropertiesArray, qkdv:A0E1L0I0M-1H0T0D0, and unit:RT
 - Fixed the types of datatype:ONstate, datatype:OFFstate, datatype:WDST_WET, and datatype:WDST_DRY
