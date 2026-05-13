@@ -10,9 +10,9 @@ prefix sh: <http://www.w3.org/ns/shacl#>
 SELECT $this (qudt:conversionMultiplier as ?path)  ?actualMultiplier ?calculatedMultiplier
 WHERE {
     {
-        # Units with "dot" in their IRI have fractional exponents; their multipliers
-        # are set manually and are not subject to precision recalculation.
-        FILTER( !CONTAINS(STR($this), "dot") )
+        # Units with decimal-encoded exponents ("dot" or "pt", e.g. SEC0dot5, SEC0pt5)
+        # have manually-set multipliers not subject to precision recalculation.
+        FILTER( !REGEX(STR($this), "[0-9](?:dot|pt)[0-9]") )
         ?this qudt:conversionMultiplier ?actualMultiplier ;
 
     }

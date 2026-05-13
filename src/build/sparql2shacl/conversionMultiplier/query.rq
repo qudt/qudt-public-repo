@@ -20,9 +20,9 @@ WHERE {
                 (GROUP_CONCAT(?multiplierFound;SEPARATOR="|") AS ?allMultipliersFound)
             WHERE {
               $this a qudt:Unit .
-              # Units with "dot" in their IRI have fractional exponents; decimal.pow
-              # requires an integer exponent so these cannot be computed from factor units.
-              FILTER( !CONTAINS(STR($this), "dot") )
+              # Units with decimal-encoded exponents ("dot" or "pt", e.g. SEC0dot5, SEC0pt5)
+              # cannot be computed from factor units: decimal.pow requires an integer exponent.
+              FILTER( !REGEX(STR($this), "[0-9](?:dot|pt)[0-9]") )
               OPTIONAL { $this qudt:conversionMultiplier ?actualMultiplier . }
               $this qudt:hasFactorUnit ?factor .
 
