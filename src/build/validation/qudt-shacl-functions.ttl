@@ -631,4 +631,59 @@ qfn:unit.dimVec.calculate
                 }
         """ .
 
+qfn:unit.eDimVec.calculate
+  a sh:SPARQLFunction ;
+  rdfs:comment """Calculates the extended dimension vector (edv:) IRI of a unit from its factor units
+    or scalingOf relationship. Reuses qfn:unit.dimVec.calculate for the eight SI dimensions,
+    then independently sums the R (angle) and N (count) exponents from each factor unit's
+    qudt:hasExtendedDimensionVector. R and N extraction reuses
+    qfn:dimVec.getDimensionExponentFromLocalname — no duplication of multiply/pow logic.""" ;
+  sh:parameter [
+    sh:datatype xsd:anyURI ;
+    sh:description "a unit IRI" ;
+    sh:order 0 ;
+    sh:path qfn:unit ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:anyURI ;
+  sh:select """
+        SELECT ?result WHERE {
+            # Step 1: eight SI dimensions via the existing function
+            BIND(qfn:unit.dimVec.calculate(?unit) AS ?qkdvResult)
+            FILTER(qfn:bound(?qkdvResult))
+
+            # Step 2: sum R and N contributions across all factor units
+            {
+                SELECT (SUM(?rContrib) AS ?rSum) (SUM(?nContrib) AS ?nSum)
+                WHERE {
+                    {
+                        ?unit qudt:hasFactorUnit ?fu .
+                        ?fu qudt:hasUnit ?base ;
+                            qudt:exponent ?exp .
+                    } UNION {
+                        ?unit qudt:scalingOf ?base .
+                        BIND(1 AS ?exp)
+                    }
+                    OPTIONAL {
+                        ?base qudt:hasExtendedDimensionVector ?baseEdv .
+                        BIND(qfn:dimVec.getDimensionExponentFromLocalname(
+                                 qfn:localname(?baseEdv), "R") AS ?baseR)
+                        BIND(qfn:dimVec.getDimensionExponentFromLocalname(
+                                 qfn:localname(?baseEdv), "N") AS ?baseN)
+                    }
+                    BIND(COALESCE(?baseR, 0) * ?exp AS ?rContrib)
+                    BIND(COALESCE(?baseN, 0) * ?exp AS ?nContrib)
+                }
+            }
+
+            # Step 3: append R and N to the qkdv: local name and switch to edv: namespace
+            BIND(qfn:localname(?qkdvResult) AS ?qkdvLocal)
+            BIND(IRI(CONCAT("http://qudt.org/vocab/extendeddimensionvector/",
+                            ?qkdvLocal,
+                            "R", STR(xsd:integer(?rSum)),
+                            "N", STR(xsd:integer(?nSum))))
+                 AS ?result)
+        }
+    """ .
+
 

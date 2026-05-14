@@ -1,0 +1,32 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qfn: <http://qudt.org/shacl/functions#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+qfn:InferExtendedDV
+  a owl:Ontology ;
+  owl:imports qfn: .
+
+qfn:InferExtendedDVRule
+  a sh:NodeShape ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:construct """
+        # Intentionally produces no triples.
+        # Extended dimension vector inconsistencies (detected by validate.ttl) must be
+        # corrected manually in the source vocabulary, not silently overridden by inference.
+        # The query body is included below to satisfy the sparql2shacl template requirement
+        # but is never reached because of the preceding FILTER(false).
+        CONSTRUCT {}
+        WHERE {
+            FILTER(false)
+            {{QUERY_WITHOUT_PREFIXES}}
+        }
+    """ ;
+    sh:prefixes qfn: ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
+
