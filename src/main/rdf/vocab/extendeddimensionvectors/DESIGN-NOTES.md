@@ -17,7 +17,8 @@ meaning:
 Not every integer-valued or "countable" quantity gets `N=1`. The rule is:
 
 > **N=1** when the quantity answers "how many of [this discrete physical
-> entity]?" — particles, organisms, turns of wire, nucleons, heartbeats.
+>
+>> entity]?" — particles, organisms, turns of wire, nucleons, heartbeats.
 >
 > **N=0** when the quantity is a dimensionless ratio, a quantum-mechanical
 > index, or an information-theoretic unit, even if it is always an integer.
