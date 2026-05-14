@@ -10,6 +10,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - Added support for community extensions: domain-specific vocabularies and even schema changes can now be maintained separately in `src/main/rdf/community/extensions/{id}/` and included in the build using `-Dqudt.supported.extensions=id1,id2`. Extensions are validated and inference-corrected alongside core vocabulary. This capability is fully backward compatible — users who do not supply extension IDs see no change in build behaviour or output.
+- Introduced the concept of an ExtendedDimensionVector that disambiguates angular and count-based quantity kind and unit dimensions beyond what is possible through the seven base SI dimensions.
 - Added quantitykind:ProductOfInertia as a replacement for the deprecated quantitykind:PRODUCT-OF-INERTIA
 - Added unit:OHM-FT (Ohm Foot), the imperial counterpart to unit:OHM-M, for resistivity in well-logging and petrophysics applications
 - Added unit:HectoHZ (Hectohertz), the 100-fold SI prefix scaling of unit:HZ

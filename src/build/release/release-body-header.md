@@ -8,3 +8,4 @@ Extensions receive the same validation, inference, and serialisation treatment a
 
 As part of this release, 31 quantity kinds that are highly specific to the field of propulsion have been migrated from the core vocabulary into an extension called **`propulsion`**. Users who currently reference those quantity kinds and wish to continue doing so should include `-Dqudt.supported.extensions=propulsion` in their build invocation. Users who do not work in the propulsion domain and did not use those quantity kinds need take no action.
 
+A second major addition is the concept of an ExtendedDimensionVector that disambiguates angular and count-based quantity kind and unit dimensions beyond what is possible through the seven base SI dimensions. This is discussed in PR #1460 [here](https://github.com/qudt/qudt-public-repo/pull/1460).
