@@ -9,6 +9,7 @@
 # IRI local-name formats:
 #   qkdv:  A{a}E{e}L{l}I{i}M{m}H{h}T{t}D{d}
 #   edv:   A{a}E{e}L{l}I{i}M{m}H{h}T{t}D{d}R{r}N{n}
+#          (namespace: http://qudt.org/vocab/extendeddimensionvector/)
 #
 # Matching strategy: IRI namespace prefix, not rdf:type.
 #   - qkdv: instances span five type variants (base + four system-specific),
@@ -43,7 +44,7 @@ WHERE {
         ?dv a [] .
         FILTER(
             STRSTARTS(STR(?dv), "http://qudt.org/vocab/dimensionvector/") ||
-            STRSTARTS(STR(?dv), "http://qudt.org/vocab/edv/")
+            STRSTARTS(STR(?dv), "http://qudt.org/vocab/extendeddimensionvector/")
         )
         FILTER NOT EXISTS { ?dv qudt:dimensionExponentForAmountOfSubstance ?any . }
     }
@@ -71,7 +72,7 @@ WHERE {
 ;
 
 # ── Extended dimension exponents (R = angle, N = count) ──────────────────────
-# Applies only to edv: instances (http://qudt.org/vocab/edv/…).
+# Applies only to edv: instances (http://qudt.org/vocab/extendeddimensionvector/…).
 # Does not fire until edv: instances are added to the vocabulary.
 
 INSERT {
@@ -83,7 +84,7 @@ INSERT {
 WHERE {
     GRAPH ?g {
         ?dv a [] .
-        FILTER(STRSTARTS(STR(?dv), "http://qudt.org/vocab/edv/"))
+        FILTER(STRSTARTS(STR(?dv), "http://qudt.org/vocab/extendeddimensionvector/"))
         FILTER NOT EXISTS { ?dv qudt:dimensionExponentForAngle ?any . }
     }
     BIND(REPLACE(STR(?dv), "^.*[/#]", "") AS ?local)

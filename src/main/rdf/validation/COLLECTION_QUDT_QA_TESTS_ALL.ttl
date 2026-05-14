@@ -75,6 +75,11 @@
     a sh:PrefixDeclaration ;
     sh:namespace "http://qudt.org/shacl/functions#"^^xsd:anyURI ;
     sh:prefix "qfn" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://qudt.org/vocab/extendeddimensionvector/"^^xsd:anyURI ;
+    sh:prefix "edv" ;
   ] .
 
 qudt:ClosedWorldShape
@@ -333,6 +338,30 @@ FILTER NOT EXISTS {?t qudt:exactMatch $this } .
 """ ;
   ] ;
   sh:targetClass qudt:Concept .
+
+qudt:ExtendedDVBroaderChainHeuristic
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Heuristic: QuantityKind has R0N0 edv but a skos:broader ancestor has non-R0N0 edv" ;
+  sh:severity sh:Warning ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "If a QuantityKind's broader ancestor has a non-R0N0 extended dimension vector, the QK itself likely needs a non-R0N0 assignment. This catches newly added specialisations of angular or count quantity kinds that were assigned the default R0N0." ;
+    sh:message "QuantityKind {$this} has edv {?thisEdv} (R0N0) but ancestor {?ancestor} has edv {?ancestorEdv} (non-R0N0). Consider whether {$this} also needs a non-zero R or N component." ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+      SELECT $this ?ancestor ?ancestorEdv ?thisEdv
+      WHERE {
+          $this qudt:hasExtendedDimensionVector ?thisEdv .
+          $this skos:broader+ ?ancestor .
+          ?ancestor qudt:hasExtendedDimensionVector ?ancestorEdv .
+          FILTER(REGEX(STR(?thisEdv), "R0N0$"))
+          FILTER(!REGEX(STR(?ancestorEdv), "R0N0$"))
+          FILTER NOT EXISTS { $this qudt:deprecated true }
+      }
+    """ ;
+  ] ;
+  sh:targetClass qudt:QuantityKind .
 
 qudt:FactorUnitShape
   a sh:NodeShape ;
@@ -675,6 +704,33 @@ WHERE {{
     ?anotherType <http://www.w3.org/2000/01/rdf-schema#subClassOf>+ qudt:Concept .
    FILTER (?myType = ?anotherType)
 }""" ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
+qudt:UnitExtendedDVConflict
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Unit has hasQuantityKind values whose extended dimension vectors disagree on R or N" ;
+  sh:severity sh:Warning ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "A unit whose associated quantity kinds share the same SI dimension vector but differ in R (angle) or N (count) represents a dimensional-cancellation ambiguity. The unit has been assigned R0N0 as a conservative default. Review whether a dedicated angular or count variant of the unit should be introduced." ;
+    sh:message "Unit {$this}: quantity kinds {?qk1} (edv {?edv1}) and {?qk2} (edv {?edv2}) share SI dimension vector {?dv} but disagree on R or N." ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+      SELECT $this ?qk1 ?edv1 ?qk2 ?edv2 ?dv
+      WHERE {
+          $this qudt:hasQuantityKind ?qk1 ;
+                qudt:hasQuantityKind ?qk2 .
+          FILTER(?qk1 < ?qk2)
+          ?qk1 qudt:hasDimensionVector ?dv ;
+               qudt:hasExtendedDimensionVector ?edv1 .
+          ?qk2 qudt:hasDimensionVector ?dv ;
+               qudt:hasExtendedDimensionVector ?edv2 .
+          FILTER(?edv1 != ?edv2)
+          FILTER NOT EXISTS { $this qudt:deprecated true }
+      }
+    """ ;
   ] ;
   sh:targetClass qudt:Unit .
 
