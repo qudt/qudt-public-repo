@@ -1734,210 +1734,437 @@ qudt:Triplet
   rdfs:subClassOf qudt:ThreeTuple .
 
 qudt:Tuple
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>The term <em>Tuple</em> originated as an abstraction of the sequence: single, double, triple, quadruple, quintuple, n-tuple. 
+    a rdfs:Class, sh:NodeShape ;
+    dcterms:description """
+  <p><em>Tuple</em> is an abstraction of the sequence: single, double, triple, quadruple, quintuple, n-tuple. 
   In mathematics, a tuple is a finite sequence (also known as an <em>Ordered List</em> of objects, each of a specified type. 
   The <em>n</em> can be any non-negative integer.
   </p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Tuple" ;
-  rdfs:subClassOf qudt:CompositeDatatype ;
-  sh:property qudt:Tuple-elementType ;
-  sh:property qudt:Tuple-elementTypeCount ;
-  sh:property qudt:Tuple-length .
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    rdfs:label "Tuple" ;
+    rdfs:subClassOf qudt:CompositeDatatype ;
+    sh:property qudt:Tuple-conformsToTupleSpec ;
+    sh:property qudt:Tuple-values;
+    sh:sparql qudt:TupleDatatypeCheck ;
+    sh:sparql qudt:TupleExtraValueCheck ;
+    sh:sparql qudt:TupleMissingRequiredValueCheck ;
+    sh:sparql qudt:TupleLengthCheck .
 
-qudt:Tuple-elementType
+#################################################################
+# 1. Datatype Check
+#################################################################
+
+qudt:TupleDatatypeCheck
+    a sh:SPARQLConstraint ;
+    sh:message "Tuple member has the wrong datatype for its position." ;
+    sh:select """
+        SELECT $this ?index ?value ?expectedDatatype
+        WHERE {
+            $this qudt:values ?values ;
+                  qudt:conformsToTupleSpec ?spec .
+
+            ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
+            ?memberSpec qudt:index ?index ;
+                        sh:datatype ?expectedDatatype .
+
+            {
+                SELECT ?values ?valueCell ?value
+                       (COUNT(?previousCell) + 1 AS ?index)
+                WHERE {
+                    ?values rdf:rest* ?valueCell .
+                    ?valueCell rdf:first ?value .
+
+                    OPTIONAL {
+                        ?values rdf:rest* ?previousCell .
+                        ?previousCell rdf:rest+ ?valueCell .
+                    }
+                }
+                GROUP BY ?values ?valueCell ?value
+            }
+
+            FILTER ( datatype(?value) != ?expectedDatatype )
+        }
+    """ .
+
+#################################################################
+# 2. Extra Value Check
+#################################################################
+
+qudt:TupleExtraValueCheck
+    a sh:SPARQLConstraint ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:message "Tuple has a value at a position not declared by its tuple specification." ;
+    sh:select """
+        SELECT $this ?index ?value
+        WHERE {
+            $this qudt:values ?values ;
+                  qudt:conformsToTupleSpec ?spec .
+
+            {
+                SELECT ?values ?valueCell ?value
+                       (COUNT(?previousCell) + 1 AS ?index)
+                WHERE {
+                    ?values rdf:rest* ?valueCell .
+                    ?valueCell rdf:first ?value .
+
+                    OPTIONAL {
+                        ?values rdf:rest* ?previousCell .
+                        ?previousCell rdf:rest+ ?valueCell .
+                    }
+                }
+                GROUP BY ?values ?valueCell ?value
+            }
+
+            FILTER NOT EXISTS {
+                ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
+                ?memberSpec qudt:index ?index .
+            }
+        }
+    """ .
+
+#################################################################
+# 3. Missing Required Value Check
+#################################################################
+
+qudt:TupleMissingRequiredValueCheck
+    a sh:SPARQLConstraint ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:message "Tuple is missing a required value declared by its tuple specification." ;
+    sh:select """
+        SELECT $this ?index
+        WHERE {
+            $this qudt:values ?values ;
+                  qudt:conformsToTupleSpec ?spec .
+
+            ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
+            ?memberSpec qudt:index ?index .
+
+            OPTIONAL { ?memberSpec sh:minCount ?minCount . }
+            FILTER ( !BOUND(?minCount) || ?minCount > 0 )
+
+            FILTER NOT EXISTS {
+                {
+                    SELECT ?values ?valueCell
+                           (COUNT(?previousCell) + 1 AS ?valueIndex)
+                    WHERE {
+                        ?values rdf:rest* ?valueCell .
+                        ?valueCell rdf:first ?value .
+
+                        OPTIONAL {
+                            ?values rdf:rest* ?previousCell .
+                            ?previousCell rdf:rest+ ?valueCell .
+                        }
+                    }
+                    GROUP BY ?values ?valueCell
+                }
+
+                FILTER ( ?valueIndex = ?index )
+            }
+        }
+    """ .
+
+#################################################################
+# 4. Length Check
+#################################################################
+
+qudt:TupleLengthCheck
+    a sh:SPARQLConstraint ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:message "Tuple length does not match the number of member specifications." ;
+    sh:select """
+        SELECT $this ?valueCount ?specCount
+        WHERE {
+            $this qudt:values ?values ;
+                  qudt:conformsToTupleSpec ?spec .
+
+            {
+                SELECT ?values (COUNT(?valueCell) AS ?valueCount)
+                WHERE {
+                    ?values rdf:rest* ?valueCell .
+                    ?valueCell rdf:first ?value .
+                }
+                GROUP BY ?values
+            }
+
+            {
+                SELECT ?spec (COUNT(?memberSpec) AS ?specCount)
+                WHERE {
+                    ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
+                }
+                GROUP BY ?spec
+            }
+
+            FILTER ( ?valueCount != ?specCount )
+        }
+    """ .
+
+qudt:Tuple-conformsToTupleSpec
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:TupleMember ;
-  sh:path qudt:elementDatatype .
-
-qudt:Tuple-elementTypeCount
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
-  sh:path qudt:elementTypeCount .
+  sh:path qudt:conformsToTupleSpec ;
+  sh:class qudt:TupleSpec .
 
-qudt:Tuple-length
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
-  sh:maxCount 1 ;
-  sh:minCount 0 ;
-  sh:path qudt:length .
+qudt:TupleSpec
+    a rdfs:class, sh:NodeShape ;
+    dcterms:description """
+    <p>A SHACL node shape that defines the ordered member constraints
+        for a tuple. A tuple specification contains an RDF list of
+        member specifications, each describing the constraints for a
+        particular tuple position.
+    </p>
+    """ ;
+    rdfs:label "Tuple Specification" ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:property [
+        sh:path qudt:memberSpecs ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:node qudt:RDFListShape ;
+    ] ;
+    sh:property [
+        sh:path (
+            qudt:memberSpecs
+            rdf:rest*
+            rdf:first
+        ) ;
+        sh:class qudt:MemberSpec ;
+        sh:node qudt:MemberSpec ;
+    ] .
+  
+qudt:MemberSpec
+    a rdfs:Class , sh:NodeShape ;
+    dcterms:description """
+    <p> A specification for one tuple position. Member specifications
+    may use standard SHACL constraint properties such as sh:datatype, sh:class, sh:node, sh:in,
+    sh:minInclusive, and sh:maxInclusive.
+    """ ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    rdfs:label "Member Specification" ;
+    sh:property [
+        sh:path qudt:index ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 1 ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] .
 
-qudt:TupleMember
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p><em>Tuple Member</em> defines the properties of a member of a tuple. 
-  It is used to provide fine grained type specification to the elements of tuples.
-  </p>
-  """^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Tuple Member Type" ;
-  rdfs:subClassOf qudt:CompositeDatatype ;
-  sh:property qudt:TupleMember-elementType ;
-  sh:property qudt:TupleMember-orderInStructure .
 
-qudt:TupleType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p><em>Tuple</em> originated as an abstraction of the sequence: single, double, triple, quadruple, quintuple, n-tuple.  
-  In mathematics, a tuple is a finite sequence (also known as an <em>Ordered List</em> of objects, each of a specified type. 
-  The <em>n</em> can be any non-negative integer.
-  </p>
-  """^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Tuple Type" ;
-  rdfs:subClassOf qudt:CompositeDatatype ;
-  sh:property qudt:Tuple-elementType ;
-  sh:property qudt:Tuple-elementTypeCount ;
-  sh:property qudt:Tuple-length .
-
-qudt:TwoTupleV2
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  A 2-tuple is called a pair. 
-  For example, a complex number can be represented as a 2-tuple.
-  2D coordinates are sometimes represented as 2-tuples.
-  """ ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Two-Tuple V2" ;
-  rdfs:subClassOf qudt:N-Tuple ;
-  sh:property qudt:TwoTupleV2-memberTypes;
-  sh:property qudt:TwoTupleV2-firstMemberValue;
-  sh:property qudt:TwoTupleV2-seccondMemberValue .
-
-qudt:TwoTupleV2-firstMemberValue
+qudt:Tuple-values
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
-  sh:path qudt:firstMemberValue ;
-  sh:datatype qudt:NumericTypeUnion .
+  sh:path qudt:values ;
+  sh:node qudt:RDFListShape  .
 
-qudt:TwoTupleTypeV2
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  A 2-tuple is called a pair. 
-  For example, a complex number can be represented as a 2-tuple.
-  2D coordinates are sometimes represented as 2-tuples.
-  """ ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Two-Tuple V2" ;
-  rdfs:subClassOf qudt:N-Tuple ;
-  sh:property qudt:TwoTuple-elementType ;
-  sh:property qudt:TwoTuple-elementTypeCount .
-
-qudt:TwoTupleV3
+qudt:RDFListShape
     a sh:NodeShape ;
-    sh:property qudt:TwoTupleV3-tupleMemberTypes ;
-    sh:property [
-        sh:path rdf:first ;
-        sh:node qudt:NumericTypeUnion ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-    ] ;
-    sh:property [
-        sh:path ( rdf:rest rdf:first ) ;
-        sh:node qudt:NumericTypeUnion ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-    ] ;
-    # list must end after two members
-    sh:property [
-        sh:path ( rdf:rest rdf:rest ) ;
-        sh:hasValue rdf:nil ;
-    ] .
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:or (
+        [
+            sh:hasValue rdf:nil
+        ]
+        [
+            sh:property [
+                sh:path rdf:first ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+            ] ;
+            sh:property [
+                sh:path rdf:rest ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:node qudt:RDFListShape ;
+            ] ;
+        ]
+    ) .
 
-qudt:TwoTupleV3-tupleMemberTypes
-    a sh:PropertyShape;
-    sh:path qudt:tupleMemberTypes ;
-    sh:class qudt:TwoTupleV3Type;
-    sh:minCount 1 ;
-    sh:maxCount 1 ;
-    .
+#################################################################
+# 2-Tuple Example
+# (xsd:date, xsd:integer)
+#################################################################
 
-qudt:TwoTupleV3Type
-    a sh:NodeShape ;
-    sh:property [
-        sh:path rdf:first ;
-        sh:or qudt:NumericTypeUnion ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-    ] ;
-    sh:property [
-        sh:path ( rdf:rest rdf:first ) ;
-        sh:or qudt:NumericTypeUnion ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-    ] ;
-    # list must end after two members
-    sh:property [
-        sh:path ( rdf:rest rdf:rest ) ;
-        sh:hasValue rdf:nil ;
-    ] .
+ex:DateCountTupleSpec
+    a qudt:TupleSpec ;
+    qudt:memberSpecs (
+        [
+            a qudt:MemberSpec ;
+            qudt:index 1 ;
+            sh:datatype xsd:date ;
+        ]
+        [
+            a qudt:MemberSpec ;
+            qudt:index 2 ;
+            sh:datatype xsd:integer ;
+            sh:minInclusive 0 ;
+        ]
+    ) .
 
-qudt:ComplexNumberType
-  a qudt:TwoTupleV3Type ;
-  qudt:hasTuple (xsd:float xsd:float) ;
-  .
+ex:exampleTuple1
+    a qudt:Tuple ;
+    qudt:conformsToTupleSpec qudt:DateCountTupleSpec ;
+    qudt:values (
+        "2026-05-12"^^xsd:date
+        42
+    ) .
 
-qudt:DateCountTwoTupleType
-  a qudt:TwoTupleV3Type ;
-  qudt:hasTuple (xsd:date xsd:int) ;
-  .
+#################################################################
+# 2-Tuple Example
+# (xsd:string, xsd:boolean)
+#################################################################
 
-qudt:TwoTuple
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  A 2-tuple is called a pair. 
-  For example, a complex number can be represented as a 2-tuple.
-  2D coordinates are sometimes represented as 2-tuples.
-  """ ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Two-Tuple" ;
-  rdfs:subClassOf qudt:N-Tuple ;
-  sh:property qudt:TwoTuple-elementType ;
-  sh:property qudt:TwoTuple-elementTypeCount .
+ex:StatusFlagTupleSpec
+    a qudt:TupleSpec ;
+    qudt:memberSpecs (
+        [
+            a qudt:MemberSpec ;
+            qudt:index 1 ;
+            sh:datatype xsd:string ;
+            sh:minLength 1 ;
+        ]
+        [
+            a qudt:MemberSpec ;
+            qudt:index 2 ;
+            sh:datatype xsd:boolean ;
+        ]
+    ) .
 
-qudt:TwoTuple-elementType
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:minCount 0 ;
-  sh:path qudt:elementDatatype .
+ex:exampleTuple2
+    a qudt:Tuple ;
+    qudt:conformsToTupleSpec ex:StatusFlagTupleSpec ;
+    qudt:values (
+        "Approved"
+        true
+    ) .
 
-qudt:TwoTuple-elementTypeCount
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
-  sh:hasValue 2 ;
-  sh:path qudt:elementTypeCount .
+#################################################################
+# 3-Tuple Example
+# (xsd:date, xsd:decimal, unit:Unit)
+#################################################################
 
-qudt:TwoTuple-elementType
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:minCount 0 ;
-  sh:path qudt:elementDatatype .
+ex:MeasurementTupleSpec
+    a qudt:TupleSpec ;
+    qudt:memberSpecs (
+        [
+            a qudt:MemberSpec ;
+            qudt:index 1 ;
+            sh:datatype xsd:date ;
+        ]
+        [
+            a qudt:MemberSpec ;
+            qudt:index 2 ;
+            sh:datatype xsd:decimal ;
+        ]
+        [
+            a qudt:MemberSpec ;
+            qudt:index 3 ;
+            sh:class qudt:Unit ;
+        ]
+    ) .
 
-qudt:TwoTuple-elementTypeCount
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
-  sh:hasValue 2 ;
-  sh:path qudt:elementTypeCount .
+ex:exampleTuple3
+    a qudt:Tuple ;
+    qudt:conformsToTupleSpec ex:MeasurementTupleSpec ;
+    qudt:values (
+        "2026-05-12"^^xsd:date
+        "23.7"^^xsd:decimal
+        unit:DEG_C
+    ) .
 
-qudt:TwoTupleType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A 2-tuple is called a pair. For example, a complex number can be represented as a 2-tuple, and 2D coordinates are sometimes represented as 2-tuples." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Two-Tuple Type" ;
-  rdfs:subClassOf qudt:N-TupleType ;
-  sh:property qudt:TwoTuple-elementType ;
-  sh:property qudt:TwoTuple-elementTypeCount .
+#################################################################
+# 3-Tuple Example
+# (quantity kind, decimal value, unit)
+#################################################################
+
+ex:QuantityValueUnitTupleSpec
+    a qudt:TupleSpec ;
+    qudt:memberSpecs (
+        [
+            a qudt:MemberSpec ;
+            qudt:index 1 ;
+            sh:class qudt:QuantityKind ;
+        ]
+        [
+            a qudt:MemberSpec ;
+            qudt:index 2 ;
+            sh:datatype xsd:decimal ;
+        ]
+        [
+            a qudt:MemberSpec ;
+            qudt:index 3 ;
+            sh:class qudt:Unit ;
+        ]
+    ) .
+
+ex:exampleTuple4
+    a qudt:Tuple ;
+    qudt:conformsToTupleSpec ex:QuantityValueUnitTupleSpec ;
+    qudt:values (
+        quantitykind:Temperature
+        "23.7"^^xsd:decimal
+        unit:DEG_C
+    ) .
+
+#################################################################
+# 3-Tuple Example
+# (IRI, language-tagged string, integer 1..5)
+#################################################################
+
+ex:ResourceLabelRatingTupleSpec
+    a qudt:TupleSpec ;
+    qudt:memberSpecs (
+        [
+            a qudt:MemberSpec ;
+            qudt:index 1 ;
+            sh:nodeKind sh:IRI ;
+        ]
+        [
+            a qudt:MemberSpec ;
+            qudt:index 2 ;
+            sh:languageIn ( "en" ) ;
+        ]
+        [
+            a qudt:MemberSpec ;
+            qudt:index 3 ;
+            sh:datatype xsd:integer ;
+            sh:minInclusive 1 ;
+            sh:maxInclusive 5 ;
+        ]
+        [
+
+            a qudt:MemberSpec ;
+
+            qudt:index 4 ;
+
+            sh:class qudt:Unit ;
+
+        ]
+
+        [
+
+            a qudt:MemberSpec ;
+
+            qudt:index 5 ;
+
+            sh:datatype xsd:date ;
+
+        ]
+    ) .
+
+ex:exampleTuple5
+    a qudt:Tuple ;
+    qudt:conformsToTupleSpec ex:ResourceLabelRatingTupleSpec ;
+    qudt:values (
+        quantitykind:Temperature
+        "Ambient temperature"@en
+        5
+        unit:DEG_C
+        "2026-05-12"^^xsd:date
+    ) .
+
+
 
 qudt:TypeList
   a rdfs:Class, sh:NodeShape ;
