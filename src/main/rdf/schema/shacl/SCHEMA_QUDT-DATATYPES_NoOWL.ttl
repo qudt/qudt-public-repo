@@ -1,3 +1,4 @@
+@prefix ex: <http://example.org#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -7,8 +8,11 @@
 @prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sou: <http://qudt.org/vocab/sou/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
 @prefix vaem: <http://www.linkedmodel.org/schema/vaem#> .
 @prefix voag: <http://voag.linkedmodel.org/schema/voag#> .
 
@@ -1756,34 +1760,34 @@ qudt:Tuple
 
 qudt:TupleDatatypeCheck
     a sh:SPARQLConstraint ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
     sh:message "Tuple member has the wrong datatype for its position." ;
     sh:select """
         SELECT $this ?index ?value ?expectedDatatype
+WHERE {
+    $this qudt:conformsToTupleSpec ?spec .
+
+    ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
+    ?memberSpec qudt:index    ?index ;
+                sh:datatype   ?expectedDatatype .
+
+    {
+        SELECT $this ?value (COUNT(?previousCell) + 1 AS ?index)
         WHERE {
-            $this qudt:values ?values ;
-                  qudt:conformsToTupleSpec ?spec .
+            $this qudt:values ?values .
+            ?values rdf:rest* ?valueCell .
+            ?valueCell rdf:first ?value .
 
-            ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
-            ?memberSpec qudt:index ?index ;
-                        sh:datatype ?expectedDatatype .
-
-            {
-                SELECT ?values ?valueCell ?value
-                       (COUNT(?previousCell) + 1 AS ?index)
-                WHERE {
-                    ?values rdf:rest* ?valueCell .
-                    ?valueCell rdf:first ?value .
-
-                    OPTIONAL {
-                        ?values rdf:rest* ?previousCell .
-                        ?previousCell rdf:rest+ ?valueCell .
-                    }
-                }
-                GROUP BY ?values ?valueCell ?value
+            OPTIONAL {
+                ?values rdf:rest* ?previousCell .
+                ?previousCell rdf:rest+ ?valueCell .
             }
-
-            FILTER ( datatype(?value) != ?expectedDatatype )
         }
+        GROUP BY $this ?value ?valueCell
+    }
+
+    FILTER ( datatype(?value) != ?expectedDatatype )
+}
     """ .
 
 #################################################################
@@ -1792,34 +1796,34 @@ qudt:TupleDatatypeCheck
 
 qudt:TupleExtraValueCheck
     a sh:SPARQLConstraint ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
     rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
     sh:message "Tuple has a value at a position not declared by its tuple specification." ;
     sh:select """
         SELECT $this ?index ?value
+WHERE {
+    $this qudt:conformsToTupleSpec ?spec .
+
+    {
+        SELECT $this ?value (COUNT(?previousCell) + 1 AS ?index)
         WHERE {
-            $this qudt:values ?values ;
-                  qudt:conformsToTupleSpec ?spec .
+            $this qudt:values ?values .
+            ?values rdf:rest* ?valueCell .
+            ?valueCell rdf:first ?value .
 
-            {
-                SELECT ?values ?valueCell ?value
-                       (COUNT(?previousCell) + 1 AS ?index)
-                WHERE {
-                    ?values rdf:rest* ?valueCell .
-                    ?valueCell rdf:first ?value .
-
-                    OPTIONAL {
-                        ?values rdf:rest* ?previousCell .
-                        ?previousCell rdf:rest+ ?valueCell .
-                    }
-                }
-                GROUP BY ?values ?valueCell ?value
-            }
-
-            FILTER NOT EXISTS {
-                ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
-                ?memberSpec qudt:index ?index .
+            OPTIONAL {
+                ?values rdf:rest* ?previousCell .
+                ?previousCell rdf:rest+ ?valueCell .
             }
         }
+        GROUP BY $this ?value ?valueCell
+    }
+
+    FILTER NOT EXISTS {
+        ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
+        ?memberSpec qudt:index ?index .
+    }
+}
     """ .
 
 #################################################################
@@ -1828,39 +1832,39 @@ qudt:TupleExtraValueCheck
 
 qudt:TupleMissingRequiredValueCheck
     a sh:SPARQLConstraint ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
     rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
     sh:message "Tuple is missing a required value declared by its tuple specification." ;
     sh:select """
         SELECT $this ?index
-        WHERE {
-            $this qudt:values ?values ;
-                  qudt:conformsToTupleSpec ?spec .
+WHERE {
+    $this qudt:conformsToTupleSpec ?spec .
 
-            ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
-            ?memberSpec qudt:index ?index .
+    ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
+    ?memberSpec qudt:index ?index .
 
-            OPTIONAL { ?memberSpec sh:minCount ?minCount . }
-            FILTER ( !BOUND(?minCount) || ?minCount > 0 )
+    OPTIONAL { ?memberSpec sh:minCount ?minCount . }
+    FILTER ( !BOUND(?minCount) || ?minCount > 0 )
 
-            FILTER NOT EXISTS {
-                {
-                    SELECT ?values ?valueCell
-                           (COUNT(?previousCell) + 1 AS ?valueIndex)
-                    WHERE {
-                        ?values rdf:rest* ?valueCell .
-                        ?valueCell rdf:first ?value .
+    FILTER EXISTS {
+        {
+            SELECT $this (COUNT(?previousCell) + 1 AS ?valueIndex)
+            WHERE {
+                $this qudt:values ?values .
+                ?values rdf:rest* ?valueCell .
+                ?valueCell rdf:first ?value .
 
-                        OPTIONAL {
-                            ?values rdf:rest* ?previousCell .
-                            ?previousCell rdf:rest+ ?valueCell .
-                        }
-                    }
-                    GROUP BY ?values ?valueCell
+                OPTIONAL {
+                    ?values rdf:rest* ?previousCell .
+                    ?previousCell rdf:rest+ ?valueCell .
                 }
-
-                FILTER ( ?valueIndex = ?index )
             }
+            GROUP BY $this ?valueCell
         }
+
+        FILTER ( ?valueIndex = ?index )
+    }
+}
     """ .
 
 #################################################################
@@ -1869,33 +1873,33 @@ qudt:TupleMissingRequiredValueCheck
 
 qudt:TupleLengthCheck
     a sh:SPARQLConstraint ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
     rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
     sh:message "Tuple length does not match the number of member specifications." ;
     sh:select """
         SELECT $this ?valueCount ?specCount
+WHERE {
+    {
+        SELECT $this (COUNT(?valueCell) AS ?valueCount)
         WHERE {
-            $this qudt:values ?values ;
-                  qudt:conformsToTupleSpec ?spec .
-
-            {
-                SELECT ?values (COUNT(?valueCell) AS ?valueCount)
-                WHERE {
-                    ?values rdf:rest* ?valueCell .
-                    ?valueCell rdf:first ?value .
-                }
-                GROUP BY ?values
-            }
-
-            {
-                SELECT ?spec (COUNT(?memberSpec) AS ?specCount)
-                WHERE {
-                    ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
-                }
-                GROUP BY ?spec
-            }
-
-            FILTER ( ?valueCount != ?specCount )
+            $this qudt:values ?values .
+            ?values rdf:rest* ?valueCell .
+            ?valueCell rdf:first ?value .
         }
+        GROUP BY $this
+    }
+
+    {
+        SELECT $this (COUNT(?memberSpec) AS ?specCount)
+        WHERE {
+            $this qudt:conformsToTupleSpec ?spec .
+            ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
+        }
+        GROUP BY $this
+    }
+
+    FILTER ( ?valueCount != ?specCount )
+}
     """ .
 
 qudt:Tuple-conformsToTupleSpec
@@ -1926,12 +1930,13 @@ qudt:TupleSpec
     sh:property [
         sh:path (
             qudt:memberSpecs
-            rdf:rest*
+            [ sh:zeroOrMorePath rdf:rest ]
             rdf:first
         ) ;
         sh:class qudt:MemberSpec ;
         sh:node qudt:MemberSpec ;
-    ] .
+    ] ;
+    .
   
 qudt:MemberSpec
     a rdfs:Class , sh:NodeShape ;
@@ -2004,7 +2009,7 @@ ex:DateCountTupleSpec
 
 ex:exampleTuple1
     a qudt:Tuple ;
-    qudt:conformsToTupleSpec qudt:DateCountTupleSpec ;
+    qudt:conformsToTupleSpec ex:DateCountTupleSpec ;
     qudt:values (
         "2026-05-12"^^xsd:date
         42
@@ -2039,9 +2044,26 @@ ex:exampleTuple2
         true
     ) .
 
+ex:badExampleTuple2a
+    a qudt:Tuple ;
+    qudt:conformsToTupleSpec ex:StatusFlagTupleSpec ;
+    qudt:values (
+        "Approved"
+        42
+    ) .
+
+ex:badExampleTuple2b
+    a qudt:Tuple ;
+    qudt:conformsToTupleSpec ex:StatusFlagTupleSpec ;
+    qudt:values (
+        "Approved"
+        true
+        42
+    ) .
+
 #################################################################
 # 3-Tuple Example
-# (xsd:date, xsd:decimal, unit:Unit)
+# (xsd:date, xsd:decimal, qudt:Unit)
 #################################################################
 
 ex:MeasurementTupleSpec
@@ -2071,6 +2093,15 @@ ex:exampleTuple3
         "2026-05-12"^^xsd:date
         "23.7"^^xsd:decimal
         unit:DEG_C
+    ) .
+  
+ex:badExampleTuple3
+    a qudt:Tuple ;
+    qudt:conformsToTupleSpec ex:MeasurementTupleSpec ;
+    qudt:values (
+        "2026-05-12"^^xsd:date
+        "23.7"^^xsd:decimal
+        42
     ) .
 
 #################################################################
@@ -2133,23 +2164,14 @@ ex:ResourceLabelRatingTupleSpec
             sh:maxInclusive 5 ;
         ]
         [
-
             a qudt:MemberSpec ;
-
             qudt:index 4 ;
-
             sh:class qudt:Unit ;
-
         ]
-
         [
-
             a qudt:MemberSpec ;
-
             qudt:index 5 ;
-
             sh:datatype xsd:date ;
-
         ]
     ) .
 
@@ -4367,6 +4389,12 @@ qudt:hexbinary
   rdfs:subClassOf xsd:string ;
   sh:datatype xsd:string ;
   sh:pattern "[0-9A-F]*" .
+
+qudt:values
+  a rdf:Property ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "values" ;
+  .
 
 vaem:GMD_SCHEMA-SHACL-DATATYPE
   a vaem:GraphMetaData ;
