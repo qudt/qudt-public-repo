@@ -191,6 +191,12 @@ qudt:AuralCue
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Aural Cue" ;
   rdfs:subClassOf qudt:ModalCue ;
+  sh:not [
+    sh:class qudt:KinestheticCue ;
+  ] ;
+  sh:not [
+    sh:class qudt:VisualCue ;
+  ] ;
   sh:property qudt:AuralCue-sound .
 
 qudt:BalancedTree
@@ -535,8 +541,7 @@ qudt:DoublePrecisionType
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Double Precision Type" ;
-  rdfs:subClassOf qudt:NumericType ;
-  sh:disjoint qudt:SinglePrecisionType .
+  rdfs:subClassOf qudt:NumericType .
 
 qudt:Encoding
   a rdfs:Class, sh:NodeShape ;
@@ -574,8 +579,6 @@ qudt:EngineeringValueTupleMember
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Engineering Value Tuple Member" ;
   rdfs:subClassOf qudt:TupleMember ;
-  sh:disjoint qudt:RawValueTupleMember ;
-  sh:disjoint qudt:RawValueTupleMemberType ;
   sh:property qudt:EngineeringValueTupleMember-elementType .
 
 qudt:Enumeration
@@ -778,11 +781,8 @@ qudt:HomogeneousArray
 qudt:IconicCue
   a rdfs:Class, sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Iconic enumeration literal" ;
-  rdfs:subClassOf qudt:ModalCue ;
-  sh:disjoint qudt:AuralCue ;
-  sh:disjoint qudt:KinestheticCue ;
-  sh:disjoint qudt:VisualCue ;
+  rdfs:label "Iconic Cue" ;
+  rdfs:subClassOf qudt:VisualCue ;
   sh:property qudt:IconicCue-image .
 
 qudt:IntegerDatatype
@@ -1747,6 +1747,28 @@ qudt:Tuple
   sh:property qudt:Tuple-elementTypeCount ;
   sh:property qudt:Tuple-length .
 
+qudt:Tuple-elementType
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:class qudt:TupleMember ;
+  sh:path qudt:elementDatatype .
+
+qudt:Tuple-elementTypeCount
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+  sh:path qudt:elementTypeCount .
+
+qudt:Tuple-length
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:minCount 0 ;
+  sh:path qudt:length .
+
 qudt:TupleMember
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
@@ -1775,6 +1797,100 @@ qudt:TupleType
   sh:property qudt:Tuple-elementTypeCount ;
   sh:property qudt:Tuple-length .
 
+qudt:TwoTupleV2
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  A 2-tuple is called a pair. 
+  For example, a complex number can be represented as a 2-tuple.
+  2D coordinates are sometimes represented as 2-tuples.
+  """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Two-Tuple V2" ;
+  rdfs:subClassOf qudt:N-Tuple ;
+  sh:property qudt:TwoTupleV2-memberTypes;
+  sh:property qudt:TwoTupleV2-firstMemberValue;
+  sh:property qudt:TwoTupleV2-seccondMemberValue .
+
+qudt:TwoTupleV2-firstMemberValue
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+  sh:path qudt:firstMemberValue ;
+  sh:datatype qudt:NumericTypeUnion .
+
+qudt:TwoTupleTypeV2
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  A 2-tuple is called a pair. 
+  For example, a complex number can be represented as a 2-tuple.
+  2D coordinates are sometimes represented as 2-tuples.
+  """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Two-Tuple V2" ;
+  rdfs:subClassOf qudt:N-Tuple ;
+  sh:property qudt:TwoTuple-elementType ;
+  sh:property qudt:TwoTuple-elementTypeCount .
+
+qudt:TwoTupleV3
+    a sh:NodeShape ;
+    sh:property qudt:TwoTupleV3-tupleMemberTypes ;
+    sh:property [
+        sh:path rdf:first ;
+        sh:node qudt:NumericTypeUnion ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ( rdf:rest rdf:first ) ;
+        sh:node qudt:NumericTypeUnion ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    # list must end after two members
+    sh:property [
+        sh:path ( rdf:rest rdf:rest ) ;
+        sh:hasValue rdf:nil ;
+    ] .
+
+qudt:TwoTupleV3-tupleMemberTypes
+    a sh:PropertyShape;
+    sh:path qudt:tupleMemberTypes ;
+    sh:class qudt:TwoTupleV3Type;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    .
+
+qudt:TwoTupleV3Type
+    a sh:NodeShape ;
+    sh:property [
+        sh:path rdf:first ;
+        sh:or qudt:NumericTypeUnion ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ( rdf:rest rdf:first ) ;
+        sh:or qudt:NumericTypeUnion ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    # list must end after two members
+    sh:property [
+        sh:path ( rdf:rest rdf:rest ) ;
+        sh:hasValue rdf:nil ;
+    ] .
+
+qudt:ComplexNumberType
+  a qudt:TwoTupleV3Type ;
+  qudt:hasTuple (xsd:float xsd:float) ;
+  .
+
+qudt:DateCountTwoTupleType
+  a qudt:TwoTupleV3Type ;
+  qudt:hasTuple (xsd:date xsd:int) ;
+  .
+
 qudt:TwoTuple
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
@@ -1788,14 +1904,40 @@ qudt:TwoTuple
   sh:property qudt:TwoTuple-elementType ;
   sh:property qudt:TwoTuple-elementTypeCount .
 
+qudt:TwoTuple-elementType
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:minCount 0 ;
+  sh:path qudt:elementDatatype .
+
+qudt:TwoTuple-elementTypeCount
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:datatype xsd:integer ;
+  sh:hasValue 2 ;
+  sh:path qudt:elementTypeCount .
+
+qudt:TwoTuple-elementType
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:minCount 0 ;
+  sh:path qudt:elementDatatype .
+
+qudt:TwoTuple-elementTypeCount
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:datatype xsd:integer ;
+  sh:hasValue 2 ;
+  sh:path qudt:elementTypeCount .
+
 qudt:TwoTupleType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description "A 2-tuple is called a pair. For example, a complex number can be represented as a 2-tuple, and 2D coordinates are sometimes represented as 2-tuples." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Two-Tuple Type" ;
   rdfs:subClassOf qudt:N-TupleType ;
-  sh:property qudt:Two-Tuple-elementType ;
-  sh:property qudt:Two-Tuple-elementTypeCount .
+  sh:property qudt:TwoTuple-elementType ;
+  sh:property qudt:TwoTuple-elementTypeCount .
 
 qudt:TypeList
   a rdfs:Class, sh:NodeShape ;
@@ -1964,7 +2106,13 @@ qudt:VisualCue
   a rdfs:Class, sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Visual Cue" ;
-  rdfs:subClassOf qudt:ModalCue .
+  rdfs:subClassOf qudt:ModalCue ;
+  sh:not [
+    sh:class qudt:AuralCue ;
+  ] ;
+  sh:not [
+    sh:class qudt:KinestheticCue ;
+  ] .
 
 qudt:WetDryStateType
   a rdfs:Class, sh:NodeShape ;
@@ -3827,27 +3975,6 @@ qudt:TimeSeriesArray-vector
   sh:minCount 1 ;
   sh:path qudt:vector .
 
-qudt:Tuple-elementType
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:TupleMember ;
-  sh:path qudt:elementDatatype .
-
-qudt:Tuple-elementTypeCount
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
-  sh:minCount 0 ;
-  sh:path qudt:elementTypeCount .
-
-qudt:Tuple-length
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
-  sh:maxCount 1 ;
-  sh:minCount 0 ;
-  sh:path qudt:length .
-
 qudt:TupleMember-elementType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -3861,13 +3988,13 @@ qudt:TupleMember-orderInStructure
   sh:minCount 1 ;
   sh:path qudt:orderInStructure .
 
-qudt:Two-Tuple-elementType
+qudt:TwoTuple-elementType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:minCount 0 ;
   sh:path qudt:elementDatatype .
 
-qudt:Two-Tuple-elementTypeCount
+qudt:TwoTuple-elementTypeCount
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:datatype xsd:integer ;
