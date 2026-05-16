@@ -39,6 +39,14 @@
     sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ;
     sh:prefix "rdf" ;
   ] ;
+  sh:declare [
+    sh:namespace "http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI ;
+    sh:prefix "rdfs" ;
+  ] ;
+  sh:declare [
+    sh:namespace "http://www.w3.org/ns/shacl#"^^xsd:anyURI ;
+    sh:prefix "sh" ;
+  ] ;
   vaem:hasCatalogEntry voag:QUDT-SchemaCatalogEntry ;
   vaem:hasGraphMetadata vaem:GMD_SCHEMA-SHACL-DATATYPE ;
   vaem:hasGraphRole vaem:SchemaGraph ;
@@ -1749,45 +1757,68 @@ qudt:Tuple
     rdfs:subClassOf qudt:CompositeDatatype ;
     sh:property qudt:Tuple-conformsToTupleSpec ;
     sh:property qudt:Tuple-values;
-    sh:sparql qudt:TupleDatatypeCheck ;
+    sh:sparql qudt:TupleTypeCheck ;
     sh:sparql qudt:TupleExtraValueCheck ;
     sh:sparql qudt:TupleMissingRequiredValueCheck ;
     sh:sparql qudt:TupleLengthCheck .
 
 #################################################################
-# 1. Datatype Check
+# 1. Tuple Member Type Check
 #################################################################
 
-qudt:TupleDatatypeCheck
+qudt:TupleTypeCheck
     a sh:SPARQLConstraint ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    sh:message "Tuple member has the wrong datatype for its position." ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:message "Tuple value at position {?index} does not satisfy the member specification." ;
     sh:select """
-        SELECT $this ?index ?value ?expectedDatatype
-WHERE {
-    $this qudt:conformsToTupleSpec ?spec .
-
-    ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
-    ?memberSpec qudt:index    ?index ;
-                sh:datatype   ?expectedDatatype .
-
-    {
-        SELECT $this ?value (COUNT(?previousCell) + 1 AS ?index)
+        SELECT $this ?index ?value
         WHERE {
-            $this qudt:values ?values .
-            ?values rdf:rest* ?valueCell .
-            ?valueCell rdf:first ?value .
+            $this qudt:conformsToTupleSpec ?spec .
 
-            OPTIONAL {
-                ?values rdf:rest* ?previousCell .
-                ?previousCell rdf:rest+ ?valueCell .
+            ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
+            ?memberSpec qudt:index ?index .
+
+            # Only check positions whose memberSpec actually declares a type expectation
+            FILTER EXISTS {
+                ?memberSpec ( sh:datatype | sh:or | sh:class | qudt:value | sh:nodeKind ) ?anyConstraint .
+            }
+
+            {
+                SELECT $this ?value (COUNT(?previousCell) + 1 AS ?index)
+                WHERE {
+                    $this qudt:values ?values .
+                    ?values rdf:rest* ?valueCell .
+                    ?valueCell rdf:first ?value .
+
+                    OPTIONAL {
+                        ?values rdf:rest* ?previousCell .
+                        ?previousCell rdf:rest+ ?valueCell .
+                    }
+                }
+                GROUP BY $this ?value ?valueCell
+            }
+
+            # Violation iff none of the four memberSpec patterns is satisfied by the value
+            FILTER NOT EXISTS {
+                {
+                    # (1) Numeric datatype — direct sh:datatype, or one inside an sh:or union
+                    ?memberSpec ( sh:datatype | sh:or/rdf:rest*/rdf:first/sh:datatype ) ?allowedDatatype .
+                    FILTER ( datatype(?value) = ?allowedDatatype )
+                } UNION {
+                    # (2) Concept class membership — sh:class <C> where <C> a qudt:Concept
+                    ?memberSpec sh:class ?targetClass .
+                    ?value rdf:type/rdfs:subClassOf* ?targetClass .
+                } UNION {
+                    # (3) Enumerated value — qudt:value <enum1>, <enum2>, ...
+                    ?memberSpec qudt:value ?value .
+                } UNION {
+                    # (4) Any IRI — sh:nodeKind sh:IRI on the memberSpec
+                    ?memberSpec sh:nodeKind sh:IRI .
+                    FILTER ( isIRI(?value) )
+                }
             }
         }
-        GROUP BY $this ?value ?valueCell
-    }
-
-    FILTER ( datatype(?value) != ?expectedDatatype )
-}
     """ .
 
 #################################################################
@@ -1947,14 +1978,46 @@ qudt:MemberSpec
     """ ;
     rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
     rdfs:label "Member Specification" ;
-    sh:property [
-        sh:path qudt:index ;
-        sh:datatype xsd:integer ;
-        sh:minInclusive 1 ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-    ] .
+    sh:property qudt:MemberSpec-index ;
+    sh:property qudt:MemberSpec-type ;
+    .
 
+qudt:MemberSpec-index
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:path qudt:index ;
+  sh:datatype xsd:integer ;
+  sh:minInclusive 1 ;
+  sh:minCount 1 ;
+  sh:maxCount 1 ;
+  .
+
+qudt:MemberSpec-type
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:node (
+      [
+        sh:or qudt:NumericTypeUnion ;
+      ]
+      [
+        sh:property [
+            sh:path sh:class ;
+            sh:class qudt:Concept ;
+          ] ;
+      ]
+      [
+        sh:property [
+            sh:path qudt:value ;
+            sh:class qudt:EnumeratedValue ;
+          ] ;
+      ]
+      [
+        sh:nodeKind sh:IRI ;
+      ]
+    ) ;
+  sh:minCount 1 ;
+  sh:maxCount 1 ;
+  .
 
 qudt:Tuple-values
   a sh:PropertyShape ;
@@ -1985,208 +2048,6 @@ qudt:RDFListShape
             ] ;
         ]
     ) .
-
-#################################################################
-# 2-Tuple Example
-# (xsd:date, xsd:integer)
-#################################################################
-
-ex:DateCountTupleSpec
-    a qudt:TupleSpec ;
-    qudt:memberSpecs (
-        [
-            a qudt:MemberSpec ;
-            qudt:index 1 ;
-            sh:datatype xsd:date ;
-        ]
-        [
-            a qudt:MemberSpec ;
-            qudt:index 2 ;
-            sh:datatype xsd:integer ;
-            sh:minInclusive 0 ;
-        ]
-    ) .
-
-ex:exampleTuple1
-    a qudt:Tuple ;
-    qudt:conformsToTupleSpec ex:DateCountTupleSpec ;
-    qudt:values (
-        "2026-05-12"^^xsd:date
-        42
-    ) .
-
-#################################################################
-# 2-Tuple Example
-# (xsd:string, xsd:boolean)
-#################################################################
-
-ex:StatusFlagTupleSpec
-    a qudt:TupleSpec ;
-    qudt:memberSpecs (
-        [
-            a qudt:MemberSpec ;
-            qudt:index 1 ;
-            sh:datatype xsd:string ;
-            sh:minLength 1 ;
-        ]
-        [
-            a qudt:MemberSpec ;
-            qudt:index 2 ;
-            sh:datatype xsd:boolean ;
-        ]
-    ) .
-
-ex:exampleTuple2
-    a qudt:Tuple ;
-    qudt:conformsToTupleSpec ex:StatusFlagTupleSpec ;
-    qudt:values (
-        "Approved"
-        true
-    ) .
-
-ex:badExampleTuple2a
-    a qudt:Tuple ;
-    qudt:conformsToTupleSpec ex:StatusFlagTupleSpec ;
-    qudt:values (
-        "Approved"
-        42
-    ) .
-
-ex:badExampleTuple2b
-    a qudt:Tuple ;
-    qudt:conformsToTupleSpec ex:StatusFlagTupleSpec ;
-    qudt:values (
-        "Approved"
-        true
-        42
-    ) .
-
-#################################################################
-# 3-Tuple Example
-# (xsd:date, xsd:decimal, qudt:Unit)
-#################################################################
-
-ex:MeasurementTupleSpec
-    a qudt:TupleSpec ;
-    qudt:memberSpecs (
-        [
-            a qudt:MemberSpec ;
-            qudt:index 1 ;
-            sh:datatype xsd:date ;
-        ]
-        [
-            a qudt:MemberSpec ;
-            qudt:index 2 ;
-            sh:datatype xsd:decimal ;
-        ]
-        [
-            a qudt:MemberSpec ;
-            qudt:index 3 ;
-            sh:class qudt:Unit ;
-        ]
-    ) .
-
-ex:exampleTuple3
-    a qudt:Tuple ;
-    qudt:conformsToTupleSpec ex:MeasurementTupleSpec ;
-    qudt:values (
-        "2026-05-12"^^xsd:date
-        "23.7"^^xsd:decimal
-        unit:DEG_C
-    ) .
-  
-ex:badExampleTuple3
-    a qudt:Tuple ;
-    qudt:conformsToTupleSpec ex:MeasurementTupleSpec ;
-    qudt:values (
-        "2026-05-12"^^xsd:date
-        "23.7"^^xsd:decimal
-        42
-    ) .
-
-#################################################################
-# 3-Tuple Example
-# (quantity kind, decimal value, unit)
-#################################################################
-
-ex:QuantityValueUnitTupleSpec
-    a qudt:TupleSpec ;
-    qudt:memberSpecs (
-        [
-            a qudt:MemberSpec ;
-            qudt:index 1 ;
-            sh:class qudt:QuantityKind ;
-        ]
-        [
-            a qudt:MemberSpec ;
-            qudt:index 2 ;
-            sh:datatype xsd:decimal ;
-        ]
-        [
-            a qudt:MemberSpec ;
-            qudt:index 3 ;
-            sh:class qudt:Unit ;
-        ]
-    ) .
-
-ex:exampleTuple4
-    a qudt:Tuple ;
-    qudt:conformsToTupleSpec ex:QuantityValueUnitTupleSpec ;
-    qudt:values (
-        quantitykind:Temperature
-        "23.7"^^xsd:decimal
-        unit:DEG_C
-    ) .
-
-#################################################################
-# 3-Tuple Example
-# (IRI, language-tagged string, integer 1..5)
-#################################################################
-
-ex:ResourceLabelRatingTupleSpec
-    a qudt:TupleSpec ;
-    qudt:memberSpecs (
-        [
-            a qudt:MemberSpec ;
-            qudt:index 1 ;
-            sh:nodeKind sh:IRI ;
-        ]
-        [
-            a qudt:MemberSpec ;
-            qudt:index 2 ;
-            sh:languageIn ( "en" ) ;
-        ]
-        [
-            a qudt:MemberSpec ;
-            qudt:index 3 ;
-            sh:datatype xsd:integer ;
-            sh:minInclusive 1 ;
-            sh:maxInclusive 5 ;
-        ]
-        [
-            a qudt:MemberSpec ;
-            qudt:index 4 ;
-            sh:class qudt:Unit ;
-        ]
-        [
-            a qudt:MemberSpec ;
-            qudt:index 5 ;
-            sh:datatype xsd:date ;
-        ]
-    ) .
-
-ex:exampleTuple5
-    a qudt:Tuple ;
-    qudt:conformsToTupleSpec ex:ResourceLabelRatingTupleSpec ;
-    qudt:values (
-        quantitykind:Temperature
-        "Ambient temperature"@en
-        5
-        unit:DEG_C
-        "2026-05-12"^^xsd:date
-    ) .
-
-
 
 qudt:TypeList
   a rdfs:Class, sh:NodeShape ;

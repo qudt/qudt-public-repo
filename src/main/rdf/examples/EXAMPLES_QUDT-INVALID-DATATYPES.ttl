@@ -1,3 +1,4 @@
+@prefix ex: <http://example.org#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -6,16 +7,20 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix unit: <http://qudt.org/vocab/unit/> .
 @prefix vaem: <http://www.linkedmodel.org/schema/vaem#> .
 
 <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype>
   a owl:Ontology ;
-  owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/facade/qudt> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/datatype> ;
   owl:imports <http://www.linkedmodel.org/schema/dtype> ;
   owl:imports <http://www.linkedmodel.org/schema/vaem> ;
-  rdfs:label "QUDT Examples of Datatypes v$$QUDT_VERSION$$" ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/quantitykind>;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/unit> ;
+  rdfs:label "QUDT Examples of Bad Datatypes v$$QUDT_VERSION$$" ;
   vaem:hasGraphMetadata vaem:GMD_INVALID-DATATYPES ;
   vaem:hasGraphRole vaem:VocabularyGraph .
 
@@ -48,6 +53,101 @@ dcterms:title
   a owl:AnnotationProperty ;
   rdfs:label "title" ;
   rdfs:range xsd:string .
+
+
+ex:MeasurementTupleSpec
+    a qudt:TupleSpec ;
+    qudt:memberSpecs (
+        [
+            a qudt:MemberSpec ;
+            qudt:index 1 ;
+            sh:datatype xsd:date ;
+        ]
+        [
+            a qudt:MemberSpec ;
+            qudt:index 2 ;
+            sh:datatype xsd:decimal ;
+        ]
+        [
+            a qudt:MemberSpec ;
+            qudt:index 3 ;
+            sh:class qudt:Unit ;
+        ]
+    ) 
+.
+
+ex:QuantityValueUnitTupleSpec
+    a qudt:TupleSpec ;
+    qudt:memberSpecs (
+        [
+            a qudt:MemberSpec ;
+            qudt:index 1 ;
+            sh:class qudt:QuantityKind ;
+        ]
+        [
+            a qudt:MemberSpec ;
+            qudt:index 2 ;
+            sh:datatype xsd:decimal ;
+        ]
+        [
+            a qudt:MemberSpec ;
+            qudt:index 3 ;
+            sh:class qudt:Unit ;
+        ]
+    ) 
+.
+
+ex:StatusFlagTupleSpec
+  a qudt:TupleSpec ;
+  qudt:memberSpecs (
+      [
+        a qudt:MemberSpec ;
+        qudt:index 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 1 ;
+      ]
+      [
+        a qudt:MemberSpec ;
+        qudt:index 2 ;
+        sh:datatype xsd:boolean ;
+      ]
+    ) ;
+.
+
+ex:badExampleTuple2a
+    a qudt:Tuple ;
+    qudt:conformsToTupleSpec ex:StatusFlagTupleSpec ;
+    qudt:values (
+        "Approved"
+        42
+    ) .
+
+ex:badExampleTuple2b
+    a qudt:Tuple ;
+    qudt:conformsToTupleSpec ex:StatusFlagTupleSpec ;
+    qudt:values (
+        "Approved"
+        true
+        42
+    ) .
+
+ex:badExampleTuple3
+    a qudt:Tuple ;
+    qudt:conformsToTupleSpec ex:MeasurementTupleSpec ;
+    qudt:values (
+        "2026-05-12"^^xsd:date
+        "23.7"^^xsd:decimal
+        42
+    ) .
+  
+ex:badExampleQuantityValueTuple
+    a qudt:Tuple ;
+    qudt:conformsToTupleSpec ex:QuantityValueUnitTupleSpec ;
+    qudt:values (
+        quantitykind:Temperature
+        "25.6"^^xsd:decimal
+        "DegC"
+    ) .
 
 qudt:Array1D_Integers-INVALID
   a qudt:Array ;
