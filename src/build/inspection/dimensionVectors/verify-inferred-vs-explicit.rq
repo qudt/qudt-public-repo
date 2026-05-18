@@ -1,0 +1,46 @@
+# Verify that dimension exponent properties on qkdv: instances match what
+# would be inferred from their IRI local names.
+# Returns rows where there is a discrepancy — expected output: 0 rows.
+
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?dv ?dimension ?explicit ?inferred
+WHERE {
+    GRAPH <dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl> {
+        ?dv a qudt:QuantityKindDimensionVector .
+        ?dv ?dimension ?explicit .
+        FILTER(?dimension IN (
+            qudt:dimensionExponentForAmountOfSubstance,
+            qudt:dimensionExponentForElectricCurrent,
+            qudt:dimensionExponentForLength,
+            qudt:dimensionExponentForLuminousIntensity,
+            qudt:dimensionExponentForMass,
+            qudt:dimensionExponentForThermodynamicTemperature,
+            qudt:dimensionExponentForTime,
+            qudt:dimensionlessExponent
+        ))
+    }
+    BIND(REPLACE(STR(?dv), "^.*[/#]", "") AS ?local)
+    BIND(
+        IF(?dimension = qudt:dimensionExponentForAmountOfSubstance,
+            REPLACE(?local, "^.*A(-?[0-9]+(?:dot[0-9]+)?)E.*$",          "$1"),
+        IF(?dimension = qudt:dimensionExponentForElectricCurrent,
+            REPLACE(?local, "^.*E(-?[0-9]+(?:dot[0-9]+)?)L.*$",          "$1"),
+        IF(?dimension = qudt:dimensionExponentForLength,
+            REPLACE(?local, "^.*L(-?[0-9]+(?:dot[0-9]+)?)I.*$",          "$1"),
+        IF(?dimension = qudt:dimensionExponentForLuminousIntensity,
+            REPLACE(?local, "^.*I(-?[0-9]+(?:dot[0-9]+)?)M.*$",          "$1"),
+        IF(?dimension = qudt:dimensionExponentForMass,
+            REPLACE(?local, "^.*M(-?[0-9]+(?:dot[0-9]+)?)H.*$",          "$1"),
+        IF(?dimension = qudt:dimensionExponentForThermodynamicTemperature,
+            REPLACE(?local, "^.*H(-?[0-9]+(?:dot[0-9]+)?)T.*$",          "$1"),
+        IF(?dimension = qudt:dimensionExponentForTime,
+            REPLACE(?local, "^.*T(-?[0-9]+(?:dot[0-9]+)?)D.*$",          "$1"),
+            REPLACE(?local, "^.*D(-?[0-9]+(?:dot[0-9]+)?)(?:[RN].*)?$",  "$1")
+        )))))))
+    AS ?raw)
+    BIND(IF(CONTAINS(?raw,"dot"), xsd:decimal(REPLACE(?raw,"dot",".")), xsd:integer(?raw)) AS ?inferred)
+    FILTER(STR(?explicit) != STR(?inferred))
+}
+ORDER BY ?dv ?dimension

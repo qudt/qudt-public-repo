@@ -879,6 +879,10 @@ validAspectDirs.each { aspectDir ->
                                         <toFile>target/inspection/reciprocalUnits/reciprocal-units.txt</toFile>
                                     </sparqlQuery>
                                     <sparqlQuery>
+                                        <file>src/build/inspection/dimensionVectors/verify-inferred-vs-explicit.rq</file>
+                                        <toFile>target/inspection/dimensionVectors/verify-inferred-vs-explicit.txt</toFile>
+                                    </sparqlQuery>
+                                    <sparqlQuery>
                                         <sparql>
                                             <![CDATA[
                                                 SELECT * WHERE {
@@ -1505,14 +1509,6 @@ validAspectDirs.each { aspectDir ->
                                                 rdfs:label
                                                 rdfs:seeAlso
                                                 rdf:type
-                                                qudt:dimensionExponentForAmountOfSubstance
-                                                qudt:dimensionExponentForElectricCurrent
-                                                qudt:dimensionExponentForLength
-                                                qudt:dimensionExponentForLuminousIntensity
-                                                qudt:dimensionExponentForMass
-                                                qudt:dimensionExponentForThermodynamicTemperature
-                                                qudt:dimensionExponentForTime
-                                                qudt:dimensionlessExponent
                                                 qudt:latexDefinition
                                                 rdfs:isDefinedBy
                                               }
@@ -1556,15 +1552,7 @@ validAspectDirs.each { aspectDir ->
                                                 rdfs:label
                                                 rdfs:seeAlso
                                                 rdf:type
-                                                qudt:dimensionExponentForAmountOfSubstance
-                                                qudt:dimensionExponentForElectricCurrent
-                                                qudt:dimensionExponentForLength
-                                                qudt:dimensionExponentForLuminousIntensity
-                                                qudt:dimensionExponentForMass
-                                                qudt:dimensionExponentForThermodynamicTemperature
-                                                qudt:dimensionExponentForTime
-                                                qudt:dimensionlessExponent
-                                                qudt:latexDefinition                                                                                                
+                                                qudt:latexDefinition
                                                 rdfs:isDefinedBy
                                                 }
                                               GRAPH <build:supported-extensions> {
@@ -3291,15 +3279,23 @@ validAspectDirs.each { aspectDir ->
                                                 ?newDimVec a qudt:QuantityKindDimensionVector .}}
                                                 BIND(REPLACE(STR(?newDimVec), "^.*[#/]", "") AS ?local)
 
-# Extract each exponent (default 0 if missing)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*A(-?[0-9]+).*", "$1")) AS ?A)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*E(-?[0-9]+).*", "$1")) AS ?E)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*L(-?[0-9]+).*", "$1")) AS ?L)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*I(-?[0-9]+).*", "$1")) AS ?I)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*M(-?[0-9]+).*", "$1")) AS ?M)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*H(-?[0-9]+).*", "$1")) AS ?H)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*T(-?[0-9]+).*", "$1")) AS ?T)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*D(-?[0-9]+).*", "$1")) AS ?D)
+# Extract each exponent; handles dot-encoded decimals (e.g. L-0dot5 → -0.5)
+                                                  BIND(REPLACE(?local, "^.*A(-?[0-9]+(?:dot[0-9]+)?)E.*$",          "$1") AS ?aRaw)
+                                                  BIND(REPLACE(?local, "^.*E(-?[0-9]+(?:dot[0-9]+)?)L.*$",          "$1") AS ?eRaw)
+                                                  BIND(REPLACE(?local, "^.*L(-?[0-9]+(?:dot[0-9]+)?)I.*$",          "$1") AS ?lRaw)
+                                                  BIND(REPLACE(?local, "^.*I(-?[0-9]+(?:dot[0-9]+)?)M.*$",          "$1") AS ?iRaw)
+                                                  BIND(REPLACE(?local, "^.*M(-?[0-9]+(?:dot[0-9]+)?)H.*$",          "$1") AS ?mRaw)
+                                                  BIND(REPLACE(?local, "^.*H(-?[0-9]+(?:dot[0-9]+)?)T.*$",          "$1") AS ?hRaw)
+                                                  BIND(REPLACE(?local, "^.*T(-?[0-9]+(?:dot[0-9]+)?)D.*$",          "$1") AS ?tRaw)
+                                                  BIND(REPLACE(?local, "^.*D(-?[0-9]+(?:dot[0-9]+)?)(?:[RN].*)?$",  "$1") AS ?dRaw)
+                                                  BIND(IF(CONTAINS(?aRaw,"dot"),xsd:decimal(REPLACE(?aRaw,"dot",".")),xsd:integer(?aRaw)) AS ?A)
+                                                  BIND(IF(CONTAINS(?eRaw,"dot"),xsd:decimal(REPLACE(?eRaw,"dot",".")),xsd:integer(?eRaw)) AS ?E)
+                                                  BIND(IF(CONTAINS(?lRaw,"dot"),xsd:decimal(REPLACE(?lRaw,"dot",".")),xsd:integer(?lRaw)) AS ?L)
+                                                  BIND(IF(CONTAINS(?iRaw,"dot"),xsd:decimal(REPLACE(?iRaw,"dot",".")),xsd:integer(?iRaw)) AS ?I)
+                                                  BIND(IF(CONTAINS(?mRaw,"dot"),xsd:decimal(REPLACE(?mRaw,"dot",".")),xsd:integer(?mRaw)) AS ?M)
+                                                  BIND(IF(CONTAINS(?hRaw,"dot"),xsd:decimal(REPLACE(?hRaw,"dot",".")),xsd:integer(?hRaw)) AS ?H)
+                                                  BIND(IF(CONTAINS(?tRaw,"dot"),xsd:decimal(REPLACE(?tRaw,"dot",".")),xsd:integer(?tRaw)) AS ?T)
+                                                  BIND(IF(CONTAINS(?dRaw,"dot"),xsd:decimal(REPLACE(?dRaw,"dot",".")),xsd:integer(?dRaw)) AS ?D)
 
                                                   BIND(?local AS ?label)
 
@@ -3324,7 +3320,12 @@ validAspectDirs.each { aspectDir ->
                                         </sparql>
                                     </sparqlUpdate>
 
-                                    <sparqlUpdate> 
+                                    <sparqlUpdate>
+                                        <message>Infer dimension-exponent properties from IRI local name for any dimension vector instance that lacks them.</message>
+                                        <file>src/build/inference/dimensionVectors/infer-dv-exponents.ru</file>
+                                    </sparqlUpdate>
+
+                                    <sparqlUpdate>
                                         <message> Florian's unit generator query. Find all things that are objects in qudt:hasUnit or qudt:scalingOf that are undefined, and declare them as ContextualUnit, Unit. For scalingOf, look up subject's quantitykind. </message>
                                         <sparql>
                                             <![CDATA[
@@ -3478,14 +3479,6 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         rdfs:label
                                                         rdfs:seeAlso
                                                         rdf:type
-                                                        qudt:dimensionExponentForAmountOfSubstance
-                                                        qudt:dimensionExponentForElectricCurrent
-                                                        qudt:dimensionExponentForLength
-                                                        qudt:dimensionExponentForLuminousIntensity
-                                                        qudt:dimensionExponentForMass
-                                                        qudt:dimensionExponentForThermodynamicTemperature
-                                                        qudt:dimensionExponentForTime
-                                                        qudt:dimensionlessExponent
                                                         qudt:latexDefinition
                                                           rdfs:isDefinedBy
                                                       }
@@ -3519,14 +3512,6 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         rdfs:label
                                                         rdfs:seeAlso
                                                         rdf:type
-                                                        qudt:dimensionExponentForAmountOfSubstance
-                                                        qudt:dimensionExponentForElectricCurrent
-                                                        qudt:dimensionExponentForLength
-                                                        qudt:dimensionExponentForLuminousIntensity
-                                                        qudt:dimensionExponentForMass
-                                                        qudt:dimensionExponentForThermodynamicTemperature
-                                                        qudt:dimensionExponentForTime
-                                                        qudt:dimensionlessExponent
                                                         qudt:latexDefinition
                                                           rdfs:isDefinedBy
                                                       }
@@ -3572,14 +3557,6 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 rdfs:label
                                                                 rdfs:seeAlso
                                                                 rdf:type
-                                                                qudt:dimensionExponentForAmountOfSubstance
-                                                                qudt:dimensionExponentForElectricCurrent
-                                                                qudt:dimensionExponentForLength
-                                                                qudt:dimensionExponentForLuminousIntensity
-                                                                qudt:dimensionExponentForMass
-                                                                qudt:dimensionExponentForThermodynamicTemperature
-                                                                qudt:dimensionExponentForTime
-                                                                qudt:dimensionlessExponent
                                                                 qudt:latexDefinition
                                                                 rdfs:isDefinedBy
                                                               }
@@ -3614,14 +3591,6 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 rdfs:label
                                                                 rdfs:seeAlso
                                                                 rdf:type
-                                                                qudt:dimensionExponentForAmountOfSubstance
-                                                                qudt:dimensionExponentForElectricCurrent
-                                                                qudt:dimensionExponentForLength
-                                                                qudt:dimensionExponentForLuminousIntensity
-                                                                qudt:dimensionExponentForMass
-                                                                qudt:dimensionExponentForThermodynamicTemperature
-                                                                qudt:dimensionExponentForTime
-                                                                qudt:dimensionlessExponent
                                                                 qudt:latexDefinition
                                                                 rdfs:isDefinedBy
                                                 }
