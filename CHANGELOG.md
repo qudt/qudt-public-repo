@@ -27,6 +27,22 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - `qkdv:A0E-2L2I0M1H-1T-2.5D0` — replaced by `qkdv:A0E-2L2I0M1H-1T-2dot5D0`; standardises on `dot` encoding for fractional exponents in dimension vector IRIs
 - `unit:J-PER-M2-SEC0pt5-K` — replaced by `unit:J-PER-M2-SEC0dot5-K`; standardises on `dot` encoding in unit IRIs
+- Deprecated 15 logarithmic Quantity Kinds in favor of more consistently-named URIs:
+  - `quantitykind:NaturalLogarithmicMedianInformationFlow` — replaced by `quantitykind:LogEMedianInformationFlow`
+  - `quantitykind:BinaryLogarithmicMedianInformationFlow` — replaced by `quantitykind:Log2MedianInformationFlow`
+  - `quantitykind:CommonLogarithmicMedianInformationFlow` — replaced by `quantitykind:Log10MedianInformationFlow`
+  - `quantitykind:InformationContentExpressedAsALogarithmToBaseE` — replaced by `quantitykind:LogEInformationContent`
+  - `quantitykind:InformationContentExpressedAsALogarithmToBase2` — replaced by `quantitykind:Log2InformationContent`
+  - `quantitykind:InformationContentExpressedAsALogarithmToBase10` — replaced by `quantitykind:Log10InformationContent`
+  - `quantitykind:LinearLogarithmicRatio` — replaced by `quantitykind:Log10LinearRatio`
+  - `quantitykind:LineicLogarithmicRatio` — replaced by `quantitykind:Log10LinearRatio`
+  - `quantitykind:LogarithmicFrequencyInterval` — replaced by `quantitykind:Log2FrequencyInterval`
+  - `quantitykind:LogarithmicFrequencyIntervalToBase10` — replaced by `quantitykind:Log10FrequencyInterval`
+  - `quantitykind:LogarithmRatioToBaseE` — replaced by `quantitykind:LogERatio`
+  - `quantitykind:LogarithmRatioToBase10` — replaced by `quantitykind:Log10Ratio`
+  - `quantitykind:LogOctanolAirPartitionCoefficient`
+  - `quantitykind:LogOctanolWaterPartitionCoefficient`
+  - `quantitykind:TimeRelatedLogarithmicRatio` — replaced by `quantitykind:TimeRelatedLog10Ratio`
 
 ### Fixed
 
