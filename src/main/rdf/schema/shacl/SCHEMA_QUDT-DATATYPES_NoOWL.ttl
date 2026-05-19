@@ -1,4 +1,3 @@
-@prefix ex: <http://example.org#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -129,12 +128,17 @@ qudt:Array
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Array" ;
   rdfs:subClassOf qudt:StructuredDatatype ;
-  sh:node qudt:DimensionalityShape ;
+  sh:property qudt:DimensionalityShape ;
   sh:property qudt:Array-isHeterogeneous ;
-  sh:property qudt:Array-value ;
-  sh:property qudt:DatatypePropertyShape ;
   sh:property qudt:DimensionalityPropertyShape ;
   sh:property qudt:DimensionsPropertyShape .
+
+qudt:Array-isHeterogeneous
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:datatype xsd:boolean ;
+  sh:maxCount 1 ;
+  sh:path qudt:isHeterogeneous .
 
 qudt:Array2DvalueList
   a rdfs:Class, sh:NodeShape ;
@@ -160,26 +164,6 @@ qudt:ArrayDataOrder
   rdfs:subClassOf qudt:EnumeratedValue ;
   sh:in ( datatype:ByColumn datatype:ByRow datatype:ByLeftMostIndex ) .
 
-qudt:ArrayType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>An <em>Array Type</em> is a type specification for ordered entries of values arranged according to the dimensions given. 
-  The dimensions are given as a list of integers where each integer is the cardinality of each dimension. 
-  The number of dimensions is specified in the attribute 'dimensionality'.
-  </p>
-  <p>Optionally a reference can be made to a variable, whose values are the array entries. 
-  The data type of the array entries is an optional field, 'elementType', which points to a data type definition. 
-  If the data type is given, then it applies to all elements.  
-  If it is not given then the elements can be of different types for each position in the array.
-  </p>
-  <p>The property <em>qudt:typeMatrix</em> must refer to a matrix of types.
-  If a default value is given this can be used to place the appropriate value in a cell when an entry value is not known. 
-  If no dimensionality or dimension vector is specified the array is under-specified but still legitimate as a place-holder for a data type.
-  </p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Array Type" ;
-  rdfs:subClassOf qudt:CompositeDatatype .
-
 qudt:AssociativeArray
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
@@ -203,12 +187,6 @@ qudt:AuralCue
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Aural Cue" ;
   rdfs:subClassOf qudt:ModalCue ;
-  sh:not [
-    sh:class qudt:KinestheticCue ;
-  ] ;
-  sh:not [
-    sh:class qudt:VisualCue ;
-  ] ;
   sh:property qudt:AuralCue-sound .
 
 qudt:BalancedTree
@@ -407,18 +385,6 @@ qudt:CompositeTable
   rdfs:label "Composite Table Type" ;
   rdfs:subClassOf qudt:Table .
 
-qudt:CompositionFunction
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Composition function" ;
-  rdfs:subClassOf qudt:Function .
-
-qudt:CompositionTree
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Composition Tree" ;
-  rdfs:subClassOf qudt:Tree ;
-  sh:property qudt:CompositionTree-compositionFunction .
 
 qudt:DataEncoding
   a rdfs:Class, sh:NodeShape ;
@@ -439,9 +405,9 @@ qudt:DataSetElement
   A field is a tuple that carries a name, a type and optionally other properties that characterize a member element of a composite data structure.
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "QUDT DataSet Element" ;
+  rdfs:label "DataSet Element" ;
   rdfs:subClassOf qudt:DataItem ;
-  rdfs:subClassOf qudt:Tuple ;
+  rdfs:subClassOf qudt:NTuple ;
   sh:property qudt:DataSetElement-elementLabel ;
   sh:property qudt:DataSetElement-optional ;
   sh:property qudt:DataSetElement-quantityKind .
@@ -521,16 +487,31 @@ qudt:Dictionary
   rdfs:label "Dictionary Type" ;
   rdfs:subClassOf qudt:Map .
 
-qudt:DimensionalDatatype
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Dimensional Data Type</em> is a data type that specifies a physical quantity or unit of measure.
-  Information about the physical dimensions of the quantities and units is embedded in their types.
-  </p>
-  """^^rdf:HTML ;
+qudt:DimensionalityShape
+  a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Dimensional Data Type" ;
-  rdfs:subClassOf qudt:StructuredDatatype .
+  rdfs:label "Dimensions Shape" ;
+  sh:severity sh:Warning ;
+  sh:sparql [
+    sh:message "\"{$this}\" has {$actualDimensions} dimensions extent and needs to have {$specifiedDimensions}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertestPrefixes> ;
+    sh:select """
+        SELECT $this $actualDimensions $specifiedDimensions
+        WHERE {
+            $this qudt:dimensionality $dimensionality .
+            $this qudt:dimensions ?dimensions .
+            ?dimensions rdf:rest*/rdf:first $specifiedDimensions .
+            { SELECT $this (COUNT(?listValue )AS $actualDimensions)
+              WHERE {
+              $this qudt:value/rdf:rest*/rdf:first ?listValue .
+              } GROUP BY $this
+            }
+            FILTER ($actualDimensions != $specifiedDimensions)
+          }
+        """ ;
+  ] ;
+  sh:targetClass qudt:Array ;
+  sh:targetClass qudt:List .
 
 qudt:DiscreteState
   a rdfs:Class, sh:NodeShape ;
@@ -598,7 +579,6 @@ qudt:Enumeration
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "QUDT Enumeration" ;
   rdfs:subClassOf dtype:Enumeration ;
-  rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:Enumeration-bits ;
   sh:property qudt:Enumeration-defaultValue ;
   sh:property qudt:Enumeration-encoding ;
@@ -671,26 +651,6 @@ qudt:FloatingPointEncodingType
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Floating Point Encoding" ;
   rdfs:subClassOf qudt:Encoding .
-
-qudt:Function
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Function" ;
-  rdfs:subClassOf qudt:Concept .
-
-qudt:FunctionDatatype
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A function data type defines the input and output data type for a function or method. 
-  The data type includes at least the function name and the number of its parameters. 
-  In some programming languages, it may also specify the function's return type or the types of its arguments.
-  </p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Function Data Type" ;
-  rdfs:subClassOf qudt:StructuredDatatype ;
-  sh:property qudt:FunctionDatatype-argType ;
-  sh:property qudt:FunctionDatatype-functionArity ;
-  sh:property qudt:FunctionDatatype-returnType .
 
 qudt:Graph
   a rdfs:Class, sh:NodeShape ;
@@ -861,14 +821,7 @@ qudt:LargeObject
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Large object" ;
-  rdfs:subClassOf qudt:CompositeDatatype .
-
-qudt:LargeObjectType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A 'LargeObject' datatype is used to store blocks of unstructured data (such as text, graphic images, video clips, and sound waveforms). They often are used to allow efficient, random, piece-wise access to the data." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Large object" ;
-  rdfs:subClassOf qudt:CompositeDatatype .
+  rdfs:subClassOf qudt:StructuredDatatype .
 
 qudt:LimitType
   a rdfs:Class, sh:NodeShape ;
@@ -906,7 +859,14 @@ qudt:MajorMinorType
 
 qudt:Map
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A Map Type is an abstract data type that defines the properties of map data structures. A Map (or Associative Array) is an abstract data structure composed of a collection of keys and a collection of values, where each key is associated with one value. The operation of finding the value associated with a key is called a lookup or indexing, and this is the most important operation supported by an associative array. The relationship between a key and its value is sometimes called a mapping or binding." ;
+  dcterms:description """
+  A Map Type is an abstract data type that defines the properties of map data structures. 
+  A Map (or Associative Array) is an abstract data structure composed of a collection of keys and a collection of values,
+   where each key is associated with one value. 
+  The operation of finding the value associated with a key is called a lookup or indexing,
+   and this is the most important operation supported by an associative array. 
+  The relationship between a key and its value is sometimes called a mapping or binding.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Map Type" ;
   rdfs:seeAlso qudt:AssociativeArray ;
@@ -917,11 +877,10 @@ qudt:MassPropertiesArray
   dcterms:description """
   <p>A <em>Mass Properties Array</em> holds, for an object, four values for the properties:
    Center of Gravity, Mass, Moment of Inertia, and Product of Inertia. </p>
-  """ ;
+  """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Mass Properties Array" ;
-  rdfs:subClassOf qudt:HeterogenousArray ;
-  sh:property qudt:QuantityKindsPropertyShape .
+  rdfs:subClassOf qudt:HeterogenousArray .
 
 qudt:MathsFunctionType
   a rdfs:Class, sh:NodeShape ;
@@ -933,20 +892,12 @@ qudt:MathsFunctionType
 qudt:Matrix
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A <em>Matrix</em> is a data type that specifies the properties of an N-dimensional data structure.
+  <p>A <em>Matrix</em> is a datatype that specifies the properties of an N-dimensional data structure.
   </p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Matrix" ;
   rdfs:subClassOf qudt:Array .
-
-qudt:MatrixElementOrder
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A datatype that specifies the order in which matrix elements are arranged." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Matrix Element Order" ;
-  rdfs:subClassOf qudt:StructuredDatatype ;
-  sh:property qudt:MatrixElementOrder-byRow .
 
 qudt:MemoryOrderType
   a rdfs:Class, sh:NodeShape ;
@@ -1000,7 +951,7 @@ qudt:MultiDimensionalDataFormat
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Multi dimensional data format" ;
-  rdfs:subClassOf qudt:CompositeDatatype ;
+  rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:MultiDimensionalDataFormat-descriptor .
 
 qudt:MultiModalEnumeration
@@ -1034,29 +985,286 @@ qudt:MultiSet
   rdfs:label "Bag" ;
   rdfs:subClassOf qudt:Collection .
 
-qudt:N-Tuple
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  A tuple containing n objects is known as an "n-tuple". 
-  For example the 4-tuple (or "quadruple"), with components of respective types PERSON, DAY, MONTH and YEAR.
-  This could be used to record that a certain person was born on a certain day of a certain month of a certain year.
-  """ ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "N-Tuple Type" ;
-  rdfs:subClassOf qudt:Tuple ;
-  sh:property qudt:N-Tuple-elementType .
+qudt:NTuple
+    a rdfs:Class, sh:NodeShape ;
+    dcterms:description """
+  <p>An <em>N-Tuple</em> is an <em>Ordered List</em> of objects, each of a specified type. 
+  The <em>n</em> can be any non-negative integer.
+  </p>"""^^rdf:HTML ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    rdfs:label "N-Tuple" ;
+    rdfs:subClassOf qudt:StructuredDatatype ;
+    sh:property qudt:NTuple-conformsToTupleSpec ;
+    sh:property qudt:NTuple-values;
+    sh:sparql qudt:NTupleTypeCheck ;
+    sh:sparql qudt:NTupleExtraValueCheck ;
+    sh:sparql qudt:NTupleMissingRequiredValueCheck ;
+    sh:sparql qudt:NTupleLengthCheck .
 
-qudt:N-TupleType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  A tuple containing n objects is known as an "n-tuple". 
-  For example the 4-tuple (or "quadruple"), with components of respective types PERSON, DAY, MONTH and YEAR.
-  This could be used to record that a certain person was born on a certain day of a certain month of a certain year.
-  """ ;
+#################################################################
+# 1. Tuple Member Type Check
+#################################################################
+
+qudt:NTupleTypeCheck
+    a sh:SPARQLConstraint ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:message "N-Tuple value at position {?index} does not satisfy the member specification." ;
+    sh:select """
+        SELECT $this ?index ?value
+        WHERE {
+            $this qudt:conformsToTupleSpec ?spec .
+
+            ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
+            ?memberSpec qudt:index ?index .
+
+            # Only check positions whose memberSpec actually declares a type expectation
+            FILTER EXISTS {
+                ?memberSpec ( sh:datatype | sh:or | sh:class | qudt:value | sh:nodeKind ) ?anyConstraint .
+            }
+
+            {
+                SELECT $this ?value (COUNT(?previousCell) + 1 AS ?index)
+                WHERE {
+                    $this qudt:values ?values .
+                    ?values rdf:rest* ?valueCell .
+                    ?valueCell rdf:first ?value .
+
+                    OPTIONAL {
+                        ?values rdf:rest* ?previousCell .
+                        ?previousCell rdf:rest+ ?valueCell .
+                    }
+                }
+                GROUP BY $this ?value ?valueCell
+            }
+
+            # Violation iff none of the four memberSpec patterns is satisfied by the value
+            FILTER NOT EXISTS {
+                {
+                    # (1) Numeric datatype — direct sh:datatype, or one inside an sh:or union
+                    ?memberSpec ( sh:datatype | sh:or/rdf:rest*/rdf:first/sh:datatype ) ?allowedDatatype .
+                    FILTER ( datatype(?value) = ?allowedDatatype )
+                } UNION {
+                    # (2) Concept class membership — sh:class <C> where <C> a qudt:Concept
+                    ?memberSpec sh:class ?targetClass .
+                    ?value rdf:type/rdfs:subClassOf* ?targetClass .
+                } UNION {
+                    # (3) Enumerated value — qudt:value <enum1>, <enum2>, ...
+                    ?memberSpec qudt:value ?value .
+                } UNION {
+                    # (4) Any IRI — sh:nodeKind sh:IRI on the memberSpec
+                    ?memberSpec sh:nodeKind sh:IRI .
+                    FILTER ( isIRI(?value) )
+                }
+            }
+        }
+    """ .
+
+#################################################################
+# 2. Extra Value Check
+#################################################################
+
+qudt:NTupleExtraValueCheck
+    a sh:SPARQLConstraint ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:message "N-Tuple has a value at a position not declared by its tuple specification." ;
+    sh:select """
+        SELECT $this ?index ?value
+WHERE {
+    $this qudt:conformsToTupleSpec ?spec .
+
+    {
+        SELECT $this ?value (COUNT(?previousCell) + 1 AS ?index)
+        WHERE {
+            $this qudt:values ?values .
+            ?values rdf:rest* ?valueCell .
+            ?valueCell rdf:first ?value .
+
+            OPTIONAL {
+                ?values rdf:rest* ?previousCell .
+                ?previousCell rdf:rest+ ?valueCell .
+            }
+        }
+        GROUP BY $this ?value ?valueCell
+    }
+
+    FILTER NOT EXISTS {
+        ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
+        ?memberSpec qudt:index ?index .
+    }
+}
+    """ .
+
+#################################################################
+# 3. Missing Required Value Check
+#################################################################
+
+qudt:NTupleMissingRequiredValueCheck
+    a sh:SPARQLConstraint ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:message "N-Tuple is missing a required value declared by its tuple specification." ;
+    sh:select """
+        SELECT $this ?index
+WHERE {
+    $this qudt:conformsToTupleSpec ?spec .
+
+    ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
+    ?memberSpec qudt:index ?index .
+
+    OPTIONAL { ?memberSpec sh:minCount ?minCount . }
+    FILTER ( !BOUND(?minCount) || ?minCount > 0 )
+
+    FILTER EXISTS {
+        {
+            SELECT $this (COUNT(?previousCell) + 1 AS ?valueIndex)
+            WHERE {
+                $this qudt:values ?values .
+                ?values rdf:rest* ?valueCell .
+                ?valueCell rdf:first ?value .
+
+                OPTIONAL {
+                    ?values rdf:rest* ?previousCell .
+                    ?previousCell rdf:rest+ ?valueCell .
+                }
+            }
+            GROUP BY $this ?valueCell
+        }
+
+        FILTER ( ?valueIndex = ?index )
+    }
+}
+    """ .
+
+#################################################################
+# 4. Length Check
+#################################################################
+
+qudt:NTupleLengthCheck
+    a sh:SPARQLConstraint ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:message "N-Tuple length does not match the number of member specifications." ;
+    sh:select """
+        SELECT $this ?valueCount ?specCount
+WHERE {
+    {
+        SELECT $this (COUNT(?valueCell) AS ?valueCount)
+        WHERE {
+            $this qudt:values ?values .
+            ?values rdf:rest* ?valueCell .
+            ?valueCell rdf:first ?value .
+        }
+        GROUP BY $this
+    }
+
+    {
+        SELECT $this (COUNT(?memberSpec) AS ?specCount)
+        WHERE {
+            $this qudt:conformsToTupleSpec ?spec .
+            ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
+        }
+        GROUP BY $this
+    }
+
+    FILTER ( ?valueCount != ?specCount )
+}
+    """ .
+
+qudt:NTuple-conformsToTupleSpec
+  a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "N-Tuple Type" ;
-  rdfs:subClassOf qudt:Tuple ;
-  sh:property qudt:N-Tuple-elementType .
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+  sh:path qudt:conformsToTupleSpec ;
+  sh:class qudt:NTupleSpec .
+
+qudt:NTupleSpec
+    a rdfs:class, sh:NodeShape ;
+    dcterms:description """
+    <p>A SHACL node shape that defines the ordered member constraints
+        for a tuple. A tuple specification contains an RDF list of
+        member specifications, each describing the constraints for a
+        particular tuple position.
+    </p>
+    """ ;
+    rdfs:label "N-Tuple Specification" ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:property [
+        sh:path qudt:tupleMemberSpecs ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:node qudt:RDFListShape ;
+    ] ;
+    sh:property [
+        sh:path (
+            qudt:tupleMemberSpecs
+            [ sh:zeroOrMorePath rdf:rest ]
+            rdf:first
+        ) ;
+        sh:class qudt:NTupleMemberTypeSpec ;
+        sh:node qudt:NTupleMemberTypeSpec ;
+    ] ;
+    .
+  
+qudt:NTupleMemberTypeSpec
+    a rdfs:Class , sh:NodeShape ;
+    dcterms:description """
+    <p> A specification for one tuple position. Member specifications
+    may use standard SHACL constraint properties such as sh:datatype, sh:class, sh:node, sh:in,
+    sh:minInclusive, and sh:maxInclusive.
+    """ ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    rdfs:label "N-Tuple Member Type Specification" ;
+    sh:property qudt:NTupleMemberTypeSpec-index ;
+    sh:property qudt:NTupleMemberTypeSpec-type ;
+    .
+
+qudt:NTupleMemberTypeSpec-index
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:path qudt:index ;
+  sh:datatype xsd:integer ;
+  sh:minInclusive 1 ;
+  sh:minCount 1 ;
+  sh:maxCount 1 ;
+  .
+
+qudt:NTupleMemberTypeSpec-type
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:node (
+      [
+        sh:or qudt:NumericTypeUnion ;
+      ]
+      [
+        sh:property [
+            sh:path sh:class ;
+            sh:class qudt:Concept ;
+          ] ;
+      ]
+      [
+        sh:property [
+            sh:path qudt:value ;
+            sh:class qudt:EnumeratedValue ;
+          ] ;
+      ]
+      [
+        sh:nodeKind sh:IRI ;
+      ]
+    ) ;
+  sh:minCount 1 ;
+  sh:maxCount 1 ;
+  .
+
+qudt:NTuple-values
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+  sh:path qudt:values ;
+  sh:node qudt:RDFListShape  .
 
 qudt:NumericType
   a rdfs:Class, sh:NodeShape ;
@@ -1181,7 +1389,7 @@ qudt:PhysicalAddress
   dcterms:description "A physical address is a pointer to a memory location." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Physical Address Type" ;
-  rdfs:subClassOf qudt:CompositeDatatype .
+  rdfs:subClassOf qudt:Datatype .
 
 qudt:Polarity
   a rdfs:Class, sh:NodeShape ;
@@ -1238,16 +1446,6 @@ qudt:QuantityKindList
     ] ) ;
     sh:path rdf:rest ;
   ] .
-
-qudt:QuantityValueType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A sub-type of 'Dimensional Data Type'." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Quantity value type" ;
-  rdfs:subClassOf qudt:DimensionalDatatype ;
-  sh:property qudt:QuantityValueType-basis ;
-  sh:property qudt:QuantityValueType-elementType ;
-  sh:property qudt:QuantityValueType-elementUnit .
 
 qudt:RawValueTupleMember
   a rdfs:Class, sh:NodeShape ;
@@ -1334,7 +1532,7 @@ qudt:Record
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Record Type" ;
-  rdfs:subClassOf qudt:CompositeDatatype .
+  rdfs:subClassOf qudt:StructuredDatatype .
 
 qudt:ReferenceDatatype
   a rdfs:Class, sh:NodeShape ;
@@ -1529,7 +1727,7 @@ qudt:SplinePoint
   dcterms:description "A sub-type of 'Tuple Type'." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Spline point" ;
-  rdfs:subClassOf qudt:Tuple .
+  rdfs:subClassOf qudt:NTuple .
 
 qudt:StateSpaceMatrix
   a rdfs:Class, sh:NodeShape ;
@@ -1615,7 +1813,14 @@ qudt:StructuredDatatype
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Structured Data Type" ;
   rdfs:subClassOf qudt:Datatype ;
-  sh:property qudt:StructuredDatatype-elementType .
+  sh:property qudt:StructuredDatatype-nTuple .
+
+qudt:StructuredDatatype-nTuple
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:class qudt:NTuple ;
+  sh:maxCount 1 ;
+  sh:path qudt:nTuple .
 
 qudt:Table
   a rdfs:Class, sh:NodeShape ;
@@ -1659,9 +1864,7 @@ qudt:ThreeTuple
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Three-Tuple" ;
-  rdfs:subClassOf qudt:N-Tuple ;
-  sh:property qudt:ThreeTuple-elementType ;
-  sh:property qudt:ThreeTuple-elementTypeCount .
+  rdfs:subClassOf qudt:N-Tuple .
 
 qudt:Time
   a rdfs:Class, sh:NodeShape ;
@@ -1703,18 +1906,6 @@ qudt:TimeSeriesArray
   sh:property qudt:TimeSeriesArray-incrementDatatype ;
   sh:property qudt:TimeSeriesArray-vector .
 
-qudt:TimeSeriesArrayType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Time Series Array Type</em> is a data type that specifies the properties of arrays that hold time series data. 
-  A time series is a sequence of data points, measured at successive time intervals. 
-  The time intervals may be uniformly or non-uniformly spaced.
-  </p>
-  """^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Time Series Array Type" ;
-  rdfs:subClassOf qudt:ArrayType .
-
 qudt:TimeStringType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description "Time takes a number of forms, depending on the units used (e.g., year, day, minute, millisecond, or combinations thereof) and the origin (i.e., time zero) to which the time value is related." ;
@@ -1744,288 +1935,6 @@ qudt:Triplet
   rdfs:label "Triplet" ;
   rdfs:seeAlso qudt:ThreeTuple ;
   rdfs:subClassOf qudt:ThreeTuple .
-
-qudt:Tuple
-    a rdfs:Class, sh:NodeShape ;
-    dcterms:description """
-  <p><em>Tuple</em> is an abstraction of the sequence: single, double, triple, quadruple, quintuple, n-tuple. 
-  In mathematics, a tuple is a finite sequence (also known as an <em>Ordered List</em> of objects, each of a specified type. 
-  The <em>n</em> can be any non-negative integer.
-  </p>"""^^rdf:HTML ;
-    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    rdfs:label "Tuple" ;
-    rdfs:subClassOf qudt:CompositeDatatype ;
-    sh:property qudt:Tuple-conformsToTupleSpec ;
-    sh:property qudt:Tuple-values;
-    sh:sparql qudt:TupleTypeCheck ;
-    sh:sparql qudt:TupleExtraValueCheck ;
-    sh:sparql qudt:TupleMissingRequiredValueCheck ;
-    sh:sparql qudt:TupleLengthCheck .
-
-#################################################################
-# 1. Tuple Member Type Check
-#################################################################
-
-qudt:TupleTypeCheck
-    a sh:SPARQLConstraint ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    sh:message "Tuple value at position {?index} does not satisfy the member specification." ;
-    sh:select """
-        SELECT $this ?index ?value
-        WHERE {
-            $this qudt:conformsToTupleSpec ?spec .
-
-            ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
-            ?memberSpec qudt:index ?index .
-
-            # Only check positions whose memberSpec actually declares a type expectation
-            FILTER EXISTS {
-                ?memberSpec ( sh:datatype | sh:or | sh:class | qudt:value | sh:nodeKind ) ?anyConstraint .
-            }
-
-            {
-                SELECT $this ?value (COUNT(?previousCell) + 1 AS ?index)
-                WHERE {
-                    $this qudt:values ?values .
-                    ?values rdf:rest* ?valueCell .
-                    ?valueCell rdf:first ?value .
-
-                    OPTIONAL {
-                        ?values rdf:rest* ?previousCell .
-                        ?previousCell rdf:rest+ ?valueCell .
-                    }
-                }
-                GROUP BY $this ?value ?valueCell
-            }
-
-            # Violation iff none of the four memberSpec patterns is satisfied by the value
-            FILTER NOT EXISTS {
-                {
-                    # (1) Numeric datatype — direct sh:datatype, or one inside an sh:or union
-                    ?memberSpec ( sh:datatype | sh:or/rdf:rest*/rdf:first/sh:datatype ) ?allowedDatatype .
-                    FILTER ( datatype(?value) = ?allowedDatatype )
-                } UNION {
-                    # (2) Concept class membership — sh:class <C> where <C> a qudt:Concept
-                    ?memberSpec sh:class ?targetClass .
-                    ?value rdf:type/rdfs:subClassOf* ?targetClass .
-                } UNION {
-                    # (3) Enumerated value — qudt:value <enum1>, <enum2>, ...
-                    ?memberSpec qudt:value ?value .
-                } UNION {
-                    # (4) Any IRI — sh:nodeKind sh:IRI on the memberSpec
-                    ?memberSpec sh:nodeKind sh:IRI .
-                    FILTER ( isIRI(?value) )
-                }
-            }
-        }
-    """ .
-
-#################################################################
-# 2. Extra Value Check
-#################################################################
-
-qudt:TupleExtraValueCheck
-    a sh:SPARQLConstraint ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    sh:message "Tuple has a value at a position not declared by its tuple specification." ;
-    sh:select """
-        SELECT $this ?index ?value
-WHERE {
-    $this qudt:conformsToTupleSpec ?spec .
-
-    {
-        SELECT $this ?value (COUNT(?previousCell) + 1 AS ?index)
-        WHERE {
-            $this qudt:values ?values .
-            ?values rdf:rest* ?valueCell .
-            ?valueCell rdf:first ?value .
-
-            OPTIONAL {
-                ?values rdf:rest* ?previousCell .
-                ?previousCell rdf:rest+ ?valueCell .
-            }
-        }
-        GROUP BY $this ?value ?valueCell
-    }
-
-    FILTER NOT EXISTS {
-        ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
-        ?memberSpec qudt:index ?index .
-    }
-}
-    """ .
-
-#################################################################
-# 3. Missing Required Value Check
-#################################################################
-
-qudt:TupleMissingRequiredValueCheck
-    a sh:SPARQLConstraint ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    sh:message "Tuple is missing a required value declared by its tuple specification." ;
-    sh:select """
-        SELECT $this ?index
-WHERE {
-    $this qudt:conformsToTupleSpec ?spec .
-
-    ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
-    ?memberSpec qudt:index ?index .
-
-    OPTIONAL { ?memberSpec sh:minCount ?minCount . }
-    FILTER ( !BOUND(?minCount) || ?minCount > 0 )
-
-    FILTER EXISTS {
-        {
-            SELECT $this (COUNT(?previousCell) + 1 AS ?valueIndex)
-            WHERE {
-                $this qudt:values ?values .
-                ?values rdf:rest* ?valueCell .
-                ?valueCell rdf:first ?value .
-
-                OPTIONAL {
-                    ?values rdf:rest* ?previousCell .
-                    ?previousCell rdf:rest+ ?valueCell .
-                }
-            }
-            GROUP BY $this ?valueCell
-        }
-
-        FILTER ( ?valueIndex = ?index )
-    }
-}
-    """ .
-
-#################################################################
-# 4. Length Check
-#################################################################
-
-qudt:TupleLengthCheck
-    a sh:SPARQLConstraint ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    sh:message "Tuple length does not match the number of member specifications." ;
-    sh:select """
-        SELECT $this ?valueCount ?specCount
-WHERE {
-    {
-        SELECT $this (COUNT(?valueCell) AS ?valueCount)
-        WHERE {
-            $this qudt:values ?values .
-            ?values rdf:rest* ?valueCell .
-            ?valueCell rdf:first ?value .
-        }
-        GROUP BY $this
-    }
-
-    {
-        SELECT $this (COUNT(?memberSpec) AS ?specCount)
-        WHERE {
-            $this qudt:conformsToTupleSpec ?spec .
-            ?spec qudt:memberSpecs/rdf:rest*/rdf:first ?memberSpec .
-        }
-        GROUP BY $this
-    }
-
-    FILTER ( ?valueCount != ?specCount )
-}
-    """ .
-
-qudt:Tuple-conformsToTupleSpec
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
-  sh:path qudt:conformsToTupleSpec ;
-  sh:class qudt:TupleSpec .
-
-qudt:TupleSpec
-    a rdfs:class, sh:NodeShape ;
-    dcterms:description """
-    <p>A SHACL node shape that defines the ordered member constraints
-        for a tuple. A tuple specification contains an RDF list of
-        member specifications, each describing the constraints for a
-        particular tuple position.
-    </p>
-    """ ;
-    rdfs:label "Tuple Specification" ;
-    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    sh:property [
-        sh:path qudt:memberSpecs ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:node qudt:RDFListShape ;
-    ] ;
-    sh:property [
-        sh:path (
-            qudt:memberSpecs
-            [ sh:zeroOrMorePath rdf:rest ]
-            rdf:first
-        ) ;
-        sh:class qudt:TupleMemberTypeSpec ;
-        sh:node qudt:TupleMemberTypeSpec ;
-    ] ;
-    .
-  
-qudt:TupleMemberTypeSpec
-    a rdfs:Class , sh:NodeShape ;
-    dcterms:description """
-    <p> A specification for one tuple position. Member specifications
-    may use standard SHACL constraint properties such as sh:datatype, sh:class, sh:node, sh:in,
-    sh:minInclusive, and sh:maxInclusive.
-    """ ;
-    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    rdfs:label "Tuple Member Type Specification" ;
-    sh:property qudt:TupleMemberTypeSpec-index ;
-    sh:property qudt:TupleMemberTypeSpec-type ;
-    .
-
-qudt:TupleMemberTypeSpec-index
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:path qudt:index ;
-  sh:datatype xsd:integer ;
-  sh:minInclusive 1 ;
-  sh:minCount 1 ;
-  sh:maxCount 1 ;
-  .
-
-qudt:TupleMemberTypeSpec-type
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:node (
-      [
-        sh:or qudt:NumericTypeUnion ;
-      ]
-      [
-        sh:property [
-            sh:path sh:class ;
-            sh:class qudt:Concept ;
-          ] ;
-      ]
-      [
-        sh:property [
-            sh:path qudt:value ;
-            sh:class qudt:EnumeratedValue ;
-          ] ;
-      ]
-      [
-        sh:nodeKind sh:IRI ;
-      ]
-    ) ;
-  sh:minCount 1 ;
-  sh:maxCount 1 ;
-  .
-
-qudt:Tuple-values
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
-  sh:path qudt:values ;
-  sh:node qudt:RDFListShape  .
 
 qudt:RDFListShape
     a sh:NodeShape ;
@@ -2209,20 +2118,13 @@ qudt:Vector
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Vector" ;
   rdfs:subClassOf qudt:Array ;
-  sh:property qudt:MaybeQuantityPropertyShape ;
-  sh:property qudt:QuantityKindsPropertyShape .
+  sh:property qudt:MaybeQuantityPropertyShape .
 
 qudt:VisualCue
   a rdfs:Class, sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Visual Cue" ;
-  rdfs:subClassOf qudt:ModalCue ;
-  sh:not [
-    sh:class qudt:AuralCue ;
-  ] ;
-  sh:not [
-    sh:class qudt:KinestheticCue ;
-  ] .
+  rdfs:subClassOf qudt:ModalCue .
 
 qudt:WetDryStateType
   a rdfs:Class, sh:NodeShape ;
@@ -3002,19 +2904,6 @@ qudt:visualCueEnumeration
   rdfs:label "visual cue enumeration" ;
   rdfs:subPropertyOf qudt:modalCueEnumeration .
 
-qudt:Array-isHeterogeneous
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:boolean ;
-  sh:maxCount 1 ;
-  sh:path qudt:isHeterogeneous .
-
-qudt:Array-value
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:node qudt:NumericListShape ;
-  sh:path qudt:value .
-
 qudt:AuralCue-sound
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -3116,14 +3005,6 @@ qudt:CompositeDatatype-padding
   sh:class qudt:PaddingType ;
   sh:maxCount 1 ;
   sh:path qudt:padding .
-
-qudt:CompositionTree-compositionFunction
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:CompositionFunction ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
-  sh:path qudt:function .
 
 qudt:DataEncoding-bitOrder
   a sh:PropertyShape ;
@@ -3557,20 +3438,6 @@ qudt:KinestheticCueEnumeration-defaultValue
   sh:class qudt:KinestheticCue ;
   sh:path qudt:defaultValue .
 
-qudt:MatrixElementOrder-byRow
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:boolean ;
-  sh:maxCount 1 ;
-  sh:path qudt:byRow .
-
-qudt:MatrixElementOrder-dataOrder
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:MatrixElementOrder ;
-  sh:maxCount 1 ;
-  sh:path qudt:dataOrder .
-
 qudt:MaybeQuantityPropertyShape
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -3663,13 +3530,6 @@ qudt:MultiModalType-visualCue
   sh:maxCount 1 ;
   sh:path qudt:visualCue .
 
-qudt:N-Tuple-elementType
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:Datatype ;
-  sh:minCount 0 ;
-  sh:path qudt:elementDatatype .
-
 qudt:NonNegativeIntegerUnionList
   a rdf:List ;
   rdf:first [
@@ -3708,32 +3568,6 @@ qudt:Quantifiable-dataEncoding
   sh:class qudt:DataEncoding ;
   sh:maxCount 1 ;
   sh:path qudt:dataEncoding .
-
-qudt:QuantityKindsPropertyShape
-  a sh:PropertyShape ;
-  dcterms:description "Invalid quantity kinds list - TODO: SPARQL Query" ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:node qudt:QuantityKindList ;
-  sh:path qudt:hasQuantityKindsList .
-
-qudt:QuantityValueType-basis
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:QuantityType ;
-  sh:path qudt:basis .
-
-qudt:QuantityValueType-elementType
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:NumericType ;
-  sh:path qudt:elementDatatype .
-
-qudt:QuantityValueType-elementUnit
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:Unit ;
-  sh:maxCount 1 ;
-  sh:path qudt:elementUnit .
 
 qudt:RawValueTupleMember-elementType
   a sh:PropertyShape ;
@@ -3968,20 +3802,6 @@ qudt:StringUTF8-memberDatatype
   sh:class qudt:CharacterType ;
   sh:hasValue datatype:UTF8-CHAR ;
   sh:path qudt:memberDatatype .
-
-qudt:StructuredData-dimensionality
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
-  sh:maxCount 1 ;
-  sh:path qudt:dimensionality .
-
-qudt:StructuredDatatype-elementType
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:Datatype ;
-  sh:maxCount 1 ;
-  sh:path qudt:elementDatatype .
 
 qudt:Table-byRow
   a sh:PropertyShape ;
@@ -4432,5 +4252,3 @@ xsd:unsignedLong
 
 xsd:unsignedShort
   a rdfs:Datatype .
-
-
