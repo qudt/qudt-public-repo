@@ -38,6 +38,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed the types of datatype:ONstate, datatype:OFFstate, datatype:WDST_WET, and datatype:WDST_DRY
 - Removed datatype:True and datatype:Yes (use datatype:TRUE and datatype:YES instead)
 - Added explicit property declarations for qudt:baseCGSUnitDimensions, qudt:baseImperialUnitDimensions, qudt:baseISOUnitDimensions, qudt:baseSIUnitDimensions, and qudt:baseUSCustomaryUnitDimensions
+- Added explicit property declaration for qudt:enumeratedValue
 
 ## [3.2.1] - 2026-04-02
 
