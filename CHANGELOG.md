@@ -55,6 +55,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Removed datatype:True and datatype:Yes (use datatype:TRUE and datatype:YES instead)
 - Added explicit property declarations for qudt:baseCGSUnitDimensions, qudt:baseImperialUnitDimensions, qudt:baseISOUnitDimensions, qudt:baseSIUnitDimensions, and qudt:baseUSCustomaryUnitDimensions
 - Added explicit property declaration for qudt:enumeratedValue
+- Fixed dimension vectors of quantitykind:Log10FrequencyInterval and quantitykind:LogERatio
 
 ## [3.2.1] - 2026-04-02
 
