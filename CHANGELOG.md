@@ -37,6 +37,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Fixed some small errors in qudt:ArrayDataOrder, qudt:MassPropertiesArray, qkdv:A0E1L0I0M-1H0T0D0, and unit:RT
 - Fixed the types of datatype:ONstate, datatype:OFFstate, datatype:WDST_WET, and datatype:WDST_DRY
 - Removed datatype:True and datatype:Yes (use datatype:TRUE and datatype:YES instead)
+- Added explicit property declarations for qudt:baseCGSUnitDimensions, qudt:baseImperialUnitDimensions, qudt:baseISOUnitDimensions, qudt:baseSIUnitDimensions, and qudt:baseUSCustomaryUnitDimensions
 
 ## [3.2.1] - 2026-04-02
 
