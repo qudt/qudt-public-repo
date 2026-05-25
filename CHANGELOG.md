@@ -16,6 +16,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added  quantitykind:ApparentEnergy and completed the ElectricEnergy specialization hierarchy
 - Added unit:BAR-PER-M (Bar per Metre), unit:PSI-PER-FT (Psi per Foot), and unit:PSI-PER-M (Psi per Metre) for pressure gradients
 - Added 6 energy intensity units: W-HR-PER-FT2, KiloW-HR-PER-FT2, MegaW-HR-PER-FT2, GigaW-HR-PER-FT2, MegaW-HR-PER-M2, GigaW-HR-PER-M2
+- Added quantitykind:LiquidLevel
 
 ### Changed
 
