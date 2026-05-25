@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.3.0] - 2026-05-25
+
 ### Added
 
 - Added support for community extensions: domain-specific vocabularies and even schema changes can now be maintained separately in `src/main/rdf/community/extensions/{id}/` and included in the build using `-Dqudt.supported.extensions=id1,id2`. Extensions are validated and inference-corrected alongside core vocabulary. This capability is fully backward compatible — users who do not supply extension IDs see no change in build behaviour or output.
@@ -746,7 +748,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.2.1...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.3.0...HEAD
+[3.3.0]: https://github.com/qudt/qudt-public-repo/compare/v3.2.1...v3.3.0
 [3.2.1]: https://github.com/qudt/qudt-public-repo/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/qudt/qudt-public-repo/compare/v3.1.11...v3.2.0
 [3.1.11]: https://github.com/qudt/qudt-public-repo/compare/v3.1.10...v3.1.11
