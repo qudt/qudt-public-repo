@@ -2758,36 +2758,9 @@ validAspectDirs.each { aspectDir ->
                                                     FILTER(STRSTARTS(STR(?g), "dist:"))
                                                     FILTER(LANG(?oldLabel) IN ("", "en", "en-US", "en-UK"))
                                                     FILTER(!REGEX(STR(?oldLabel), "^\\p{Lu}( (al|ανά|на|je|na|par|pe|per|por|pro|za|in|for) |[^\\p{Lu}]|[^\\p{Ll}]\\p{Lu})*$"))
-                                                    # Step 1: insert space before each uppercase letter that follows a lowercase letter (CamelCase split)
-                                                    BIND(REPLACE(STR(?oldLabel), "(\\p{Ll})(\\p{Lu})", "$1 $2") AS ?step1)
-                                                    # Step 2: capitalise the first letter of each word that follows a space (26 single-letter replacements using Java lookbehind)
-                                                    BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                                                         REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                                                         REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                                                         REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                                                         REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                                                         REPLACE(?step1,
-                                                           "(?<= )a","A"),"(?<= )b","B"),"(?<= )c","C"),"(?<= )d","D"),"(?<= )e","E"),
-                                                           "(?<= )f","F"),"(?<= )g","G"),"(?<= )h","H"),"(?<= )i","I"),"(?<= )j","J"),
-                                                           "(?<= )k","K"),"(?<= )l","L"),"(?<= )m","M"),"(?<= )n","N"),"(?<= )o","O"),
-                                                           "(?<= )p","P"),"(?<= )q","Q"),"(?<= )r","R"),"(?<= )s","S"),"(?<= )t","T"),
-                                                           "(?<= )u","U"),"(?<= )v","V"),"(?<= )w","W"),"(?<= )x","X"),"(?<= )y","Y"),
-                                                           "(?<= )z","Z") AS ?step2)
-                                                    # Step 3: restore English prepositions and articles to lowercase
-                                                    BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                                                         ?step2,
-                                                         "(?<= )Of(?= |$)","of"),
-                                                         "(?<= )Per(?= |$)","per"),
-                                                         "(?<= )In(?= |$)","in"),
-                                                         "(?<= )For(?= |$)","for"),
-                                                         "(?<= )And(?= |$)","and"),
-                                                         "(?<= )To(?= |$)","to"),
-                                                         "(?<= )A(?= )","a"),
-                                                         "(?<= )An(?= |$)","an") AS ?step3)
-                                                    # Step 4: capitalise the first character of the whole label
-                                                    BIND(CONCAT(UCASE(SUBSTR(?step3, 1, 1)), SUBSTR(?step3, 2)) AS ?step4)
-                                                    BIND(IF(LANG(?oldLabel) = "", ?step4, STRLANG(?step4, LANG(?oldLabel))) AS ?newLabel)
-                                                    FILTER(STR(?step4) != STR(?oldLabel))
+                                                    BIND(qfn:titleCase(STR(?oldLabel)) AS ?fixed)
+                                                    BIND(IF(LANG(?oldLabel) = "", ?fixed, STRLANG(?fixed, LANG(?oldLabel))) AS ?newLabel)
+                                                    FILTER(STR(?fixed) != STR(?oldLabel))
                                                 }
                                             ]]>
                                         </sparql>
