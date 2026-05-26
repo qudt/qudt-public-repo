@@ -605,10 +605,44 @@ qudt:RdfsLabelInTitleCaseShapeWarning
             $this qudt:deprecated true .
           }
           BIND(LANG(?value) as ?lang)
-          # languages to check (not all languages can be in title case)
-          FILTER ( ?lang IN ("", "bg", "cs", "de", "el", "en", "en-US", "es", "fr", "it", "la", "ms", "nl", "pl", "pt", "ro", "ru", "sl", "tr" ) )
+          # English labels only; non-English title-case issues reported at sh:Info level
+          FILTER ( ?lang IN ("", "en", "en-US", "en-UK") )
           # title case check
-          FILTER ( !REGEX(STR(?value), "^\\\\p{Lu}( (al|ανά|на|je|na|par|pe|per|por|pro|za) |[^\\\\p{Lu}]|[^\\\\p{Ll}]\\\\p{Lu})*$") )
+          FILTER ( !REGEX(STR(?value), "^\\\\p{Lu}( (al|ανά|на|je|na|par|pe|per|por|pro|za|in|for) |[^\\\\p{Lu}]|[^\\\\p{Ll}]\\\\p{Lu})*$") )
+          BIND( CONCAT("'",STR(?value),"'", IF (?lang = "", "", CONCAT("@", ?lang))) AS ?langValue)
+        }
+      """ ;
+  ] ;
+  sh:targetClass qudt:ConstantValue ;
+  sh:targetClass qudt:PhysicalConstant ;
+  sh:targetClass qudt:Prefix ;
+  sh:targetClass qudt:QuantityKind .
+
+qudt:RdfsLabelInTitleCaseShapeInfo
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Informational notices for non-English labels that are not in title case" ;
+  sh:severity sh:Info ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message """{$this}: The value of rdfs:label, {?langValue}, is not in title case.
+            - each word must start with an uppercase letter
+            - no uppercase letters allowed directly after a lowercase letter (no CamelCase)
+            - articles and prepositions must be lowercase
+        """ ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+        SELECT $this ?langValue ?value
+        WHERE {
+          $this rdfs:label ?value .
+          FILTER NOT EXISTS {
+            $this qudt:deprecated true .
+          }
+          BIND(LANG(?value) as ?lang)
+          # non-English languages only
+          FILTER ( ?lang IN ("bg", "cs", "de", "el", "es", "fr", "it", "la", "ms", "nl", "pl", "pt", "ro", "ru", "sl", "tr") )
+          # title case check
+          FILTER ( !REGEX(STR(?value), "^\\\\p{Lu}( (al|ανά|на|je|na|par|pe|per|por|pro|za|in|for) |[^\\\\p{Lu}]|[^\\\\p{Ll}]\\\\p{Lu})*$") )
           BIND( CONCAT("'",STR(?value),"'", IF (?lang = "", "", CONCAT("@", ?lang))) AS ?langValue)
         }
       """ ;
