@@ -145,8 +145,18 @@ jobs:
           body_path: target/release-body.md
           files: target/checkout/target/qudt-public-repo-*.zip
 
+      # trigger website publish in qudt-r2 now that the GitHub Release ZIP is available
+      - name: Trigger website publish
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.QUDT_R2_DISPATCH_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/qudtdev/qudt-r2/actions/workflows/publish-website.yml/dispatches \
+            -d '{"ref":"main","inputs":{"version":"${{ inputs.release_version }}"}}'
+
       # create the pull request
       - name: Create Pull Request
+        id: create_pr
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -169,6 +179,14 @@ jobs:
             # Next Steps
             
             Please rebase this PR on top of `main` after verifying the release is ok. 
+
+      # approve and merge the release PR automatically
+      - name: Approve and merge release PR
+        env:
+          GH_TOKEN: ${{ secrets.QUDT_RELEASE_MERGE_TOKEN }}
+        run: |
+          gh pr review ${{ steps.create_pr.outputs.pull-request-number }} --approve
+          gh pr merge ${{ steps.create_pr.outputs.pull-request-number }} --squash --auto
 
       # delete the snapshot release (so we do not accumulate snapshots of all versions over time)
       - name: Delete Snapshot Release
