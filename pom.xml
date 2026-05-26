@@ -2739,6 +2739,49 @@ validAspectDirs.each { aspectDir ->
 
                                     <savepoint><id>10-infer-labels-factors</id></savepoint>
 
+                                    <sparqlUpdate>
+                                        <message>Fixing English labels not in title case (capitalize first letter; split CamelCase)</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                DELETE { GRAPH ?g { ?s rdfs:label ?oldLabel } }
+                                                INSERT {
+                                                    GRAPH ?g { ?s rdfs:label ?newLabel }
+                                                    GRAPH <fix:labels:title-case:toDelete> { ?s rdfs:label ?oldLabel }
+                                                    GRAPH <fix:labels:title-case:toAdd>    { ?s rdfs:label ?newLabel }
+                                                }
+                                                WHERE {
+                                                    GRAPH ?g {
+                                                        ?s rdfs:label ?oldLabel .
+                                                        { ?s a qudt:QuantityKind }
+                                                        UNION { ?s a qudt:Prefix }
+                                                        UNION { ?s a qudt:ConstantValue }
+                                                        UNION { ?s a qudt:PhysicalConstant }
+                                                        FILTER NOT EXISTS { ?s qudt:deprecated true }
+                                                    }
+                                                    FILTER(STRSTARTS(STR(?g), "dist:"))
+                                                    FILTER(LANG(?oldLabel) IN ("", "en", "en-US", "en-UK"))
+                                                    FILTER(!REGEX(STR(?oldLabel), "^\\p{Lu}( (al|ανά|на|je|na|par|pe|per|por|pro|za|in|for) |[^\\p{Lu}]|[^\\p{Ll}]\\p{Lu})*$"))
+                                                    # Step 1: insert space before each uppercase letter that follows a lowercase letter (CamelCase split)
+                                                    BIND(REPLACE(STR(?oldLabel), "(\\p{Ll})(\\p{Lu})", "$1 $2") AS ?step1)
+                                                    # Step 2: capitalise the first character
+                                                    BIND(CONCAT(UCASE(SUBSTR(?step1, 1, 1)), SUBSTR(?step1, 2)) AS ?step2)
+                                                    BIND(IF(LANG(?oldLabel) = "", ?step2, STRLANG(?step2, LANG(?oldLabel))) AS ?newLabel)
+                                                    FILTER(STR(?step2) != STR(?oldLabel))
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <write>
+                                        <graph>fix:labels:title-case:toDelete</graph>
+                                        <toFile>target/fix/labels/title-case/toDelete.ttl</toFile>
+                                    </write>
+                                    <write>
+                                        <graph>fix:labels:title-case:toAdd</graph>
+                                        <toFile>target/fix/labels/title-case/toAdd.ttl</toFile>
+                                    </write>
+
+                                    <savepoint><id>10-infer-labels-title-case</id></savepoint>
+
 
 
 
