@@ -75,55 +75,6 @@ qfn:
     sh:prefix "rdfio" ;
   ] .
 
-qfn:titleCase
-  a sh:SPARQLFunction ;
-  rdfs:comment """Converts an English string to title case:
-    - splits CamelCase words by inserting a space before each uppercase letter that follows a lowercase letter
-    - capitalises the first letter of every word
-    - restores common English prepositions and articles (of, per, in, for, and, to, a, an) to lowercase
-    - capitalises the first character of the result unconditionally""" ;
-  sh:parameter [
-    sh:datatype xsd:string ;
-    sh:description "Input string" ;
-    sh:order 0 ;
-    sh:path qfn:input ;
-  ] ;
-  sh:prefixes qfn: ;
-  sh:returnType xsd:string ;
-  sh:select """
-    SELECT ?result
-    WHERE {
-      # Step 1: split CamelCase (space before uppercase following lowercase)
-      BIND(REPLACE(?input, "(\\\\p{Ll})(\\\\p{Lu})", "$1 $2") AS ?s1)
-      # Step 2: capitalise first letter of each word following a space (26 lookbehind replacements)
-      BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-           REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-           REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-           REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-           REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-           REPLACE(?s1,
-             "(?<= )a","A"),"(?<= )b","B"),"(?<= )c","C"),"(?<= )d","D"),"(?<= )e","E"),
-             "(?<= )f","F"),"(?<= )g","G"),"(?<= )h","H"),"(?<= )i","I"),"(?<= )j","J"),
-             "(?<= )k","K"),"(?<= )l","L"),"(?<= )m","M"),"(?<= )n","N"),"(?<= )o","O"),
-             "(?<= )p","P"),"(?<= )q","Q"),"(?<= )r","R"),"(?<= )s","S"),"(?<= )t","T"),
-             "(?<= )u","U"),"(?<= )v","V"),"(?<= )w","W"),"(?<= )x","X"),"(?<= )y","Y"),
-             "(?<= )z","Z") AS ?s2)
-      # Step 3: restore English prepositions and articles to lowercase
-      BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-           ?s2,
-           "(?<= )Of(?= |$)","of"),
-           "(?<= )Per(?= |$)","per"),
-           "(?<= )In(?= |$)","in"),
-           "(?<= )For(?= |$)","for"),
-           "(?<= )And(?= |$)","and"),
-           "(?<= )To(?= |$)","to"),
-           "(?<= )A(?= )","a"),
-           "(?<= )An(?= |$)","an") AS ?s3)
-      # Step 4: capitalise first character unconditionally
-      BIND(CONCAT(UCASE(SUBSTR(?s3, 1, 1)), SUBSTR(?s3, 2)) AS ?result)
-    }
-  """ .
-
 qfn:bound
   a sh:SPARQLFunction ;
   rdfs:comment "returns true iff the value is bound and not equal to qfn:Unbound" ;
@@ -595,6 +546,61 @@ qfn:pow
         AS ?result )
     }
     """ .
+
+qfn:titleCase
+  a sh:SPARQLFunction ;
+  rdfs:comment """Converts an English string to title case:
+    - splits CamelCase words by inserting a space before each uppercase letter that follows a lowercase letter
+    - capitalises the first letter of each word that has two or more letters (single-character tokens are left unchanged)
+    - restores common English prepositions, conjunctions, and articles (of, per, in, for, and, to, a, an, by, as, the, at) to lowercase
+    - capitalises the first character of the result unconditionally""" ;
+  sh:parameter [
+    sh:datatype xsd:string ;
+    sh:description "Input string" ;
+    sh:order 0 ;
+    sh:path qfn:input ;
+  ] ;
+  sh:prefixes qfn: ;
+  sh:returnType xsd:string ;
+  sh:select """
+    SELECT ?result
+    WHERE {
+      # Step 1: split CamelCase (space before uppercase following lowercase)
+      BIND(REPLACE(?input, "(\\\\p{Ll})(\\\\p{Lu})", "$1 $2") AS ?s1)
+      # Step 2: capitalise first letter of each word following a space, only if the word has ≥2 letters
+      # (single-character tokens like 'e' in 'base e' are left unchanged)
+      BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+           REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+           REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+           REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+           REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+           REPLACE(?s1,
+             "(?<= )a(?=[a-zA-Z])","A"),"(?<= )b(?=[a-zA-Z])","B"),"(?<= )c(?=[a-zA-Z])","C"),"(?<= )d(?=[a-zA-Z])","D"),"(?<= )e(?=[a-zA-Z])","E"),
+             "(?<= )f(?=[a-zA-Z])","F"),"(?<= )g(?=[a-zA-Z])","G"),"(?<= )h(?=[a-zA-Z])","H"),"(?<= )i(?=[a-zA-Z])","I"),"(?<= )j(?=[a-zA-Z])","J"),
+             "(?<= )k(?=[a-zA-Z])","K"),"(?<= )l(?=[a-zA-Z])","L"),"(?<= )m(?=[a-zA-Z])","M"),"(?<= )n(?=[a-zA-Z])","N"),"(?<= )o(?=[a-zA-Z])","O"),
+             "(?<= )p(?=[a-zA-Z])","P"),"(?<= )q(?=[a-zA-Z])","Q"),"(?<= )r(?=[a-zA-Z])","R"),"(?<= )s(?=[a-zA-Z])","S"),"(?<= )t(?=[a-zA-Z])","T"),
+             "(?<= )u(?=[a-zA-Z])","U"),"(?<= )v(?=[a-zA-Z])","V"),"(?<= )w(?=[a-zA-Z])","W"),"(?<= )x(?=[a-zA-Z])","X"),"(?<= )y(?=[a-zA-Z])","Y"),
+             "(?<= )z(?=[a-zA-Z])","Z") AS ?s2)
+      # Step 3: restore English prepositions, conjunctions, and articles to lowercase
+      BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+           REPLACE(REPLACE(REPLACE(REPLACE(
+           ?s2,
+           "(?<= )Of(?= |$)","of"),
+           "(?<= )Per(?= |$)","per"),
+           "(?<= )In(?= |$)","in"),
+           "(?<= )For(?= |$)","for"),
+           "(?<= )And(?= |$)","and"),
+           "(?<= )To(?= |$)","to"),
+           "(?<= )A(?= )","a"),
+           "(?<= )An(?= |$)","an"),
+           "(?<= )By(?= |$)","by"),
+           "(?<= )As(?= |$)","as"),
+           "(?<= )The(?= |$)","the"),
+           "(?<= )At(?= |$)","at") AS ?s3)
+      # Step 4: capitalise first character unconditionally
+      BIND(CONCAT(UCASE(SUBSTR(?s3, 1, 1)), SUBSTR(?s3, 2)) AS ?result)
+    }
+  """ .
 
 qfn:unit.dimVec.calculate
   a sh:SPARQLFunction ;

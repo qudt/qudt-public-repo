@@ -99,6 +99,13 @@
             mvn -Dqudt.allInOne.extensions=propulsion,loop3d install
         -->
         <qudt.allInOne.extensions />
+        <!--
+            Sentinel used by the src-errors pipeline step to detect whether the 'fix' profile is
+            active. The fix profile overrides this to "fix.profile.is.active"; the default value
+            here ensures Maven always substitutes a defined string so rdfio does not attempt to
+            resolve the placeholder as a metadata-graph variable (behaviour added in rdfio 1.7.0).
+        -->
+        <fix.profile.is.inactive>fix.profile.is.inactive</fix.profile.is.inactive>
     </properties>
     <scm>
         <connection>scm:git:https://github.com/qudt/qudt-public-repo.git</connection>
@@ -2757,7 +2764,7 @@ validAspectDirs.each { aspectDir ->
                                                     }
                                                     FILTER(STRSTARTS(STR(?g), "dist:"))
                                                     FILTER(LANG(?oldLabel) IN ("", "en", "en-US", "en-UK"))
-                                                    FILTER(!REGEX(STR(?oldLabel), "^\\p{Lu}( (al|ανά|на|je|na|par|pe|per|por|pro|za|in|for) |[^\\p{Lu}]|[^\\p{Ll}]\\p{Lu})*$"))
+                                                    FILTER(!REGEX(STR(?oldLabel), "^\\p{Ll}-"))
                                                     BIND(qfn:titleCase(STR(?oldLabel)) AS ?fixed)
                                                     BIND(IF(LANG(?oldLabel) = "", ?fixed, STRLANG(?fixed, LANG(?oldLabel))) AS ?newLabel)
                                                     FILTER(STR(?fixed) != STR(?oldLabel))
