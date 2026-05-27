@@ -51,17 +51,17 @@ a currency unit. `C=0` otherwise.
 
 Worked examples from the source ontology:
 
-|     Quantity kind      | SI dimension vector   | C |               Rationale                |
-|------------------------|-----------------------|---|----------------------------------------|
-| `Currency`             | `A0E0L0I0M0H0T0D1`    | 1 | Monetary amount; all SI dims zero → D=1 |
-| `CurrencyPerFlight`    | `A0E0L0I0M0H0T0D1`    | 1 | Cost denominated in currency            |
-| `CurrencyPerTime`      | `A0E0L0I0M0H0T-1D0`   | 1 | Monetary flow rate (e.g. M$/yr)         |
-| `CostPerEnergy`        | `A0E0L-2I0M-1H0T2D0`  | 1 | Price per unit energy (e.g. EUR/kWh)    |
-| `CostPerPower`         | `A0E0L-2I0M-1H0T3D0`  | 1 | Price per unit power (e.g. EUR/kW)      |
-| `CostPerArea`          | `A0E0L-2I0M0H0T0D0`   | 1 | Price per unit area (e.g. EUR/m²)       |
-| `CostPerMass`          | `A0E0L0I0M-1H0T0D0`   | 1 | Price per unit mass (e.g. CHF/kg)       |
-| `Frequency`            | `A0E0L0I0M0H0T-1D0`   | 0 | Physical rate; no monetary character    |
-| `ElectricCurrent`      | `A0E1L0I0M0H0T0D0`    | 0 | SI base quantity; not monetary          |
+|    Quantity kind    | SI dimension vector  | C |                Rationale                |
+|---------------------|----------------------|---|-----------------------------------------|
+| `Currency`          | `A0E0L0I0M0H0T0D1`   | 1 | Monetary amount; all SI dims zero → D=1 |
+| `CurrencyPerFlight` | `A0E0L0I0M0H0T0D1`   | 1 | Cost denominated in currency            |
+| `CurrencyPerTime`   | `A0E0L0I0M0H0T-1D0`  | 1 | Monetary flow rate (e.g. M$/yr)         |
+| `CostPerEnergy`     | `A0E0L-2I0M-1H0T2D0` | 1 | Price per unit energy (e.g. EUR/kWh)    |
+| `CostPerPower`      | `A0E0L-2I0M-1H0T3D0` | 1 | Price per unit power (e.g. EUR/kW)      |
+| `CostPerArea`       | `A0E0L-2I0M0H0T0D0`  | 1 | Price per unit area (e.g. EUR/m²)       |
+| `CostPerMass`       | `A0E0L0I0M-1H0T0D0`  | 1 | Price per unit mass (e.g. CHF/kg)       |
+| `Frequency`         | `A0E0L0I0M0H0T-1D0`  | 0 | Physical rate; no monetary character    |
+| `ElectricCurrent`   | `A0E1L0I0M0H0T0D0`   | 0 | SI base quantity; not monetary          |
 
 The D exponent follows the standard convention independently of C: D=1 when all
 eight SI base exponents are zero, D=0 otherwise. For a pure currency amount
