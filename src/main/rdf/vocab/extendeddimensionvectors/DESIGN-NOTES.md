@@ -82,6 +82,9 @@ definition:
   the unit of angle — not derived.
 - `unit:SR` = rad², so `R=2` by definition. Same factor-unit limitation applies.
 
+The `qfn:ExtendedDVConsistencyRule` QA shape will always flag these as
+warnings. This is expected and correct.
+
 ## Becquerel N=1 by convention
 
 `unit:BQ` is assigned `N=1` (each becquerel counts one nuclear disintegration
