@@ -17,6 +17,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Fixed a missing qudt:element property for datatype:ONstate and datatype:OFFstate
+
 ## [3.3.0] - 2026-05-25
 
 ### Added
