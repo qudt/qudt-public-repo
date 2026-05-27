@@ -8,7 +8,7 @@
 #
 # IRI local-name formats:
 #   qkdv:  A{a}E{e}L{l}I{i}M{m}H{h}T{t}D{d}
-#   edv:   A{a}E{e}L{l}I{i}M{m}H{h}T{t}D{d}R{r}N{n}
+#   edv:   A{a}E{e}L{l}I{i}M{m}H{h}T{t}D{d}R{r}N{n}C{c}
 #          (namespace: http://qudt.org/vocab/extendeddimensionvector/)
 #
 # Matching strategy: IRI namespace prefix, not rdf:type.
@@ -57,8 +57,8 @@ WHERE {
     BIND(REPLACE(?local, "^.*M(-?[0-9]+(?:dot[0-9]+)?)H.*$",          "$1") AS ?mRaw)
     BIND(REPLACE(?local, "^.*H(-?[0-9]+(?:dot[0-9]+)?)T.*$",          "$1") AS ?hRaw)
     BIND(REPLACE(?local, "^.*T(-?[0-9]+(?:dot[0-9]+)?)D.*$",          "$1") AS ?tRaw)
-    # D is last in qkdv: IRIs; R and N may follow in edv: IRIs
-    BIND(REPLACE(?local, "^.*D(-?[0-9]+(?:dot[0-9]+)?)(?:[RN].*)?$",  "$1") AS ?dRaw)
+    # D is last in qkdv: IRIs; R, N, and C may follow in edv: IRIs
+    BIND(REPLACE(?local, "^.*D(-?[0-9]+(?:dot[0-9]+)?)(?:[RNC].*)?$",  "$1") AS ?dRaw)
 
     BIND(IF(CONTAINS(?aRaw,"dot"), xsd:decimal(REPLACE(?aRaw,"dot",".")), xsd:integer(?aRaw)) AS ?aExp)
     BIND(IF(CONTAINS(?eRaw,"dot"), xsd:decimal(REPLACE(?eRaw,"dot",".")), xsd:integer(?eRaw)) AS ?eExp)
@@ -71,14 +71,15 @@ WHERE {
 }
 ;
 
-# ── Extended dimension exponents (R = angle, N = count) ──────────────────────
+# ── Extended dimension exponents (R = angle, N = count, C = currency) ────────
 # Applies only to edv: instances (http://qudt.org/vocab/extendeddimensionvector/…).
 # Does not fire until edv: instances are added to the vocabulary.
 
 INSERT {
     GRAPH ?g {
-        ?dv qudt:dimensionExponentForAngle ?rExp ;
-            qudt:dimensionExponentForCount ?nExp .
+        ?dv qudt:dimensionExponentForAngle    ?rExp ;
+            qudt:dimensionExponentForCount    ?nExp ;
+            qudt:dimensionExponentForCurrency ?cExp .
     }
 }
 WHERE {
@@ -90,8 +91,10 @@ WHERE {
     BIND(REPLACE(STR(?dv), "^.*[/#]", "") AS ?local)
 
     BIND(REPLACE(?local, "^.*R(-?[0-9]+(?:dot[0-9]+)?)N.*$", "$1") AS ?rRaw)
-    BIND(REPLACE(?local, "^.*N(-?[0-9]+(?:dot[0-9]+)?)$",    "$1") AS ?nRaw)
+    BIND(REPLACE(?local, "^.*N(-?[0-9]+(?:dot[0-9]+)?)C.*$", "$1") AS ?nRaw)
+    BIND(REPLACE(?local, "^.*C(-?[0-9]+(?:dot[0-9]+)?)$",    "$1") AS ?cRaw)
 
     BIND(IF(CONTAINS(?rRaw,"dot"), xsd:decimal(REPLACE(?rRaw,"dot",".")), xsd:integer(?rRaw)) AS ?rExp)
     BIND(IF(CONTAINS(?nRaw,"dot"), xsd:decimal(REPLACE(?nRaw,"dot",".")), xsd:integer(?nRaw)) AS ?nExp)
+    BIND(IF(CONTAINS(?cRaw,"dot"), xsd:decimal(REPLACE(?cRaw,"dot",".")), xsd:integer(?cRaw)) AS ?cExp)
 }
