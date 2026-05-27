@@ -1,16 +1,21 @@
 # Extended Dimension Vectors — Design Notes
 
-## What the R and N dimensions represent
+## What the R, N, and C dimensions represent
 
-Extended dimension vectors (`edv:`) extend the eight SI base dimensions with two
-additional dimensions that are dimensionless in SI but carry distinct physical
-meaning:
+Extended dimension vectors (`edv:`) extend the eight SI base dimensions with three
+additional dimensions that are dimensionless in SI but carry distinct physical or
+economic meaning:
 
 - **R (angle)** — tracks radian-dimension, suppressed in SI. Examples: `R=1`
   for plane angle, `R=2` for solid angle (sr = rad²), `R=−1` for torque
   (τ = dW/dθ), `R=−2` for torsional stiffness and radiance.
 - **N (count)** — tracks discrete enumerable entities. Examples: `N=1` for
   particle number, nucleon number, heartbeat count, lumen (cd·sr), NUM/COUNT.
+- **C (currency)** — tracks monetary denomination. `C=1` for quantities expressed
+  in or directly representing monetary value (prices, costs, exchange amounts);
+  `C=0` for all physical, information-theoretic, or dimensionless quantities.
+  Unlike R and N, C has no SI factor-unit derivation; it is always set explicitly
+  on the unit or quantity-kind definition.
 
 ## Dividing line for N=1
 
@@ -25,19 +30,47 @@ Not every integer-valued or "countable" quantity gets `N=1`. The rule is:
 
 Worked examples from the source ontology:
 
-|       Quantity kind        | R | N |                    Rationale                     |
-|----------------------------|---|---|--------------------------------------------------|
-| `AtomicNumber`             | 0 | 1 | Count of protons; `skos:broader Count`           |
-| `MassNumber`               | 0 | 1 | Count of nucleons; `skos:broader Count`          |
-| `NucleonNumber`            | 0 | 1 | Count of nucleons                                |
-| `NeutronNumber`            | 0 | 1 | Count of neutrons                                |
-| `ChargeNumber`             | 0 | 0 | q/e — a ratio, `skos:broader Dimensionless`      |
-| `NuclearSpinQuantumNumber` | 0 | 0 | Quantum state index                              |
-| `InformationContent` (bit) | 0 | 0 | Information-theoretic unit, not a particle count |
+|       Quantity kind        | R | N | C |                    Rationale                     |
+|----------------------------|---|---|---|--------------------------------------------------|
+| `AtomicNumber`             | 0 | 1 | 0 | Count of protons; `skos:broader Count`           |
+| `MassNumber`               | 0 | 1 | 0 | Count of nucleons; `skos:broader Count`          |
+| `NucleonNumber`            | 0 | 1 | 0 | Count of nucleons                                |
+| `NeutronNumber`            | 0 | 1 | 0 | Count of neutrons                                |
+| `ChargeNumber`             | 0 | 0 | 0 | q/e — a ratio, `skos:broader Dimensionless`      |
+| `NuclearSpinQuantumNumber` | 0 | 0 | 0 | Quantum state index                              |
+| `InformationContent` (bit) | 0 | 0 | 0 | Information-theoretic unit, not a particle count |
 
 Bits are information units. You do not measure information content by counting
 discrete objects the way you count protons; the mathematical structure is
 fundamentally different. See also the note in `unit:BIT`'s description.
+
+## Dividing line for C=1
+
+`C=1` when the quantity is a monetary amount or is directly denominated in
+a currency unit. `C=0` otherwise.
+
+Worked examples from the source ontology:
+
+|     Quantity kind      | SI dimension vector   | C |               Rationale                |
+|------------------------|-----------------------|---|----------------------------------------|
+| `Currency`             | `A0E0L0I0M0H0T0D1`    | 1 | Monetary amount; all SI dims zero → D=1 |
+| `CurrencyPerFlight`    | `A0E0L0I0M0H0T0D1`    | 1 | Cost denominated in currency            |
+| `CurrencyPerTime`      | `A0E0L0I0M0H0T-1D0`   | 1 | Monetary flow rate (e.g. M$/yr)         |
+| `CostPerEnergy`        | `A0E0L-2I0M-1H0T2D0`  | 1 | Price per unit energy (e.g. EUR/kWh)    |
+| `CostPerPower`         | `A0E0L-2I0M-1H0T3D0`  | 1 | Price per unit power (e.g. EUR/kW)      |
+| `CostPerArea`          | `A0E0L-2I0M0H0T0D0`   | 1 | Price per unit area (e.g. EUR/m²)       |
+| `CostPerMass`          | `A0E0L0I0M-1H0T0D0`   | 1 | Price per unit mass (e.g. CHF/kg)       |
+| `Frequency`            | `A0E0L0I0M0H0T-1D0`   | 0 | Physical rate; no monetary character    |
+| `ElectricCurrent`      | `A0E1L0I0M0H0T0D0`    | 0 | SI base quantity; not monetary          |
+
+The D exponent follows the standard convention independently of C: D=1 when all
+eight SI base exponents are zero, D=0 otherwise. For a pure currency amount
+(T=0, M=0, …), D=1; for a currency rate or density, the non-zero SI exponent
+forces D=0.
+
+Because C has no SI base unit and no factor-unit derivation, the extended-DV
+consistency check cannot compute C from component units. All C values are
+authoritative by definition and will never produce a factor-unit mismatch warning.
 
 ## Angle and solid angle are definitional (R=1, R=2)
 
@@ -48,9 +81,6 @@ definition:
   computation yields `R=0`. The `R=1` assignment is definitional — radian is
   the unit of angle — not derived.
 - `unit:SR` = rad², so `R=2` by definition. Same factor-unit limitation applies.
-
-The `qudt:ExtendedDVConsistencyRule` QA shape will always flag these as
-warnings. This is expected and correct.
 
 ## Becquerel N=1 by convention
 
