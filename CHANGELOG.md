@@ -7,6 +7,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+- Added code to automatically convert labels for quantity kinds into Title Case
+
+### Changed
+
+### Deprecated
+
+### Fixed
+
 ## [3.3.0] - 2026-05-25
 
 ### Added
