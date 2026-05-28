@@ -71,7 +71,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.qudt</groupId>
     <artifactId>qudt-public-repo</artifactId>
-    <version>3.2.2-SNAPSHOT</version>
+    <version>3.3.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -92,13 +92,20 @@
             convention in defineAdditionalProperties, e.g.:
             mvn -Dqudt.supported.extensions=propulsion install
         -->
-        <qudt.supported.extensions></qudt.supported.extensions>
+        <qudt.supported.extensions />
         <!--
             Optional local-only all-in-one extension bundle selection. CI should
             leave this empty. Example:
             mvn -Dqudt.allInOne.extensions=propulsion,loop3d install
         -->
-        <qudt.allInOne.extensions></qudt.allInOne.extensions>
+        <qudt.allInOne.extensions />
+        <!--
+            Sentinel used by the src-errors pipeline step to detect whether the 'fix' profile is
+            active. The fix profile overrides this to "fix.profile.is.active"; the default value
+            here ensures Maven always substitutes a defined string so rdfio does not attempt to
+            resolve the placeholder as a metadata-graph variable (behaviour added in rdfio 1.7.0).
+        -->
+        <fix.profile.is.inactive>fix.profile.is.inactive</fix.profile.is.inactive>
     </properties>
     <scm>
         <connection>scm:git:https://github.com/qudt/qudt-public-repo.git</connection>
@@ -156,7 +163,7 @@
                                     project.properties.setProperty('project.version.majorminor', majorMinorVersion)
                                     project.properties.setProperty('qudt.versioned.iri.prefix', "http://qudt.org/${majorMinorVersion}/")
                                     def now = OffsetDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0)
-                                    project.properties.setProperty('qudt.build.date', "${now}")
+                                    project.properties.setProperty('qudt.build.date', now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")))
                                     def currentMonth = now.format(DateTimeFormatter.ofPattern("MM"))
                                     def currentYear = now.format(DateTimeFormatter.ofPattern("YYYY"))
                                     project.properties.setProperty('qudt.current.month', currentMonth)
@@ -1736,7 +1743,7 @@ validAspectDirs.each { aspectDir ->
                                         <graph>inferred:applicableUnits</graph>
                                         <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
                                     </add>
-                                    <invoke stepRef="refresh-supported-extensions-vocab"/>
+                                    <invoke stepRef="refresh-supported-extensions-vocab" />
                                     <sparqlQuery>
                                         <message>Loading core quantity kind hierarchy as support for supported extension applicableUnit inference</message>
                                         <sparql>
@@ -2170,7 +2177,7 @@ validAspectDirs.each { aspectDir ->
                                         <toFile>target/inferred/supported-extensions-core-unit-derived-properties.ttl</toFile>
                                     </sparqlQuery>
                                     <!-- ===== Extension phase: all extension inference on a single stable aggregate ===== -->
-                                    <invoke stepRef="refresh-supported-extensions-vocab"/>
+                                    <invoke stepRef="refresh-supported-extensions-vocab" />
                                     <shaclInfer>
                                         <message>Inferring qudt:hasFactorUnit for supported extension units</message>
                                         <shapes>
@@ -2385,7 +2392,7 @@ validAspectDirs.each { aspectDir ->
                                                 <message>Checking supported extension units for missing/wrong ${name}s that can be corrected/inferred</message>
                                                 <indexVar>iteration_ext</indexVar>
                                                 <body>
-                                                    <invoke stepRef="refresh-supported-extensions-vocab"/>
+                                                    <invoke stepRef="refresh-supported-extensions-vocab" />
                                                     <clear>
                                                         <graph>inferred:${name}-supported-extensions</graph>
                                                         <graph>delete:${name}-supported-extensions</graph>
@@ -2738,6 +2745,43 @@ validAspectDirs.each { aspectDir ->
 
 
                                     <savepoint><id>10-infer-labels-factors</id></savepoint>
+
+                                    <sparqlUpdate>
+                                        <message>Fixing English labels not in title case (capitalize first letter; split CamelCase)</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                DELETE { GRAPH ?g { ?s rdfs:label ?oldLabel } }
+                                                INSERT {
+                                                    GRAPH ?g { ?s rdfs:label ?newLabel }
+                                                    GRAPH <fix:labels:title-case:toDelete> { ?s rdfs:label ?oldLabel }
+                                                    GRAPH <fix:labels:title-case:toAdd>    { ?s rdfs:label ?newLabel }
+                                                }
+                                                WHERE {
+                                                    GRAPH ?g {
+                                                        ?s rdfs:label ?oldLabel .
+                                                        { ?s a qudt:QuantityKind } UNION { ?s a qudt:Prefix }
+                                                        FILTER NOT EXISTS { ?s qudt:deprecated true }
+                                                    }
+                                                    FILTER(STRSTARTS(STR(?g), "dist:"))
+                                                    FILTER(LANG(?oldLabel) IN ("", "en", "en-US", "en-UK"))
+                                                    FILTER(!REGEX(STR(?oldLabel), "^\\p{Ll}-"))
+                                                    BIND(qfn:titleCase(STR(?oldLabel)) AS ?fixed)
+                                                    BIND(IF(LANG(?oldLabel) = "", ?fixed, STRLANG(?fixed, LANG(?oldLabel))) AS ?newLabel)
+                                                    FILTER(STR(?fixed) != STR(?oldLabel))
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <write>
+                                        <graph>fix:labels:title-case:toDelete</graph>
+                                        <toFile>target/fix/labels/title-case/toDelete.ttl</toFile>
+                                    </write>
+                                    <write>
+                                        <graph>fix:labels:title-case:toAdd</graph>
+                                        <toFile>target/fix/labels/title-case/toAdd.ttl</toFile>
+                                    </write>
+
+                                    <savepoint><id>10-infer-labels-title-case</id></savepoint>
 
 
 
@@ -3713,7 +3757,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         </files>
                                         <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
                                     </add>
-                                    <invoke stepRef="refresh-supported-extensions-vocab"/>
+                                    <invoke stepRef="refresh-supported-extensions-vocab" />
                                     <shaclValidate>
                                         <message>Validating QUDT build output (target/dist/)</message>
                                         <!--skip>true</skip-->

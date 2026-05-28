@@ -9,13 +9,28 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added code to automatically convert labels for quantity kinds into Title Case
+
+### Changed
+
+### Deprecated
+
+### Fixed
+
+- Fixed a missing qudt:element property for datatype:ONstate and datatype:OFFstate
+
+## [3.3.0] - 2026-05-25
+
+### Added
+
 - Added support for community extensions: domain-specific vocabularies and even schema changes can now be maintained separately in `src/main/rdf/community/extensions/{id}/` and included in the build using `-Dqudt.supported.extensions=id1,id2`. Extensions are validated and inference-corrected alongside core vocabulary. This capability is fully backward compatible — users who do not supply extension IDs see no change in build behaviour or output.
 - Added quantitykind:ProductOfInertia as a replacement for the deprecated quantitykind:PRODUCT-OF-INERTIA
 - Added unit:OHM-FT (Ohm Foot), the imperial counterpart to unit:OHM-M, for resistivity in well-logging and petrophysics applications
 - Added unit:HectoHZ (Hectohertz), the 100-fold SI prefix scaling of unit:HZ
 - Added  quantitykind:ApparentEnergy and completed the ElectricEnergy specialization hierarchy
-- Added unit:BAR-PER-M (Bar per Metre), unit:PSI-PER-FT (Psi per Foot), and unit:PSI-PER-M (Psi per Metre) for pressure gradients
+- Added unit:BAR-PER-M (Bar per Metre), unit:PSI-PER-FT (Psi per Foot), and unit:PSI-PER-M (Psi per Metre) for pressure gradients.
 - Added 6 energy intensity units: W-HR-PER-FT2, KiloW-HR-PER-FT2, MegaW-HR-PER-FT2, GigaW-HR-PER-FT2, MegaW-HR-PER-M2, GigaW-HR-PER-M2
+- Added quantitykind:LiquidLevel
 
 ### Changed
 
@@ -762,7 +777,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.2.1...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.3.0...HEAD
+[3.3.0]: https://github.com/qudt/qudt-public-repo/compare/v3.2.1...v3.3.0
 [3.2.1]: https://github.com/qudt/qudt-public-repo/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/qudt/qudt-public-repo/compare/v3.1.11...v3.2.0
 [3.1.11]: https://github.com/qudt/qudt-public-repo/compare/v3.1.10...v3.1.11
