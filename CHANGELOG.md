@@ -15,9 +15,27 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Deprecated
 
+- Deprecated 15 logarithmic Quantity Kinds in favor of more consistently-named URIs:
+  - `quantitykind:NaturalLogarithmicMedianInformationFlow` — replaced by `quantitykind:LogEMedianInformationFlow`
+  - `quantitykind:BinaryLogarithmicMedianInformationFlow` — replaced by `quantitykind:Log2MedianInformationFlow`
+  - `quantitykind:CommonLogarithmicMedianInformationFlow` — replaced by `quantitykind:Log10MedianInformationFlow`
+  - `quantitykind:InformationContentExpressedAsALogarithmToBaseE` — replaced by `quantitykind:LogEInformationContent`
+  - `quantitykind:InformationContentExpressedAsALogarithmToBase2` — replaced by `quantitykind:Log2InformationContent`
+  - `quantitykind:InformationContentExpressedAsALogarithmToBase10` — replaced by `quantitykind:Log10InformationContent`
+  - `quantitykind:LinearLogarithmicRatio` — replaced by `quantitykind:Log10LinearRatio`
+  - `quantitykind:LineicLogarithmicRatio` — replaced by `quantitykind:Log10LinearRatio`
+  - `quantitykind:LogarithmicFrequencyInterval` — replaced by `quantitykind:Log2FrequencyInterval`
+  - `quantitykind:LogarithmicFrequencyIntervalToBase10` — replaced by `quantitykind:Log10FrequencyInterval`
+  - `quantitykind:LogarithmRatioToBaseE` — replaced by `quantitykind:LogERatio`
+  - `quantitykind:LogarithmRatioToBase10` — replaced by `quantitykind:Log10Ratio`
+  - `quantitykind:LogOctanolAirPartitionCoefficient`
+  - `quantitykind:LogOctanolWaterPartitionCoefficient`
+  - `quantitykind:TimeRelatedLogarithmicRatio` — replaced by `quantitykind:TimeRelatedLog10Ratio`
+
 ### Fixed
 
 - Fixed a missing qudt:element property for datatype:ONstate and datatype:OFFstate
+- Fixed dimension vectors of quantitykind:Log10FrequencyInterval and quantitykind:LogERatio
 
 ## [3.3.0] - 2026-05-25
 
