@@ -10,8 +10,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - Added code to automatically convert labels for quantity kinds into Title Case
+- Added qudt:eclassCode
 
 ### Changed
+
+- Changed all qudt:symbol annotations with an ECLASS IRDI to qudt:eclassCode
 
 ### Deprecated
 
