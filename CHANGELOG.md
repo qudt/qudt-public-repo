@@ -11,16 +11,19 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Added code to automatically convert labels for quantity kinds into Title Case
 - Added qudt:eclassCode
+- Added some missing dimension vectors to quantity kinds
 
 ### Changed
 
 - Changed all qudt:symbol annotations with an ECLASS IRDI to qudt:eclassCode
+- Updated all qudt:eclassCode values to match ECLASS Release 16.0
 
 ### Deprecated
 
 ### Fixed
 
 - Fixed a missing qudt:element property for datatype:ONstate and datatype:OFFstate
+- Fixed some dimension vectors of quantity kinds
 
 ## [3.3.0] - 2026-05-25
 
