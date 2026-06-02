@@ -342,12 +342,12 @@ FILTER NOT EXISTS {?t qudt:exactMatch $this } .
 qudt:ExtendedDVBroaderChainHeuristic
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
-  rdfs:label "Heuristic: QuantityKind has R0N0 edv but a skos:broader ancestor has non-R0N0 edv" ;
+  rdfs:label "Heuristic: QuantityKind has R0N0C0 edv but a skos:broader ancestor has non-R0N0C0 edv" ;
   sh:severity sh:Warning ;
   sh:sparql [
     a sh:SPARQLConstraint ;
-    rdfs:comment "If a QuantityKind's broader ancestor has a non-R0N0 extended dimension vector, the QK itself likely needs a non-R0N0 assignment. This catches newly added specialisations of angular or count quantity kinds that were assigned the default R0N0." ;
-    sh:message "QuantityKind {$this} has edv {?thisEdv} (R0N0) but ancestor {?ancestor} has edv {?ancestorEdv} (non-R0N0). Consider whether {$this} also needs a non-zero R or N component." ;
+    rdfs:comment "If a QuantityKind's broader ancestor has a non-R0N0C0 extended dimension vector, the QK itself likely needs a non-R0N0C0 assignment. This catches newly added specialisations of angular, count, or currency quantity kinds that were assigned the default R0N0C0." ;
+    sh:message "QuantityKind {$this} has edv {?thisEdv} (R0N0C0) but ancestor {?ancestor} has edv {?ancestorEdv} (non-R0N0C0). Consider whether {$this} also needs a non-zero R, N, or C component." ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
       SELECT $this ?ancestor ?ancestorEdv ?thisEdv
@@ -355,8 +355,8 @@ qudt:ExtendedDVBroaderChainHeuristic
           $this qudt:hasExtendedDimensionVector ?thisEdv .
           $this skos:broader+ ?ancestor .
           ?ancestor qudt:hasExtendedDimensionVector ?ancestorEdv .
-          FILTER(REGEX(STR(?thisEdv), "R0N0$"))
-          FILTER(!REGEX(STR(?ancestorEdv), "R0N0$"))
+          FILTER(REGEX(STR(?thisEdv), "R0N0C0$"))
+          FILTER(!REGEX(STR(?ancestorEdv), "R0N0C0$"))
           FILTER NOT EXISTS { $this qudt:deprecated true }
       }
     """ ;
@@ -479,6 +479,52 @@ $this qudt:hasQuantityKind ?qk .
 FILTER (?udv != qkdv:NotApplicable) .
 FILTER (?qdv != qkdv:NotApplicable) .
 FILTER (?udv != ?qdv) .
+}
+""" ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
+qudt:InconsistentExtendedDimensionVectorInSKOSHierarchyConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Checks that a QuantityKind has the same extended dimension vector as any skos:broader QuantityKind" ;
+    sh:message "QuantityKind {$this} has extended dimension vector {?edv} which is not the same as the extended dimension vector of its skos:broader {?qk} with extended dimension vector {?ancestorEdv}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+SELECT $this ?edv ?qk ?ancestorEdv
+WHERE {
+FILTER NOT EXISTS { $this qudt:deprecated true } .
+$this qudt:hasExtendedDimensionVector ?edv .
+$this skos:broader* ?qk .
+?qk qudt:hasExtendedDimensionVector ?ancestorEdv .
+FILTER (?edv != ?ancestorEdv) .
+FILTER (?edv != edv:NotApplicable) .
+FILTER (?ancestorEdv != edv:NotApplicable) .
+}
+""" ;
+  ] ;
+  sh:targetClass qudt:QuantityKind .
+
+qudt:InconsistentExtendedDimensionVectorUnitAndQuantityKindConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Checks that a Unit and its QuantityKind have the same extended dimension vector" ;
+    sh:message "Unit {$this} has extended dimension vector {?edv} which is not the same as the extended dimension vector of its quantity kind {?qk} with extended dimension vector {?qkEdv}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+SELECT $this ?edv ?qk ?qkEdv
+WHERE {
+FILTER NOT EXISTS { $this qudt:deprecated true } .
+$this qudt:hasExtendedDimensionVector ?edv .
+$this qudt:hasQuantityKind ?qk .
+?qk qudt:hasExtendedDimensionVector ?qkEdv .
+FILTER (?edv != edv:NotApplicable) .
+FILTER (?qkEdv != edv:NotApplicable) .
+FILTER (?edv != ?qkEdv) .
 }
 """ ;
   ] ;

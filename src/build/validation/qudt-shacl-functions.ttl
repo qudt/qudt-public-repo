@@ -676,12 +676,15 @@ qfn:unit.eDimVec.calculate
                 }
             }
 
-            # Step 3: append R and N to the qkdv: local name and switch to edv: namespace
-            BIND(qfn:localname(?qkdvResult) AS ?qkdvLocal)
+            # Step 3: append R, N, C0 to the qkdv: local name (minus its D slot)
+            # and switch to edv: namespace. edv: IRIs omit D; C is always 0 for
+            # factor-unit-derived EDVs (currency cannot be derived from factor units).
+            BIND(REPLACE(qfn:localname(?qkdvResult), "D-?[0-9]+$", "") AS ?qkdvLocalWithoutD)
             BIND(IRI(CONCAT("http://qudt.org/vocab/extendeddimensionvector/",
-                            ?qkdvLocal,
+                            ?qkdvLocalWithoutD,
                             "R", STR(xsd:integer(?rSum)),
-                            "N", STR(xsd:integer(?nSum))))
+                            "N", STR(xsd:integer(?nSum)),
+                            "C0"))
                  AS ?result)
         }
     """ .

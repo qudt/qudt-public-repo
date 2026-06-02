@@ -2,9 +2,17 @@
 
 ## What the R, N, and C dimensions represent
 
-Extended dimension vectors (`edv:`) extend the eight SI base dimensions with three
-additional dimensions that are dimensionless in SI but carry distinct physical or
-economic meaning:
+Extended dimension vectors (`edv:`) share the eight SI base-dimension exponents with
+the SI dimension vector (`qkdv:`) but use a different IRI format:
+
+- **`qkdv:` format:** `A{a}E{e}L{l}I{i}M{m}H{h}T{t}D{d}` — eight SI dimensions including the dimensionless D slot
+- **`edv:` format:** `A{a}E{e}L{l}I{i}M{m}H{h}T{t}R{r}N{n}C{c}` — eight SI base dimensions (D omitted) plus three extended dimensions
+
+The D slot is omitted from the EDV IRI because it is entirely determined by the SI
+base exponents (D=1 iff all eight are zero) and carries no independent information.
+It remains present in `qkdv:` IRIs and is unchanged by this system.
+
+The three additional extended dimensions carry distinct physical or economic meaning:
 
 - **R (angle)** — tracks radian-dimension, suppressed in SI. Examples: `R=1`
   for plane angle, `R=2` for solid angle (sr = rad²), `R=−1` for torque
@@ -51,22 +59,21 @@ a currency unit. `C=0` otherwise.
 
 Worked examples from the source ontology:
 
-|    Quantity kind    | SI dimension vector  | C |                Rationale                |
-|---------------------|----------------------|---|-----------------------------------------|
-| `Currency`          | `A0E0L0I0M0H0T0D1`   | 1 | Monetary amount; all SI dims zero → D=1 |
-| `CurrencyPerFlight` | `A0E0L0I0M0H0T0D1`   | 1 | Cost denominated in currency            |
-| `CurrencyPerTime`   | `A0E0L0I0M0H0T-1D0`  | 1 | Monetary flow rate (e.g. M$/yr)         |
-| `CostPerEnergy`     | `A0E0L-2I0M-1H0T2D0` | 1 | Price per unit energy (e.g. EUR/kWh)    |
-| `CostPerPower`      | `A0E0L-2I0M-1H0T3D0` | 1 | Price per unit power (e.g. EUR/kW)      |
-| `CostPerArea`       | `A0E0L-2I0M0H0T0D0`  | 1 | Price per unit area (e.g. EUR/m²)       |
-| `CostPerMass`       | `A0E0L0I0M-1H0T0D0`  | 1 | Price per unit mass (e.g. CHF/kg)       |
-| `Frequency`         | `A0E0L0I0M0H0T-1D0`  | 0 | Physical rate; no monetary character    |
-| `ElectricCurrent`   | `A0E1L0I0M0H0T0D0`   | 0 | SI base quantity; not monetary          |
+|    Quantity kind    | EDV base (A…T, no D)   | C |             Rationale              |
+|---------------------|------------------------|---|------------------------------------|
+| `Currency`          | `A0E0L0I0M0H0T0`       | 1 | Monetary amount                    |
+| `CurrencyPerFlight` | `A0E0L0I0M0H0T0`       | 1 | Cost denominated in currency       |
+| `CurrencyPerTime`   | `A0E0L0I0M0H0T-1`      | 1 | Monetary flow rate (e.g. M$/yr)    |
+| `CostPerEnergy`     | `A0E0L-2I0M-1H0T2`     | 1 | Price per unit energy (e.g. EUR/kWh) |
+| `CostPerPower`      | `A0E0L-2I0M-1H0T3`     | 1 | Price per unit power (e.g. EUR/kW) |
+| `CostPerArea`       | `A0E0L-2I0M0H0T0`      | 1 | Price per unit area (e.g. EUR/m²)  |
+| `CostPerMass`       | `A0E0L0I0M-1H0T0`      | 1 | Price per unit mass (e.g. CHF/kg)  |
+| `Frequency`         | `A0E0L0I0M0H0T-1`      | 0 | Physical rate; no monetary character |
+| `ElectricCurrent`   | `A0E1L0I0M0H0T0`       | 0 | SI base quantity; not monetary     |
 
-The D exponent follows the standard convention independently of C: D=1 when all
-eight SI base exponents are zero, D=0 otherwise. For a pure currency amount
-(T=0, M=0, …), D=1; for a currency rate or density, the non-zero SI exponent
-forces D=0.
+The D exponent is not part of the EDV IRI. It is present only in the corresponding
+`qkdv:` SI dimension vector, where it follows the standard convention: D=1 when all
+eight SI base exponents are zero, D=0 otherwise.
 
 Because C has no SI base unit and no factor-unit derivation, the extended-DV
 consistency check cannot compute C from component units. All C values are

@@ -8,8 +8,9 @@
 #
 # IRI local-name formats:
 #   qkdv:  A{a}E{e}L{l}I{i}M{m}H{h}T{t}D{d}
-#   edv:   A{a}E{e}L{l}I{i}M{m}H{h}T{t}D{d}R{r}N{n}C{c}
+#   edv:   A{a}E{e}L{l}I{i}M{m}H{h}T{t}R{r}N{n}C{c}
 #          (namespace: http://qudt.org/vocab/extendeddimensionvector/)
+#          Note: edv: omits the D slot — D is present only in qkdv: IRIs.
 #
 # Matching strategy: IRI namespace prefix, not rdf:type.
 #   - qkdv: instances span five type variants (base + four system-specific),
@@ -56,9 +57,11 @@ WHERE {
     BIND(REPLACE(?local, "^.*I(-?[0-9]+(?:dot[0-9]+)?)M.*$",          "$1") AS ?iRaw)
     BIND(REPLACE(?local, "^.*M(-?[0-9]+(?:dot[0-9]+)?)H.*$",          "$1") AS ?mRaw)
     BIND(REPLACE(?local, "^.*H(-?[0-9]+(?:dot[0-9]+)?)T.*$",          "$1") AS ?hRaw)
-    BIND(REPLACE(?local, "^.*T(-?[0-9]+(?:dot[0-9]+)?)D.*$",          "$1") AS ?tRaw)
-    # D is last in qkdv: IRIs; R, N, and C may follow in edv: IRIs
-    BIND(REPLACE(?local, "^.*D(-?[0-9]+(?:dot[0-9]+)?)(?:[RNC].*)?$",  "$1") AS ?dRaw)
+    # T is followed by D in qkdv: IRIs; by R in edv: IRIs (which have no D slot)
+    BIND(REPLACE(?local, "^.*T(-?[0-9]+(?:dot[0-9]+)?)[DR].*$",         "$1") AS ?tRaw)
+    # D is last in qkdv: IRIs; absent from edv: IRIs — ?dExp will be unbound
+    # for edv: instances, so dimensionlessExponent is not inserted for them.
+    BIND(REPLACE(?local, "^.*D(-?[0-9]+(?:dot[0-9]+)?)$",               "$1") AS ?dRaw)
 
     BIND(IF(CONTAINS(?aRaw,"dot"), xsd:decimal(REPLACE(?aRaw,"dot",".")), xsd:integer(?aRaw)) AS ?aExp)
     BIND(IF(CONTAINS(?eRaw,"dot"), xsd:decimal(REPLACE(?eRaw,"dot",".")), xsd:integer(?eRaw)) AS ?eExp)
