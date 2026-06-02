@@ -461,29 +461,6 @@ FILTER (?udv != ?qdv) .
   sh:targetClass qudt:QuantityKind ;
   sh:targetClass qudt:Unit .
 
-qudt:InconsistentUnitAndDimensionVectorConstraint
-  a sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
-  sh:sparql [
-    a sh:SPARQLConstraint ;
-    rdfs:comment "Checks that a Unit and its QuantityKind have the same dimension vector" ;
-    sh:message "Unit {$this} has dimension vector {$udv} which is not the same as the dimension vector of its quantity kind {$qk} with dimension vector {$qdv}" ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
-    sh:select """
-SELECT $this ?udv ?qk ?qdv
-WHERE {
-FILTER NOT EXISTS {$this qudt:deprecated true} .
-$this qudt:hasDimensionVector  ?udv .
-$this qudt:hasQuantityKind ?qk .
-?qk qudt:hasDimensionVector ?qdv .
-FILTER (?udv != qkdv:NotApplicable) .
-FILTER (?qdv != qkdv:NotApplicable) .
-FILTER (?udv != ?qdv) .
-}
-""" ;
-  ] ;
-  sh:targetClass qudt:Unit .
-
 qudt:InconsistentExtendedDimensionVectorInSKOSHierarchyConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
@@ -525,6 +502,29 @@ $this qudt:hasQuantityKind ?qk .
 FILTER (?edv != edv:NotApplicable) .
 FILTER (?qkEdv != edv:NotApplicable) .
 FILTER (?edv != ?qkEdv) .
+}
+""" ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
+qudt:InconsistentUnitAndDimensionVectorConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Checks that a Unit and its QuantityKind have the same dimension vector" ;
+    sh:message "Unit {$this} has dimension vector {$udv} which is not the same as the dimension vector of its quantity kind {$qk} with dimension vector {$qdv}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+SELECT $this ?udv ?qk ?qdv
+WHERE {
+FILTER NOT EXISTS {$this qudt:deprecated true} .
+$this qudt:hasDimensionVector  ?udv .
+$this qudt:hasQuantityKind ?qk .
+?qk qudt:hasDimensionVector ?qdv .
+FILTER (?udv != qkdv:NotApplicable) .
+FILTER (?qdv != qkdv:NotApplicable) .
+FILTER (?udv != ?qdv) .
 }
 """ ;
   ] ;

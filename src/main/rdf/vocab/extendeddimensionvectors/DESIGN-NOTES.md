@@ -59,17 +59,17 @@ a currency unit. `C=0` otherwise.
 
 Worked examples from the source ontology:
 
-|    Quantity kind    | EDV base (A…T, no D)   | C |             Rationale              |
-|---------------------|------------------------|---|------------------------------------|
-| `Currency`          | `A0E0L0I0M0H0T0`       | 1 | Monetary amount                    |
-| `CurrencyPerFlight` | `A0E0L0I0M0H0T0`       | 1 | Cost denominated in currency       |
-| `CurrencyPerTime`   | `A0E0L0I0M0H0T-1`      | 1 | Monetary flow rate (e.g. M$/yr)    |
-| `CostPerEnergy`     | `A0E0L-2I0M-1H0T2`     | 1 | Price per unit energy (e.g. EUR/kWh) |
-| `CostPerPower`      | `A0E0L-2I0M-1H0T3`     | 1 | Price per unit power (e.g. EUR/kW) |
-| `CostPerArea`       | `A0E0L-2I0M0H0T0`      | 1 | Price per unit area (e.g. EUR/m²)  |
-| `CostPerMass`       | `A0E0L0I0M-1H0T0`      | 1 | Price per unit mass (e.g. CHF/kg)  |
-| `Frequency`         | `A0E0L0I0M0H0T-1`      | 0 | Physical rate; no monetary character |
-| `ElectricCurrent`   | `A0E1L0I0M0H0T0`       | 0 | SI base quantity; not monetary     |
+|    Quantity kind    | EDV base (A…T, no D) | C |              Rationale               |
+|---------------------|----------------------|---|--------------------------------------|
+| `Currency`          | `A0E0L0I0M0H0T0`     | 1 | Monetary amount                      |
+| `CurrencyPerFlight` | `A0E0L0I0M0H0T0`     | 1 | Cost denominated in currency         |
+| `CurrencyPerTime`   | `A0E0L0I0M0H0T-1`    | 1 | Monetary flow rate (e.g. M$/yr)      |
+| `CostPerEnergy`     | `A0E0L-2I0M-1H0T2`   | 1 | Price per unit energy (e.g. EUR/kWh) |
+| `CostPerPower`      | `A0E0L-2I0M-1H0T3`   | 1 | Price per unit power (e.g. EUR/kW)   |
+| `CostPerArea`       | `A0E0L-2I0M0H0T0`    | 1 | Price per unit area (e.g. EUR/m²)    |
+| `CostPerMass`       | `A0E0L0I0M-1H0T0`    | 1 | Price per unit mass (e.g. CHF/kg)    |
+| `Frequency`         | `A0E0L0I0M0H0T-1`    | 0 | Physical rate; no monetary character |
+| `ElectricCurrent`   | `A0E1L0I0M0H0T0`     | 0 | SI base quantity; not monetary       |
 
 The D exponent is not part of the EDV IRI. It is present only in the corresponding
 `qkdv:` SI dimension vector, where it follows the standard convention: D=1 when all
