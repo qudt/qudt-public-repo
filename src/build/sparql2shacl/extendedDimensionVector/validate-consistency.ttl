@@ -1,0 +1,39 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qfn: <http://qudt.org/shacl/functions#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+qfn:ExtendedDVConsistency
+  a owl:Ontology ;
+  owl:imports qfn: .
+
+qfn:ExtendedDVConsistencyRule
+  a sh:NodeShape ;
+  sh:severity sh:Warning ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message "{$this}: qudt:hasExtendedDimensionVector is {?actualEdimVec} but factor units compute {?calculatedEdimVec}. If the discrepancy is intentional (e.g. torque units where R is assigned by convention rather than derived from an angular factor unit), it is documented in DESIGN-NOTES.md as a Group-2 dimensional-cancellation case." ;
+    sh:prefixes qfn: ;
+    sh:select """
+      SELECT $this ?calculatedEdimVec ?actualEdimVec
+      WHERE {
+        $this a qudt:Unit .
+        $this qudt:hasExtendedDimensionVector ?actualEdimVec .
+        FILTER NOT EXISTS { $this qudt:deprecated true }
+        FILTER EXISTS {
+          { $this qudt:hasFactorUnit ?fu }
+          UNION
+          { $this qudt:scalingOf ?base }
+        }
+        BIND(qfn:unit.eDimVec.calculate($this) AS ?calculatedEdimVec)
+        FILTER(qfn:bound(?calculatedEdimVec))
+        FILTER(?calculatedEdimVec != ?actualEdimVec)
+        FILTER(REPLACE(qfn:localname(?actualEdimVec), "C-?[0-9]+$", "C0") != qfn:localname(?calculatedEdimVec))
+      }
+    """ ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
+

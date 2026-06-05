@@ -5,25 +5,21 @@
 @prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 
-qfn:InferExtendedDV
+qfn:InferMissingExtendedDV
   a owl:Ontology ;
   owl:imports qfn: .
 
-qfn:InferExtendedDVRule
+qfn:InferMissingExtendedDVRule
   a sh:NodeShape ;
   sh:rule [
     a sh:SPARQLRule ;
     sh:construct """
-        # Intentionally produces no triples.
-        # Extended dimension vector inconsistencies (detected by validate.ttl) must be
-        # corrected manually in the source vocabulary, not silently overridden by inference.
-        # The query body is included below to satisfy the sparql2shacl template requirement
-        # but is never reached because of the preceding FILTER(false).
-        CONSTRUCT {}
-        WHERE {
-            FILTER(false)
-            {{QUERY_WITHOUT_PREFIXES}}
-        }
+      CONSTRUCT {
+        $this qudt:hasExtendedDimensionVector ?calculatedEdimVec .
+      }
+      WHERE {
+        {{QUERY_WITHOUT_PREFIXES}}
+      }
     """ ;
     sh:prefixes qfn: ;
   ] ;

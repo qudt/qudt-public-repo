@@ -2016,11 +2016,65 @@ validAspectDirs.each { aspectDir ->
                                         </sparqlAsk>
                                     </until>
                                     <savepoint><id>07-infer-dimensionVector</id></savepoint>
+                                    <shaclValidate>
+                                        <message>Validating qudt:hasExtendedDimensionVector (making sure none are missing that cannot be derived)</message>
+                                        <shapes>
+                                            <file>src/build/sparql2shacl/extendedDimensionVector/prerequisite.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                        </data>
+                                        <validationReport>
+                                            <file>target/validation/extendedDimensionVector-underivable.ttl</file>
+                                        </validationReport>
+                                    </shaclValidate>
+                                    <until>
+                                        <message>Add missing extended dimension vectors that can be inferred</message>
+                                        <indexVar>index_edv</indexVar>
+                                        <body>
+                                            <shaclInfer>
+                                                <message>Inferring missing qudt:hasExtendedDimensionVector</message>
+                                                <iterateUntilStable>true</iterateUntilStable>
+                                                <iterationOutputFilePattern>target/inferred/extendedDimensionVector-${index_edv}_${index}.ttl</iterationOutputFilePattern>
+                                                <shapes>
+                                                    <file>target/sparql2shacl/extendedDimensionVector/infer.ttl</file>
+                                                </shapes>
+                                                <data>
+                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                    <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                                    <graph>dist:vocab:VOCAB_QUDT-EXTENDED-DIMENSION-VECTORS.ttl</graph>
+                                                    <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                                </data>
+                                                <inferred>
+                                                    <graph>inferred:extendedDimensionVector_${index_edv}</graph>
+                                                    <file>target/inferred/extendedDimensionVector_${index_edv}.ttl</file>
+                                                </inferred>
+                                            </shaclInfer>
+                                            <add>
+                                                <graph>inferred:extendedDimensionVector_${index_edv}</graph>
+                                                <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                            </add>
+                                        </body>
+                                        <sparqlAsk>
+                                            ASK {
+                                                BIND(IRI(CONCAT("inferred:extendedDimensionVector_",STR(?index_edv))) as ?graph)
+                                                FILTER NOT EXISTS {
+                                                    GRAPH ?graph {
+                                                        ?s ?p ?o
+                                                    }
+                                                }
+                                            }
+                                        </sparqlAsk>
+                                    </until>
+                                    <savepoint><id>07b-infer-extendedDimensionVector</id></savepoint>
                                     <forEachEnv>
                                         <env id="symbol">
                                             <property name="name">symbol</property>
                                             <property name="property">qudt:symbol</property>
                                             <property name="incorrectVar">incorrectSymbol</property>
+
                                             <property name="overrideFile">src/build/sparql2shacl/symbol/units-overriding-inferred-symbol.ttl</property>
                                         </env>
                                         <env id="ucumCode">
@@ -2346,6 +2400,96 @@ validAspectDirs.each { aspectDir ->
                                         <sparqlAsk>
                                             ASK {
                                                 BIND(IRI(CONCAT("inferred:dimensionVector_supported_extensions_",STR(?index_dv_supported_extensions))) as ?graph)
+                                                FILTER NOT EXISTS {
+                                                    GRAPH ?graph {
+                                                        ?s ?p ?o
+                                                    }
+                                                }
+                                            }
+                                        </sparqlAsk>
+                                    </until>
+                                    <shaclValidate>
+                                        <message>Validating supported extension qudt:hasExtendedDimensionVector (making sure none are missing that cannot be derived)</message>
+                                        <shapes>
+                                            <file>src/build/sparql2shacl/extendedDimensionVector/prerequisite.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graphs>
+                                                <include>
+                                                    support:supported-extensions-core-unit-derived-properties
+                                                    dist:supported-extensions:vocab
+                                                    dist:vocab:VOCAB_QUDT-PREFIXES.ttl
+                                                </include>
+                                            </graphs>
+                                        </data>
+                                        <validationReport>
+                                            <file>target/validation/extendedDimensionVector-underivable-supported-extensions.ttl</file>
+                                        </validationReport>
+                                    </shaclValidate>
+                                    <until>
+                                        <message>Add missing supported extension extended dimension vectors that can be inferred</message>
+                                        <indexVar>index_edv_supported_extensions</indexVar>
+                                        <body>
+                                            <shaclInfer>
+                                                <message>Inferring missing supported extension qudt:hasExtendedDimensionVector</message>
+                                                <iterateUntilStable>true</iterateUntilStable>
+                                                <iterationOutputFilePattern>target/inferred/extendedDimensionVector-supported-extensions-${index_edv_supported_extensions}_${index}.ttl</iterationOutputFilePattern>
+                                                <shapes>
+                                                    <file>target/sparql2shacl/extendedDimensionVector/infer.ttl</file>
+                                                </shapes>
+                                                <data>
+                                                    <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                                    <graphs>
+                                                        <include>
+                                                            support:supported-extensions-core-unit-derived-properties
+                                                            dist:supported-extensions:vocab
+                                                            dist:vocab:VOCAB_QUDT-EXTENDED-DIMENSION-VECTORS.ttl
+                                                            dist:vocab:VOCAB_QUDT-PREFIXES.ttl
+                                                        </include>
+                                                    </graphs>
+                                                </data>
+                                                <inferred>
+                                                    <graph>inferred:extendedDimensionVector_supported_extensions_${index_edv_supported_extensions}</graph>
+                                                    <file>target/inferred/extendedDimensionVector_supported_extensions_${index_edv_supported_extensions}.ttl</file>
+                                                </inferred>
+                                            </shaclInfer>
+                                            <sparqlUpdate>
+                                                <message>Add inferred supported extension extended dimension vectors to owning unit graphs</message>
+                                                <sparql>
+                                                    <![CDATA[
+                                                        INSERT {
+                                                            GRAPH ?unitGraph {
+                                                                ?unit ?property ?value .
+                                                            }
+                                                        } WHERE {
+                                                            GRAPH <build:supported-extensions> {
+                                                                ?unitGraph a <urn:qudt-build:extensions#SupportedVocabGraph> .
+                                                            }
+                                                            BIND(IRI(CONCAT("inferred:extendedDimensionVector_supported_extensions_",STR(?index_edv_supported_extensions))) AS ?inferredGraph)
+                                                            GRAPH ?inferredGraph {
+                                                                ?unit ?property ?value .
+                                                            }
+                                                            GRAPH ?unitGraph {
+                                                                ?unit ?ownerProperty ?ownerValue .
+                                                            }
+                                                            FILTER NOT EXISTS {
+                                                                GRAPH ?unitGraph {
+                                                                    ?unit ?property ?value .
+                                                                }
+                                                            }
+                                                        }
+                                                    ]]>
+                                                </sparql>
+                                            </sparqlUpdate>
+                                            <add>
+                                                <graph>inferred:extendedDimensionVector_supported_extensions_${index_edv_supported_extensions}</graph>
+                                                <toGraph>dist:supported-extensions:vocab</toGraph>
+                                            </add>
+                                        </body>
+                                        <sparqlAsk>
+                                            ASK {
+                                                BIND(IRI(CONCAT("inferred:extendedDimensionVector_supported_extensions_",STR(?index_edv_supported_extensions))) as ?graph)
                                                 FILTER NOT EXISTS {
                                                     GRAPH ?graph {
                                                         ?s ?p ?o
@@ -3815,9 +3959,24 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         </validationReport>
                                     </shaclValidate>
                                     <shaclValidate>
-                                        <message>Validating extended dimension vector consistency with factor units</message>
+                                        <message>Validating that no units are missing an extended dimension vector after inference</message>
                                         <shapes>
                                             <file>target/sparql2shacl/extendedDimensionVector/validate.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-EXTENDED-DIMENSION-VECTORS.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                        </data>
+                                        <validationReport>
+                                            <file>target/validation/extendedDimensionVector-missing.ttl</file>
+                                        </validationReport>
+                                    </shaclValidate>
+                                    <shaclValidate>
+                                        <message>Validating extended dimension vector consistency with factor units</message>
+                                        <shapes>
+                                            <file>src/build/sparql2shacl/extendedDimensionVector/validate-consistency.ttl</file>
                                         </shapes>
                                         <data>
                                             <file>target/dist/schema/SCHEMA_QUDT.ttl</file>

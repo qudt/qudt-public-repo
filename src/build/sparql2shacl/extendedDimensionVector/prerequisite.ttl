@@ -1,0 +1,37 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qfn: <http://qudt.org/shacl/functions#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+qfn:MissingUnderivableExtendedDV
+  a owl:Ontology ;
+  owl:imports qfn: .
+
+qfn:MissingUnderivableExtendedDVRule
+  a sh:NodeShape ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message "{$this}: extended dimension vector is missing and no way to derive it (no qudt:scalingOf, no qudt:hasFactorUnit present)" ;
+    sh:prefixes qfn: ;
+    sh:select """
+      SELECT $this
+      WHERE {
+        $this a qudt:Unit .
+        FILTER NOT EXISTS { $this qudt:hasExtendedDimensionVector ?anyEdv }
+        FILTER NOT EXISTS {
+          {
+            $this qudt:hasFactorUnit ?fu
+          } UNION {
+            $this qudt:scalingOf ?base
+          }
+        }
+        FILTER NOT EXISTS { $this qudt:deprecated true }
+      }
+    """ ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
+
