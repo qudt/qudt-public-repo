@@ -9,3 +9,4 @@
 - If you use QUDT to **validate unit compatibility** in your application — checking that the units on both sides of an addition or comparison are comparable — the results will be more precise and less likely to give a false "yes."
 - If you write SPARQL queries that traverse the `skos:broader` hierarchy to find related units or quantity kinds, those queries now return tighter, semantically correct results.
 - If your code simply looks up units and their conversion factors, nothing changes for you. All conversion multipliers and dimension vectors are unaffected.
+
