@@ -61,4 +61,7 @@ WHERE {
     BIND(COALESCE(?thisScalarOpt, 1.0) AS ?thisScalar)
     BIND(COALESCE(?reciprocalScalarOpt, 1.0) as ?reciprocalScalar)
     FILTER(?thisScalar = 1 / ?reciprocalScalar)
+    # exclude deprecated units from reciprocal-unit inference (either endpoint)
+    FILTER NOT EXISTS { GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?this qudt:deprecated true } }
+    FILTER NOT EXISTS { GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?reciprocalUnit qudt:deprecated true } }
 } ORDER BY ?this
