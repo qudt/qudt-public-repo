@@ -1,21 +1,9 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix sq: <http://qudt.org/2.1/shacl/infer/broaderAcrossExactMatch> .
-
-# Congruence of skos:broader under qudt:exactMatch.
-# If A exactMatch B, then A and B denote the same kind, so any skos:broader edge
-# of one holds for the other in both argument positions. Materialising this closure
-# lets the commensurability test stay a pure (skos:broader|^skos:broader)* path
-# without ever traversing qudt:exactMatch, and connects synonym quantity kinds into
-# one family (commensurability class) without asserting a (semantically wrong)
-# reciprocal skos:broader between the synonyms themselves.
-#
-# Dimension guard: each exactMatch leg must agree on qudt:hasDimensionVector, so a
-# mis-asserted cross-dimension exactMatch cannot inject a dimension-crossing
-# skos:broader edge. A genuine "broader ∧ exactMatch" contradiction is precluded
-# upstream by the QA constraint that forbids that pair.
 
 qudt:
   sh:declare [
@@ -37,9 +25,9 @@ sq:broaderAcrossExactMatchRule
         CONSTRUCT {
             $this skos:broader ?broaderSyn .
         } WHERE {
-            $this (skos:exactMatch|^skos:exactMatch)* ?n .
+            $this (qudt:exactMatch|^qudt:exactMatch)* ?n .
             ?n skos:broader ?b .
-            ?b (skos:exactMatch|^skos:exactMatch)* ?broaderSyn .
+            ?b (qudt:exactMatch|^qudt:exactMatch)* ?broaderSyn .
             $this       qudt:hasDimensionVector ?dvThis .
             ?n          qudt:hasDimensionVector ?dvThis .
             ?b          qudt:hasDimensionVector ?dvB .
@@ -51,3 +39,5 @@ sq:broaderAcrossExactMatchRule
     sh:prefixes skos: ;
   ] ;
   sh:targetClass qudt:QuantityKind .
+
+
