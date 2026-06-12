@@ -9,7 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
-- Introduced the concept of an ExtendedDimensionVector that disambiguates angular, count-based, and currency quantity kind and unit dimensions beyond what is possible through the seven base SI dimensions.
+- Added rigor to building the quantity kind commensurability families. Now, a quantity kind family now constitutes the necessary and sufficient requirement for commensurability.
 - Added code to automatically convert labels for quantity kinds into Title Case
 - Added qudt:eclassCode
 
