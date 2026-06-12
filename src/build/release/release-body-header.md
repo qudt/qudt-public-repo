@@ -1,10 +1,12 @@
-This release introduces support for **community extensions**: optional, domain-specific sets of vocabularies and even schema changes that can be included in the QUDT build alongside the core vocabulary. Extensions are maintained in `src/main/rdf/community/extensions/{id}/` and activated at build time by supplying one or more extension IDs:
+## Improved support for commensurability of units
 
-```
-mvn -Dqudt.supported.extensions=id1,id2 install
-```
+- `skos:broader` now means precisely one thing: *"X is a specialisation of Y, and any quantity of kind X can be compared and converted with one of kind Y."* Nothing else.
+- Quantity kinds that share a dimension (e.g. both measured in s⁻¹) but are genuinely *not* interchangeable — such as frequency (Hz) and radioactive activity (Bq) — are placed in **separate, unconnected skos:broader hierarchies (towers)**. A commensurability check will correctly report them as incompatible.
+- Abstract grouping nodes such as "Dimensionless" are no longer used as hierarchy parents. Instead, each distinct dimensionless quantity kind (strain, efficiency, refractive index, information content, …) is its own root. Browsing by dimension is the recommended way to discover related quantity kinds.
 
-Extensions receive the same validation, inference, and serialisation treatment as core vocabulary. This capability is **fully backward compatible**: users who continue to use the default 'mvn install' will see no change.
+**What does this mean for you?**
 
-As part of this release, 31 quantity kinds that are highly specific to the field of propulsion have been migrated from the core vocabulary into an extension called **`propulsion`**. Users who currently reference those quantity kinds and wish to continue doing so should include `-Dqudt.supported.extensions=propulsion` in their build invocation. Users who do not work in the propulsion domain and did not use those quantity kinds need take no action.
+- If you use QUDT to **validate unit compatibility** in your application — checking that the units on both sides of an addition or comparison are comparable — the results will be more precise and less likely to give a false "yes."
+- If you write SPARQL queries that traverse the `skos:broader` hierarchy to find related units or quantity kinds, those queries now return tighter, semantically correct results.
+- If your code simply looks up units and their conversion factors, nothing changes for you. All conversion multipliers and dimension vectors are unaffected.
 

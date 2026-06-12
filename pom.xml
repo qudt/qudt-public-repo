@@ -98,13 +98,8 @@
             leave this empty. Example:
             mvn -Dqudt.allInOne.extensions=propulsion,loop3d install
         -->
-        <qudt.allInOne.extensions />
-        <!--
-            Sentinel used by the src-errors pipeline step to detect whether the 'fix' profile is
-            active. The fix profile overrides this to "fix.profile.is.active"; the default value
-            here ensures Maven always substitutes a defined string so rdfio does not attempt to
-            resolve the placeholder as a metadata-graph variable (behaviour added in rdfio 1.7.0).
-        -->
+        <qudt.allInOne.extensions></qudt.allInOne.extensions>
+        <!-- default value; overridden to "fix.profile.is.active" by the fix profile -->
         <fix.profile.is.inactive>fix.profile.is.inactive</fix.profile.is.inactive>
     </properties>
     <scm>
@@ -230,10 +225,10 @@
                                         ['src:vocab:VOCAB_QUDT-COORDINATES.ttl', 'dist:vocab:VOCAB_QUDT-COORDINATES.ttl'],
                                         ['src:vocab:VOCAB_QUDT-PREFIXES.ttl', 'dist:vocab:VOCAB_QUDT-PREFIXES.ttl'],
                                         ['src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl', 'dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl'],
+                                        ['src:vocab:VOCAB_QUDT-EXTENDED-DIMENSION-VECTORS.ttl', 'dist:vocab:VOCAB_QUDT-EXTENDED-DIMENSION-VECTORS.ttl'],
                                         ['src:vocab:VOCAB_QUDT-UNITS-ALL.ttl', 'dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl'],
                                         ['src:vocab:VOCAB_QUDT-CONSTANTS.ttl', 'dist:vocab:VOCAB_QUDT-CONSTANTS.ttl'],
                                         ['src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl', 'dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl'],
-                                        ['src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl', 'dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl'],
                                         ['src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl', 'dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl']
                                     ]
                                     def configFile = new File(generatedSupportedExtensionsDir, "config.ttl")
@@ -721,8 +716,8 @@ validAspectDirs.each { aspectDir ->
                                         <include>
                                             src/build/collection-declarations/SHACL-Collection.ttl
                                             target/dist/vocab/constants/VOCAB_QUDT-CONSTANTS.ttl
-                                            target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl
                                             target/dist/vocab/dimensionvectors/VOCAB_QUDT-DIMENSION-VECTORS.ttl
+                                            target/dist/vocab/extendeddimensionvectors/VOCAB_QUDT-EXTENDED-DIMENSION-VECTORS.ttl
                                             target/dist/vocab/prefixes/VOCAB_QUDT-PREFIXES.ttl
                                             target/dist/vocab/quantities/VOCAB_QUDT-QUANTITIES.ttl
                                             target/dist/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl
@@ -762,8 +757,8 @@ validAspectDirs.each { aspectDir ->
                                         <include>
                                             src/build/collection-declarations/OWL-Collection.ttl
                                             target/dist/vocab/constants/VOCAB_QUDT-CONSTANTS.ttl
-                                            target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl
                                             target/dist/vocab/dimensionvectors/VOCAB_QUDT-DIMENSION-VECTORS.ttl
+                                            target/dist/vocab/extendeddimensionvectors/VOCAB_QUDT-EXTENDED-DIMENSION-VECTORS.ttl
                                             target/dist/vocab/prefixes/VOCAB_QUDT-PREFIXES.ttl
                                             target/dist/vocab/quantities/VOCAB_QUDT-QUANTITIES.ttl
                                             target/dist/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl
@@ -1508,11 +1503,11 @@ validAspectDirs.each { aspectDir ->
                                                 qudt:symbol
                                                 qudt:ucumCode
                                                 qudt:hasDimensionVector
+                                                qudt:hasExtendedDimensionVector
                                                 qudt:hasReciprocalUnit
                                                 qudt:hasQuantityKind
                                                 qudt:hasReferenceQuantityKind
                                                 qudt:systemDerivedQuantityKind
-                                                skos:broader
                                                 rdfs:label
                                                 rdfs:seeAlso
                                                 rdf:type
@@ -1551,11 +1546,11 @@ validAspectDirs.each { aspectDir ->
                                                 qudt:symbol
                                                 qudt:ucumCode
                                                 qudt:hasDimensionVector
+                                                qudt:hasExtendedDimensionVector
                                                 qudt:hasReciprocalUnit
                                                 qudt:hasQuantityKind
                                                 qudt:hasReferenceQuantityKind
                                                 qudt:systemDerivedQuantityKind
-                                                skos:broader
                                                 rdfs:label
                                                 rdfs:seeAlso
                                                 rdf:type
@@ -1810,23 +1805,6 @@ validAspectDirs.each { aspectDir ->
 
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
                                     <savepoint><id>02-applicableUnits</id></savepoint>
-                                    <shaclInfer>  <!-- do the quantitykinds inference for currency units -->
-                                        <message>Inferring qudt:applicableUnit triples (currency units)</message>
-                                        <shapes><graph>shapes:applicableUnits</graph></shapes>
-                                        <data>
-                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl</graph>
-                                        </data>
-                                        <inferred>
-                                            <graph>inferred:applicableCurrencyUnits</graph>
-                                            <file>target/inferred/applicableUnits-currency.ttl</file>
-                                        </inferred>
-                                    </shaclInfer>
-                                    <add>
-                                        <graph>inferred:applicableCurrencyUnits</graph>
-                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl</toGraph>
-                                    </add>
-
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
                                     <savepoint><id>03-applicableUnits-currencies</id></savepoint>
 
@@ -1969,6 +1947,7 @@ validAspectDirs.each { aspectDir ->
                                                         }
                                                         ?unit ?rel ?otherUnit .
                                                         FILTER(?rel IN (qudt:exactMatch,skos:broader))
+                                                        FILTER NOT EXISTS { ?otherUnit qudt:deprecated true }
                                                         ?otherUnit
                                                             qudt:conversionMultiplier ?cm ;
                                                             qudt:conversionMultiplierSN ?cmSN .
@@ -2036,11 +2015,33 @@ validAspectDirs.each { aspectDir ->
                                         </sparqlAsk>
                                     </until>
                                     <savepoint><id>07-infer-dimensionVector</id></savepoint>
+
+                                    <shaclInfer>
+                                        <message>Inferring skos:broader across qudt:exactMatch (commensurability-family closure)</message>
+                                        <shapes>
+                                            <file>src/build/inference/inferBroaderAcrossExactMatch.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:broaderAcrossExactMatch</graph>
+                                            <file>target/inferred/broaderAcrossExactMatch.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:broaderAcrossExactMatch</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
+                                    </add>
+                                    <savepoint><id>07.5-infer-broader-across-exactmatch</id></savepoint>
+
                                     <forEachEnv>
                                         <env id="symbol">
                                             <property name="name">symbol</property>
                                             <property name="property">qudt:symbol</property>
                                             <property name="incorrectVar">incorrectSymbol</property>
+
                                             <property name="overrideFile">src/build/sparql2shacl/symbol/units-overriding-inferred-symbol.ttl</property>
                                         </env>
                                         <env id="ucumCode">
@@ -3515,11 +3516,11 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         qudt:symbol
                                                         qudt:ucumCode
                                                         qudt:hasDimensionVector
+                                                        qudt:hasExtendedDimensionVector
                                                         qudt:hasReciprocalUnit
                                                         qudt:hasQuantityKind
                                                         qudt:hasReferenceQuantityKind
                                                         qudt:systemDerivedQuantityKind
-                                                        skos:broader
                                                         rdfs:label
                                                         rdfs:seeAlso
                                                         rdf:type
@@ -3548,11 +3549,11 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         qudt:symbol
                                                         qudt:ucumCode
                                                         qudt:hasDimensionVector
+                                                        qudt:hasExtendedDimensionVector
                                                         qudt:hasReciprocalUnit
                                                         qudt:hasQuantityKind
                                                         qudt:hasReferenceQuantityKind
                                                         qudt:systemDerivedQuantityKind
-                                                        skos:broader
                                                         rdfs:label
                                                         rdfs:seeAlso
                                                         rdf:type
@@ -3593,11 +3594,11 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 qudt:symbol
                                                                 qudt:ucumCode
                                                                 qudt:hasDimensionVector
+                                                                qudt:hasExtendedDimensionVector
                                                                 qudt:hasReciprocalUnit
                                                                 qudt:hasQuantityKind
                                                                 qudt:hasReferenceQuantityKind
                                                                 qudt:systemDerivedQuantityKind
-                                                                skos:broader
                                                                 rdfs:label
                                                                 rdfs:seeAlso
                                                                 rdf:type
@@ -3627,11 +3628,11 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 qudt:symbol
                                                                 qudt:ucumCode
                                                                 qudt:hasDimensionVector
+                                                                qudt:hasExtendedDimensionVector
                                                                 qudt:hasReciprocalUnit
                                                                 qudt:hasQuantityKind
                                                                 qudt:hasReferenceQuantityKind
                                                                 qudt:systemDerivedQuantityKind
-                                                                skos:broader
                                                                 rdfs:label
                                                                 rdfs:seeAlso
                                                                 rdf:type

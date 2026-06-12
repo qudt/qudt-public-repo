@@ -1,0 +1,47 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sq: <http://qudt.org/2.1/shacl/infer/broaderAcrossExactMatch> .
+
+qudt:
+  sh:declare [
+    sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+    sh:prefix "qudt" ;
+  ] .
+
+skos:
+  sh:declare [
+    sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
+    sh:prefix "skos" ;
+  ] .
+
+sq:broaderAcrossExactMatchRule
+  a sh:NodeShape ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:construct """
+        CONSTRUCT {
+            $this skos:broader ?broaderSyn .
+        } WHERE {
+            $this (qudt:exactMatch|^qudt:exactMatch)* ?n .
+            ?n skos:broader ?b .
+            ?b (qudt:exactMatch|^qudt:exactMatch)* ?broaderSyn .
+            $this       qudt:hasDimensionVector ?dvThis .
+            ?n          qudt:hasDimensionVector ?dvThis .
+            ?b          qudt:hasDimensionVector ?dvB .
+            ?broaderSyn qudt:hasDimensionVector ?dvB .
+            FILTER ( $this != ?broaderSyn )
+            FILTER NOT EXISTS { $this       qudt:deprecated true }
+            FILTER NOT EXISTS { ?n          qudt:deprecated true }
+            FILTER NOT EXISTS { ?b          qudt:deprecated true }
+            FILTER NOT EXISTS { ?broaderSyn qudt:deprecated true }
+        }
+        """ ;
+    sh:prefixes qudt: ;
+    sh:prefixes skos: ;
+  ] ;
+  sh:targetClass qudt:QuantityKind .
+
+

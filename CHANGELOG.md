@@ -9,6 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added rigor to building the quantity kind commensurability families. Now, a quantity kind family now constitutes the necessary and sufficient requirement for commensurability.
 - Added code to automatically convert labels for quantity kinds into Title Case
 - Added qudt:eclassCode
 
