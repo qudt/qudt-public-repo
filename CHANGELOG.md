@@ -12,10 +12,14 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added rigor to building the quantity kind commensurability families. Now, a quantity kind family now constitutes the necessary and sufficient requirement for commensurability.
 - Added code to automatically convert labels for quantity kinds into Title Case
 - Added qudt:eclassCode
+- Added `qudt:organizedUnder`, an organizational/unit-applicability grouping relation that does **not** assert commensurability (unlike `skos:broader`). Applicable-unit inference traverses both `skos:broader` and `qudt:organizedUnder`; commensurability does not.
+- Added a Warning-severity QA check that `qudt:organizedUnder` only groups quantity kinds of the same dimension.
 
 ### Changed
 
 - Changed all qudt:symbol annotations with an ECLASS IRDI to qudt:eclassCode
+- Decoupled the dimensionless quantity kinds from commensurability. The abstract grouping nodes `quantitykind:Dimensionless` and `quantitykind:DimensionlessRatio` (and the ratio/factor groupings beneath them) were linked by `skos:broader`, which made all ~90 dimensionless quantity kinds one commensurability family — wrongly reporting e.g. strain, efficiency, Mach number and quantum numbers as mutually comparable. Those 89 `skos:broader` edges are now `qudt:organizedUnder`, so each is its own family; applicable units are unchanged.
+- Rehomed several units that were mis-parked on `quantitykind:Dimensionless` to their proper quantity kinds (e.g. `SUSCEPTIBILITY_ELEC`→`ElectricSusceptibility`, `NP`→`LogarithmRatioToBaseE`, `DECADE`→`LogarithmRatioToBase10`), so only genuinely generic units are inherited by dimensionless kinds.
 
 ### Deprecated
 
