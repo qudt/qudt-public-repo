@@ -16,6 +16,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Changed
 
 - Changed all qudt:symbol annotations with an ECLASS IRDI to qudt:eclassCode
+- Moved the `loop3d` community extension's graph IRIs from `http://qudt.org/community/loop3d` (and `…/community/loop3d/voc`) to `http://qudt.org/extension/loop3d` (and `…/extension/loop3d/voc`), with the maintainer's agreement, so that all community extensions live under a consistent `extension/{id}/` path. The vocabulary content (units) is unchanged.
 
 ### Deprecated
 

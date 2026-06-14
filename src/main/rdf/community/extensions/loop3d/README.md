@@ -6,15 +6,15 @@ The _profile_ is a specification formulated according to [the W3C's Profiles Voc
 
 The current profile elements are stored as files in this repository folder but should be accessed or refered to by their QUDT web addresses (persistent identifiers):
 
-* the Loop3D profile - <http://qudt.org/community/loop3d>
-  * the units vocabulary - <http://qudt.org/community/loop3d/voc>
+* the Loop3D profile - <http://qudt.org/extension/loop3d>
+  * the units vocabulary - <http://qudt.org/extension/loop3d/voc>
 
 ### Profile technical access
 
 Those elements can be accessed in _Linked Data_ forms via their web addresses too, i.e. as HTML web pages for humans (the default) or RDF documents for machines. _Content Negotiation_ can be used to get the RDF forms, for example a `curl` (command line program) request like this for the vocabulary in the _Turtle_ RDF format:
 
 ```bash
-curl -L -H 'Accept: text/turtle' http://qudt.org/community/loop3d/voc
+curl -L -H 'Accept: text/turtle' http://qudt.org/extension/loop3d/voc
 ```
 
 ## Contact
