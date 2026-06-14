@@ -20,6 +20,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Changed all qudt:symbol annotations with an ECLASS IRDI to qudt:eclassCode
 - Decoupled the dimensionless quantity kinds from commensurability. The abstract grouping nodes `quantitykind:Dimensionless` and `quantitykind:DimensionlessRatio` (and the ratio/factor groupings beneath them) were linked by `skos:broader`, which made all ~90 dimensionless quantity kinds one commensurability family — wrongly reporting e.g. strain, efficiency, Mach number and quantum numbers as mutually comparable. Those 89 `skos:broader` edges are now `qudt:organizedUnder`, so each is its own family; applicable units are unchanged.
 - Rehomed several units that were mis-parked on `quantitykind:Dimensionless` to their proper quantity kinds (e.g. `SUSCEPTIBILITY_ELEC`→`ElectricSusceptibility`, `NP`→`LogarithmRatioToBaseE`, `DECADE`→`LogarithmRatioToBase10`), so only genuinely generic units are inherited by dimensionless kinds.
+- Moved the `loop3d` community extension's graph IRIs from `http://qudt.org/community/loop3d` (and `…/community/loop3d/voc`) to `http://qudt.org/extension/loop3d` (and `…/extension/loop3d/voc`), with the maintainer's agreement, so that all community extensions live under a consistent `extension/{id}/` path. The vocabulary content (units) is unchanged.
 
 ### Deprecated
 
