@@ -1505,7 +1505,6 @@ validAspectDirs.each { aspectDir ->
                                                 qudt:hasDimensionVector
                                                 qudt:hasExtendedDimensionVector
                                                 qudt:hasReciprocalUnit
-                                                qudt:hasQuantityKind
                                                 qudt:hasReferenceQuantityKind
                                                 qudt:systemDerivedQuantityKind
                                                 rdfs:label
@@ -1548,7 +1547,6 @@ validAspectDirs.each { aspectDir ->
                                                 qudt:hasDimensionVector
                                                 qudt:hasExtendedDimensionVector
                                                 qudt:hasReciprocalUnit
-                                                qudt:hasQuantityKind
                                                 qudt:hasReferenceQuantityKind
                                                 qudt:systemDerivedQuantityKind
                                                 rdfs:label
@@ -1712,6 +1710,45 @@ validAspectDirs.each { aspectDir ->
                                         </sparql>
                                     </sparqlUpdate>
                                     <savepoint><id>01-iec-links</id></savepoint>
+
+                                    <shaclInfer> <!-- materialize skos:broader from qudt:specializationOf (backward-compat super) before any skos:broader-based inference -->
+                                        <message>Materializing skos:broader from qudt:specializationOf</message>
+                                        <shapes>
+                                            <file>src/build/inference/materializeRelationSuperProperties.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:materializedBroader</graph>
+                                            <file>target/inferred/materializedBroader.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:materializedBroader</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
+                                    </add>
+
+                                    <shaclInfer> <!-- materialize qudt:hasQuantityKind from qudt:measuresQuantityKind / qudt:categorizedBy (backward-compat super) before applicableUnit inference -->
+                                        <message>Materializing qudt:hasQuantityKind from qudt:measuresQuantityKind / qudt:categorizedBy</message>
+                                        <shapes>
+                                            <file>src/build/inference/materializeRelationSuperProperties.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:materializedHasQuantityKind</graph>
+                                            <file>target/inferred/materializedHasQuantityKind.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:materializedHasQuantityKind</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                    </add>
+                                    <savepoint><id>01.5-materialize-relation-superproperties</id></savepoint>
 
                                     <add> <!-- load applicableUnits shapes (rules) into <shapes:applicableUnits> because we need them twice (see below) -->
                                         <file>src/build/inference/inferApplicableUnits.ttl</file>
@@ -3518,7 +3555,6 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         qudt:hasDimensionVector
                                                         qudt:hasExtendedDimensionVector
                                                         qudt:hasReciprocalUnit
-                                                        qudt:hasQuantityKind
                                                         qudt:hasReferenceQuantityKind
                                                         qudt:systemDerivedQuantityKind
                                                         rdfs:label
@@ -3551,7 +3587,6 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         qudt:hasDimensionVector
                                                         qudt:hasExtendedDimensionVector
                                                         qudt:hasReciprocalUnit
-                                                        qudt:hasQuantityKind
                                                         qudt:hasReferenceQuantityKind
                                                         qudt:systemDerivedQuantityKind
                                                         rdfs:label
@@ -3596,7 +3631,6 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 qudt:hasDimensionVector
                                                                 qudt:hasExtendedDimensionVector
                                                                 qudt:hasReciprocalUnit
-                                                                qudt:hasQuantityKind
                                                                 qudt:hasReferenceQuantityKind
                                                                 qudt:systemDerivedQuantityKind
                                                                 rdfs:label
@@ -3630,7 +3664,6 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 qudt:hasDimensionVector
                                                                 qudt:hasExtendedDimensionVector
                                                                 qudt:hasReciprocalUnit
-                                                                qudt:hasQuantityKind
                                                                 qudt:hasReferenceQuantityKind
                                                                 qudt:systemDerivedQuantityKind
                                                                 rdfs:label

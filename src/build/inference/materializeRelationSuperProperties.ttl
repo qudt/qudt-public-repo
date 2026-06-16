@@ -1,0 +1,66 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sq: <http://qudt.org/2.1/shacl/infer/materializeRelationSuperProperties> .
+
+qudt:
+  sh:declare [
+    sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+    sh:prefix "qudt" ;
+  ] .
+
+skos:
+  sh:declare [
+    sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
+    sh:prefix "skos" ;
+  ] .
+
+sq:categorizedByToHasQuantityKindRule
+  a sh:NodeShape ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:construct """
+        CONSTRUCT {
+            $this qudt:hasQuantityKind ?o .
+        } WHERE {
+            $this qudt:categorizedBy ?o .
+        }
+        """ ;
+    sh:prefixes qudt: ;
+  ] ;
+  sh:targetSubjectsOf qudt:categorizedBy .
+
+sq:measuresQuantityKindToHasQuantityKindRule
+  a sh:NodeShape ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:construct """
+        CONSTRUCT {
+            $this qudt:hasQuantityKind ?o .
+        } WHERE {
+            $this qudt:measuresQuantityKind ?o .
+        }
+        """ ;
+    sh:prefixes qudt: ;
+  ] ;
+  sh:targetSubjectsOf qudt:measuresQuantityKind .
+
+sq:specializationOfToBroaderRule
+  a sh:NodeShape ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:construct """
+        CONSTRUCT {
+            $this skos:broader ?o .
+        } WHERE {
+            $this qudt:specializationOf ?o .
+        }
+        """ ;
+    sh:prefixes qudt: ;
+    sh:prefixes skos: ;
+  ] ;
+  sh:targetSubjectsOf qudt:specializationOf .
+
+
