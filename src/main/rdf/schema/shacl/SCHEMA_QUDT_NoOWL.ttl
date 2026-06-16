@@ -863,7 +863,7 @@ qudt:Unit
   rdfs:subClassOf qudt:Verifiable ;
   sh:property qudt:Unit-altSymbol ;
   sh:property qudt:Unit-applicableSystem ;
-  sh:property qudt:Unit-categorizedBy ;
+  sh:property qudt:Unit-categorizedByQuantityKind ;
   sh:property qudt:Unit-conversionMultiplier ;
   sh:property qudt:Unit-conversionMultiplierSN ;
   sh:property qudt:Unit-conversionOffset ;
@@ -882,7 +882,6 @@ qudt:Unit
   sh:property qudt:Unit-latexDefinition ;
   sh:property qudt:Unit-latexSymbol ;
   sh:property qudt:Unit-mathMLdefinition ;
-  sh:property qudt:Unit-measuresQuantityKind ;
   sh:property qudt:Unit-omUnit ;
   sh:property qudt:Unit-prefix ;
   sh:property qudt:Unit-qkdvDenominator ;
@@ -894,6 +893,7 @@ qudt:Unit
   sh:property qudt:Unit-ucumCode ;
   sh:property qudt:Unit-udunitsCode ;
   sh:property qudt:Unit-uneceCommonCode ;
+  sh:property qudt:Unit-unitForQuantityKind ;
   sh:property qudt:Unit-unitOfSystem .
 
 qudt:UserQuantityKind
@@ -1091,16 +1091,16 @@ qudt:categorizedAs
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "categorized as" .
 
-qudt:categorizedBy
+qudt:categorizedByQuantityKind
   a rdf:Property ;
   dcterms:description """
   <p>Relates a unit to a non-commensurate quantity-kind <em>category</em> under which it is grouped
   &mdash; e.g. the placeholder <code>quantitykind:Unknown</code>, or a dimensionless bucket such as
   <code>quantitykind:DimensionlessRatio</code> &mdash; <strong>without</strong> asserting that the
   unit measures or is convertible within a commensurate family. A sub-property of
-  <code>qudt:hasQuantityKind</code>. Contrast <code>qudt:measuresQuantityKind</code>.</p>"""^^rdf:HTML ;
+  <code>qudt:hasQuantityKind</code>. Contrast <code>qudt:unitForQuantityKind</code>.</p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  rdfs:label "categorized by" ;
+  rdfs:label "categorized by quantity kind" ;
   rdfs:subPropertyOf qudt:hasQuantityKind .
 
 qudt:coherentUnitSystem
@@ -1646,16 +1646,6 @@ qudt:mathMLdefinition
   rdfs:label "mathML definition" ;
   rdfs:subPropertyOf qudt:mathDefinition .
 
-qudt:measuresQuantityKind
-  a rdf:Property ;
-  dcterms:description """
-  <p>Relates a unit to a quantity kind it <em>measures</em> &mdash; a member of the commensurate
-  family the unit belongs to, within which the unit is convertible. A sub-property of
-  <code>qudt:hasQuantityKind</code>. Contrast <code>qudt:categorizedBy</code>.</p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  rdfs:label "measures quantity kind" ;
-  rdfs:subPropertyOf qudt:hasQuantityKind .
-
 qudt:normativeReference
   a rdf:Property ;
   dcterms:description "Provides a way to reference information that is an authoritative source providing a standard definition" ;
@@ -1894,6 +1884,17 @@ qudt:unitFor
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "unit for" .
+
+qudt:unitForQuantityKind
+  a rdf:Property ;
+  dcterms:description """
+  <p>Relates a unit to a quantity kind it is a <em>unit for</em> &mdash; a quantity kind the unit
+  measures, a member of the commensurate family within which the unit is convertible. A
+  sub-property of <code>qudt:hasQuantityKind</code>. Contrast
+  <code>qudt:categorizedByQuantityKind</code>.</p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  rdfs:label "unit for quantity kind" ;
+  rdfs:subPropertyOf qudt:hasQuantityKind .
 
 qudt:url
   a rdf:Property ;
@@ -2993,11 +2994,11 @@ qudt:Unit-applicableSystem
   sh:class qudt:SystemOfUnits ;
   sh:path qudt:applicableSystem .
 
-qudt:Unit-categorizedBy
+qudt:Unit-categorizedByQuantityKind
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:class qudt:QuantityKind ;
-  sh:path qudt:categorizedBy .
+  sh:path qudt:categorizedByQuantityKind .
 
 qudt:Unit-conversionMultiplier
   a sh:PropertyShape ;
@@ -3119,12 +3120,6 @@ qudt:Unit-mathMLdefinition
   sh:maxCount 1 ;
   sh:path qudt:mathMLdefinition .
 
-qudt:Unit-measuresQuantityKind
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  sh:class qudt:QuantityKind ;
-  sh:path qudt:measuresQuantityKind .
-
 qudt:Unit-omUnit
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
@@ -3198,6 +3193,12 @@ qudt:Unit-uneceCommonCode
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:datatype xsd:string ;
   sh:path qudt:uneceCommonCode .
+
+qudt:Unit-unitForQuantityKind
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:class qudt:QuantityKind ;
+  sh:path qudt:unitForQuantityKind .
 
 qudt:Unit-unitOfSystem
   a sh:PropertyShape ;
