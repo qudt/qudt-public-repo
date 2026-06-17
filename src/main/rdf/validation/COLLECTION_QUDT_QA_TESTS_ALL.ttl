@@ -717,6 +717,27 @@ qudt:ScalingOfAndFactorUnitsPresent
   ] ;
   sh:targetClass qudt:Concept .
 
+qudt:SpecializationOfSameDimensionShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Violation when qudt:specializationOf links quantity kinds of different dimension" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message "{$this} qudt:specializationOf {?parent}, but they have different dimension vectors ({?dvThis} vs {?dvParent}). A specialization must be commensurable with its parent, so it must share the same dimension; use qudt:organizedUnder for a grouping that does not assert commensurability." ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+        SELECT $this ?parent ?dvThis ?dvParent
+        WHERE {
+          $this qudt:specializationOf ?parent .
+          $this qudt:hasDimensionVector ?dvThis .
+          ?parent qudt:hasDimensionVector ?dvParent .
+          FILTER ( ?dvThis != ?dvParent )
+        }
+      """ ;
+  ] ;
+  sh:targetClass qudt:QuantityKind .
+
 qudt:UniqueSymbolTypeRestrictedPropertyConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
