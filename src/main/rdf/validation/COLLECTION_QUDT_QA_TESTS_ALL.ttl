@@ -536,6 +536,27 @@ qudt:MultipleLabelsConstraint
   ] ;
   sh:targetClass qudt:Concept .
 
+qudt:OrganizedUnderSameDimensionShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Warning when qudt:organizedUnder links quantity kinds of different dimension" ;
+  sh:severity sh:Warning ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message "{$this} qudt:organizedUnder {?parent}, but they have different dimension vectors ({?dvThis} vs {?dvParent}). qudt:organizedUnder is an organizational/unit-applicability grouping within a single dimension; it should not cross dimensions." ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+        SELECT $this ?parent ?dvThis ?dvParent
+        WHERE {
+          $this qudt:organizedUnder ?parent .
+          $this qudt:hasDimensionVector ?dvThis .
+          ?parent qudt:hasDimensionVector ?dvParent .
+          FILTER ( ?dvThis != ?dvParent )
+        }
+      """ ;
+  ] ;
+  sh:targetClass qudt:QuantityKind .
+
 qudt:QuantityKindShape
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
   sh:property [
