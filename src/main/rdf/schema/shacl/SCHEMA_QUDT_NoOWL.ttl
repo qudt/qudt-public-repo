@@ -38,6 +38,8 @@ qudt:AbstractQuantityKind
   sh:property qudt:AbstractQuantityKind-altSymbol ;
   sh:property qudt:AbstractQuantityKind-broader ;
   sh:property qudt:AbstractQuantityKind-latexSymbol ;
+  sh:property qudt:AbstractQuantityKind-organizedUnder ;
+  sh:property qudt:AbstractQuantityKind-specializationOf ;
   sh:property qudt:AbstractQuantityKind-symbol .
 
 qudt:AngleUnit
@@ -861,6 +863,7 @@ qudt:Unit
   rdfs:subClassOf qudt:Verifiable ;
   sh:property qudt:Unit-altSymbol ;
   sh:property qudt:Unit-applicableSystem ;
+  sh:property qudt:Unit-categorizedByQuantityKind ;
   sh:property qudt:Unit-conversionMultiplier ;
   sh:property qudt:Unit-conversionMultiplierSN ;
   sh:property qudt:Unit-conversionOffset ;
@@ -890,6 +893,7 @@ qudt:Unit
   sh:property qudt:Unit-ucumCode ;
   sh:property qudt:Unit-udunitsCode ;
   sh:property qudt:Unit-uneceCommonCode ;
+  sh:property qudt:Unit-unitForQuantityKind ;
   sh:property qudt:Unit-unitOfSystem .
 
 qudt:UserQuantityKind
@@ -1086,6 +1090,18 @@ qudt:categorizedAs
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "categorized as" .
+
+qudt:categorizedByQuantityKind
+  a rdf:Property ;
+  dcterms:description """
+  <p>Relates a unit to a non-commensurate quantity-kind <em>category</em> under which it is grouped
+  &mdash; e.g. the placeholder <code>quantitykind:Unknown</code>, or a dimensionless bucket such as
+  <code>quantitykind:DimensionlessRatio</code> &mdash; <strong>without</strong> asserting that the
+  unit measures or is convertible within a commensurate family. A sub-property of
+  <code>qudt:hasQuantityKind</code>. Contrast <code>qudt:unitForQuantityKind</code>.</p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  rdfs:label "categorized by quantity kind" ;
+  rdfs:subPropertyOf qudt:hasQuantityKind .
 
 qudt:coherentUnitSystem
   a rdf:Property ;
@@ -1661,6 +1677,21 @@ qudt:order
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "order" .
 
+qudt:organizedUnder
+  a rdf:Property ;
+  dcterms:description """
+  <p>Relates a quantity kind to a broader quantity kind for the purpose of <em>organization and unit
+  applicability only</em> &mdash; it does <strong>not</strong> assert commensurability. Unlike
+  <code>skos:broader</code> (which means "specialisation of, and convertible/comparable with"),
+  <code>qudt:organizedUnder</code> groups quantity kinds that share a dimension but are <em>not</em>
+  interchangeable &mdash; principally the dimensionless quantity kinds, which are all organised under
+  <code>quantitykind:Dimensionless</code> / <code>quantitykind:DimensionlessRatio</code> without being
+  commensurable with one another. The applicable-unit computation traverses both
+  <code>skos:broader</code> and <code>qudt:organizedUnder</code>; the commensurability test traverses
+  <code>skos:broader</code> and <code>qudt:exactMatch</code> (never <code>qudt:organizedUnder</code>).</p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  rdfs:label "organized under" .
+
 qudt:outOfScope
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
@@ -1777,6 +1808,19 @@ qudt:siUnitsExpression
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "si units expression" .
 
+qudt:specializationOf
+  a rdf:Property ;
+  dcterms:description """
+  <p>Relates a quantity kind to a broader quantity kind of which it is a <em>specialization</em>,
+  asserting <strong>commensurability</strong>: the two share a dimension, their values are comparable
+  and addable, and their units are inter-convertible. A sub-property of <code>skos:broader</code>.
+  Commensurability families are the connected components under
+  <code>(qudt:specializationOf | qudt:exactMatch)</code>. Contrast <code>qudt:organizedUnder</code>,
+  which groups quantity kinds without asserting commensurability.</p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  rdfs:label "specialization of" ;
+  rdfs:subPropertyOf skos:broader .
+
 qudt:standardUncertainty
   a rdf:Property ;
   dcterms:description "The standard uncertainty of a quantity is the estimated standard deviation of the mean taken from a series of measurements." ;
@@ -1840,6 +1884,17 @@ qudt:unitFor
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "unit for" .
+
+qudt:unitForQuantityKind
+  a rdf:Property ;
+  dcterms:description """
+  <p>Relates a unit to a quantity kind it is a <em>unit for</em> &mdash; a quantity kind the unit
+  measures, a member of the commensurate family within which the unit is convertible. A
+  sub-property of <code>qudt:hasQuantityKind</code>. Contrast
+  <code>qudt:categorizedByQuantityKind</code>.</p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  rdfs:label "unit for quantity kind" ;
+  rdfs:subPropertyOf qudt:hasQuantityKind .
 
 qudt:url
   a rdf:Property ;
@@ -1905,6 +1960,18 @@ qudt:AbstractQuantityKind-latexSymbol
   sh:datatype qudt:LatexString ;
   sh:minCount 0 ;
   sh:path qudt:latexSymbol .
+
+qudt:AbstractQuantityKind-organizedUnder
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:class qudt:QuantityKind ;
+  sh:path qudt:organizedUnder .
+
+qudt:AbstractQuantityKind-specializationOf
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:class qudt:QuantityKind ;
+  sh:path qudt:specializationOf .
 
 qudt:AbstractQuantityKind-symbol
   a sh:PropertyShape ;
@@ -2927,6 +2994,12 @@ qudt:Unit-applicableSystem
   sh:class qudt:SystemOfUnits ;
   sh:path qudt:applicableSystem .
 
+qudt:Unit-categorizedByQuantityKind
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:class qudt:QuantityKind ;
+  sh:path qudt:categorizedByQuantityKind .
+
 qudt:Unit-conversionMultiplier
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
@@ -3120,6 +3193,12 @@ qudt:Unit-uneceCommonCode
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:datatype xsd:string ;
   sh:path qudt:uneceCommonCode .
+
+qudt:Unit-unitForQuantityKind
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:class qudt:QuantityKind ;
+  sh:path qudt:unitForQuantityKind .
 
 qudt:Unit-unitOfSystem
   a sh:PropertyShape ;
