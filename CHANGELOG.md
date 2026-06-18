@@ -9,6 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added `qudt:SpecializationOfAndOrganizedUnderDisjointShape`, a Violation-severity QA check that fires when a non-deprecated quantity kind carries both an outgoing `qudt:specializationOf` and an outgoing `qudt:organizedUnder`. The two properties are mutually exclusive by design.
 - Added rigor to building the quantity kind commensurability families. Now, a quantity kind family now constitutes the necessary and sufficient requirement for commensurability.
 - Added code to automatically convert labels for quantity kinds into Title Case
 - Added qudt:eclassCode
@@ -32,6 +33,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Fixed `inferApplicableUnits` to union units from all equidistant unit-bearing ancestors instead of arbitrarily picking one. The previous `ORDER BY … LIMIT 1` pattern was non-deterministic when two parents sat at the same minimum distance; the new query computes `MIN(?steps)` and keeps every ancestor at that distance, deterministically unioning their units.
 - Fixed a missing qudt:element property for datatype:ONstate and datatype:OFFstate
 
 ## [3.3.0] - 2026-05-25
