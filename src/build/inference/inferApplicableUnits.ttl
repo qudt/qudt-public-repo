@@ -47,43 +47,63 @@ sq:qkRule
                  (CONCAT("Applicable units are those of ",
                    REPLACE(STR(?qk),"http://qudt.org/vocab/quantitykind/","quantitykind:")) as ?comment)
             WHERE {
+                # Step 1: find the minimum path length to any unit-bearing non-deprecated ancestor.
+                # Two ancestors at the same minimum distance (multi-parent tie) both qualify.
                 {
-                    SELECT
-                        $this
-                        ?qk
-                        ?steps
+                    SELECT $this (MIN(?s) AS ?minSteps)
                     WHERE {
                         {
-                            SELECT
-                                $this
-                                ?qk
-                                (COUNT(*) as ?steps)
+                            SELECT $this ?qk2 (COUNT(*) AS ?s)
                             WHERE {
-                                $this (skos:broader|qudt:organizedUnder)* ?mid .
-                                ?mid (skos:broader|qudt:organizedUnder)* ?qk .
+                                $this (skos:broader|qudt:organizedUnder)* ?mid2 .
+                                ?mid2 (skos:broader|qudt:organizedUnder)* ?qk2 .
                             }
-                            GROUP BY $this ?qk
+                            GROUP BY $this ?qk2
                         }
                         FILTER EXISTS {
-                            ?unit qudt:hasQuantityKind ?qk .
+                            ?u qudt:hasQuantityKind ?qk2 .
                             {
-                                  ?unit a qudt:Unit .
+                                  ?u a qudt:Unit .
                             } UNION {
-                                  ?unit a qudt:CurrencyUnit .
+                                  ?u a qudt:CurrencyUnit .
                             }
                             FILTER NOT EXISTS {
-                                ?unit qudt:deprecated true
+                                ?u qudt:deprecated true
                             }
                         }
                         # do not source applicable units from a deprecated quantity kind;
-                        # $this then falls through to the nearest live ?qk
+                        # $this then falls through to the nearest live ancestor
                         FILTER NOT EXISTS {
-                            ?qk qudt:deprecated true
+                            ?qk2 qudt:deprecated true
                         }
-
                     }
-                    ORDER BY ASC(?steps)
-                    LIMIT 1
+                    GROUP BY $this
+                }
+                # Step 2: enumerate all unit-bearing ancestors at exactly the minimum distance,
+                # unioning their units.  For most quantity kinds this is a single ancestor (no tie);
+                # for multi-parent kinds such as SignalStrength all equidistant ancestors contribute.
+                {
+                    SELECT $this ?qk (COUNT(*) AS ?steps)
+                    WHERE {
+                        $this (skos:broader|qudt:organizedUnder)* ?mid .
+                        ?mid (skos:broader|qudt:organizedUnder)* ?qk .
+                    }
+                    GROUP BY $this ?qk
+                }
+                FILTER(?steps = ?minSteps)
+                FILTER EXISTS {
+                    ?unit qudt:hasQuantityKind ?qk .
+                    {
+                          ?unit a qudt:Unit .
+                    } UNION {
+                          ?unit a qudt:CurrencyUnit .
+                    }
+                    FILTER NOT EXISTS {
+                        ?unit qudt:deprecated true
+                    }
+                }
+                FILTER NOT EXISTS {
+                    ?qk qudt:deprecated true
                 }
                 ?unit qudt:hasQuantityKind ?qk .
                 {
