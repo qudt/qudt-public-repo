@@ -717,6 +717,26 @@ qudt:ScalingOfAndFactorUnitsPresent
   ] ;
   sh:targetClass qudt:Concept .
 
+qudt:SpecializationOfAndOrganizedUnderDisjointShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Violation when a quantity kind has both outgoing qudt:specializationOf and qudt:organizedUnder" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message "{$this} has both qudt:specializationOf {?specializationParent} and qudt:organizedUnder {?organizationParent}. A quantity kind must use at most one outgoing relation type: specializationOf asserts commensurability with the parent family; organizedUnder is a non-commensurate categorical grouping. Using both is contradictory." ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+        SELECT $this ?specializationParent ?organizationParent
+        WHERE {
+          $this qudt:specializationOf ?specializationParent .
+          $this qudt:organizedUnder ?organizationParent .
+          FILTER NOT EXISTS { $this qudt:deprecated true }
+        }
+      """ ;
+  ] ;
+  sh:targetClass qudt:QuantityKind .
+
 qudt:SpecializationOfSameDimensionShape
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
