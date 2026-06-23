@@ -17,6 +17,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added a Warning-severity QA check that `qudt:organizedUnder` only groups quantity kinds of the same dimension.
 - Added a Violation-severity QA check that `qudt:specializationOf` only relates quantity kinds of the same dimension (a stricter counterpart to the `qudt:organizedUnder` check, since a commensurable specialisation must share its parent's dimension).
 - Added explicit, individually-validatable relations for the precise meanings that had been overloaded onto `skos:broader` and `qudt:hasQuantityKind`: `qudt:specializationOf` (a quantity kind that is a more-specific, *commensurable* kind of its parent — a sub-property of `skos:broader`), `qudt:unitForQuantityKind` (a unit that measures, and is convertible within, a commensurable family — a sub-property of `qudt:hasQuantityKind`), and `qudt:categorizedByQuantityKind` (a unit filed under a non-commensurate quantity-kind category such as `quantitykind:Unknown` or `quantitykind:DimensionlessRatio`, with no convertibility claim — a sub-property of `qudt:hasQuantityKind`). Authors assert the precise sub-property; the build materialises the super-property (`skos:broader` / `qudt:hasQuantityKind`) into the released graphs, so existing consumers see no change.
+- Add equivalent concentration units for clinical chemistry (Eq/L family)
 
 ### Changed
 
