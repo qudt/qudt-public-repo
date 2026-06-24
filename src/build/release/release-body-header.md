@@ -1,12 +1,18 @@
-## Improved support for commensurability of units
+## Commensurability Framework
 
-- `skos:broader` now means precisely one thing: *"X is a specialisation of Y, and any quantity of kind X can be compared and converted with one of kind Y."* Nothing else.
-- Quantity kinds that share a dimension (e.g. both measured in s⁻¹) but are genuinely *not* interchangeable — such as frequency (Hz) and radioactive activity (Bq) — are placed in **separate, unconnected skos:broader hierarchies (towers)**. A commensurability check will correctly report them as incompatible.
-- Abstract grouping nodes such as "Dimensionless" are no longer used as hierarchy parents. Instead, each distinct dimensionless quantity kind (strain, efficiency, refractive index, information content, …) is its own root. Browsing by dimension is the recommended way to discover related quantity kinds.
+This release upgrades the treatment of commensurability and unit classification with explicit, individually-validatable relations:
 
-**What does this mean for you?**
+**In the source graph** (`src/main/rdf/`):
 
-- If you use QUDT to **validate unit compatibility** in your application — checking that the units on both sides of an addition or comparison are comparable — the results will be more precise and less likely to give a false "yes."
-- If you write SPARQL queries that traverse the `skos:broader` hierarchy to find related units or quantity kinds, those queries now return tighter, semantically correct results.
-- If your code simply looks up units and their conversion factors, nothing changes for you. All conversion multipliers and dimension vectors are unaffected.
+- Quantity-kind hierarchies use `qudt:specializationOf` (commensurate specialization, a sub-property of `skos:broader`) instead of bare `skos:broader`, and `qudt:organizedUnder` (organizational grouping without commensurability, also a sub-property of `skos:broader`).
+- Unit classifications use `qudt:unitForQuantityKind` (commensurate measurement, a sub-property of `qudt:hasQuantityKind`) and `qudt:categorizedByQuantityKind` (non-commensurate filing, also a sub-property of `qudt:hasQuantityKind`) instead of bare `qudt:hasQuantityKind`.
+- Authors assert the precise sub-property; the build materializes the super-property (`skos:broader` / `qudt:hasQuantityKind`) into the released graphs for full backward compatibility.
+
+**Result:**
+
+- **Commensurability** is now derived from `qudt:specializationOf` and `qudt:exactMatch` (not `skos:broader`), so organizational groupings can be carried on `skos:broader` without implying convertibility.
+- **Released graphs** are byte-for-byte identical in `qudt:applicableUnit`, `qudt:hasQuantityKind`, and `skos:broader` — fully backward compatible.
+- **Precision** improves: dimension-coincident quantity kinds (e.g., frequency and radioactive activity) are correctly identified as non-commensurate.
+
+See [Commensurability, Composition Semantics, and Context](https://github.com/qudt/qudt-public-repo/wiki/Commensurability-Composition-Semantics-and-Context) on the QUDT wiki for the design rationale, formal definitions, and examples.
 
