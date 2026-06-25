@@ -9,7 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
-- Added a release-pipeline validation gate that checks the distribution zip — archive integrity, presence of the core artifacts (units, quantity kinds, the normative SHACL schema, and the all-in-one files), and a sanity floor on the Turtle-file count — before the GitHub Release is published and before the qudt-r2 website publish is triggered, so a corrupted or incomplete build cannot reach the live site.
+- Added a release-pipeline validation gate that checks the distribution zip — archive integrity, presence of the core artifacts (units, quantity kinds, the normative SHACL schema, and the all-in-one files), and a sanity floor on the Turtle-file count — before the GitHub Release is published and before the qudt-r2 website publish is triggered, so a corrupted or incomplete build cannot reach the live site. When a release aborts before the GitHub Release is published, the workflow now also deletes the tag and branch that `release:prepare` had already pushed, so the same version can simply be re-run without manual cleanup.
 
 ## [3.4.0] - 2026-06-25
 

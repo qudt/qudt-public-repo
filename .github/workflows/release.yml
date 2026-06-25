@@ -184,6 +184,7 @@ jobs:
           EOF
           cat src/build/release/release-body-footer.md >> target/release-body.md
       - name: Release
+        id: gh_release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ inputs.release_version }}
@@ -242,3 +243,19 @@ jobs:
       # print the summary
       - name: Print summary
         run: echo "Release ${{ inputs.release_version }} was built and published on GitHub." >> $GITHUB_STEP_SUMMARY
+
+      # If the release aborted before the GitHub Release was published (e.g. the zip validation
+      # gate failed), release:prepare has already pushed the tag v<version> and the release branch.
+      # The leftover tag makes the "Check if tag exists" guard abort any re-run of this version, so
+      # clean both up. This is gated on the Release step NOT having succeeded: once the Release is
+      # published the tag is real (and qudt-r2 may already have deployed it), so we must not delete it.
+      - name: Clean up release tag and branch on failed release
+        if: failure() && steps.gh_release.outcome != 'success'
+        env:
+          version: ${{ inputs.release_version }}
+          branch: ${{ steps.create_release_branch.outputs.branch_name }}
+        run: |
+          git push origin ":refs/tags/v${version}" || echo "No remote tag v${version} to delete"
+          if [ -n "${branch:-}" ]; then
+            git push origin --delete "${branch}" || echo "No remote branch ${branch} to delete"
+          fi
