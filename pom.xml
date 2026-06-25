@@ -2785,7 +2785,39 @@ validAspectDirs.each { aspectDir ->
                                     <savepoint><id>10-infer-labels-factors</id></savepoint>
 
                                     <sparqlUpdate>
-                                        <message>Fixing English labels not in title case (capitalize first letter; split CamelCase)</message>
+                                        <message>Removing untagged rdfs:label duplicates that are redundant with an existing English-tagged label of identical text</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                DELETE {
+                                                    GRAPH ?g { ?s rdfs:label ?untaggedLabel }
+                                                }
+                                                INSERT {
+                                                    GRAPH <fix:labels:lang-dedup:toDelete> { ?s rdfs:label ?untaggedLabel }
+                                                }
+                                                WHERE {
+                                                    GRAPH ?g {
+                                                        ?s rdfs:label ?untaggedLabel .
+                                                        ?s rdfs:label ?taggedLabel .
+                                                        { ?s a qudt:QuantityKind } UNION { ?s a qudt:Prefix }
+                                                        FILTER NOT EXISTS { ?s qudt:deprecated true }
+                                                    }
+                                                    FILTER(STRSTARTS(STR(?g), "dist:"))
+                                                    FILTER(LANG(?untaggedLabel) = "")
+                                                    FILTER(LANG(?taggedLabel) IN ("en", "en-US", "en-UK"))
+                                                    FILTER(STR(?untaggedLabel) = STR(?taggedLabel))
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <write>
+                                        <graph>fix:labels:lang-dedup:toDelete</graph>
+                                        <toFile>target/fix/labels/lang-dedup/toDelete.ttl</toFile>
+                                    </write>
+
+                                    <savepoint><id>10-infer-labels-lang-dedup</id></savepoint>
+
+                                    <sparqlUpdate>
+                                        <message>Fixing English labels not in title case (capitalize first letter; split CamelCase) and tagging untagged labels as English</message>
                                         <sparql>
                                             <![CDATA[
                                                 DELETE { GRAPH ?g { ?s rdfs:label ?oldLabel } }
@@ -2804,8 +2836,8 @@ validAspectDirs.each { aspectDir ->
                                                     FILTER(LANG(?oldLabel) IN ("", "en", "en-US", "en-UK"))
                                                     FILTER(!REGEX(STR(?oldLabel), "^\\p{Ll}-"))
                                                     BIND(qfn:titleCase(STR(?oldLabel)) AS ?fixed)
-                                                    BIND(IF(LANG(?oldLabel) = "", ?fixed, STRLANG(?fixed, LANG(?oldLabel))) AS ?newLabel)
-                                                    FILTER(STR(?fixed) != STR(?oldLabel))
+                                                    BIND(IF(LANG(?oldLabel) = "", STRLANG(?fixed, "en"), STRLANG(?fixed, LANG(?oldLabel))) AS ?newLabel)
+                                                    FILTER(STR(?fixed) != STR(?oldLabel) || LANG(?oldLabel) = "")
                                                 }
                                             ]]>
                                         </sparql>
