@@ -120,6 +120,51 @@ jobs:
         env:
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Guard the irreversible steps that follow: the GitHub Release asset and the qudt-r2
+      # website publish both consume this exact zip, and qudt-r2 deploys it to the live site
+      # without re-checking it. The build pipeline already SHACL-validates the RDF content, so
+      # this gate targets packaging corruption (truncated/incomplete zip, missing core files).
+      - name: Validate release zip
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          zips=(target/checkout/target/qudt-public-repo-*.zip)
+          if [ ${#zips[@]} -ne 1 ]; then
+            echo "Expected exactly one release zip, found ${#zips[@]}: ${zips[*]:-none}" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          zip="${zips[0]}"
+          echo "Validating $zip"
+
+          # 1. Integrity: the archive is complete and not corrupted
+          unzip -t "$zip" > /dev/null
+
+          listing="$(unzip -Z1 "$zip")"
+
+          # 2. Core artifacts are present
+          required=(
+            "vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl"
+            "vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl"
+            "schema/shacl/SCHEMA_QUDT_NoOWL.ttl"
+            "QUDT-all-in-one-OWL.ttl"
+            "QUDT-all-in-one-SHACL.ttl"
+          )
+          for f in "${required[@]}"; do
+            if ! grep -qxF "$f" <<< "$listing"; then
+              echo "Release zip is missing required entry: $f" >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+          done
+
+          # 3. Sanity floor on Turtle count (catches a well-formed but near-empty build)
+          ttl_count="$(grep -c '\.ttl$' <<< "$listing" || true)"
+          if [ "${ttl_count:-0}" -lt 20 ]; then
+            echo "Release zip contains only ${ttl_count} .ttl files (expected >= 20)" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          echo "Release zip validated: ${ttl_count} .ttl files, all core artifacts present." >> "$GITHUB_STEP_SUMMARY"
+
       # Read version changelog
       - id: get-changelog
         name: Get version changelog
