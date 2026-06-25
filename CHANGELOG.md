@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.4.0] - 2026-06-25
+
 ### Added
 
 - Added `qudt:SpecializationOfAndOrganizedUnderDisjointShape`, a Violation-severity QA check that fires when a non-deprecated quantity kind carries both an outgoing `qudt:specializationOf` and an outgoing `qudt:organizedUnder`. The two properties are mutually exclusive by design.
@@ -40,8 +42,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Cleaned up numerous references from Units to QuantityKinds to provide more meaningful applicableUnit values.
 - Converted the last 8 `qudt:hasQuantityKind` links to `qudt:unitForQuantityKind`, completing the migration off the legacy relation for all non-deprecated units: `unit:A-HR-PER-M2`/`unit:C-PER-M2` (`quantitykind:ElectricPolarization`), `unit:GigaHZ-M` (`quantitykind:LinearVelocity`), `unit:M2-PER-KiloGM` (`quantitykind:SpecificSurfaceArea`), and `unit:PER-BAR`/`unit:PER-MegaPA`/`unit:PER-PA`/`unit:PERMILLE-PER-PSI` (`quantitykind:InversePressure`). Each had exactly one quantity-kind target, and every other unit already pointing at that target used `qudt:unitForQuantityKind`, so no judgement call was involved.
 - Filled in further `qudt:specializationOf`/`qudt:organizedUnder`/`qudt:exactMatch` gaps surfaced by the same-dimension family review: `BitRate`/`ByteRate` → `specializationOf DataRate`; `ElectromagneticWavePhaseSpeed` → `organizedUnder Speed`; `EnergyExpenditure` → `specializationOf MassicPower` (also corrected its dimension vector, which had been Power's rather than SpecificPower's); `GasLeakRate` → `specializationOf EnergyFluence` (dimension vector corrected likewise); `HamiltonFunction`/`LagrangeFunction`/`PlanckFunction` → `organizedUnder Energy`; `HeartRate`/`RespiratoryRate` → `organizedUnder CountRate`; `NonActivePower` → `organizedUnder ElectricPower`; `Period`/`SpecificImpulse` → `organizedUnder Time`; `VentilationRatePerFloorArea` → `specializationOf SurfaceRelatedVolumeFlowRate`. Added `qudt:exactMatch` between several synonym pairs that had drifted apart with separate `qudt:applicableUnit` sets (`RotationalStiffness`/`TorsionalRigidity`, `SurfaceRelatedVolumeFlow`/`SurfaceRelatedVolumeFlowRate`/`VolumetricFlux`, `VapourPermeability`/`WaterVapourPermeability`), and `qudt:specializationOf TorquePerAngle` to `TorsionalRigidity`. Reclassified `SpecificImpulseByWeight` from a (incorrect, dual-parent) `specializationOf` of both `SpecificImpulse` and `Time` to a single `organizedUnder SpecificImpulse`. `qudt:applicableUnit` changes follow from the new `exactMatch`/`specializationOf` edges: e.g. units of `SurfaceRelatedVolumeFlow` now also apply to `SurfaceRelatedVolumeFlowRate` and `VolumetricFlux`, and `SEC`/`MilliSEC` now also apply to `SpecificImpulse`.
-
-### Deprecated
 
 ### Fixed
 
@@ -789,7 +789,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
   (thanks @J-meirlaen). (MassDensity and Density are already declared as qudt:exactMatch.
   MassConcentration will be included in these declarations in the future.)
 
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.3.0...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.4.0...HEAD
+[3.4.0]: https://github.com/qudt/qudt-public-repo/compare/v3.3.0...v3.4.0
 [3.3.0]: https://github.com/qudt/qudt-public-repo/compare/v3.2.1...v3.3.0
 [3.2.1]: https://github.com/qudt/qudt-public-repo/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/qudt/qudt-public-repo/compare/v3.1.11...v3.2.0
