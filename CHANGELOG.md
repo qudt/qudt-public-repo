@@ -7,6 +7,18 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+- Added `qudt:exactMatch` between `quantitykind:Activity` and `quantitykind:RadioactiveDecay`, and between `quantitykind:Magnetization` and `quantitykind:MagnetizationField`. The radioactivity units (the `BQ`/`CI` families) now also carry `qudt:unitForQuantityKind quantitykind:RadioactiveDecay`.
+- Added `qudt:qkdvNumerator`/`qudt:qkdvDenominator` to `quantitykind:RelativeHumidity` and `quantitykind:RelativePartialPressure`.
+- Added `qudt:unitForQuantityKind quantitykind:BodyMassIndex` to `unit:KiloGM-PER-M2`.
+
+### Changed
+
+- Reclassified `quantitykind:ReactivePower` from `qudt:organizedUnder quantitykind:ElectricPower` to `qudt:specializationOf quantitykind:NonActivePower`: reactive power is the sinusoidal special case of non-active power (they are commensurable — both measured in var — but equal only under sinusoidal conditions). The var unit family (`VAR` and its prefixes) now attaches to `quantitykind:NonActivePower` via `qudt:unitForQuantityKind`, and `quantitykind:ReactivePower` inherits them through `qudt:specializationOf`, so its `qudt:applicableUnit` set is unchanged.
+- Corrected `quantitykind:Magnetization` `qudt:specializationOf` from `quantitykind:LinearElectricCurrent` to `quantitykind:ElectricCurrentPerLength`.
+- Added `qudt:specializationOf quantitykind:CountRate` to `quantitykind:StochasticProcess`.
+
 ## [3.4.0] - 2026-06-25
 
 ### Added
