@@ -7,6 +7,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Changed
+
+- The symmetric-relation inference (driven by `qudt:SymmetricRelation`, currently only `qudt:exactMatch`) now materialises the inverse triple for **quantity kinds** as well as units, so `qudt:exactMatch` need only be authored in one direction.
+- `qudt:unitForQuantityKind` is now propagated across the `qudt:exactMatch` equivalence closure before applicable-unit inference, so every member of an `exactMatch` clique shares the same applicable units even when a unit is authored on only one member. Applicable-unit inference itself still traverses `qudt:specializationOf` only; this pre-step is what lets it reach `exactMatch` siblings without crossing the relation directly.
+
 ## [3.4.0] - 2026-06-25
 
 ### Added
