@@ -10,6 +10,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Tagged `rdfs:label` values on `qudt:QuantityKind` and `qudt:Prefix` that were missing a language tag. The existing title-case fix (`mvn -Pfix install`) now also defaults an untagged label to `@en` (consistent with `qudt:RdfsLabelInTitleCaseShapeWarning`, which already treated untagged labels as English), and a new dedup rule removes untagged labels that were redundant leftovers alongside an identical, already-`en`/`en-US`/`en-UK`-tagged label. Deprecated entities are left untouched, as before. This is now enforced automatically on every build rather than needing a one-off cleanup.
+
 ### Added
 
 - Added a release-pipeline validation gate that checks the distribution zip — archive integrity, presence of the core artifacts (units, quantity kinds, the normative SHACL schema, and the all-in-one files), and a sanity floor on the Turtle-file count — before the GitHub Release is published and before the qudt-r2 website publish is triggered, so a corrupted or incomplete build cannot reach the live site. When a release aborts before the GitHub Release is published, the workflow now also deletes the tag and branch that `release:prepare` had already pushed, so the same version can simply be re-run without manual cleanup.
