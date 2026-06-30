@@ -12,11 +12,17 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `qudt:exactMatch` between `quantitykind:Activity` and `quantitykind:RadioactiveDecay`, and between `quantitykind:Magnetization` and `quantitykind:MagnetizationField`. The radioactivity units (the `BQ`/`CI` families) now also carry `qudt:unitForQuantityKind quantitykind:RadioactiveDecay`.
 - Added `qudt:qkdvNumerator`/`qudt:qkdvDenominator` to `quantitykind:RelativeHumidity` and `quantitykind:RelativePartialPressure`.
 - Added `qudt:unitForQuantityKind quantitykind:BodyMassIndex` to `unit:KiloGM-PER-M2`.
+- Gave `quantitykind:AtomicStoppingPower`, `AreaBitDensity`, and `Currency` commensurability links (`exactMatch`/`specializationOf`) so they inherit applicable units; abstract parents `AreicDataVolume` and `Asset` left unit-less by design.
+- Assigned the `N·m/m²` unit family to `quantitykind:AreicTorque`; added `qudt:organizedUnder quantitykind:ForcePerLength`.
+- Added `qudt:qkdvNumerator`/`qkdvDenominator` (mass/mass) to `MassFraction`, `MassFractionOfDryMatter`, `MassFractionOfWater`, and `MassRatio`.
+- Added `unit:PERCENT`/`unit:FRACTION` to `quantitykind:MassFraction`, and `unit:FRACTION` to `quantitykind:MassRatio`; cross-linked the two with `rdfs:seeAlso`.
+- Added bidirectional `qudt:exactMatch` between `quantitykind:LinearElectricCurrent` and `quantitykind:ElectricCurrentPerLength` (same quantity, two source vocabularies).
 
 ### Changed
 
+- Reclassified `unit:IU` (International Unit) from amount of substance to mass-equivalent: `qudt:hasDimensionVector` is now mass (`M`), and it measures `quantitykind:AmountOfBiologicallyActiveSubstance` (also re-dimensioned to `M`, `qudt:organizedUnder quantitykind:MassEquivalent`). The IU/volume and IU/mass derived units cascade accordingly: `IU-PER-L`/`IU-PER-MilliL` become mass concentration under `PlasmaLevel`/`SerumLevel`, and `IU-PER-MilliGM` becomes dimensionless under `quantitykind:MassFraction`.
 - Reclassified `quantitykind:ReactivePower` from `qudt:organizedUnder quantitykind:ElectricPower` to `qudt:specializationOf quantitykind:NonActivePower`: reactive power is the sinusoidal special case of non-active power (they are commensurable — both measured in var — but equal only under sinusoidal conditions). The var unit family (`VAR` and its prefixes) now attaches to `quantitykind:NonActivePower` via `qudt:unitForQuantityKind`, and `quantitykind:ReactivePower` inherits them through `qudt:specializationOf`, so its `qudt:applicableUnit` set is unchanged.
-- Corrected `quantitykind:Magnetization` `qudt:specializationOf` from `quantitykind:LinearElectricCurrent` to `quantitykind:ElectricCurrentPerLength`.
+- Changed `quantitykind:Magnetization` `qudt:specializationOf` from `quantitykind:LinearElectricCurrent` to `quantitykind:ElectricCurrentPerLength`.
 - Added `qudt:specializationOf quantitykind:CountRate` to `quantitykind:StochasticProcess`.
 
 ## [3.4.0] - 2026-06-25
