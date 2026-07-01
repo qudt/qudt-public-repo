@@ -9,6 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added `unit:BIT_COUNT` and `unit:BYTE_COUNT`, counting-sense units (as opposed to the information-entropy `unit:BIT`/`unit:BYTE`) for `quantitykind:BitDataVolume` and `quantitykind:ByteDataVolume`, which are now `organizedUnder quantitykind:Count`; cross-linked with `rdfs:seeAlso`.
 - Added a release-pipeline validation gate that checks the distribution zip — archive integrity, presence of the core artifacts (units, quantity kinds, the normative SHACL schema, and the all-in-one files), and a sanity floor on the Turtle-file count — before the GitHub Release is published and before the qudt-r2 website publish is triggered, so a corrupted or incomplete build cannot reach the live site. When a release aborts before the GitHub Release is published, the workflow now also deletes the tag and branch that `release:prepare` had already pushed, so the same version can simply be re-run without manual cleanup.
 - Added a version-increment guard to the Release workflow: the requested release version must be a single step from the last released `vX.Y.Z` tag (PATCH+1, MINOR+1 with PATCH reset, or MAJOR+1 with MINOR/PATCH reset), failing fast otherwise. The `next_snapshot_version` input is now optional and defaults to the release version with PATCH+1 and `-SNAPSHOT` (e.g. `3.4.1` → `3.4.2-SNAPSHOT`) when left blank.
 
