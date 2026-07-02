@@ -7,6 +7,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING:** Redefined `unit:BIT`, `unit:BYTE`, `unit:OCTET` and the entire prefixed (SI + binary) and compound (`-PER-SEC`, `-PER-M`/`M2`/`M3`) BIT/BYTE ladder as **counting/storage** units. Their `conversionMultiplier` values are now clean counts (`BIT`=1, `BYTE`=8, `KiloBYTE`=8000, `GibiBYTE`=8589934592, …) instead of the former information-entropy scaling (× ln2), and they carry `qudt:CountingUnit` and point to `quantitykind:BitDataVolume`/`ByteDataVolume` (density/rate compounds keep their `LinearBitDensity`/`DataRate`/etc. kinds). The information-entropy sense is unchanged and remains on `unit:SHANNON` (base 2), `unit:NAT` (base e) and `unit:HART` (base 10); `unit:BIT` no longer duplicates the shannon. This aligns with ISO/IEC 80000-13. Migration: consumers using `unit:BIT`/`unit:BYTE` for information entropy should switch to `unit:SHANNON`.
+- Added `quantitykind:AmountOfData` as the general "amount of digital data" kind (`organizedUnder quantitykind:Count`), with `BitDataVolume`, `ByteDataVolume` and `DatasetOfBits` as its `qudt:specializationOf` so bits and bytes remain mutually commensurable; `BitDataVolume` and `DatasetOfBits` are additionally `qudt:exactMatch`.
+
 ### Added
 
 - Added a release-pipeline validation gate that checks the distribution zip — archive integrity, presence of the core artifacts (units, quantity kinds, the normative SHACL schema, and the all-in-one files), and a sanity floor on the Turtle-file count — before the GitHub Release is published and before the qudt-r2 website publish is triggered, so a corrupted or incomplete build cannot reach the live site. When a release aborts before the GitHub Release is published, the workflow now also deletes the tag and branch that `release:prepare` had already pushed, so the same version can simply be re-run without manual cleanup.
