@@ -7,6 +7,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Changed
+
+- The symmetric-relation inference (driven by `qudt:SymmetricRelation`, currently only `qudt:exactMatch`) now materialises the inverse triple for **quantity kinds**, **physical constants**, and **prefixes**, as well as units, so `qudt:exactMatch` need only be authored in one direction. (Coordinate reference frames and datatypes also use `qudt:exactMatch` but aren't yet covered, pending a way to target their multi-level subclass hierarchies; see the `rdfs:comment` on `qudt:SymmetricRelationShape`.) Previously the inference was wired up for units only — broadening `sh:targetClass` to other classes had no effect unless their graph was also fed into the inference step, which it wasn't.
+- `qudt:unitForQuantityKind` is now propagated across the `qudt:exactMatch` equivalence closure before applicable-unit inference, so every member of an `exactMatch` clique shares the same applicable units even when a unit is authored on only one member. Applicable-unit inference itself still traverses `qudt:specializationOf` only; this pre-step is what lets it reach `exactMatch` siblings without crossing the relation directly.
+
 ### Added
 
 - Added a release-pipeline validation gate that checks the distribution zip — archive integrity, presence of the core artifacts (units, quantity kinds, the normative SHACL schema, and the all-in-one files), and a sanity floor on the Turtle-file count — before the GitHub Release is published and before the qudt-r2 website publish is triggered, so a corrupted or incomplete build cannot reach the live site. When a release aborts before the GitHub Release is published, the workflow now also deletes the tag and branch that `release:prepare` had already pushed, so the same version can simply be re-run without manual cleanup.
