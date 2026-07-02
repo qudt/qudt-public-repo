@@ -1711,6 +1711,63 @@ validAspectDirs.each { aspectDir ->
                                     </sparqlUpdate>
                                     <savepoint><id>01-iec-links</id></savepoint>
 
+                                    <shaclInfer> <!-- materialize the inverse of qudt:exactMatch (and other symmetric relations) on quantity kinds; the unit-side equivalent runs later, see owl-subset-units -->
+                                        <message>Performing our custom subset of OWL inferences (quantity kinds)</message>
+                                        <shapes>
+                                            <file>src/build/inference/owl-subset.shapes.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:owl-subset-quantitykinds</graph>
+                                            <file>target/inferred/owl-subset-quantitykinds.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:owl-subset-quantitykinds</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
+                                    </add>
+
+                                    <shaclInfer> <!-- materialize the inverse of qudt:exactMatch (and other symmetric relations) on physical constants -->
+                                        <message>Performing our custom subset of OWL inferences (physical constants)</message>
+                                        <shapes>
+                                            <file>src/build/inference/owl-subset.shapes.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-CONSTANTS.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:owl-subset-constants</graph>
+                                            <file>target/inferred/owl-subset-constants.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:owl-subset-constants</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-CONSTANTS.ttl</toGraph>
+                                    </add>
+
+                                    <shaclInfer> <!-- materialize the inverse of qudt:exactMatch (and other symmetric relations) on prefixes -->
+                                        <message>Performing our custom subset of OWL inferences (prefixes)</message>
+                                        <shapes>
+                                            <file>src/build/inference/owl-subset.shapes.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:owl-subset-prefixes</graph>
+                                            <file>target/inferred/owl-subset-prefixes.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:owl-subset-prefixes</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</toGraph>
+                                    </add>
+
                                     <shaclInfer> <!-- materialize skos:broader from qudt:specializationOf (backward-compat super) before any skos:broader-based inference -->
                                         <message>Materializing skos:broader from qudt:specializationOf</message>
                                         <shapes>
@@ -1728,6 +1785,26 @@ validAspectDirs.each { aspectDir ->
                                     <add>
                                         <graph>inferred:materializedBroader</graph>
                                         <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
+                                    </add>
+
+                                    <shaclInfer> <!-- fan qudt:unitForQuantityKind out across the qudt:exactMatch closure, so exactMatch siblings share applicable units; must precede the hasQuantityKind materialize below so propagated links are materialized too -->
+                                        <message>Propagating qudt:unitForQuantityKind across qudt:exactMatch</message>
+                                        <shapes>
+                                            <file>src/build/inference/propagateUnitForQuantityKindAcrossExactMatch.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:propagatedUnitForQuantityKind</graph>
+                                            <file>target/inferred/propagatedUnitForQuantityKind.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:propagatedUnitForQuantityKind</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
                                     </add>
 
                                     <shaclInfer> <!-- materialize qudt:hasQuantityKind from qudt:unitForQuantityKind / qudt:categorizedByQuantityKind (backward-compat super) before applicableUnit inference -->

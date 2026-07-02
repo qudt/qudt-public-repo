@@ -1,0 +1,36 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+qudt:
+  sh:declare [
+    sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+    sh:prefix "qudt" ;
+  ] .
+
+qudt:PropagateUnitForQuantityKindAcrossExactMatchShape
+  a sh:NodeShape ;
+  rdfs:comment "qudt:exactMatch is an equivalence (symmetric + transitive), so a unit that measures one member of an exactMatch clique measures every member. Applicable-unit inference deliberately traverses qudt:specializationOf only, so it never crosses qudt:exactMatch on its own; this rule first fans qudt:unitForQuantityKind out across the exactMatch closure, after which every clique member owns the unit directly (distance 0) and inferApplicableUnits picks it up unchanged. The (qudt:exactMatch|^qudt:exactMatch)+ path closes the clique regardless of which direction the authored edges run, so a unit need only be authored on one member." ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:construct """
+    CONSTRUCT {
+      $this qudt:unitForQuantityKind ?qkB .
+    }
+    WHERE {
+      $this qudt:unitForQuantityKind ?qkA .
+      ?qkA (qudt:exactMatch|^qudt:exactMatch)+ ?qkB .
+      FILTER (?qkA != ?qkB)
+      FILTER NOT EXISTS { $this qudt:deprecated true }
+      FILTER NOT EXISTS { ?qkB qudt:deprecated true }
+      FILTER NOT EXISTS { $this qudt:unitForQuantityKind ?qkB }
+    }
+    """ ;
+    sh:prefixes qudt: ;
+  ] ;
+  sh:targetClass qudt:CurrencyUnit ;
+  sh:targetClass qudt:Unit .
+
+
