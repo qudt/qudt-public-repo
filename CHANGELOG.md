@@ -7,6 +7,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Changed
+
+- The symmetric-relation inference (driven by `qudt:SymmetricRelation`, currently only `qudt:exactMatch`) now materialises the inverse triple for **quantity kinds**, **physical constants**, and **prefixes**, as well as units, so `qudt:exactMatch` need only be authored in one direction. (Coordinate reference frames and datatypes also use `qudt:exactMatch` but aren't yet covered, pending a way to target their multi-level subclass hierarchies; see the `rdfs:comment` on `qudt:SymmetricRelationShape`.) Previously the inference was wired up for units only — broadening `sh:targetClass` to other classes had no effect unless their graph was also fed into the inference step, which it wasn't.
+- `qudt:unitForQuantityKind` is now propagated across the `qudt:exactMatch` equivalence closure before applicable-unit inference, so every member of an `exactMatch` clique shares the same applicable units even when a unit is authored on only one member. Applicable-unit inference itself still traverses `qudt:specializationOf` only; this pre-step is what lets it reach `exactMatch` siblings without crossing the relation directly.
+
 ### Added
 
 - Added `qudt:exactMatch` between `quantitykind:Activity` and `quantitykind:RadioactiveDecay`, and between `quantitykind:Magnetization` and `quantitykind:MagnetizationField`. The radioactivity units (the `BQ`/`CI` families) now also carry `qudt:unitForQuantityKind quantitykind:RadioactiveDecay`.
