@@ -7,6 +7,14 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Fixed
+
+- Closed out the unit-less E-named quantity kinds: `EinsteinTransitionProbabilityForSpontaneousOrInducedEmissionAndAbsorption` `exactMatch` `EinsteinCoefficients`; `ExposureOfIonizingRadiation` `exactMatch` `Exposure`; `ExposureRateOfIonizingRadiation` `exactMatch` `ExposureRate`; `EvaporativeHeatTransfer` dimension corrected from W/(m²·K) to W (matching its Φ-family siblings) and made `specializationOf HeatFlowRate`, with its truncated description completed.
+- Corrected the swapped dimension vectors of `EquilibriumConstantBasedOnConcentration` (now mol/m³) and `EquilibriumConstantBasedOnPressure` (now Pa); gave them direct applicable units (`MOL-PER-L`/`MOL-PER-M3` and `PA`/`BAR`) and `rdfs:seeAlso` links to their dimensionless `EquilibriumConstantOn…Basis` counterparts.
+- Retyped `EquilibriumConstantOnConcentrationBasis` and `EquilibriumConstantOnPressureBasis` from `qudt:specializationOf` to `qudt:organizedUnder quantitykind:EquilibriumConstant` — Kc, Kp and the thermodynamic K° are all dimensionless but have no fixed inter-conversion, so they are not commensurable; their `UNITLESS` applicable unit is preserved via direct `unitForQuantityKind` links. Replaced the copy-pasted descriptions across the equilibrium-constant cluster with texts documenting each entity's dimension convention (dimensionless ISO 80000/IEC 61360 vs dimensional ECLASS) and why both forms are maintained.
+- Corrected the `rdfs:label` of `quantitykind:EvaporativeHeatTransferCoefficient` (was a copy of "Combined Non Evaporative Heat Transfer Coefficient").
+- Removed the `qudt:CountingUnit` type from `unit:UNITLESS` — it is the unit for plain dimensionless values (refractive index, Reynolds number, equilibrium constants, …), not a count of entities; it remains a `qudt:DimensionlessUnit`.
+
 ### Changed
 
 - The symmetric-relation inference (driven by `qudt:SymmetricRelation`, currently only `qudt:exactMatch`) now materialises the inverse triple for **quantity kinds**, **physical constants**, and **prefixes**, as well as units, so `qudt:exactMatch` need only be authored in one direction. (Coordinate reference frames and datatypes also use `qudt:exactMatch` but aren't yet covered, pending a way to target their multi-level subclass hierarchies; see the `rdfs:comment` on `qudt:SymmetricRelationShape`.) Previously the inference was wired up for units only — broadening `sh:targetClass` to other classes had no effect unless their graph was also fed into the inference step, which it wasn't.
