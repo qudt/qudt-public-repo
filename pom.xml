@@ -71,7 +71,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.qudt</groupId>
     <artifactId>qudt-public-repo</artifactId>
-    <version>3.2.2-SNAPSHOT</version>
+    <version>3.4.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -92,13 +92,15 @@
             convention in defineAdditionalProperties, e.g.:
             mvn -Dqudt.supported.extensions=propulsion install
         -->
-        <qudt.supported.extensions></qudt.supported.extensions>
+        <qudt.supported.extensions />
         <!--
             Optional local-only all-in-one extension bundle selection. CI should
             leave this empty. Example:
             mvn -Dqudt.allInOne.extensions=propulsion,loop3d install
         -->
-        <qudt.allInOne.extensions></qudt.allInOne.extensions>
+        <qudt.allInOne.extensions />
+        <!-- default value; overridden to "fix.profile.is.active" by the fix profile -->
+        <fix.profile.is.inactive>fix.profile.is.inactive</fix.profile.is.inactive>
     </properties>
     <scm>
         <connection>scm:git:https://github.com/qudt/qudt-public-repo.git</connection>
@@ -156,7 +158,7 @@
                                     project.properties.setProperty('project.version.majorminor', majorMinorVersion)
                                     project.properties.setProperty('qudt.versioned.iri.prefix', "http://qudt.org/${majorMinorVersion}/")
                                     def now = OffsetDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0)
-                                    project.properties.setProperty('qudt.build.date', "${now}")
+                                    project.properties.setProperty('qudt.build.date', now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")))
                                     def currentMonth = now.format(DateTimeFormatter.ofPattern("MM"))
                                     def currentYear = now.format(DateTimeFormatter.ofPattern("YYYY"))
                                     project.properties.setProperty('qudt.current.month', currentMonth)
@@ -223,10 +225,10 @@
                                         ['src:vocab:VOCAB_QUDT-COORDINATES.ttl', 'dist:vocab:VOCAB_QUDT-COORDINATES.ttl'],
                                         ['src:vocab:VOCAB_QUDT-PREFIXES.ttl', 'dist:vocab:VOCAB_QUDT-PREFIXES.ttl'],
                                         ['src:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl', 'dist:vocab:VOCAB_QUDT-DIMENSION-VECTORS.ttl'],
+                                        ['src:vocab:VOCAB_QUDT-EXTENDED-DIMENSION-VECTORS.ttl', 'dist:vocab:VOCAB_QUDT-EXTENDED-DIMENSION-VECTORS.ttl'],
                                         ['src:vocab:VOCAB_QUDT-UNITS-ALL.ttl', 'dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl'],
                                         ['src:vocab:VOCAB_QUDT-CONSTANTS.ttl', 'dist:vocab:VOCAB_QUDT-CONSTANTS.ttl'],
                                         ['src:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl', 'dist:vocab:VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl'],
-                                        ['src:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl', 'dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl'],
                                         ['src:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl', 'dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl']
                                     ]
                                     def configFile = new File(generatedSupportedExtensionsDir, "config.ttl")
@@ -714,8 +716,8 @@ validAspectDirs.each { aspectDir ->
                                         <include>
                                             src/build/collection-declarations/SHACL-Collection.ttl
                                             target/dist/vocab/constants/VOCAB_QUDT-CONSTANTS.ttl
-                                            target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl
                                             target/dist/vocab/dimensionvectors/VOCAB_QUDT-DIMENSION-VECTORS.ttl
+                                            target/dist/vocab/extendeddimensionvectors/VOCAB_QUDT-EXTENDED-DIMENSION-VECTORS.ttl
                                             target/dist/vocab/prefixes/VOCAB_QUDT-PREFIXES.ttl
                                             target/dist/vocab/quantities/VOCAB_QUDT-QUANTITIES.ttl
                                             target/dist/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl
@@ -755,8 +757,8 @@ validAspectDirs.each { aspectDir ->
                                         <include>
                                             src/build/collection-declarations/OWL-Collection.ttl
                                             target/dist/vocab/constants/VOCAB_QUDT-CONSTANTS.ttl
-                                            target/dist/vocab/currency/VOCAB_QUDT-UNITS-CURRENCY.ttl
                                             target/dist/vocab/dimensionvectors/VOCAB_QUDT-DIMENSION-VECTORS.ttl
+                                            target/dist/vocab/extendeddimensionvectors/VOCAB_QUDT-EXTENDED-DIMENSION-VECTORS.ttl
                                             target/dist/vocab/prefixes/VOCAB_QUDT-PREFIXES.ttl
                                             target/dist/vocab/quantities/VOCAB_QUDT-QUANTITIES.ttl
                                             target/dist/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl
@@ -877,6 +879,10 @@ validAspectDirs.each { aspectDir ->
                                     <sparqlQuery>
                                         <file>src/build/inference/reciprocalUnits/query.rq</file>
                                         <toFile>target/inspection/reciprocalUnits/reciprocal-units.txt</toFile>
+                                    </sparqlQuery>
+                                    <sparqlQuery>
+                                        <file>src/build/inspection/dimensionVectors/verify-inferred-vs-explicit.rq</file>
+                                        <toFile>target/inspection/dimensionVectors/verify-inferred-vs-explicit.txt</toFile>
                                     </sparqlQuery>
                                     <sparqlQuery>
                                         <sparql>
@@ -1497,22 +1503,13 @@ validAspectDirs.each { aspectDir ->
                                                 qudt:symbol
                                                 qudt:ucumCode
                                                 qudt:hasDimensionVector
+                                                qudt:hasExtendedDimensionVector
                                                 qudt:hasReciprocalUnit
-                                                qudt:hasQuantityKind
                                                 qudt:hasReferenceQuantityKind
                                                 qudt:systemDerivedQuantityKind
-                                                skos:broader
                                                 rdfs:label
                                                 rdfs:seeAlso
                                                 rdf:type
-                                                qudt:dimensionExponentForAmountOfSubstance
-                                                qudt:dimensionExponentForElectricCurrent
-                                                qudt:dimensionExponentForLength
-                                                qudt:dimensionExponentForLuminousIntensity
-                                                qudt:dimensionExponentForMass
-                                                qudt:dimensionExponentForThermodynamicTemperature
-                                                qudt:dimensionExponentForTime
-                                                qudt:dimensionlessExponent
                                                 qudt:latexDefinition
                                                 rdfs:isDefinedBy
                                               }
@@ -1548,23 +1545,14 @@ validAspectDirs.each { aspectDir ->
                                                 qudt:symbol
                                                 qudt:ucumCode
                                                 qudt:hasDimensionVector
+                                                qudt:hasExtendedDimensionVector
                                                 qudt:hasReciprocalUnit
-                                                qudt:hasQuantityKind
                                                 qudt:hasReferenceQuantityKind
                                                 qudt:systemDerivedQuantityKind
-                                                skos:broader
                                                 rdfs:label
                                                 rdfs:seeAlso
                                                 rdf:type
-                                                qudt:dimensionExponentForAmountOfSubstance
-                                                qudt:dimensionExponentForElectricCurrent
-                                                qudt:dimensionExponentForLength
-                                                qudt:dimensionExponentForLuminousIntensity
-                                                qudt:dimensionExponentForMass
-                                                qudt:dimensionExponentForThermodynamicTemperature
-                                                qudt:dimensionExponentForTime
-                                                qudt:dimensionlessExponent
-                                                qudt:latexDefinition                                                                                                
+                                                qudt:latexDefinition
                                                 rdfs:isDefinedBy
                                                 }
                                               GRAPH <build:supported-extensions> {
@@ -1723,6 +1711,122 @@ validAspectDirs.each { aspectDir ->
                                     </sparqlUpdate>
                                     <savepoint><id>01-iec-links</id></savepoint>
 
+                                    <shaclInfer> <!-- materialize the inverse of qudt:exactMatch (and other symmetric relations) on quantity kinds; the unit-side equivalent runs later, see owl-subset-units -->
+                                        <message>Performing our custom subset of OWL inferences (quantity kinds)</message>
+                                        <shapes>
+                                            <file>src/build/inference/owl-subset.shapes.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:owl-subset-quantitykinds</graph>
+                                            <file>target/inferred/owl-subset-quantitykinds.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:owl-subset-quantitykinds</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
+                                    </add>
+
+                                    <shaclInfer> <!-- materialize the inverse of qudt:exactMatch (and other symmetric relations) on physical constants -->
+                                        <message>Performing our custom subset of OWL inferences (physical constants)</message>
+                                        <shapes>
+                                            <file>src/build/inference/owl-subset.shapes.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-CONSTANTS.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:owl-subset-constants</graph>
+                                            <file>target/inferred/owl-subset-constants.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:owl-subset-constants</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-CONSTANTS.ttl</toGraph>
+                                    </add>
+
+                                    <shaclInfer> <!-- materialize the inverse of qudt:exactMatch (and other symmetric relations) on prefixes -->
+                                        <message>Performing our custom subset of OWL inferences (prefixes)</message>
+                                        <shapes>
+                                            <file>src/build/inference/owl-subset.shapes.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:owl-subset-prefixes</graph>
+                                            <file>target/inferred/owl-subset-prefixes.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:owl-subset-prefixes</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-PREFIXES.ttl</toGraph>
+                                    </add>
+
+                                    <shaclInfer> <!-- materialize skos:broader from qudt:specializationOf (backward-compat super) before any skos:broader-based inference -->
+                                        <message>Materializing skos:broader from qudt:specializationOf</message>
+                                        <shapes>
+                                            <file>src/build/inference/materializeRelationSuperProperties.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:materializedBroader</graph>
+                                            <file>target/inferred/materializedBroader.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:materializedBroader</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
+                                    </add>
+
+                                    <shaclInfer> <!-- fan qudt:unitForQuantityKind out across the qudt:exactMatch closure, so exactMatch siblings share applicable units; must precede the hasQuantityKind materialize below so propagated links are materialized too -->
+                                        <message>Propagating qudt:unitForQuantityKind across qudt:exactMatch</message>
+                                        <shapes>
+                                            <file>src/build/inference/propagateUnitForQuantityKindAcrossExactMatch.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:propagatedUnitForQuantityKind</graph>
+                                            <file>target/inferred/propagatedUnitForQuantityKind.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:propagatedUnitForQuantityKind</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                    </add>
+
+                                    <shaclInfer> <!-- materialize qudt:hasQuantityKind from qudt:unitForQuantityKind / qudt:categorizedByQuantityKind (backward-compat super) before applicableUnit inference -->
+                                        <message>Materializing qudt:hasQuantityKind from qudt:unitForQuantityKind / qudt:categorizedByQuantityKind</message>
+                                        <shapes>
+                                            <file>src/build/inference/materializeRelationSuperProperties.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:materializedHasQuantityKind</graph>
+                                            <file>target/inferred/materializedHasQuantityKind.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:materializedHasQuantityKind</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl</toGraph>
+                                    </add>
+                                    <savepoint><id>01.5-materialize-relation-superproperties</id></savepoint>
+
                                     <add> <!-- load applicableUnits shapes (rules) into <shapes:applicableUnits> because we need them twice (see below) -->
                                         <file>src/build/inference/inferApplicableUnits.ttl</file>
                                         <toGraph>shapes:applicableUnits</toGraph>
@@ -1748,7 +1852,7 @@ validAspectDirs.each { aspectDir ->
                                         <graph>inferred:applicableUnits</graph>
                                         <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
                                     </add>
-                                    <invoke stepRef="refresh-supported-extensions-vocab"/>
+                                    <invoke stepRef="refresh-supported-extensions-vocab" />
                                     <sparqlQuery>
                                         <message>Loading core quantity kind hierarchy as support for supported extension applicableUnit inference</message>
                                         <sparql>
@@ -1815,23 +1919,6 @@ validAspectDirs.each { aspectDir ->
 
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
                                     <savepoint><id>02-applicableUnits</id></savepoint>
-                                    <shaclInfer>  <!-- do the quantitykinds inference for currency units -->
-                                        <message>Inferring qudt:applicableUnit triples (currency units)</message>
-                                        <shapes><graph>shapes:applicableUnits</graph></shapes>
-                                        <data>
-                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl</graph>
-                                        </data>
-                                        <inferred>
-                                            <graph>inferred:applicableCurrencyUnits</graph>
-                                            <file>target/inferred/applicableUnits-currency.ttl</file>
-                                        </inferred>
-                                    </shaclInfer>
-                                    <add>
-                                        <graph>inferred:applicableCurrencyUnits</graph>
-                                        <toGraph>dist:vocab:VOCAB_QUDT-UNITS-CURRENCY.ttl</toGraph>
-                                    </add>
-
                                     <!-- start from here if nothing has changed in the inputs of the earlier steps -->
                                     <savepoint><id>03-applicableUnits-currencies</id></savepoint>
 
@@ -1974,6 +2061,7 @@ validAspectDirs.each { aspectDir ->
                                                         }
                                                         ?unit ?rel ?otherUnit .
                                                         FILTER(?rel IN (qudt:exactMatch,skos:broader))
+                                                        FILTER NOT EXISTS { ?otherUnit qudt:deprecated true }
                                                         ?otherUnit
                                                             qudt:conversionMultiplier ?cm ;
                                                             qudt:conversionMultiplierSN ?cmSN .
@@ -2041,11 +2129,33 @@ validAspectDirs.each { aspectDir ->
                                         </sparqlAsk>
                                     </until>
                                     <savepoint><id>07-infer-dimensionVector</id></savepoint>
+
+                                    <shaclInfer>
+                                        <message>Inferring skos:broader across qudt:specializationOf + qudt:exactMatch (commensurability-family closure)</message>
+                                        <shapes>
+                                            <file>src/build/inference/inferBroaderAcrossExactMatch.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:broaderAcrossExactMatch</graph>
+                                            <file>target/inferred/broaderAcrossExactMatch.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:broaderAcrossExactMatch</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
+                                    </add>
+                                    <savepoint><id>07.5-infer-broader-across-exactmatch</id></savepoint>
+
                                     <forEachEnv>
                                         <env id="symbol">
                                             <property name="name">symbol</property>
                                             <property name="property">qudt:symbol</property>
                                             <property name="incorrectVar">incorrectSymbol</property>
+
                                             <property name="overrideFile">src/build/sparql2shacl/symbol/units-overriding-inferred-symbol.ttl</property>
                                         </env>
                                         <env id="ucumCode">
@@ -2182,7 +2292,7 @@ validAspectDirs.each { aspectDir ->
                                         <toFile>target/inferred/supported-extensions-core-unit-derived-properties.ttl</toFile>
                                     </sparqlQuery>
                                     <!-- ===== Extension phase: all extension inference on a single stable aggregate ===== -->
-                                    <invoke stepRef="refresh-supported-extensions-vocab"/>
+                                    <invoke stepRef="refresh-supported-extensions-vocab" />
                                     <shaclInfer>
                                         <message>Inferring qudt:hasFactorUnit for supported extension units</message>
                                         <shapes>
@@ -2397,7 +2507,7 @@ validAspectDirs.each { aspectDir ->
                                                 <message>Checking supported extension units for missing/wrong ${name}s that can be corrected/inferred</message>
                                                 <indexVar>iteration_ext</indexVar>
                                                 <body>
-                                                    <invoke stepRef="refresh-supported-extensions-vocab"/>
+                                                    <invoke stepRef="refresh-supported-extensions-vocab" />
                                                     <clear>
                                                         <graph>inferred:${name}-supported-extensions</graph>
                                                         <graph>delete:${name}-supported-extensions</graph>
@@ -2750,6 +2860,43 @@ validAspectDirs.each { aspectDir ->
 
 
                                     <savepoint><id>10-infer-labels-factors</id></savepoint>
+
+                                    <sparqlUpdate>
+                                        <message>Fixing English labels not in title case (capitalize first letter; split CamelCase)</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                DELETE { GRAPH ?g { ?s rdfs:label ?oldLabel } }
+                                                INSERT {
+                                                    GRAPH ?g { ?s rdfs:label ?newLabel }
+                                                    GRAPH <fix:labels:title-case:toDelete> { ?s rdfs:label ?oldLabel }
+                                                    GRAPH <fix:labels:title-case:toAdd>    { ?s rdfs:label ?newLabel }
+                                                }
+                                                WHERE {
+                                                    GRAPH ?g {
+                                                        ?s rdfs:label ?oldLabel .
+                                                        { ?s a qudt:QuantityKind } UNION { ?s a qudt:Prefix }
+                                                        FILTER NOT EXISTS { ?s qudt:deprecated true }
+                                                    }
+                                                    FILTER(STRSTARTS(STR(?g), "dist:"))
+                                                    FILTER(LANG(?oldLabel) IN ("", "en", "en-US", "en-UK"))
+                                                    FILTER(!REGEX(STR(?oldLabel), "^\\p{Ll}-"))
+                                                    BIND(qfn:titleCase(STR(?oldLabel)) AS ?fixed)
+                                                    BIND(IF(LANG(?oldLabel) = "", ?fixed, STRLANG(?fixed, LANG(?oldLabel))) AS ?newLabel)
+                                                    FILTER(STR(?fixed) != STR(?oldLabel))
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <write>
+                                        <graph>fix:labels:title-case:toDelete</graph>
+                                        <toFile>target/fix/labels/title-case/toDelete.ttl</toFile>
+                                    </write>
+                                    <write>
+                                        <graph>fix:labels:title-case:toAdd</graph>
+                                        <toFile>target/fix/labels/title-case/toAdd.ttl</toFile>
+                                    </write>
+
+                                    <savepoint><id>10-infer-labels-title-case</id></savepoint>
 
 
 
@@ -3291,15 +3438,23 @@ validAspectDirs.each { aspectDir ->
                                                 ?newDimVec a qudt:QuantityKindDimensionVector .}}
                                                 BIND(REPLACE(STR(?newDimVec), "^.*[#/]", "") AS ?local)
 
-# Extract each exponent (default 0 if missing)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*A(-?[0-9]+).*", "$1")) AS ?A)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*E(-?[0-9]+).*", "$1")) AS ?E)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*L(-?[0-9]+).*", "$1")) AS ?L)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*I(-?[0-9]+).*", "$1")) AS ?I)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*M(-?[0-9]+).*", "$1")) AS ?M)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*H(-?[0-9]+).*", "$1")) AS ?H)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*T(-?[0-9]+).*", "$1")) AS ?T)
-                                                  BIND(xsd:integer(REPLACE(?local, "^.*D(-?[0-9]+).*", "$1")) AS ?D)
+# Extract each exponent; handles dot-encoded decimals (e.g. L-0dot5 → -0.5)
+                                                  BIND(REPLACE(?local, "^.*A(-?[0-9]+(?:dot[0-9]+)?)E.*$",          "$1") AS ?aRaw)
+                                                  BIND(REPLACE(?local, "^.*E(-?[0-9]+(?:dot[0-9]+)?)L.*$",          "$1") AS ?eRaw)
+                                                  BIND(REPLACE(?local, "^.*L(-?[0-9]+(?:dot[0-9]+)?)I.*$",          "$1") AS ?lRaw)
+                                                  BIND(REPLACE(?local, "^.*I(-?[0-9]+(?:dot[0-9]+)?)M.*$",          "$1") AS ?iRaw)
+                                                  BIND(REPLACE(?local, "^.*M(-?[0-9]+(?:dot[0-9]+)?)H.*$",          "$1") AS ?mRaw)
+                                                  BIND(REPLACE(?local, "^.*H(-?[0-9]+(?:dot[0-9]+)?)T.*$",          "$1") AS ?hRaw)
+                                                  BIND(REPLACE(?local, "^.*T(-?[0-9]+(?:dot[0-9]+)?)D.*$",          "$1") AS ?tRaw)
+                                                  BIND(REPLACE(?local, "^.*D(-?[0-9]+(?:dot[0-9]+)?)(?:[RN].*)?$",  "$1") AS ?dRaw)
+                                                  BIND(IF(CONTAINS(?aRaw,"dot"),xsd:decimal(REPLACE(?aRaw,"dot",".")),xsd:integer(?aRaw)) AS ?A)
+                                                  BIND(IF(CONTAINS(?eRaw,"dot"),xsd:decimal(REPLACE(?eRaw,"dot",".")),xsd:integer(?eRaw)) AS ?E)
+                                                  BIND(IF(CONTAINS(?lRaw,"dot"),xsd:decimal(REPLACE(?lRaw,"dot",".")),xsd:integer(?lRaw)) AS ?L)
+                                                  BIND(IF(CONTAINS(?iRaw,"dot"),xsd:decimal(REPLACE(?iRaw,"dot",".")),xsd:integer(?iRaw)) AS ?I)
+                                                  BIND(IF(CONTAINS(?mRaw,"dot"),xsd:decimal(REPLACE(?mRaw,"dot",".")),xsd:integer(?mRaw)) AS ?M)
+                                                  BIND(IF(CONTAINS(?hRaw,"dot"),xsd:decimal(REPLACE(?hRaw,"dot",".")),xsd:integer(?hRaw)) AS ?H)
+                                                  BIND(IF(CONTAINS(?tRaw,"dot"),xsd:decimal(REPLACE(?tRaw,"dot",".")),xsd:integer(?tRaw)) AS ?T)
+                                                  BIND(IF(CONTAINS(?dRaw,"dot"),xsd:decimal(REPLACE(?dRaw,"dot",".")),xsd:integer(?dRaw)) AS ?D)
 
                                                   BIND(?local AS ?label)
 
@@ -3324,7 +3479,12 @@ validAspectDirs.each { aspectDir ->
                                         </sparql>
                                     </sparqlUpdate>
 
-                                    <sparqlUpdate> 
+                                    <sparqlUpdate>
+                                        <message>Infer dimension-exponent properties from IRI local name for any dimension vector instance that lacks them.</message>
+                                        <file>src/build/inference/dimensionVectors/infer-dv-exponents.ru</file>
+                                    </sparqlUpdate>
+
+                                    <sparqlUpdate>
                                         <message> Florian's unit generator query. Find all things that are objects in qudt:hasUnit or qudt:scalingOf that are undefined, and declare them as ContextualUnit, Unit. For scalingOf, look up subject's quantitykind. </message>
                                         <sparql>
                                             <![CDATA[
@@ -3470,22 +3630,13 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         qudt:symbol
                                                         qudt:ucumCode
                                                         qudt:hasDimensionVector
+                                                        qudt:hasExtendedDimensionVector
                                                         qudt:hasReciprocalUnit
-                                                        qudt:hasQuantityKind
                                                         qudt:hasReferenceQuantityKind
                                                         qudt:systemDerivedQuantityKind
-                                                        skos:broader
                                                         rdfs:label
                                                         rdfs:seeAlso
                                                         rdf:type
-                                                        qudt:dimensionExponentForAmountOfSubstance
-                                                        qudt:dimensionExponentForElectricCurrent
-                                                        qudt:dimensionExponentForLength
-                                                        qudt:dimensionExponentForLuminousIntensity
-                                                        qudt:dimensionExponentForMass
-                                                        qudt:dimensionExponentForThermodynamicTemperature
-                                                        qudt:dimensionExponentForTime
-                                                        qudt:dimensionlessExponent
                                                         qudt:latexDefinition
                                                           rdfs:isDefinedBy
                                                       }
@@ -3511,22 +3662,13 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                         qudt:symbol
                                                         qudt:ucumCode
                                                         qudt:hasDimensionVector
+                                                        qudt:hasExtendedDimensionVector
                                                         qudt:hasReciprocalUnit
-                                                        qudt:hasQuantityKind
                                                         qudt:hasReferenceQuantityKind
                                                         qudt:systemDerivedQuantityKind
-                                                        skos:broader
                                                         rdfs:label
                                                         rdfs:seeAlso
                                                         rdf:type
-                                                        qudt:dimensionExponentForAmountOfSubstance
-                                                        qudt:dimensionExponentForElectricCurrent
-                                                        qudt:dimensionExponentForLength
-                                                        qudt:dimensionExponentForLuminousIntensity
-                                                        qudt:dimensionExponentForMass
-                                                        qudt:dimensionExponentForThermodynamicTemperature
-                                                        qudt:dimensionExponentForTime
-                                                        qudt:dimensionlessExponent
                                                         qudt:latexDefinition
                                                           rdfs:isDefinedBy
                                                       }
@@ -3564,22 +3706,13 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 qudt:symbol
                                                                 qudt:ucumCode
                                                                 qudt:hasDimensionVector
+                                                                qudt:hasExtendedDimensionVector
                                                                 qudt:hasReciprocalUnit
-                                                                qudt:hasQuantityKind
                                                                 qudt:hasReferenceQuantityKind
                                                                 qudt:systemDerivedQuantityKind
-                                                                skos:broader
                                                                 rdfs:label
                                                                 rdfs:seeAlso
                                                                 rdf:type
-                                                                qudt:dimensionExponentForAmountOfSubstance
-                                                                qudt:dimensionExponentForElectricCurrent
-                                                                qudt:dimensionExponentForLength
-                                                                qudt:dimensionExponentForLuminousIntensity
-                                                                qudt:dimensionExponentForMass
-                                                                qudt:dimensionExponentForThermodynamicTemperature
-                                                                qudt:dimensionExponentForTime
-                                                                qudt:dimensionlessExponent
                                                                 qudt:latexDefinition
                                                                 rdfs:isDefinedBy
                                                               }
@@ -3606,22 +3739,13 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                                                 qudt:symbol
                                                                 qudt:ucumCode
                                                                 qudt:hasDimensionVector
+                                                                qudt:hasExtendedDimensionVector
                                                                 qudt:hasReciprocalUnit
-                                                                qudt:hasQuantityKind
                                                                 qudt:hasReferenceQuantityKind
                                                                 qudt:systemDerivedQuantityKind
-                                                                skos:broader
                                                                 rdfs:label
                                                                 rdfs:seeAlso
                                                                 rdf:type
-                                                                qudt:dimensionExponentForAmountOfSubstance
-                                                                qudt:dimensionExponentForElectricCurrent
-                                                                qudt:dimensionExponentForLength
-                                                                qudt:dimensionExponentForLuminousIntensity
-                                                                qudt:dimensionExponentForMass
-                                                                qudt:dimensionExponentForThermodynamicTemperature
-                                                                qudt:dimensionExponentForTime
-                                                                qudt:dimensionlessExponent
                                                                 qudt:latexDefinition
                                                                 rdfs:isDefinedBy
                                                 }
@@ -3744,7 +3868,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         </files>
                                         <toGraphsPattern>dist:schema:${name}</toGraphsPattern>
                                     </add>
-                                    <invoke stepRef="refresh-supported-extensions-vocab"/>
+                                    <invoke stepRef="refresh-supported-extensions-vocab" />
                                     <shaclValidate>
                                         <message>Validating QUDT build output (target/dist/)</message>
                                         <!--skip>true</skip-->

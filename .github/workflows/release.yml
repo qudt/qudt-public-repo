@@ -11,8 +11,8 @@ on:
         required: true
         type: string
       next_snapshot_version:
-        description: 'Next SNAPSHOT version (such as 2.4-SNAPSHOT)'
-        required: true
+        description: 'Next SNAPSHOT version. Leave blank to default to the release version with PATCH+1 and -SNAPSHOT (e.g. 3.4.1 -> 3.4.2-SNAPSHOT).'
+        required: false
         type: string
       previous_release_year:
         description: 'The Year (YYYY) the last release was published'
@@ -54,6 +54,53 @@ jobs:
         run: |
           echo Tag v${{ inputs.release_version }} already exists, release aborted >> $GITHUB_STEP_SUMMARY
           exit 1
+
+      # Guard against fat-fingered versions: the release must be a single increment of the last
+      # released vX.Y.Z tag (PATCH+1, MINOR+1 with PATCH reset, or MAJOR+1 with MINOR/PATCH reset).
+      # Also resolve the next SNAPSHOT version, defaulting to release_version with PATCH+1 when the
+      # input was left blank, and expose it as an output for the build and PR-body steps.
+      - name: Validate version and resolve next snapshot
+        id: resolve_versions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          release_version: ${{ inputs.release_version }}
+          next_snapshot_input: ${{ inputs.next_snapshot_version }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$release_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "release_version '$release_version' must be of the form X.Y.Z" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          IFS='.' read -r RMAJ RMIN RPAT <<< "$release_version"
+
+          last="$(gh api --paginate "repos/${REPO}/tags" --jq '.[].name' \
+            | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+            | sed 's/^v//' \
+            | sort -t. -k1,1n -k2,2n -k3,3n \
+            | tail -n1 || true)"
+
+          if [[ -z "$last" ]]; then
+            echo "No previous vX.Y.Z release tag found; skipping increment check."
+          else
+            IFS='.' read -r LMAJ LMIN LPAT <<< "$last"
+            if [[ ( "$RMAJ" == "$LMAJ" && "$RMIN" == "$LMIN" && "$RPAT" == "$((LPAT+1))" ) \
+               || ( "$RMAJ" == "$LMAJ" && "$RMIN" == "$((LMIN+1))" && "$RPAT" == "0" ) \
+               || ( "$RMAJ" == "$((LMAJ+1))" && "$RMIN" == "0" && "$RPAT" == "0" ) ]]; then
+              echo "Version check OK: $last -> $release_version"
+            else
+              echo "release_version $release_version is not a single increment of last release $last (allowed: $LMAJ.$LMIN.$((LPAT+1)), $LMAJ.$((LMIN+1)).0, or $((LMAJ+1)).0.0)" >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+          fi
+
+          if [[ -n "${next_snapshot_input}" ]]; then
+            next_snapshot="${next_snapshot_input}"
+          else
+            next_snapshot="${RMAJ}.${RMIN}.$((RPAT+1))-SNAPSHOT"
+          fi
+          echo "Next snapshot version: $next_snapshot"
+          echo "next_snapshot_version=${next_snapshot}" >> "$GITHUB_OUTPUT"
 
       # Set up java with maven cache
       - uses: actions/checkout@v3
@@ -115,10 +162,55 @@ jobs:
           mvn -Pzip -B release:clean release:prepare release:perform \
             -DtagNameFormat="v@{project.version}" \
             -DreleaseVersion=${{ inputs.release_version }} \
-            -DdevelopmentVersion=${{ inputs.next_snapshot_version }} \
+            -DdevelopmentVersion=${{ steps.resolve_versions.outputs.next_snapshot_version }} \
             -Darguments="-DqudtPrevReleaseYear=${{ inputs.previous_release_year }} -DqudtPrevReleaseMonth=${{ inputs.previous_release_month }}"
         env:
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Guard the irreversible steps that follow: the GitHub Release asset and the qudt-r2
+      # website publish both consume this exact zip, and qudt-r2 deploys it to the live site
+      # without re-checking it. The build pipeline already SHACL-validates the RDF content, so
+      # this gate targets packaging corruption (truncated/incomplete zip, missing core files).
+      - name: Validate release zip
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          zips=(target/checkout/target/qudt-public-repo-*.zip)
+          if [ ${#zips[@]} -ne 1 ]; then
+            echo "Expected exactly one release zip, found ${#zips[@]}: ${zips[*]:-none}" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          zip="${zips[0]}"
+          echo "Validating $zip"
+
+          # 1. Integrity: the archive is complete and not corrupted
+          unzip -t "$zip" > /dev/null
+
+          listing="$(unzip -Z1 "$zip")"
+
+          # 2. Core artifacts are present
+          required=(
+            "vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl"
+            "vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl"
+            "schema/shacl/SCHEMA_QUDT_NoOWL.ttl"
+            "QUDT-all-in-one-OWL.ttl"
+            "QUDT-all-in-one-SHACL.ttl"
+          )
+          for f in "${required[@]}"; do
+            if ! grep -qxF "$f" <<< "$listing"; then
+              echo "Release zip is missing required entry: $f" >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+          done
+
+          # 3. Sanity floor on Turtle count (catches a well-formed but near-empty build)
+          ttl_count="$(grep -c '\.ttl$' <<< "$listing" || true)"
+          if [ "${ttl_count:-0}" -lt 20 ]; then
+            echo "Release zip contains only ${ttl_count} .ttl files (expected >= 20)" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          echo "Release zip validated: ${ttl_count} .ttl files, all core artifacts present." >> "$GITHUB_STEP_SUMMARY"
 
       # Read version changelog
       - id: get-changelog
@@ -139,14 +231,25 @@ jobs:
           EOF
           cat src/build/release/release-body-footer.md >> target/release-body.md
       - name: Release
+        id: gh_release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ inputs.release_version }}
           body_path: target/release-body.md
           files: target/checkout/target/qudt-public-repo-*.zip
 
+      # trigger website publish in qudt-r2 now that the GitHub Release ZIP is available
+      - name: Trigger website publish
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.QUDT_R2_DISPATCH_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/qudtdev/qudt-r2/actions/workflows/publish-website.yml/dispatches \
+            -d '{"ref":"main","inputs":{"version":"${{ inputs.release_version }}"}}'
+
       # create the pull request
       - name: Create Pull Request
+        id: create_pr
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -164,11 +267,19 @@ jobs:
             Automated release through workflow: '${{ github.workflow }}'
             Triggered by: ${{ github.triggering_actor }}
             Version: ${{ inputs.release_version }}
-            Next development version: ${{ inputs.next_snapshot_version }}
+            Next development version: ${{ steps.resolve_versions.outputs.next_snapshot_version }}
             
             # Next Steps
             
             Please rebase this PR on top of `main` after verifying the release is ok. 
+
+      # approve and merge the release PR automatically
+      - name: Approve and merge release PR
+        env:
+          GH_TOKEN: ${{ secrets.QUDT_RELEASE_MERGE_TOKEN }}
+        run: |
+          gh pr review ${{ steps.create_pr.outputs.pull-request-number }} --approve
+          gh pr merge ${{ steps.create_pr.outputs.pull-request-number }} --squash --auto
 
       # delete the snapshot release (so we do not accumulate snapshots of all versions over time)
       - name: Delete Snapshot Release
@@ -179,3 +290,19 @@ jobs:
       # print the summary
       - name: Print summary
         run: echo "Release ${{ inputs.release_version }} was built and published on GitHub." >> $GITHUB_STEP_SUMMARY
+
+      # If the release aborted before the GitHub Release was published (e.g. the zip validation
+      # gate failed), release:prepare has already pushed the tag v<version> and the release branch.
+      # The leftover tag makes the "Check if tag exists" guard abort any re-run of this version, so
+      # clean both up. This is gated on the Release step NOT having succeeded: once the Release is
+      # published the tag is real (and qudt-r2 may already have deployed it), so we must not delete it.
+      - name: Clean up release tag and branch on failed release
+        if: failure() && steps.gh_release.outcome != 'success'
+        env:
+          version: ${{ inputs.release_version }}
+          branch: ${{ steps.create_release_branch.outputs.branch_name }}
+        run: |
+          git push origin ":refs/tags/v${version}" || echo "No remote tag v${version} to delete"
+          if [ -n "${branch:-}" ]; then
+            git push origin --delete "${branch}" || echo "No remote branch ${branch} to delete"
+          fi

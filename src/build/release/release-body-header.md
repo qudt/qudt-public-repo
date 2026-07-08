@@ -1,10 +1,18 @@
-This release introduces support for **community extensions**: optional, domain-specific sets of vocabularies and even schema changes that can be included in the QUDT build alongside the core vocabulary. Extensions are maintained in `src/main/rdf/community/extensions/{id}/` and activated at build time by supplying one or more extension IDs:
+## Commensurability Framework
 
-```
-mvn -Dqudt.supported.extensions=id1,id2 install
-```
+This release upgrades the treatment of commensurability and unit classification with explicit, individually-validatable relations:
 
-Extensions receive the same validation, inference, and serialisation treatment as core vocabulary. This capability is **fully backward compatible**: users who continue to use the default 'mvn install' will see no change.
+**In the source graph** (`src/main/rdf/`):
 
-As part of this release, 31 quantity kinds that are highly specific to the field of propulsion have been migrated from the core vocabulary into an extension called **`propulsion`**. Users who currently reference those quantity kinds and wish to continue doing so should include `-Dqudt.supported.extensions=propulsion` in their build invocation. Users who do not work in the propulsion domain and did not use those quantity kinds need take no action.
+- Quantity-kind hierarchies use `qudt:specializationOf` (commensurate specialization, a sub-property of `skos:broader`) instead of bare `skos:broader`, and `qudt:organizedUnder` (organizational grouping without commensurability, also a sub-property of `skos:broader`).
+- Unit classifications use `qudt:unitForQuantityKind` (commensurate measurement, a sub-property of `qudt:hasQuantityKind`) and `qudt:categorizedByQuantityKind` (non-commensurate filing, also a sub-property of `qudt:hasQuantityKind`) instead of bare `qudt:hasQuantityKind`.
+- Authors assert the precise sub-property; the build materializes the super-property (`skos:broader` / `qudt:hasQuantityKind`) into the released graphs for full backward compatibility.
+
+**Result:**
+
+- **Commensurability** is now derived from `qudt:specializationOf` and `qudt:exactMatch` (not `skos:broader`), so organizational groupings can be carried on `skos:broader` without implying convertibility.
+- **Released graphs** are byte-for-byte identical in `qudt:applicableUnit`, `qudt:hasQuantityKind`, and `skos:broader` — fully backward compatible.
+- **Precision** improves: dimension-coincident quantity kinds (e.g., frequency and radioactive activity) are correctly identified as non-commensurate.
+
+See [Commensurability, Composition Semantics, and Context](https://github.com/qudt/qudt-public-repo/wiki/Commensurability-Composition-Semantics-and-Context) on the QUDT wiki for the design rationale, formal definitions, and examples.
 
