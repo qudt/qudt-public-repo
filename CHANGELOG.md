@@ -9,6 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Corrected the acoustic impedance quantity-kind family: `AcousticImpedance` dimension vector fixed from L⁻² to L⁻⁴ (p/q, Pa·s/m³) with `specializationOf PressureInRelationToVolumeFlow`; `SpecificAcousticImpedance` (p/v, Pa·s/m) enriched and made `specializationOf MassPerAreaTime`; `CharacteristicAcousticImpedance` repointed to `SpecificAcousticImpedance`; unit–QK links corrected accordingly; `PressureInRelationToVolumeFlow` and `PressureInRelationToVolumeFlowRate` linked as `exactMatch`.
 - Tagged `rdfs:label` values on `qudt:QuantityKind` and `qudt:Prefix` that were missing a language tag. The existing title-case fix (`mvn -Pfix install`) now also defaults an untagged label to `@en` (consistent with `qudt:RdfsLabelInTitleCaseShapeWarning`, which already treated untagged labels as English), and a new dedup rule removes untagged labels that were redundant leftovers alongside an identical, already-`en`/`en-US`/`en-UK`-tagged label. Deprecated entities are left untouched, as before. This is now enforced automatically on every build rather than needing a one-off cleanup.
 
 ### Changed
