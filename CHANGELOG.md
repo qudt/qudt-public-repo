@@ -7,6 +7,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Fixed
+
+- Tagged `rdfs:label` values on `qudt:QuantityKind` and `qudt:Prefix` that were missing a language tag. The existing title-case fix (`mvn -Pfix install`) now also defaults an untagged label to `@en` (consistent with `qudt:RdfsLabelInTitleCaseShapeWarning`, which already treated untagged labels as English), and a new dedup rule removes untagged labels that were redundant leftovers alongside an identical, already-`en`/`en-US`/`en-UK`-tagged label. Deprecated entities are left untouched, as before. This is now enforced automatically on every build rather than needing a one-off cleanup.
+
 ### Changed
 
 - **BREAKING:** Redefined `unit:BIT`, `unit:BYTE`, `unit:OCTET` and the entire prefixed (SI + binary) and compound (`-PER-SEC`, `-PER-M`/`M2`/`M3`) BIT/BYTE ladder as **counting/storage** units. Their `conversionMultiplier` values are now clean counts (`BIT`=1, `BYTE`=8, `KiloBYTE`=8000, `GibiBYTE`=8589934592, …) instead of the former information-entropy scaling (× ln2), and they carry `qudt:CountingUnit` and point to `quantitykind:BitDataVolume`/`ByteDataVolume` (density/rate compounds keep their `LinearBitDensity`/`DataRate`/etc. kinds). The information-entropy sense is unchanged and remains on `unit:SHANNON` (base 2), `unit:NAT` (base e) and `unit:HART` (base 10); `unit:BIT` no longer duplicates the shannon. This aligns with ISO/IEC 80000-13. Migration: consumers using `unit:BIT`/`unit:BYTE` for information entropy should switch to `unit:SHANNON`.
