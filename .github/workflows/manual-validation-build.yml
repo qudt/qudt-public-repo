@@ -82,8 +82,14 @@ jobs:
         env:
           CI: ""   # allow fix logic to mutate in CI if it checks this flag
         run: |
-          echo "Running: mvn -Pfix install"
-          mvn -Pfix install
+          # forceRun disables savepoint resume: this step reuses target/ from the
+          # preceding "Build with Maven" step, and a resumed 'main' pipeline restarts
+          # past the <stepDef id="refresh-supported-extensions-vocab"> registration
+          # (which precedes savepoint 01-iec-links) while still hitting the downstream
+          # <invoke>, failing with "no <stepDef ...> has been registered". Remove once
+          # the rdfio plugin persists/pre-registers stepDefs across resume.
+          echo "Running: mvn -Pfix install -Drdfio.pipeline.forceRun=true"
+          mvn -Pfix install -Drdfio.pipeline.forceRun=true
           echo "----- Changes in working tree after -Pfix -----"
           git status --porcelain=1 || true
 

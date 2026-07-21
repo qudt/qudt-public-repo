@@ -9,6 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Fixed the purple-submitted changes to IEC quantity kinds, mostly iec61360Code values and one label
 - Closed out the unit-less R- and S-named quantity kinds (23 of 25; the two exceptions are noted below).
   - Duplicates linked with `qudt:exactMatch`, so units propagate through the closure: `Radioactivity`→`Activity` (Bq, Ci); `ReciprocalElectricResistance`→`Conductance` (S); `ReciprocalEnergy`→`InverseEnergy` (/J); `ResistanceBasedInductance`→`InductanceBasedTimeConstant` (the ECLASS twin of the IEC entry: Φ/(I·R) = L/R = τ).
   - `RateOfRiseOfVoltage` (IEC) gains `unit:V-PER-SEC`, and `RateOfRiseOfOffStateVoltage` (ECLASS) is `specializationOf` it — an off-state du/dt is a narrower case, not a synonym; its label, still reading "Rise of Off-state Voltage" from an earlier rename, is corrected to match its URI.
