@@ -9,6 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Fixed the purple-submitted changes to IEC quantity kinds, mostly iec61360Code values and one label
 - Closed out the unit-less M-named quantity kinds:
   - Linked duplicate concepts to their canonical twins with `qudt:exactMatch`, so units propagate through the exactMatch closure: `MolarThermalCapacity`→`MolarHeatCapacity` (J/(mol·K)); `MolarDensity`→`InverseAmountOfSubstance` (/mol — note the ECLASS concept is reciprocal amount of substance, not a density); `MassRelatedElectricalCurrent`→`MassicElectricCurrent` (A/kg).
   - Corrected `MolarOpticalRotationalAbility`'s dimension vector from `A0E0L2I0M-1H0T0D0` (rad·m²/kg) to `A-1E0L2I0M0H0T0D0` (rad·m²/mol) and pointed its `qudt:exactMatch` at `MolarOpticalRotatoryPower` rather than `SpecificOpticalRotatoryPower`. The ECLASS pair BAJ425/BAJ426 has its dimension vectors swapped, not its names: this entry is defined against *Stoffmengenkonzentration* (amount-of-substance concentration), so it is a molar quantity, while its sibling `SpecificOpticalRotationalAbility` (BAJ425) is defined against *Massenkonzentration* and is the mass-based one. That sibling is S-named and is corrected in #1505.
