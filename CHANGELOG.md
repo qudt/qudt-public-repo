@@ -9,6 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Fixed the purple-submitted changes to IEC quantity kinds, mostly iec61360Code values and one label
 - Closed out the unit-less G/H-named quantity kinds:
   - `GyromagneticRatio`: corrected its dimension vector from A·m² (`A0E1L2I0M0H0T0D0`, the magnetic-moment dimension) to charge-per-mass (`A0E1L0I0M-1H0T1D0`, C/kg ≡ rad·s⁻¹·T⁻¹, as its own definition requires) and made it `specializationOf ElectricChargePerMass` so it inherits `unit:PER-T-SEC` and `unit:C-PER-KiloGM`; also fixed the description's ambiguous unit statement (the SI coherent unit is rad·s⁻¹·T⁻¹, equal to C·kg⁻¹ because the radian is dimensionless — the previous text wrote `T^{1}`).
   - `HamiltonFunction`: retyped from `organizedUnder` to `specializationOf quantitykind:Energy` so it inherits the energy units, and rewrote its description — which previously described the Hamilton–Jacobi equation (whose principal function is the action, J·s) — to describe the Hamiltonian itself (`H = Σ pᵢq̇ᵢ − L`, the total energy of the system), repointing the informative reference from the HJE article to Hamiltonian mechanics.
