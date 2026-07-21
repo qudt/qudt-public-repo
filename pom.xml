@@ -1787,6 +1787,25 @@ validAspectDirs.each { aspectDir ->
                                         <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
                                     </add>
 
+                                    <shaclInfer> <!-- close qudt:specializationOf (+ skos:broader) across the qudt:exactMatch cliques. Must precede applicableUnit inference: that inference traverses qudt:specializationOf only, so a kind whose only path to a unit-bearing ancestor runs through an exactMatch synonym (which the unitForQuantityKind fan-out below cannot help with when the synonym has no direct units) would otherwise end up with no applicable units. Safe this early because the rule's inputs (exactMatch, authored specializationOf, quantity-kind dimension vectors) are all present; dimension-vector inference at savepoint 07 concerns units only. -->
+                                        <message>Inferring skos:broader across qudt:specializationOf + qudt:exactMatch (commensurability-family closure)</message>
+                                        <shapes>
+                                            <file>src/build/inference/inferBroaderAcrossExactMatch.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:broaderAcrossExactMatch</graph>
+                                            <file>target/inferred/broaderAcrossExactMatch.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:broaderAcrossExactMatch</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
+                                    </add>
+
                                     <shaclInfer> <!-- fan qudt:unitForQuantityKind out across the qudt:exactMatch closure, so exactMatch siblings share applicable units; must precede the hasQuantityKind materialize below so propagated links are materialized too -->
                                         <message>Propagating qudt:unitForQuantityKind across qudt:exactMatch</message>
                                         <shapes>
@@ -2129,26 +2148,6 @@ validAspectDirs.each { aspectDir ->
                                         </sparqlAsk>
                                     </until>
                                     <savepoint><id>07-infer-dimensionVector</id></savepoint>
-
-                                    <shaclInfer>
-                                        <message>Inferring skos:broader across qudt:specializationOf + qudt:exactMatch (commensurability-family closure)</message>
-                                        <shapes>
-                                            <file>src/build/inference/inferBroaderAcrossExactMatch.ttl</file>
-                                        </shapes>
-                                        <data>
-                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
-                                        </data>
-                                        <inferred>
-                                            <graph>inferred:broaderAcrossExactMatch</graph>
-                                            <file>target/inferred/broaderAcrossExactMatch.ttl</file>
-                                        </inferred>
-                                    </shaclInfer>
-                                    <add>
-                                        <graph>inferred:broaderAcrossExactMatch</graph>
-                                        <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
-                                    </add>
-                                    <savepoint><id>07.5-infer-broader-across-exactmatch</id></savepoint>
 
                                     <forEachEnv>
                                         <env id="symbol">
