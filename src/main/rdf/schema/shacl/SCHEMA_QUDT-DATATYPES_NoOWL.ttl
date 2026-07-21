@@ -119,19 +119,33 @@ qudt:Array
   </p>
   <p>An array can be multi-dimensional.
   Multiple indices are used but they are treated as extensions of the same structure.
-  For Example: for a 2D array arr[2][3], indices refer to the row and column positions.
-  A 2D array is still represented as a list, where each member of the list is a list.
+  For example, for a 2D array arr[2][3], the indices refer to the row and column positions.
   </p>
-  <p>Higher dimensional arrays can be represented as nested lists.
-  For each dimension a new nested list is defined.
+  <p>The values of an array are held in a single flat list (the property 'qudt:values').
+  By default the innermost (last) index varies fastest: the values sharing the same outer indices
+  occur contiguously before the outer index advances, so the values of the first dimension occur
+  first, followed by the values of the next dimension, and so on. Higher dimensional arrays follow
+  the same pattern for each additional dimension. For a 2D array arr[2][3] the default order is:
+  </p>
+  <pre>arr[0][0] arr[0][1] arr[0][2]  arr[1][0] arr[1][1] arr[1][2]</pre>
+  <p>An instance may override this default ordering by stating a 'qudt:dataOrder'
+  (see 'qudt:ArrayDataOrder' for the available orderings).
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Array" ;
   rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:DimensionalityShape ;
+  sh:property qudt:Array-dataOrder ;
   sh:property qudt:Array-isHeterogeneous ;
   sh:property qudt:DimensionalityPropertyShape ;
   sh:property qudt:DimensionsPropertyShape .
+
+qudt:Array-dataOrder
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:class qudt:ArrayDataOrder ;
+  sh:maxCount 1 ;
+  sh:path qudt:dataOrder .
 
 qudt:Array-isHeterogeneous
   a sh:PropertyShape ;
@@ -158,11 +172,16 @@ qudt:Array2DvalueList
 
 qudt:ArrayDataOrder
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A sub-type of 'Enumerated Value'. Detailed description to be provided in a future version." ;
+  dcterms:description """
+  <p>The order in which the values of a multi-dimensional array are laid out in the array's single
+  flat value list. Two orderings are defined: <em>Innermost Index Fastest</em>, in which the
+  innermost (last) index varies fastest, and <em>Outermost Index Fastest</em>, in which the
+  outermost (first) index varies fastest. See the individual values for worked examples.</p>
+  """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Array data order" ;
   rdfs:subClassOf qudt:EnumeratedValue ;
-  sh:in ( datatype:ByColumn datatype:ByRow datatype:ByLeftMostIndex ) .
+  sh:in ( qudt:InnermostIndexFastest qudt:OutermostIndexFastest ) .
 
 qudt:AssociativeArray
   a rdfs:Class, sh:NodeShape ;
@@ -756,6 +775,19 @@ qudt:IconicCue
   rdfs:label "Iconic Cue" ;
   rdfs:subClassOf qudt:VisualCue ;
   sh:property qudt:IconicCue-image .
+
+qudt:InnermostIndexFastest
+  a qudt:ArrayDataOrder ;
+  dcterms:description """
+  <p>The array values are held in a single flat list in which the innermost (last) index varies
+  fastest: values that share the same outer indices occur contiguously before the outer index
+  advances. For a 2-dimensional array arr[2][3] the values are ordered
+  arr[0][0], arr[0][1], arr[0][2], arr[1][0], arr[1][1], arr[1][2].
+  This is the default ordering when an array does not state a qudt:dataOrder.</p>
+  """^^rdf:HTML ;
+  dtype:literal "innermostIndexFastest" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Innermost Index Fastest" .
 
 qudt:IntegerDatatype
   a rdfs:Class, sh:NodeShape ;
@@ -1355,6 +1387,18 @@ qudt:OrdinalType
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Ordinal Data Type" ;
   rdfs:subClassOf qudt:ScalarDatatype .
+
+qudt:OutermostIndexFastest
+  a qudt:ArrayDataOrder ;
+  dcterms:description """
+  <p>The array values are held in a single flat list in which the outermost (first) index varies
+  fastest: values that share the same inner indices occur contiguously before the inner index
+  advances. For a 2-dimensional array arr[2][3] the values are ordered
+  arr[0][0], arr[1][0], arr[0][1], arr[1][1], arr[0][2], arr[1][2].</p>
+  """^^rdf:HTML ;
+  dtype:literal "outermostIndexFastest" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Outermost Index Fastest" .
 
 qudt:PaddingType
   a rdfs:Class, sh:NodeShape ;
@@ -2300,8 +2344,10 @@ qudt:dataEncoding
 
 qudt:dataOrder
   a rdf:Property ;
+  rdfs:comment "The order in which the values of a multi-dimensional array are laid out in the array's flat value list. When absent, the default is qudt:InnermostIndexFastest." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "data order" .
+  rdfs:label "data order" ;
+  rdfs:range qudt:ArrayDataOrder .
 
 qudt:datatype
   a rdf:Property ;
@@ -4111,9 +4157,6 @@ vaem:GMD_SCHEMA-SHACL-DATATYPE
   vaem:usesNonImportedResource datatype:BitAligned ;
   vaem:usesNonImportedResource datatype:BitEncoding ;
   vaem:usesNonImportedResource datatype:BooleanEncoding ;
-  vaem:usesNonImportedResource datatype:ByColumn ;
-  vaem:usesNonImportedResource datatype:ByLeftMostIndex ;
-  vaem:usesNonImportedResource datatype:ByRow ;
   vaem:usesNonImportedResource datatype:ByteAligned ;
   vaem:usesNonImportedResource datatype:CT_COUNTABLY-INFINITE ;
   vaem:usesNonImportedResource datatype:CT_FINITE ;

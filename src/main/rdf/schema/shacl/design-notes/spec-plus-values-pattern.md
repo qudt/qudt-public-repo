@@ -143,7 +143,7 @@ some future `qudt:Foo`), work through this checklist:
    - `qudt:RDFListShape` (recursive well-formed-list shape)
    - `qudt:IntegerListShape` (list of integers)
    - `qudt:Array2DvalueList` (2-D-specific shape)
-   - `qudt:ArrayDataOrder` (`ByRow` / `ByColumn` / `ByLeftMostIndex`
+   - `qudt:ArrayDataOrder` (`qudt:InnermostIndexFastest` / `qudt:OutermostIndexFastest`
      enumeration)
    - `qudt:NumericTypeUnion` (numeric datatype disjunction)
 
