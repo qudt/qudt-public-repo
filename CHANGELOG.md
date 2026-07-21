@@ -9,6 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Removed erroneous `^^qudt:LatexString`/`^^rdf:HTML` datatype tags from three plain-text `dcterms:description` values added in this PR (`quantitykind:GustatoryThreshold`, `quantitykind:TouchThresholds`, `unit:NAT`) — none contain LaTeX or HTML markup, and each already carries an untagged `qudt:plainTextDescription` with equivalent content.
 - Fixed the purple-submitted changes to IEC quantity kinds, mostly iec61360Code values and one label
 - Closed out the unit-less G/H-named quantity kinds:
   - `GyromagneticRatio`: corrected its dimension vector from A·m² (`A0E1L2I0M0H0T0D0`, the magnetic-moment dimension) to charge-per-mass (`A0E1L0I0M-1H0T1D0`, C/kg ≡ rad·s⁻¹·T⁻¹, as its own definition requires) and made it `specializationOf ElectricChargePerMass` so it inherits `unit:PER-T-SEC` and `unit:C-PER-KiloGM`; also fixed the description's ambiguous unit statement (the SI coherent unit is rad·s⁻¹·T⁻¹, equal to C·kg⁻¹ because the radian is dimensionless — the previous text wrote `T^{1}`).
