@@ -134,11 +134,17 @@ qudt:Array
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Array" ;
   rdfs:subClassOf qudt:StructuredDatatype ;
-  sh:property qudt:DimensionalityShape ;
   sh:property qudt:Array-dataOrder ;
   sh:property qudt:Array-isHeterogeneous ;
+  sh:property qudt:Array-values ;
+  sh:property qudt:Array-elementType ;
+  sh:property qudt:Array-elementCount ;
+  sh:property qudt:Array-conformsToTupleSpec ;
   sh:property qudt:DimensionalityPropertyShape ;
-  sh:property qudt:DimensionsPropertyShape .
+  sh:property qudt:DimensionsPropertyShape ;
+  sh:sparql qudt:ArrayRankCheck ;
+  sh:sparql qudt:ArrayLengthCheck ;
+  sh:sparql qudt:ArrayElementTypeCheck .
 
 qudt:Array-dataOrder
   a sh:PropertyShape ;
@@ -153,6 +159,119 @@ qudt:Array-isHeterogeneous
   sh:datatype xsd:boolean ;
   sh:maxCount 1 ;
   sh:path qudt:isHeterogeneous .
+
+# The flat value list of an array (row-major etc. per qudt:dataOrder).
+qudt:Array-values
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:path qudt:values ;
+  sh:node qudt:RDFListShape ;
+  sh:maxCount 1 .
+
+# Homogeneous arrays: the single shared element-type facet (a datatype or a
+# class IRI). Heterogeneous arrays instead use qudt:conformsToTupleSpec below.
+qudt:Array-elementType
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:path qudt:elementType ;
+  sh:nodeKind sh:IRI ;
+  sh:maxCount 1 .
+
+# The total number of cells = product of the dimensions. Held explicitly
+# because SPARQL has no PRODUCT aggregate; ArrayLengthCheck compares it against
+# the length of the flat value list.
+qudt:Array-elementCount
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:path qudt:elementCount ;
+  sh:datatype xsd:integer ;
+  sh:minInclusive 0 ;
+  sh:maxCount 1 .
+
+# Heterogeneous arrays: per-position element types, reusing the N-Tuple
+# blueprint (qudt:NTupleSpec), addressed 1-based over the flat value list.
+qudt:Array-conformsToTupleSpec
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:path qudt:conformsToTupleSpec ;
+  sh:class qudt:NTupleSpec ;
+  sh:maxCount 1 .
+
+# Rank check: the number of entries in the qudt:dimensions list must equal
+# qudt:dimensionality. (Replaces the retired, broken qudt:DimensionalityShape.)
+qudt:ArrayRankCheck
+    a sh:SPARQLConstraint ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:message "Array dimensionality ({?dimensionality}) does not equal the number of dimensions listed ({?dimensionCount})." ;
+    sh:select """
+        SELECT $this ?dimensionality ?dimensionCount
+        WHERE {
+            $this qudt:dimensionality ?dimensionality .
+            {
+                SELECT $this (COUNT(?dimensionCell) AS ?dimensionCount)
+                WHERE {
+                    $this qudt:dimensions ?dimensions .
+                    ?dimensions rdf:rest* ?dimensionCell .
+                    ?dimensionCell rdf:first ?dimension .
+                }
+                GROUP BY $this
+            }
+            FILTER ( ?dimensionCount != ?dimensionality )
+        }
+    """ .
+
+# Length check: the number of cells in the flat qudt:values list must equal the
+# declared qudt:elementCount (= product of dimensions).
+qudt:ArrayLengthCheck
+    a sh:SPARQLConstraint ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:message "Array value count ({?valueCount}) does not equal the declared element count ({?elementCount})." ;
+    sh:select """
+        SELECT $this ?valueCount ?elementCount
+        WHERE {
+            $this qudt:elementCount ?elementCount .
+            {
+                SELECT $this (COUNT(?valueCell) AS ?valueCount)
+                WHERE {
+                    $this qudt:values ?values .
+                    ?values rdf:rest* ?valueCell .
+                    ?valueCell rdf:first ?value .
+                }
+                GROUP BY $this
+            }
+            FILTER ( ?valueCount != ?elementCount )
+        }
+    """ .
+
+# Element-type check (homogeneous arrays): every cell in the flat value list
+# must satisfy the single qudt:elementType facet, either as a literal datatype
+# or as membership of a class. Heterogeneous arrays are checked per position by
+# the reused NTuple constraints (see qudt:HeterogenousArray).
+qudt:ArrayElementTypeCheck
+    a sh:SPARQLConstraint ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:message "Array element {?value} does not satisfy the array's element type {?elementType}." ;
+    sh:select """
+        SELECT $this ?value ?elementType
+        WHERE {
+            $this qudt:elementType ?elementType .
+            $this qudt:values ?values .
+            ?values rdf:rest* ?valueCell .
+            ?valueCell rdf:first ?value .
+
+            FILTER NOT EXISTS {
+                {
+                    $this qudt:elementType ?allowedDatatype .
+                    FILTER ( isLiteral(?value) && datatype(?value) = ?allowedDatatype )
+                } UNION {
+                    ?value rdf:type/rdfs:subClassOf* ?elementType .
+                }
+            }
+        }
+    """ .
 
 qudt:Array2DvalueList
   a rdfs:Class, sh:NodeShape ;
@@ -506,31 +625,9 @@ qudt:Dictionary
   rdfs:label "Dictionary Type" ;
   rdfs:subClassOf qudt:Map .
 
-qudt:DimensionalityShape
-  a sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Dimensions Shape" ;
-  sh:severity sh:Warning ;
-  sh:sparql [
-    sh:message "\"{$this}\" has {$actualDimensions} dimensions extent and needs to have {$specifiedDimensions}" ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/usertestPrefixes> ;
-    sh:select """
-        SELECT $this $actualDimensions $specifiedDimensions
-        WHERE {
-            $this qudt:dimensionality $dimensionality .
-            $this qudt:dimensions ?dimensions .
-            ?dimensions rdf:rest*/rdf:first $specifiedDimensions .
-            { SELECT $this (COUNT(?listValue )AS $actualDimensions)
-              WHERE {
-              $this qudt:value/rdf:rest*/rdf:first ?listValue .
-              } GROUP BY $this
-            }
-            FILTER ($actualDimensions != $specifiedDimensions)
-          }
-        """ ;
-  ] ;
-  sh:targetClass qudt:Array ;
-  sh:targetClass qudt:List .
+# qudt:DimensionalityShape removed — it walked qudt:value (singular), fired once
+# per dimension entry, and did not project $this in its sub-SELECT. Replaced by
+# qudt:ArrayRankCheck (rank) and qudt:ArrayLengthCheck (extent), both on qudt:Array.
 
 qudt:DiscreteState
   a rdfs:Class, sh:NodeShape ;
@@ -725,7 +822,17 @@ qudt:HeterogenousArray
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Heterogenous Array" ;
   rdfs:subClassOf qudt:Array ;
-  sh:property qudt:HeterogenousArray-datatype .
+  sh:property qudt:HeterogenousArray-datatype ;
+  # A heterogeneous array is an N-Tuple laid out in a grid: its per-position
+  # element types are given by a qudt:NTupleSpec via qudt:conformsToTupleSpec,
+  # so it reuses the N-Tuple constraints verbatim (positions are 1-based over
+  # the flat qudt:values list). The array-level qudt:ArrayLengthCheck
+  # (values = elementCount) and these NTuple checks together tie value count,
+  # element count, and spec positions to one another.
+  sh:sparql qudt:NTupleTypeCheck ;
+  sh:sparql qudt:NTupleLengthCheck ;
+  sh:sparql qudt:NTupleExtraValueCheck ;
+  sh:sparql qudt:NTupleMissingRequiredValueCheck .
 
 qudt:HexBinaryType
   a rdfs:Class, sh:NodeShape ;
@@ -2431,6 +2538,19 @@ qudt:elementName
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "element name" .
 
+qudt:elementCount
+  a rdf:Property ;
+  dcterms:description "The total number of elements (cells) in an array, equal to the product of its dimensions. Held explicitly so that the flat value list can be length-checked without a SPARQL PRODUCT aggregate." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "element count" ;
+  rdfs:range xsd:integer .
+
+qudt:elementType
+  a rdf:Property ;
+  dcterms:description "The single shared element type of a homogeneous array, given as a datatype IRI (matched against each cell's literal datatype) or a class IRI (matched against each cell's rdf:type). Heterogeneous arrays instead give per-position types via qudt:conformsToTupleSpec." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "element type" .
+
 qudt:elementTypeCount
   a rdf:Property ;
   dcterms:description "This property determines the allowed number of element types that a structured data type may have." ;
@@ -3406,12 +3526,14 @@ qudt:FunctionDatatype-returnType
   sh:minCount 0 ;
   sh:path qudt:returnType .
 
+# Legacy per-element-datatype pointer for heterogeneous arrays. Now optional:
+# superseded by qudt:conformsToTupleSpec (an NTupleSpec giving one type per
+# position). Retained for backward compatibility; full deprecation is pending.
 qudt:HeterogenousArray-datatype
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:class qudt:Datatype ;
   sh:maxCount 1 ;
-  sh:minCount 1 ;
   sh:path qudt:datatype .
 
 qudt:HexBinaryType-length

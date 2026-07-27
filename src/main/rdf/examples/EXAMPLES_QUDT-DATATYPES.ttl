@@ -172,6 +172,102 @@ ex:exampleTuple5
       "2026-05-12"^^xsd:date
     ) ;
 .
+
+#################################################################
+# Array examples (flat-list representation, no ArraySpec)
+#
+# An array is self-describing: rank (qudt:dimensionality), per-dimension
+# extents (qudt:dimensions), total cell count (qudt:elementCount), the flat
+# value list (qudt:values) and its linearisation (qudt:dataOrder) all live on
+# the one instance. Element types use the hybrid representation:
+#   - homogeneous: the flat qudt:elementType facet (one shared type), with any
+#     shared quantity kind / unit stated once on the array;
+#   - heterogeneous: qudt:conformsToTupleSpec pointing at a qudt:NTupleSpec that
+#     gives one type per position, addressed 1-based over the flat value list.
+#################################################################
+
+# Homogeneous 2x2x2 array of plain decimals (canonical homogeneous case).
+ex:example3DHomogeneousArray
+  a qudt:HomogeneousArray ;
+  dcterms:description """
+  <p>A three-dimensional (2&#215;2&#215;2) homogeneous array of eight decimal cells.
+  The values are held in a single flat <code>qudt:values</code> list, linearised
+  here with the outermost index varying fastest. Because every cell shares one
+  type, the element type is given once by the flat <code>qudt:elementType</code>
+  shortcut.</p>"""^^rdf:HTML ;
+  qudt:dimensionality 3 ;
+  qudt:dimensions ( 2 2 2 ) ;
+  qudt:elementCount 8 ;
+  qudt:dataOrder qudt:OutermostIndexFastest ;
+  qudt:isHeterogeneous false ;
+  qudt:elementType xsd:decimal ;
+  qudt:values ( 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Homogeneous 2x2x2 array of decimals" ;
+.
+
+# Homogeneous 2x2x2 array whose eight cells are all temperatures.
+# "Temperature" is a quantity kind, not a datatype, so the flat qudt:elementType
+# fixes only the literal datatype of each cell (xsd:decimal); the shared quantity
+# kind and unit are stated once on the array.
+ex:example3DTemperatureArray
+  a qudt:HomogeneousArray ;
+  dcterms:description """
+  <p>A three-dimensional (2&#215;2&#215;2) homogeneous array whose eight cells are all
+  temperatures in degrees Celsius. Every cell shares one type, so the element
+  datatype is given once by <code>qudt:elementType</code>, and the shared quantity
+  kind (<code>quantitykind:Temperature</code>) and unit (<code>unit:DEG_C</code>) are
+  stated once on the array rather than per cell.</p>"""^^rdf:HTML ;
+  qudt:dimensionality 3 ;
+  qudt:dimensions ( 2 2 2 ) ;
+  qudt:elementCount 8 ;
+  qudt:dataOrder qudt:OutermostIndexFastest ;
+  qudt:isHeterogeneous false ;
+  qudt:elementType xsd:decimal ;
+  qudt:hasQuantityKind quantitykind:Temperature ;
+  qudt:unit unit:DEG_C ;
+  qudt:values ( 20.1 20.4 21.0 19.8 22.3 21.7 20.9 20.2 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Homogeneous 2x2x2 array of temperatures" ;
+.
+
+# Element-type blueprint for the heterogeneous array below: one type per
+# position, reusing the N-Tuple machinery (qudt:NTupleSpec).
+ex:TempPressureArraySpec
+  a qudt:NTupleSpec ;
+  qudt:tupleMemberSpecs (
+      [ a qudt:NTupleMemberTypeSpec ; qudt:index 1 ; sh:datatype xsd:string  ]
+      [ a qudt:NTupleMemberTypeSpec ; qudt:index 2 ; sh:datatype xsd:decimal ]
+      [ a qudt:NTupleMemberTypeSpec ; qudt:index 3 ; sh:class    qudt:Unit    ]
+      [ a qudt:NTupleMemberTypeSpec ; qudt:index 4 ; sh:datatype xsd:string  ]
+      [ a qudt:NTupleMemberTypeSpec ; qudt:index 5 ; sh:datatype xsd:decimal ]
+      [ a qudt:NTupleMemberTypeSpec ; qudt:index 6 ; sh:class    qudt:Unit    ]
+    ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Element-type spec for the 2x3 heterogeneous array" ;
+.
+
+# Heterogeneous 2x3 array: each of the six positions has an independent type,
+# given by the NTupleSpec above. Row-major (innermost index fastest):
+# row 0 = ("Temp", 23.7, DEG_C), row 1 = ("Pressure", 101.3, PA).
+ex:example2x3HeterogeneousArray
+  a qudt:HeterogenousArray ;
+  dcterms:description """
+  <p>A two-dimensional (2&#215;3) heterogeneous array &mdash; effectively an N-Tuple laid
+  out in a grid. The six cells are held in a single flat <code>qudt:values</code> list
+  in row-major order (innermost index fastest); the per-position types are given by
+  the referenced <code>qudt:NTupleSpec</code>.</p>"""^^rdf:HTML ;
+  qudt:dimensionality 2 ;
+  qudt:dimensions ( 2 3 ) ;
+  qudt:elementCount 6 ;
+  qudt:dataOrder qudt:InnermostIndexFastest ;
+  qudt:isHeterogeneous true ;
+  qudt:conformsToTupleSpec ex:TempPressureArraySpec ;
+  qudt:values ( "Temp" 23.7 unit:DEG_C "Pressure" 101.3 unit:PA ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Heterogeneous 2x3 array (row-major)" ;
+.
+
 dcterms:contributor
   a owl:AnnotationProperty ;
   rdfs:label "contributor" ;

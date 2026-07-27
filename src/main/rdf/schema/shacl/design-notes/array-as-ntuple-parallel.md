@@ -1,9 +1,10 @@
 # Array as NTuple-parallel — design discussion
 
 **Opened:** 2026-05-16 (branch `rh-pr1440`, post-merge with `main`)
-**Status:** open — flat representation confirmed; data order **implemented** (`qudt:dataOrder` on the
-instance; enum `qudt:InnermostIndexFastest` (default) / `qudt:OutermostIndexFastest`). Array spec/values
-apparatus (step 2) still pending sign-off.
+**Status:** open — flat representation confirmed; data order **implemented**. **Design revised
+2026-07-27: `qudt:ArraySpec` dropped in favour of a self-describing array (Option B, hybrid element
+types).** Schema constraints + examples drafted; **SHACL validation deferred** (not yet signed off).
+See "Design revision (2026-07-27)" below — it supersedes the `qudt:ArraySpec` sketch further down.
 **Related file:** `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl`
 
 ## Goal
@@ -11,6 +12,75 @@ apparatus (step 2) still pending sign-off.
 Give `qudt:Array` the same spec-plus-values treatment as `qudt:NTuple`, so that the two structured
 datatypes share a single modelling story. Stay entirely within the SHACL datatype schema; do not
 touch the parallel OWL side (`SCHEMA_QUDT-DATATYPE.ttl`) as part of this work.
+
+## Design revision (2026-07-27) — self-describing array, no `qudt:ArraySpec` (Option B)
+
+**This section supersedes the `qudt:ArraySpec` / `qudt:ArrayElementTypeSpec` /
+`qudt:arrayElementTypeSpecs` sketches later in this document.** After working through the temperature
+and heterogeneous examples, the decision was to **not** give arrays a separate spec/blueprint node.
+
+**Decisions:**
+
+1. **Drop `qudt:ArraySpec` and `qudt:conformsToArraySpec`.** The array is **self-describing**: rank
+   (`qudt:dimensionality`), extents (`qudt:dimensions`), total cell count (`qudt:elementCount`), the
+   flat value list (`qudt:values`), its linearisation (`qudt:dataOrder`), and the element type(s) all
+   live directly on the one `qudt:Array` instance. Rationale: a blueprint pays off only when many
+   instances share it, but an array's `dimensions` vary per instance, so the indirection buys little.
+   Accepted trade-off: heterogeneous arrays can't share a reusable positional-type blueprint the way
+   `NTupleSpec` allows — each restates its per-position types (but see the reuse in point 3).
+2. **`qudt:elementCount` is a scalar total on the instance**, `= ∏(dimensions)` — *not* a per-dimension
+   list (that is already `qudt:dimensions`). It exists solely because SPARQL has no `PRODUCT` aggregate,
+   so `ArrayLengthCheck` can be `COUNT(values) = elementCount`. Held explicitly / modeller-asserted;
+   `elementCount = ∏(dimensions)` is not SPARQL-checked at arbitrary rank.
+3. **Element types use a hybrid (Option B):**
+   - **Homogeneous** → the flat `qudt:elementType` facet (one shared type), plus any shared
+     `qudt:hasQuantityKind` / `qudt:unit` stated once on the array. "Temperature" is a quantity kind,
+     not a datatype, so `qudt:elementType` fixes only the literal datatype (e.g. `xsd:decimal`) and the
+     quantity kind/unit sit on the array.
+   - **Heterogeneous** → `qudt:conformsToTupleSpec` → a `qudt:NTupleSpec` (borrows the tuple engine,
+     one type per position, addressed 1-based over the flat value list).
+   - **Known limitation:** the flat `qudt:elementType` is only unambiguous for a plain `xsd:` datatype
+     — a bare IRI object can't distinguish a datatype facet from a class facet. Richer element types
+     push metadata to the array level or fall back to the structured/tuple form. (This is why Option B
+     is inherently a *hybrid*: the flat shortcut can't express per-position types, so heterogeneous
+     arrays must use a second mechanism.)
+
+**Implemented in `SCHEMA_QUDT-DATATYPES_NoOWL.ttl` (2026-07-27):**
+
+- On `qudt:Array`: added property shapes `qudt:Array-values` (`sh:node qudt:RDFListShape`),
+  `qudt:Array-elementType` (`sh:nodeKind sh:IRI`), `qudt:Array-elementCount` (`xsd:integer`),
+  `qudt:Array-conformsToTupleSpec` (`sh:class qudt:NTupleSpec`) — all optional (`sh:maxCount 1`), so
+  legacy `qudt:value`/`qudt:datatype` arrays still parse.
+- Three `sh:sparql` constraints on `qudt:Array`: `qudt:ArrayRankCheck`
+  (`COUNT(dimensions) = dimensionality`), `qudt:ArrayLengthCheck` (`COUNT(values) = elementCount`),
+  `qudt:ArrayElementTypeCheck` (homogeneous — each cell matches the single `qudt:elementType`, as a
+  literal datatype or a class).
+- On `qudt:HeterogenousArray`: reuse the tuple engine — `sh:sparql` references to
+  `qudt:NTupleTypeCheck`, `NTupleLengthCheck`, `NTupleExtraValueCheck`, `NTupleMissingRequiredValueCheck`.
+- Retired the broken `qudt:DimensionalityShape` (walked `qudt:value` singular, fired per-dimension,
+  didn't project `$this`) — replaced by the two array checks above. **Side effect:** its
+  `qudt:List` target is gone, and the legacy old-style invalid array examples that relied on it
+  (`qudt:Array1D_Integers-INVALID`, `qudt:EX_Array1D_INVALID`) are no longer flagged.
+- Relaxed `qudt:HeterogenousArray-datatype` to optional (removed `sh:minCount 1`) — bridges the legacy
+  `qudt:datatype` pointer and the new `qudt:conformsToTupleSpec`.
+- Declared new properties `qudt:elementCount` and `qudt:elementType`.
+
+**Examples added:** valid — `ex:example3DHomogeneousArray`, `ex:example3DTemperatureArray`,
+`ex:example2x3HeterogeneousArray` (+ `ex:TempPressureArraySpec`) in `EXAMPLES_QUDT-DATATYPES.ttl`;
+invalid — `ex:badExampleHomogeneousArrayLength` / `…ArrayType` / `ex:badExampleArrayRank` /
+`ex:badExampleHeterogeneousArrayType` (each isolating one violation) in `EXAMPLES_QUDT-INVALID-DATATYPES.ttl`.
+All files parse (rdflib); array count invariants cross-checked.
+
+**Validation status — DEFERRED (not signed off).** `ArrayRankCheck` and `ArrayLengthCheck` were
+confirmed correct via raw SPARQL with `$this` pre-bound (bad rank / bad length flagged, valid clean).
+`ArrayElementTypeCheck` and the reused `NTuple*` checks showed **anomalies under both pyshacl 0.25 and
+rdflib** — valid decimals flagged, cross-product violations. The **existing, unmodified**
+`NTupleTypeCheck` reproduced the same anomaly on a known-valid tuple, pointing at a `$this`
+pre-binding / `NOT EXISTS` correlation quirk in those engines rather than a definite logic error (the
+schema targets TopBraid/Jena ARQ). **To resolve when validation resumes:** confirm behaviour in the
+project's actual SHACL engine, and settle whether `ArrayElementTypeCheck`'s `NOT EXISTS` needs
+restructuring to avoid re-referencing `$this` inside it. (pyshacl also has a naive scan that rejects
+any query containing the token `values`, so `qudt:values` must be aliased to test with it.)
 
 ## What already exists on the branch
 
@@ -418,20 +488,28 @@ shared spec and **heterogeneous** arrays need one spec per position. The discuss
 
 ## Next session — where to pick up
 
-1. ~~Confirm the flat-vs-nested direction with a small worked example.~~ **Done above — flat.**
-   Get sign-off, then proceed.
-1b. ~~Wire `qudt:dataOrder` on the instance + define the enum values.~~ **Done — implemented**
-   (`qudt:Array-dataOrder`, `qudt:InnermostIndexFastest` / `qudt:OutermostIndexFastest`; see
-   "Data order (IMPLEMENTED)").
-2. Draft the Turtle for `qudt:ArraySpec`, `qudt:ArrayElementTypeSpec`, and the three SPARQL
-   constraints, following the SHACL pre-binding rules from `SKILL.md`. Prerequisite: decide
-   `qudt:elementCount` (materialised `∏(dims)`) vs inline computation — the length check depends on it.
-3. Add example instances (valid and invalid) to `src/main/rdf/examples/EXAMPLES_QUDT-DATATYPES.ttl`
-   and `EXAMPLES_QUDT-INVALID-DATATYPES.ttl` (promote the Option-B blocks above).
-4. Fix or delete `qudt:DimensionalityShape` (lines 490–514).
-5. Decide the fate of `qudt:HeterogenousArray-datatype` (line 3363).
-6. Rewrite the nested-list prose on `qudt:HomogeneousArray`, `qudt:HeterogenousArray`, and
+1. ~~Confirm the flat-vs-nested direction with a small worked example.~~ **Done — flat.**
+1b. ~~Wire `qudt:dataOrder` on the instance + define the enum values.~~ **Done — implemented.**
+2. ~~Decide `qudt:elementCount`, draft the spec + constraints.~~ **Done, revised** — `qudt:ArraySpec`
+   **dropped**; `qudt:elementCount` is a scalar on the instance; three array constraints + tuple-engine
+   reuse for heterogeneous. See "Design revision (2026-07-27)".
+3. ~~Add valid/invalid example instances.~~ **Done** — see "Examples added" in the revision section.
+4. ~~Fix or delete `qudt:DimensionalityShape`.~~ **Done — deleted**, replaced by
+   `ArrayRankCheck` + `ArrayLengthCheck`.
+5. ~~Decide the fate of `qudt:HeterogenousArray-datatype`.~~ **Partial** — relaxed to optional
+   (bridge). Full deprecation/removal still open.
+
+**Still to do:**
+
+A. **Resume SHACL validation (deferred).** Confirm the constraints in the project's real SHACL engine;
+   settle the `ArrayElementTypeCheck` / `NTuple*` `NOT EXISTS` + `$this` pre-binding question flagged in
+   the revision's "Validation status".
+B. **Migrate or retire the legacy old-style array examples** (`qudt:Array1D_Integers[-INVALID]`,
+   `qudt:EX_Array1D_INVALID`, `qudt:Array_MassProperties_Rocket`, `qudt:Matrix-*`) that still use
+   `qudt:value` (singular) / `qudt:datatype` — the retired `DimensionalityShape` no longer covers the
+   invalid ones.
+C. **Finish deprecating `qudt:HeterogenousArray-datatype`** in favour of `qudt:conformsToTupleSpec`.
+D. Rewrite the nested-list prose on `qudt:HomogeneousArray`, `qudt:HeterogenousArray`, and
    `qudt:MultiDimensionalArray` to match the flat representation.
-7. Hold the "specifying the types of an array's values" discussion (see "Open discussion" above) —
-   a type-specification construct parallel to the values, and resolve the homogeneous-vs-heterogeneous
-   "one type specification" point.
+E. Hold the "specifying the types of an array's values" discussion (see "Open discussion" above), now
+   in light of the Option-B hybrid decision.
