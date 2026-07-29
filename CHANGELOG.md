@@ -7,6 +7,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Changed
+
+- Updated maven plugins to achieve stable blank node ordering in TTL files. As a side effect, Java 25+ is now required for the maven build.
+
 ## [3.5.0] - 2026-07-28
 
 ### Added
