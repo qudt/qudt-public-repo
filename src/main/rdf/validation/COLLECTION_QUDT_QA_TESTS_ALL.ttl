@@ -75,6 +75,11 @@
     a sh:PrefixDeclaration ;
     sh:namespace "http://qudt.org/shacl/functions#"^^xsd:anyURI ;
     sh:prefix "qfn" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://qudt.org/vocab/extendeddimensionvector/"^^xsd:anyURI ;
+    sh:prefix "edv" ;
   ] .
 
 qudt:ClosedWorldShape
@@ -94,7 +99,7 @@ $this ?p ?o .
 FILTER(STRSTARTS (str(?p), 'http://qudt.org/schema/qudt'))
 FILTER NOT EXISTS {$this a sh:NodeShape}
 FILTER NOT EXISTS {$this a/rdfs:subClassOf* ?class .
-\t\t\t?class sh:property/sh:path ?p .
+?class sh:property/sh:path ?p .
 }
 FILTER NOT EXISTS {$this a/rdfs:subClassOf* ?class .
 ?class sh:xone/rdf:rest*/rdf:first/sh:property/sh:path ?p .
@@ -106,6 +111,25 @@ FILTER NOT EXISTS {$this a/rdfs:subClassOf* ?class .
 """ ;
   ] ;
   sh:targetClass qudt:Concept .
+
+qudt:Concept-label-IRI-Shape
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  sh:message "An rdfs:label is required." ;
+  sh:minCount 1 ;
+  sh:path rdfs:label ;
+  sh:target [
+    a sh:SPARQLTarget ;
+    sh:select """
+      PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      PREFIX qudt: <http://qudt.org/schema/qudt/>
+      SELECT $this WHERE {
+        $this rdf:type/rdfs:subClassOf* qudt:Concept .
+        FILTER(!isBlank($this))
+      }
+    """ ;
+  ] .
 
 qudt:ConvertibleDerivedUnitOfInconvertibleBase
   a sh:NodeShape ;
@@ -164,6 +188,7 @@ qudt:DefinedByConstraint
 WHERE {
 FILTER NOT EXISTS {$this rdfs:isDefinedBy ?y}
 FILTER NOT EXISTS {$this qudt:deprecated true}
+FILTER(!isBlank($this))
 }""" ;
   ] ;
   sh:targetClass qudt:Concept .
@@ -255,7 +280,7 @@ qudt:DeprecatedTripleMissing
     WHERE {
         ?dep qudt:deprecated true .
         {
-            $this ( ( qudt:hasFactorUnit/qudt:hasUnit ) | qudt:scalingOf ) + ?dep .
+            $this ( ( qudt:hasFactorUnit/qudt:hasUnit ) | qudt:scalingOf | qudt:hasQuantityKind ) + ?dep .
             FILTER NOT EXISTS {
                 $this qudt:deprecated true
             }
@@ -314,6 +339,33 @@ FILTER NOT EXISTS {?t qudt:exactMatch $this } .
   ] ;
   sh:targetClass qudt:Concept .
 
+qudt:FactorUnitShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Only check for valid factor units on non-deprecated units" ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Only check for valid factor units on non-deprecated units" ;
+    sh:message "{$this} has an undefined factor unit {?factorUnit}." ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+            SELECT $this ?factorUnit
+            WHERE {
+                FILTER NOT EXISTS {$this qudt:deprecated true} .
+                $this qudt:hasFactorUnit ?reifiedFactor .
+                ?reifiedFactor qudt:hasUnit ?factorUnit .
+                  {
+                  FILTER NOT EXISTS {?factorUnit a qudt:Unit .} .
+                  }
+                UNION 
+                  {
+                  ?factorUnit qudt:deprecated true .
+                  }
+                }
+        """ ;
+  ] ;
+  sh:targetClass qudt:Unit .
+
 qudt:InconsistentDimensionVector
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
@@ -329,6 +381,8 @@ qudt:InconsistentDimensionVector
     sh:select """
     SELECT $this ?calculatedDimVec ?actualDimVec
     WHERE {
+# Don't process units that contain "dot" in their IRI
+        FILTER( !CONTAINS(STR($this), "dot") )
         $this qudt:hasDimensionVector ?actualDimVec
         BIND(qfn:unit.dimVec.calculate($this) AS ?calculatedDimVec)
         FILTER(qfn:bound(?calculatedDimVec))
@@ -361,6 +415,27 @@ FILTER (?udv != ?qdv) .
 """ ;
   ] ;
   sh:targetClass qudt:QuantityKind .
+
+qudt:InconsistentDimensionVectorOfDeprecationConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Checks that a deprecated entity has the same dimension vector as its replacement" ;
+    sh:message "Entity {$this} has dimension vector {$udv} which is not the same as the dimension vector of its replacement, {$qk} with dimension vector {$qdv}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+SELECT $this ?udv ?qk ?qdv
+WHERE {
+$this dcterms:isReplacedBy ?qk .
+$this qudt:hasDimensionVector  ?udv .
+?qk qudt:hasDimensionVector ?qdv .
+FILTER (?udv != ?qdv) .
+}
+""" ;
+  ] ;
+  sh:targetClass qudt:QuantityKind ;
+  sh:targetClass qudt:Unit .
 
 qudt:InconsistentUnitAndDimensionVectorConstraint
   a sh:NodeShape ;
@@ -461,6 +536,27 @@ qudt:MultipleLabelsConstraint
   ] ;
   sh:targetClass qudt:Concept .
 
+qudt:OrganizedUnderSameDimensionShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Warning when qudt:organizedUnder links quantity kinds of different dimension" ;
+  sh:severity sh:Warning ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message "{$this} qudt:organizedUnder {?parent}, but they have different dimension vectors ({?dvThis} vs {?dvParent}). qudt:organizedUnder is an organizational/unit-applicability grouping within a single dimension; it should not cross dimensions." ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+        SELECT $this ?parent ?dvThis ?dvParent
+        WHERE {
+          $this qudt:organizedUnder ?parent .
+          $this qudt:hasDimensionVector ?dvThis .
+          ?parent qudt:hasDimensionVector ?dvParent .
+          FILTER ( ?dvThis != ?dvParent )
+        }
+      """ ;
+  ] ;
+  sh:targetClass qudt:QuantityKind .
+
 qudt:QuantityKindShape
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
   sh:property [
@@ -481,32 +577,47 @@ qudt:QuantityKindShape
               """ ;
     ] ;
   ] ;
-  sh:property [
-    rdfs:comment "Check for inconsistent dimensionvectors in the skos:broader hierarchy" ;
-    sh:path qudt:hasDimensionVector ;
-    sh:sparql [
-      a sh:SPARQLConstraint ;
-      sh:message "{$this} has a dimension vector that is inconsistent with {?qk} in its skos:broader hierarchy." ;
-      sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
-      sh:select """
-                SELECT $this ?qk
-                WHERE {
-                FILTER NOT EXISTS {$this qudt:deprecated true} .
-                $this qudt:hasDimensionVector  ?udv .
-                $this skos:broader* ?qk .
-                ?qk qudt:hasDimensionVector ?qdv .
-                FILTER (?udv != ?qdv) .
-                }
-          """ ;
-    ] ;
+  sh:targetClass qudt:QuantityKind .
+
+qudt:RdfsLabelInTitleCaseShapeInfo
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Informational notices for non-English labels that are not in title case" ;
+  sh:severity sh:Info ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message """{$this}: The value of rdfs:label, {?langValue}, is not in title case.
+            - each word must start with an uppercase letter
+            - no uppercase letters allowed directly after a lowercase letter (no CamelCase)
+            - articles and prepositions must be lowercase
+        """ ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+        SELECT $this ?langValue ?value
+        WHERE {
+          $this rdfs:label ?value .
+          FILTER NOT EXISTS {
+            $this qudt:deprecated true .
+          }
+          BIND(LANG(?value) as ?lang)
+          # non-English languages only
+          FILTER ( ?lang IN ("bg", "cs", "de", "el", "es", "fr", "it", "la", "ms", "nl", "pl", "pt", "ro", "ru", "sl", "tr") )
+          # title case check
+          FILTER ( !REGEX(STR(?value), "^\\\\p{Lu}( (al|ανά|на|je|na|par|pe|per|por|pro|za|in|for) |[^\\\\p{Lu}]|[^\\\\p{Ll}]\\\\p{Lu})*$") )
+          BIND( CONCAT("'",STR(?value),"'", IF (?lang = "", "", CONCAT("@", ?lang))) AS ?langValue)
+        }
+      """ ;
   ] ;
+  sh:targetClass qudt:ConstantValue ;
+  sh:targetClass qudt:PhysicalConstant ;
+  sh:targetClass qudt:Prefix ;
   sh:targetClass qudt:QuantityKind .
 
 qudt:RdfsLabelInTitleCaseShapeViolation
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
-  rdfs:label "Violations for labels that are not in title case" ;
-  sh:severity sh:Violation ;
+  rdfs:label "Warnings for labels that are not in title case (units)" ;
+  sh:severity sh:Warning ;
   sh:sparql [
     a sh:SPARQLConstraint ;
     sh:message """{$this}: The value of rdfs:label, {?langValue}, is not in title case.
@@ -554,16 +665,22 @@ qudt:RdfsLabelInTitleCaseShapeWarning
             $this qudt:deprecated true .
           }
           BIND(LANG(?value) as ?lang)
-          # languages to check (not all languages can be in title case)
-          FILTER ( ?lang IN ("", "bg", "cs", "de", "el", "en", "en-US", "es", "fr", "it", "la", "ms", "nl", "pl", "pt", "ro", "ru", "sl", "tr" ) )
+          # English labels only; non-English title-case issues reported at sh:Info level
+          FILTER ( ?lang IN ("", "en", "en-US", "en-UK") )
           # title case check
-          FILTER ( !REGEX(STR(?value), "^\\\\p{Lu}( (al|ανά|на|je|na|par|pe|per|por|pro|za) |[^\\\\p{Lu}]|[^\\\\p{Ll}]\\\\p{Lu})*$") )
+          # The second condition explicitly catches capitalized exception words (e.g. "Of", "And")
+          # that the first regex cannot reject due to a known limitation with uppercase word starts.
+          FILTER (
+            (
+              !REGEX(STR(?value), "^\\\\p{Lu}( (al|ανά|на|je|na|par|pe|per|por|pro|za|in|for) |[^\\\\p{Lu}]|[^\\\\p{Ll}]\\\\p{Lu}|\\\\p{Lu})*$")
+              || REGEX(STR(?value), "(?<= )(And|An|Of|Per|In|For|To|By|As|The|At)(?= |$)|(?<= )A(?= )")
+            )
+            && !REGEX(STR(?value), "^\\\\p{Ll}-")
+          )
           BIND( CONCAT("'",STR(?value),"'", IF (?lang = "", "", CONCAT("@", ?lang))) AS ?langValue)
         }
       """ ;
   ] ;
-  sh:targetClass qudt:ConstantValue ;
-  sh:targetClass qudt:PhysicalConstant ;
   sh:targetClass qudt:Prefix ;
   sh:targetClass qudt:QuantityKind .
 
@@ -599,6 +716,47 @@ qudt:ScalingOfAndFactorUnitsPresent
       """ ;
   ] ;
   sh:targetClass qudt:Concept .
+
+qudt:SpecializationOfAndOrganizedUnderDisjointShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Violation when a quantity kind has both outgoing qudt:specializationOf and qudt:organizedUnder" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message "{$this} has both qudt:specializationOf {?specializationParent} and qudt:organizedUnder {?organizationParent}. A quantity kind must use at most one outgoing relation type: specializationOf asserts commensurability with the parent family; organizedUnder is a non-commensurate categorical grouping. Using both is contradictory." ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+        SELECT $this ?specializationParent ?organizationParent
+        WHERE {
+          $this qudt:specializationOf ?specializationParent .
+          $this qudt:organizedUnder ?organizationParent .
+          FILTER NOT EXISTS { $this qudt:deprecated true }
+        }
+      """ ;
+  ] ;
+  sh:targetClass qudt:QuantityKind .
+
+qudt:SpecializationOfSameDimensionShape
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Violation when qudt:specializationOf links quantity kinds of different dimension" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message "{$this} qudt:specializationOf {?parent}, but they have different dimension vectors ({?dvThis} vs {?dvParent}). A specialization must be commensurable with its parent, so it must share the same dimension; use qudt:organizedUnder for a grouping that does not assert commensurability." ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+        SELECT $this ?parent ?dvThis ?dvParent
+        WHERE {
+          $this qudt:specializationOf ?parent .
+          $this qudt:hasDimensionVector ?dvThis .
+          ?parent qudt:hasDimensionVector ?dvParent .
+          FILTER ( ?dvThis != ?dvParent )
+        }
+      """ ;
+  ] ;
+  sh:targetClass qudt:QuantityKind .
 
 qudt:UniqueSymbolTypeRestrictedPropertyConstraint
   a sh:NodeShape ;
@@ -693,7 +851,7 @@ qudt:UnitsHaveRdfClassQudtUnitTriple
   ] ;
   sh:target [
     a sh:SPARQLTarget ;
-    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/validation/units-without-schema/prefixes> ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
     sh:select """
         SELECT DISTINCT $this
         WHERE {

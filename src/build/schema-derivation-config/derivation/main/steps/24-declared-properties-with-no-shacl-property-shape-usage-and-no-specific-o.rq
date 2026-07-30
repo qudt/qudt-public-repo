@@ -1,0 +1,22 @@
+# owl-schema-derive step 24
+# Message: Declared properties with no SHACL property-shape usage and no specific OWL type before overlay
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                                            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+                                            PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+                                            SELECT DISTINCT ?property
+                                            WHERE {
+                                                GRAPH <work:schema:derived> {
+                                                    ?property a rdf:Property .
+                                                    FILTER(isIRI(?property))
+                                                    FILTER NOT EXISTS {
+                                                        ?ps a sh:PropertyShape ;
+                                                            sh:path ?property .
+                                                    }
+                                                    FILTER NOT EXISTS { ?property a owl:ObjectProperty . }
+                                                    FILTER NOT EXISTS { ?property a owl:DatatypeProperty . }
+                                                    FILTER NOT EXISTS { ?property a owl:AnnotationProperty . }
+                                                }
+                                            }
+                                            ORDER BY ?property

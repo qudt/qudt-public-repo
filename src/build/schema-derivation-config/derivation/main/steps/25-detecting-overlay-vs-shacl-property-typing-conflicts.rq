@@ -1,0 +1,45 @@
+# owl-schema-derive step 25
+# Message: Detecting overlay-vs-SHACL property typing conflicts
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+                                            PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+                                            SELECT (COUNT(*) AS ?conflictCount)
+                                            WHERE {
+                                                GRAPH <work:schema:overlay> {
+                                                    ?property a ?overlayType .
+                                                    FILTER(?overlayType IN (owl:AnnotationProperty, owl:ObjectProperty, owl:DatatypeProperty))
+                                                }
+                                                GRAPH <work:schema:derived> {
+                                                    ?ps a sh:PropertyShape ;
+                                                        sh:path ?property .
+                                                    FILTER(isIRI(?property))
+                                                }
+                                                {
+                                                    FILTER(?overlayType = owl:AnnotationProperty)
+                                                    GRAPH <work:schema:derived> {
+                                                        ?ps sh:datatype ?dt .
+                                                    }
+                                                } UNION {
+                                                    FILTER(?overlayType = owl:ObjectProperty)
+                                                    GRAPH <work:schema:derived> {
+                                                        ?ps sh:datatype ?dt .
+                                                    }
+                                                } UNION {
+                                                    FILTER(?overlayType = owl:DatatypeProperty)
+                                                    GRAPH <work:schema:derived> {
+                                                        ?ps sh:class ?cls .
+                                                    }
+                                                } UNION {
+                                                    FILTER(?overlayType = owl:DatatypeProperty)
+                                                    GRAPH <work:schema:derived> {
+                                                        ?ps sh:node ?node .
+                                                    }
+                                                } UNION {
+                                                    FILTER(?overlayType = owl:DatatypeProperty)
+                                                    GRAPH <work:schema:derived> {
+                                                        ?ps sh:nodeKind ?nk .
+                                                        FILTER(?nk IN (sh:IRI, sh:BlankNodeOrIRI))
+                                                    }
+                                                }
+                                            }

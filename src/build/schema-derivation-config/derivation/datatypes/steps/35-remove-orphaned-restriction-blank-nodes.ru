@@ -1,0 +1,18 @@
+# owl-datatypes-derive step 35
+# Message: Remove orphaned restriction blank nodes
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+                                                    DELETE {
+                                                        GRAPH <work:datatype:derived> {
+                                                            ?r ?rp ?ro .
+                                                        }
+                                                    }
+                                                    WHERE {
+                                                        GRAPH <work:datatype:derived> {
+                                                            ?r a owl:Restriction ;
+                                                               ?rp ?ro .
+                                                            FILTER(isBlank(?r))
+                                                            FILTER NOT EXISTS { ?anyS ?anyP ?r . }
+                                                        }
+                                                    }
