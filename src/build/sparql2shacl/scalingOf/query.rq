@@ -12,10 +12,10 @@ where
             WHERE
             {
                 # select all base units (not using prefixes)
+                # Units with decimal-encoded exponents ("dot" or "pt", e.g. SEC0dot5, SEC0pt5) are excluded.
+                FILTER( !REGEX(STR($this), "[0-9](?:dot|pt)[0-9]") )
                 {
                     $this a qudt:Unit .
- # Don't process units that contain "dot" in their IRI
-                    FILTER( !CONTAINS(STR($this), "dot") )                   
                 } UNION  {
                     ?factor qudt:hasUnit $this ;
                     FILTER NOT EXISTS {

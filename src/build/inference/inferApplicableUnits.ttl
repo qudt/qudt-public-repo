@@ -4,7 +4,6 @@
 @prefix qk: <http://qudt.org/schema/quantitykind/> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix sq: <http://qudt.org/2.1/shacl/infer/applicableUnits> .
 
 qk:
@@ -25,12 +24,6 @@ rdfs:
     sh:prefix "rdfs" ;
   ] .
 
-skos:
-  sh:declare [
-    sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
-    sh:prefix "skos" ;
-  ] .
-
 sq:qkRule
   a sh:NodeShape ;
   sh:rule [
@@ -47,38 +40,71 @@ sq:qkRule
                  (CONCAT("Applicable units are those of ",
                    REPLACE(STR(?qk),"http://qudt.org/vocab/quantitykind/","quantitykind:")) as ?comment)
             WHERE {
+                # Step 1: find the minimum path length to any unit-bearing non-deprecated ancestor.
+                # Two ancestors at the same minimum distance (multi-parent tie) both qualify.
+                # Traversal is restricted to qudt:specializationOf, the commensurable-specialisation
+                # relation, so every applicableUnit is guaranteed commensurable with $this. (Walking
+                # qudt:organizedUnder or bare skos:broader would inherit units across a non-commensurable
+                # edge, which is exactly the false-commensurability signal this restriction removes.)
+                # Unit attachment is likewise restricted to qudt:unitForQuantityKind, not the
+                # materialized qudt:hasQuantityKind super-property: qudt:categorizedByQuantityKind
+                # (and any not-yet-classified legacy qudt:hasQuantityKind) makes no commensurability
+                # claim, so its units must not feed applicableUnit either.
                 {
-                    SELECT
-                        $this
-                        ?qk
-                        ?steps
+                    SELECT $this (MIN(?s) AS ?minSteps)
                     WHERE {
                         {
-                            SELECT
-                                $this
-                                ?qk
-                                (COUNT(*) as ?steps)
+                            SELECT $this ?qk2 (COUNT(*) AS ?s)
                             WHERE {
-                                $this skos:broader* ?mid .
-                                ?mid skos:broader* ?qk .
+                                $this qudt:specializationOf* ?mid2 .
+                                ?mid2 qudt:specializationOf* ?qk2 .
                             }
-                            GROUP BY $this ?qk
+                            GROUP BY $this ?qk2
                         }
                         FILTER EXISTS {
-                            ?unit qudt:hasQuantityKind ?qk .
+                            ?u qudt:unitForQuantityKind ?qk2 .
                             {
-                                  ?unit a qudt:Unit .
+                                  ?u a qudt:Unit .
                             } UNION {
-                                  ?unit a qudt:CurrencyUnit .
+                                  ?u a qudt:CurrencyUnit .
                             }
                             FILTER NOT EXISTS {
-                                ?unit qudt:deprecated true
+                                ?u qudt:deprecated true
                             }
                         }
-
+                        # do not source applicable units from a deprecated quantity kind;
+                        # $this then falls through to the nearest live ancestor
+                        FILTER NOT EXISTS {
+                            ?qk2 qudt:deprecated true
+                        }
                     }
-                    ORDER BY ASC(?steps)
-                    LIMIT 1
+                    GROUP BY $this
+                }
+                # Step 2: enumerate all unit-bearing ancestors at exactly the minimum distance,
+                # unioning their units.  For most quantity kinds this is a single ancestor (no tie);
+                # for multi-parent kinds such as SignalStrength all equidistant ancestors contribute.
+                {
+                    SELECT $this ?qk (COUNT(*) AS ?steps)
+                    WHERE {
+                        $this qudt:specializationOf* ?mid .
+                        ?mid qudt:specializationOf* ?qk .
+                    }
+                    GROUP BY $this ?qk
+                }
+                FILTER(?steps = ?minSteps)
+                FILTER EXISTS {
+                    ?unit qudt:unitForQuantityKind ?qk .
+                    {
+                          ?unit a qudt:Unit .
+                    } UNION {
+                          ?unit a qudt:CurrencyUnit .
+                    }
+                    FILTER NOT EXISTS {
+                        ?unit qudt:deprecated true
+                    }
+                }
+                FILTER NOT EXISTS {
+                    ?qk qudt:deprecated true
                 }
                 ?unit qudt:hasQuantityKind ?qk .
                 {
@@ -95,7 +121,6 @@ sq:qkRule
     sh:prefixes qk: ;
     sh:prefixes qudt: ;
     sh:prefixes rdfs: ;
-    sh:prefixes skos: ;
   ] ;
   sh:targetClass qudt:QuantityKind .
 
