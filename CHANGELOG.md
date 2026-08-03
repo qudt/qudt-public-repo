@@ -7,6 +7,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Changed
+
+- Updated maven plugins to achieve stable blank node ordering in TTL files. As a side effect, Java 25+ is now required for the maven build.
+
 ### Added
 
 - Added `quantitykind:RadonExposure` (time-integrated radon activity concentration, ISO 16641), with the existing `unit:BQ-SEC-PER-M3` re-homed to it from `quantitykind:AbsoluteActivity` and the new `unit:BQ-HR-PER-M3` ([Henrike Fleischhack](https://github.com/henrikef)).
