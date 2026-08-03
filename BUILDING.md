@@ -62,7 +62,7 @@ The process is driven by a `pom.xml` file, which is like a blueprint for Maven. 
 
 ## Prerequisites
 
-- **Java**: Version 11 or higher (Maven needs this to run).
+- **Java**: Version 25 or higher (Maven needs this to run).
 - **Maven**: Version 3.6.0 or higher install it from [here](https://maven.apache.org/download.cgi).
 - **Git**: To get the code install it from [here](https://git-scm.com/downloads).
 - A terminal or command-line tool e.g., Terminal on macOS/Linux, Command Prompt or PowerShell on Windows.
@@ -85,7 +85,7 @@ The process is driven by a `pom.xml` file, which is like a blueprint for Maven. 
    Run these to make sure everything’s ready:
 
    ```bash
-   java -version  # Should show 11 or higher
+   java -version  # Should show 25 or higher
    mvn -version   # Should show 3.6.0 or higher
    git --version  # Should show something like 2.x.x
    ```
