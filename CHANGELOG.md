@@ -14,6 +14,12 @@ with IEC 80000-6:2022  qudt:informativeReference "https://webstore.iec.ch/en/pub
 - Deleted incorrect qudt:normativeReference "http://www.iso.org/iso/catalogue_detail?csnumber=43012" from quantitykind:ActiveEnergy
 - Deleted incorrect qudt:isonormativeReference "http://www.iso.org/iso/catalogue_detail?csnumber=43012", from quantitykind:Capacitance, quantitykind:ElectricPotential, quantitykind:Impedance, quantitykind:RateOfChangeOfFrequency
 - Correct typo in quantitykind:ElectricFlux  qudt:expression "$electric-flux$"^^qudt:LatexString ;
+
+### Changed
+
+- Updated qudt:eclassCode values to match ECLASS Release 16.0
+- Updated maven plugins to achieve stable blank node ordering in TTL files. As a side effect, Java 25+ is now required for the maven build.
+
 ### Added
 
 - Added `quantitykind:RadonExposure` (time-integrated radon activity concentration, ISO 16641), with the existing `unit:BQ-SEC-PER-M3` re-homed to it from `quantitykind:AbsoluteActivity` and the new `unit:BQ-HR-PER-M3` ([Henrike Fleischhack](https://github.com/henrikef)).
