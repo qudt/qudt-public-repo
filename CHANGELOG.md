@@ -23,6 +23,7 @@ with IEC 80000-6:2022  qudt:informativeReference "https://webstore.iec.ch/en/pub
 ### Added
 
 - Added `quantitykind:RadonExposure` (time-integrated radon activity concentration, ISO 16641), with the existing `unit:BQ-SEC-PER-M3` re-homed to it from `quantitykind:AbsoluteActivity` and the new `unit:BQ-HR-PER-M3` ([Henrike Fleischhack](https://github.com/henrikef)).
+- Added more mappings of quantity kinds to ECLASS codes
 
 ### Fixed
 
