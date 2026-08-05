@@ -15,6 +15,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - Added `quantitykind:RadonExposure` (time-integrated radon activity concentration, ISO 16641), with the existing `unit:BQ-SEC-PER-M3` re-homed to it from `quantitykind:AbsoluteActivity` and the new `unit:BQ-HR-PER-M3` ([Henrike Fleischhack](https://github.com/henrikef)).
+- Added more mappings of quantity kinds to ECLASS codes
 
 ### Fixed
 
