@@ -7,6 +7,14 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Fixed
+- Mass update for electro-magnetic quantity Kinds
+replace IEC 80000-6:2008 (withdrawn) qudt:informativeReference "http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=31891"
+with IEC 80000-6:2022  qudt:informativeReference "https://webstore.iec.ch/en/publication/60010"
+- Deleted incorrect qudt:normativeReference "http://www.iso.org/iso/catalogue_detail?csnumber=43012" from quantitykind:ActiveEnergy
+- Deleted incorrect qudt:isonormativeReference "http://www.iso.org/iso/catalogue_detail?csnumber=43012", from quantitykind:Capacitance, quantitykind:ElectricPotential, quantitykind:Impedance, quantitykind:RateOfChangeOfFrequency
+- Correct typo in quantitykind:ElectricFlux  qudt:expression "$electric-flux$"^^qudt:LatexString ;
+
 ### Changed
 
 - Updated qudt:eclassCode values to match ECLASS Release 16.0
