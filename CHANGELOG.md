@@ -16,9 +16,16 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Added `quantitykind:RadonExposure` (time-integrated radon activity concentration, ISO 16641), with the existing `unit:BQ-SEC-PER-M3` re-homed to it from `quantitykind:AbsoluteActivity` and the new `unit:BQ-HR-PER-M3` ([Henrike Fleischhack](https://github.com/henrikef)).
 - Added more mappings of quantity kinds to ECLASS codes
+- Added informative references to IEV for common electrical quantity kinds: ActiveEnergy, ReactiveEnergy, ElectricCurrent, ElectricPotential, ElectricPotentialDifference, Voltage.
 
 ### Fixed
 
+- Updated references to IEC 80000-6 for electro-magnetic quantity kinds
+  - replace IEC 80000-6:2008 (withdrawn) `qudt:informativeReference` "http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=31891"
+  - with IEC 80000-6:2022  `qudt:informativeReference` "https://webstore.iec.ch/en/publication/60010"
+- Deleted incorrect `qudt:normativeReference` "http://www.iso.org/iso/catalogue_detail?csnumber=43012" from `quantitykind:ActiveEnergy`
+- Deleted incorrect `qudt:isonormativeReference` "http://www.iso.org/iso/catalogue_detail?csnumber=43012", from `quantitykind:Capacitance`, `quantitykind:ElectricPotential`, `quantitykind:Impedance`, `quantitykind:RateOfChangeOfFrequency`
+- Correct typo in `quantitykind:ElectricFlux  qudt:expression "$electric-flux$"`
 - Corrected the dimension vector of `quantitykind:AbsoluteActivity` from `qkdv:A0E0L-3I0M0H0T0D0` (reciprocal volume) to dimensionless `qkdv:A0E0L0I0M0H0T0D1`. Absolute activity is defined as $\lambda_B = e^{\mu_B/RT}$ — the exponential of a dimensionless ratio — so it cannot carry a length dimension. The former L⁻³ vector had been back-derived from `unit:BQ-SEC-PER-M3` (Bq·s/m³ reduces to m⁻³), which was attached to this quantity kind by a name collision on "activity"; that unit measures time-integrated activity concentration and now belongs to `quantitykind:RadonExposure`. `AbsoluteActivity` is `qudt:organizedUnder quantitykind:Dimensionless` ([Henrike Fleischhack](https://github.com/henrikef)).
 
 ## [3.5.0] - 2026-07-28
