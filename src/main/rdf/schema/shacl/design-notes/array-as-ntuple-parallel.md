@@ -310,7 +310,8 @@ validate it separately with a rank check) or compute inline for small N via nest
 the type facet is fixed for all cells (no per-position spec). If the heterogenous case is unified
 with the NTuple pattern (see next section), this becomes almost a copy of `NTupleTypeCheck`.
 
-All three must follow the SHACL pre-binding rule for sub-SELECTs (see main `SKILL.md`, idiom 2).
+All three must follow the SHACL pre-binding rule for sub-SELECTs (see
+[spec-plus-values-pattern.md](spec-plus-values-pattern.md), "Idiom 2").
 
 ## Unifying heterogeneous arrays with NTuples
 

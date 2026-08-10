@@ -16,10 +16,13 @@ of the open threads; the open-thread docs assume familiarity with it.
 ## Open threads
 
 - **[array-as-ntuple-parallel.md](array-as-ntuple-parallel.md)** *(opened 2026-05-16)* —
-  Giving `qudt:Array` the same spec-plus-values treatment as `qudt:NTuple`.
-  Includes analysis of the existing (broken) `qudt:DimensionalityShape`
-  constraint and two design choices for the value-list representation
-  (nested vs flat). Pending a decision.
+  Giving `qudt:Array` a structured-datatype treatment. **Decided & implemented
+  (2026-07-27): Option B** — a *self-describing* `qudt:Array` (no separate
+  `ArraySpec`), flat values + `qudt:elementCount`, hybrid element types
+  (flat `qudt:elementType` for homogeneous, `qudt:conformsToTupleSpec` for
+  heterogeneous). The broken `qudt:DimensionalityShape` was replaced by
+  `ArrayRankCheck` + `ArrayLengthCheck`. **Still open:** SHACL validation in the
+  real engine is deferred, plus the "still to do" A–E list in the note.
 
 ## Adding a new note
 

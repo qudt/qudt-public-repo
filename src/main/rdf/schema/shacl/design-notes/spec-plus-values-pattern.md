@@ -35,13 +35,13 @@ the way they do, and how to apply the pattern to a new datatype.
    Carries `qudt:index` for positional variants, and a **type facet** that
    must be one of the four alternatives below.
 
-The canonical worked example is `qudt:NTuple`, defined at
-`SCHEMA_QUDT-DATATYPES_NoOWL.ttl:988`. When designing a new structured
-datatype, start by reading that block.
+The canonical worked example is `qudt:NTuple`, defined in
+`SCHEMA_QUDT-DATATYPES_NoOWL.ttl` (search for `qudt:NTuple`). When designing a
+new structured datatype, start by reading that block.
 
 ## The four-alternative type facet
 
-`qudt:NTupleMemberTypeSpec-type` (line 1234) declares that every member spec
+`qudt:NTupleMemberTypeSpec-type` declares that every member spec
 must satisfy exactly one of four kinds of type expectation:
 
 1. **Numeric datatype union** — `sh:or qudt:NumericTypeUnion` (or a bare
@@ -58,16 +58,27 @@ shared spec instead of one-per-position.
 ## SPARQL constraint idioms
 
 Every structured-datatype instance shape hangs one or more `sh:sparql`
-constraints off itself. `qudt:NTuple` uses four:
+constraints off itself. `qudt:NTuple` uses five:
 
 | Constraint | Purpose |
 |---|---|
 | `NTupleTypeCheck` | Value at position `?index` satisfies the position's type facet |
+| `NTupleRangeCheck` | Value at position `?index` satisfies any numeric bounds on its member spec (`sh:minInclusive` / `sh:maxInclusive` / `sh:minExclusive` / `sh:maxExclusive`) |
 | `NTupleExtraValueCheck` | No value sits at a position with no matching spec |
 | `NTupleMissingRequiredValueCheck` | Every required spec position is filled |
-| `NTupleLengthCheck` | Length of values list equals number of spec positions |
+| `NTupleLengthCheck` | Length of the values list lies within the range allowed by the spec — `[requiredCount, totalCount]`, where a member spec is optional (not counted as required) iff it declares `sh:minCount 0`. Assumes optional members are trailing. |
 
-All four rely on the same three idioms.
+`NTupleTypeCheck` and `NTupleRangeCheck` share the "compute the 1-based
+`?index` in a sub-SELECT, then join to the member spec by `?index`" idiom;
+all five rely on the same three idioms below.
+
+> **Worked example — `IfcCompoundPlaneAngleMeasure`.** The IFC4 type
+> `LIST [3:4] OF INTEGER` (degrees, minutes, seconds, optional millionth-seconds)
+> is modelled in the EXAMPLES files as an `NTuple` subclass: per-position
+> `sh:minExclusive`/`sh:maxExclusive` drive `NTupleRangeCheck`, the optional
+> 4th member (`sh:minCount 0`) exercises the length range, and a small
+> `ConsistentSign` `sh:sparql` on the subclass adds the one cross-position rule
+> the generic tuple machinery doesn't cover.
 
 ### Idiom 1: 1-based position via COUNT of preceding cells
 
@@ -124,7 +135,13 @@ some future `qudt:Foo`), work through this checklist:
 
 1. **Instance vs blueprint.** Does the datatype need its own spec/blueprint, or
    does it reuse an existing one? Rule of thumb: if the number/kind of
-   positions can vary across instances, you need a spec.
+   positions can vary across instances, you need a spec. **Exception —
+   `qudt:Array` (see [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md)):**
+   arrays deliberately do **not** use a separate spec node. They are
+   *self-describing* — rank, extents, `qudt:elementCount`, `qudt:values` and the
+   element type(s) all live on the one instance — because an array's shape
+   varies per instance, so a shared blueprint buys little. Heterogeneous arrays
+   still reuse the tuple engine via `qudt:conformsToTupleSpec` → `qudt:NTupleSpec`.
 2. **List representation.** Are values a flat list, a nested list, or something
    else? A flat list with a companion `qudt:dimensions` extent list is usually
    easier to validate in SPARQL than deeply nested lists (nested-list
@@ -133,9 +150,10 @@ some future `qudt:Foo`), work through this checklist:
    Homogeneous array: only for type validation, not for a per-position spec.)
    If positions matter, follow the NTuple idiom verbatim. If not, reuse the
    type-facet machinery without `qudt:index`.
-4. **Constraint set.** Which of the four NTuple constraints does the new
+4. **Constraint set.** Which of the five NTuple constraints does the new
    datatype need? Most structured datatypes need type check + length/shape
-   check; some don't need extra-value or missing-required checks.
+   check; add the range check if positions carry numeric bounds; some don't
+   need extra-value or missing-required checks.
 5. **Existing infrastructure to reuse.** Before adding new properties, check
    whether one of these already-defined pieces fits:
    - `qudt:dimensionality` (rank), `qudt:dimensions` (extent list),
