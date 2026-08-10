@@ -268,6 +268,82 @@ ex:example2x3HeterogeneousArray
   rdfs:label "Heterogeneous 2x3 array (row-major)" ;
 .
 
+#################################################################
+# IfcCompoundPlaneAngleMeasure (IFC4) modelled with the N-Tuple pattern.
+#   LIST [3:4] OF INTEGER = (degrees, minutes, seconds, [millionth-seconds]).
+# The generic tuple checks (type, per-position range, length, extra/missing)
+# come from qudt:NTuple; the type-specific ConsistentSign rule (all non-zero
+# components share one sign) is added here on the subclass shape.
+#   Ref: https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2/HTML/
+#        schema/ifcmeasureresource/lexical/ifccompoundplaneanglemeasure.htm
+#################################################################
+
+ex:IfcCompoundPlaneAngleMeasure
+  a rdfs:Class, sh:NodeShape ;
+  rdfs:subClassOf qudt:NTuple ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "IfcCompoundPlaneAngleMeasure" ;
+  sh:sparql ex:IfcCompoundPlaneAngleConsistentSign ;
+.
+
+ex:IfcCompoundPlaneAngleConsistentSign
+  a sh:SPARQLConstraint ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "Compound plane angle has components of mixed sign (ConsistentSign)." ;
+  sh:select """
+      SELECT $this WHERE {
+          $this qudt:values ?values .
+          ?values rdf:rest*/rdf:first ?a .
+          ?values rdf:rest*/rdf:first ?b .
+          FILTER ( ?a > 0 && ?b < 0 )
+      }
+  """ ;
+.
+
+ex:IfcCompoundPlaneAngleMeasureSpec
+  a qudt:NTupleSpec ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "IfcCompoundPlaneAngleMeasure: (degrees, minutes, seconds, [millionth-seconds])" ;
+  qudt:tupleMemberSpecs (
+      [ a qudt:NTupleMemberTypeSpec ; qudt:index 1 ; sh:datatype xsd:integer ]
+      [ a qudt:NTupleMemberTypeSpec ; qudt:index 2 ; sh:datatype xsd:integer ; sh:minExclusive -60 ; sh:maxExclusive 60 ]
+      [ a qudt:NTupleMemberTypeSpec ; qudt:index 3 ; sh:datatype xsd:integer ; sh:minExclusive -60 ; sh:maxExclusive 60 ]
+      [ a qudt:NTupleMemberTypeSpec ; qudt:index 4 ; sh:datatype xsd:integer ; sh:minExclusive -1000000 ; sh:maxExclusive 1000000 ; sh:minCount 0 ]
+    ) ;
+.
+
+ex:cpaRefLatitudeExample
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( -50 -58 -33 -110400 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "-50 deg 58 min 33.110400 sec (the IFC spec worked example, 4-part, all negative)" ;
+.
+
+ex:cpaBerlinLatitude
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 52 31 12 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "52 deg 31 min 12 sec N latitude (3-part form, no millionth-seconds)" ;
+.
+
+ex:cpaLongitudeExample
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 13 24 18 500000 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "13 deg 24 min 18.5 sec E longitude (4-part)" ;
+.
+
+ex:cpaExactDegrees
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 45 0 0 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "exactly 45 degrees" ;
+.
+
 dcterms:contributor
   a owl:AnnotationProperty ;
   rdfs:label "contributor" ;

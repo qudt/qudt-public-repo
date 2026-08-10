@@ -1136,6 +1136,7 @@ qudt:NTuple
     sh:property qudt:NTuple-conformsToTupleSpec ;
     sh:property qudt:NTuple-values;
     sh:sparql qudt:NTupleTypeCheck ;
+    sh:sparql qudt:NTupleRangeCheck ;
     sh:sparql qudt:NTupleExtraValueCheck ;
     sh:sparql qudt:NTupleMissingRequiredValueCheck ;
     sh:sparql qudt:NTupleLengthCheck .
@@ -1284,9 +1285,9 @@ qudt:NTupleLengthCheck
     a sh:SPARQLConstraint ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
     rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-    sh:message "N-Tuple length does not match the number of member specifications." ;
+    sh:message "N-Tuple length ({?valueCount}) is outside the range permitted by the tuple specification ({?requiredCount} required, {?totalCount} total)." ;
     sh:select """
-        SELECT $this ?valueCount ?specCount
+        SELECT $this ?valueCount ?requiredCount ?totalCount
 WHERE {
     {
         SELECT $this (COUNT(?valueCell) AS ?valueCount)
@@ -1298,8 +1299,9 @@ WHERE {
         GROUP BY $this
     }
 
+    # Total declared positions.
     {
-        SELECT $this (COUNT(?memberSpec) AS ?specCount)
+        SELECT $this (COUNT(?memberSpec) AS ?totalCount)
         WHERE {
             $this qudt:conformsToTupleSpec ?spec .
             ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
@@ -1307,8 +1309,72 @@ WHERE {
         GROUP BY $this
     }
 
-    FILTER ( ?valueCount != ?specCount )
+    # Required positions: a member spec is optional only if it declares sh:minCount 0.
+    {
+        SELECT $this (COUNT(?requiredSpec) AS ?requiredCount)
+        WHERE {
+            $this qudt:conformsToTupleSpec ?rspec .
+            ?rspec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?requiredSpec .
+            OPTIONAL { ?requiredSpec sh:minCount ?minCount . }
+            FILTER ( !BOUND(?minCount) || ?minCount > 0 )
+        }
+        GROUP BY $this
+    }
+
+    # Valid length lies in [requiredCount, totalCount]; anything outside is a violation.
+    # (Assumes optional members are trailing, e.g. LIST [3:4].)
+    FILTER ( ?valueCount < ?requiredCount || ?valueCount > ?totalCount )
 }
+    """ .
+
+#################################################################
+# 5. Range Check (per-position numeric bounds)
+#################################################################
+
+qudt:NTupleRangeCheck
+    a sh:SPARQLConstraint ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    sh:message "N-Tuple value {?value} at position {?index} is outside the range declared by its member specification." ;
+    sh:select """
+        SELECT $this ?index ?value
+        WHERE {
+            $this qudt:conformsToTupleSpec ?spec .
+            ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
+            ?memberSpec qudt:index ?index .
+
+            # Only positions whose memberSpec declares at least one numeric bound.
+            FILTER EXISTS {
+                ?memberSpec ( sh:minInclusive | sh:maxInclusive | sh:minExclusive | sh:maxExclusive ) ?anyBound .
+            }
+
+            {
+                SELECT $this ?value (COUNT(?previousCell) + 1 AS ?index)
+                WHERE {
+                    $this qudt:values ?values .
+                    ?values rdf:rest* ?valueCell .
+                    ?valueCell rdf:first ?value .
+
+                    OPTIONAL {
+                        ?values rdf:rest* ?previousCell .
+                        ?previousCell rdf:rest+ ?valueCell .
+                    }
+                }
+                GROUP BY $this ?value ?valueCell
+            }
+
+            OPTIONAL { ?memberSpec sh:minInclusive ?minInclusive . }
+            OPTIONAL { ?memberSpec sh:maxInclusive ?maxInclusive . }
+            OPTIONAL { ?memberSpec sh:minExclusive ?minExclusive . }
+            OPTIONAL { ?memberSpec sh:maxExclusive ?maxExclusive . }
+
+            FILTER (
+                   ( BOUND(?minInclusive) && ?value <  ?minInclusive )
+                || ( BOUND(?maxInclusive) && ?value >  ?maxInclusive )
+                || ( BOUND(?minExclusive) && ?value <= ?minExclusive )
+                || ( BOUND(?maxExclusive) && ?value >= ?maxExclusive )
+            )
+        }
     """ .
 
 qudt:NTuple-conformsToTupleSpec

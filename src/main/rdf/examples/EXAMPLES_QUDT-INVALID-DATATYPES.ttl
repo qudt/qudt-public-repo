@@ -241,6 +241,101 @@ ex:badExampleHeterogeneousArrayType
   rdfs:label "Invalid heterogeneous array - value at position 3 is not a unit" ;
 .
 
+#################################################################
+# Invalid IfcCompoundPlaneAngleMeasure examples (IFC4).
+#   LIST [3:4] OF INTEGER = (degrees, minutes, seconds, [millionth-seconds]).
+# Shape + spec duplicated here so this graph validates standalone. Each
+# instance violates one IFC WHERE rule (or the LIST cardinality / integer type).
+#################################################################
+
+ex:IfcCompoundPlaneAngleMeasure
+  a rdfs:Class, sh:NodeShape ;
+  rdfs:subClassOf qudt:NTuple ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "IfcCompoundPlaneAngleMeasure" ;
+  sh:sparql ex:IfcCompoundPlaneAngleConsistentSign ;
+.
+
+ex:IfcCompoundPlaneAngleConsistentSign
+  a sh:SPARQLConstraint ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "Compound plane angle has components of mixed sign (ConsistentSign)." ;
+  sh:select """
+      SELECT $this WHERE {
+          $this qudt:values ?values .
+          ?values rdf:rest*/rdf:first ?a .
+          ?values rdf:rest*/rdf:first ?b .
+          FILTER ( ?a > 0 && ?b < 0 )
+      }
+  """ ;
+.
+
+ex:IfcCompoundPlaneAngleMeasureSpec
+  a qudt:NTupleSpec ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "IfcCompoundPlaneAngleMeasure: (degrees, minutes, seconds, [millionth-seconds])" ;
+  qudt:tupleMemberSpecs (
+      [ a qudt:NTupleMemberTypeSpec ; qudt:index 1 ; sh:datatype xsd:integer ]
+      [ a qudt:NTupleMemberTypeSpec ; qudt:index 2 ; sh:datatype xsd:integer ; sh:minExclusive -60 ; sh:maxExclusive 60 ]
+      [ a qudt:NTupleMemberTypeSpec ; qudt:index 3 ; sh:datatype xsd:integer ; sh:minExclusive -60 ; sh:maxExclusive 60 ]
+      [ a qudt:NTupleMemberTypeSpec ; qudt:index 4 ; sh:datatype xsd:integer ; sh:minExclusive -1000000 ; sh:maxExclusive 1000000 ; sh:minCount 0 ]
+    ) ;
+.
+
+# INVALID: minutes = 60, outside (-60, 60) — violates MinutesInRange.
+ex:cpaBadMinutes
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 52 60 0 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "minutes = 60 - violates MinutesInRange" ;
+.
+
+# INVALID: seconds = 75, outside (-60, 60) — violates SecondsInRange.
+ex:cpaBadSeconds
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 52 31 75 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "seconds = 75 - violates SecondsInRange" ;
+.
+
+# INVALID: millionth-seconds = 1000000, outside (-1e6, 1e6) — violates MicrosecondsInRange.
+ex:cpaBadMicroseconds
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 52 31 12 1000000 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "millionth-seconds = 1000000 - violates MicrosecondsInRange" ;
+.
+
+# INVALID: components have mixed sign — violates ConsistentSign.
+ex:cpaBadSign
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 52 -31 12 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "mixed signs - violates ConsistentSign" ;
+.
+
+# INVALID: only 2 members — violates the LIST [3:4] cardinality (too short).
+ex:cpaBadLengthShort
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 52 31 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "only 2 members - violates LIST [3:4] (too short)" ;
+.
+
+# INVALID: seconds is a string, not an integer — violates the member type.
+ex:cpaBadType
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 52 31 "12" ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "seconds is a string - violates the integer member type" ;
+.
+
 qudt:Array1D_Integers-INVALID
   a qudt:Array ;
   dcterms:description """
