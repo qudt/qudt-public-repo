@@ -27,6 +27,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added more mappings of quantity kinds to ECLASS codes
 - Added informative references to IEV for common electrical quantity kinds: ActiveEnergy, ReactiveEnergy, ElectricCurrent, ElectricPotential, ElectricPotentialDifference, Voltage.
 - Added `quantitykind:ToxicEquivalent` (`specializationOf quantitykind:MassEquivalent`) with the new `unit:TEQ` (one TEQ = one gram of toxic equivalent, `ContextualUnit`) and `unit:TEQ-PER-YR` for annual toxic equivalent emissions ([Maxim Van de Wynckel](https://github.com/Maximvdw)).
+- Added `unit:DAY-PER-YR`, a dimensionless unit expressing days per year (`TimeRatio`), symbol `d/a` ([Maxim Van de Wynckel](https://github.com/Maximvdw)).
 
 ### Fixed
 
