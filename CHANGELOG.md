@@ -26,6 +26,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `quantitykind:RadonExposure` (time-integrated radon activity concentration, ISO 16641), with the existing `unit:BQ-SEC-PER-M3` re-homed to it from `quantitykind:AbsoluteActivity` and the new `unit:BQ-HR-PER-M3` ([Henrike Fleischhack](https://github.com/henrikef)).
 - Added more mappings of quantity kinds to ECLASS codes
 - Added informative references to IEV for common electrical quantity kinds: ActiveEnergy, ReactiveEnergy, ElectricCurrent, ElectricPotential, ElectricPotentialDifference, Voltage.
+- Added `unit:DAY-PER-YR`, a dimensionless unit expressing days per year (`TimeRatio`), symbol `d/a` ([Maxim Van de Wynckel](https://github.com/Maximvdw)).
 
 ### Fixed
 
