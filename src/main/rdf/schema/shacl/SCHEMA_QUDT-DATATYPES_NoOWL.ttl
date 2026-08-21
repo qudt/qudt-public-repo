@@ -134,9 +134,53 @@ qudt:Array
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Array" ;
   rdfs:subClassOf qudt:StructuredDatatype ;
+  sh:property qudt:Array-values ;
+  sh:property qudt:Array-arrayKind ;
+  .
+
+qudt:Array-arrayKind
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:class qudt:ArrayKind ;
+  sh:minCount 1 ;
+  sh:maxCount 1 ;
+  sh:path qudt:arrayKind .
+
+qudt:ArrayKind
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>An <em>Array Kind></em> is a data structure that stores a collection of elements, typically of the same type, in a contiguous block of memory. 
+  Each element in an array is identified by an index or key, which is typically a numerical identifier, either starting at '0' or '1'.
+  </p>
+  <p>The key considerations for an Array are:
+  </p>
+  <ol>
+  <li>Fixed Size: The size of an array may be pre-determined when it is created and cannot be changed;</li>
+  <li>Index-Based Access: Elements can be accessed, updated, or modified using their index;</li>
+  <li>Contiguous Memory Allocation: The elements are stored in consecutive memory locations, which allows efficient access using the index.</li>
+  </ol>
+  <p>An Array is represented as ordered entries of values arranged according to its dimensionality.
+  The number of dimensions is specified in the attribute 'dimensionality'.
+  </p>
+  <p>An array can be multi-dimensional.
+  Multiple indices are used but they are treated as extensions of the same structure.
+  For example, for a 2D array arr[2][3], the indices refer to the row and column positions.
+  </p>
+  <p>The values of an array are held in a single flat list (the property 'qudt:values').
+  By default the innermost (last) index varies fastest: the values sharing the same outer indices
+  occur contiguously before the outer index advances, so the values of the first dimension occur
+  first, followed by the values of the next dimension, and so on. Higher dimensional arrays follow
+  the same pattern for each additional dimension. For a 2D array arr[2][3] the default order is:
+  </p>
+  <pre>arr[0][0] arr[0][1] arr[0][2]  arr[1][0] arr[1][1] arr[1][2]</pre>
+  <p>An instance may override this default ordering by stating a 'qudt:dataOrder'
+  (see 'qudt:ArrayDataOrder' for the available orderings).
+  </p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Array" ;
+  rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:Array-dataOrder ;
   sh:property qudt:Array-isHeterogeneous ;
-  sh:property qudt:Array-values ;
   sh:property qudt:Array-elementType ;
   sh:property qudt:Array-elementCount ;
   sh:property qudt:Array-conformsToTupleSpec ;
@@ -272,22 +316,6 @@ qudt:ArrayElementTypeCheck
             }
         }
     """ .
-
-qudt:Array2DvalueList
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  An rdf:List for a 2D array.
-  For example "[[1,2], [3,4], [5,6]]"
-  """ ;
-  rdf:first [
-    sh:datatype qudt:List ;
-  ] ;
-  rdf:rest ( [
-    sh:datatype qudt:List ;
-  ] ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "2D Array Value List" ;
-  rdfs:subClassOf qudt:List .
 
 qudt:ArrayDataOrder
   a rdfs:Class, sh:NodeShape ;
@@ -811,24 +839,22 @@ qudt:HeterogenousArray
   </p>
   <p>The property 'qudt:datatype' refers to a list if the datatypes of the elements.  
   </p>
+  <p>A heterogeneous array is an N-Tuple laid out in a grid: 
+   its per-position element types are given by a qudt:NTupleSpec via qudt:conformsToTupleSpec,
+   so it reuses the N-Tuple constraints verbatim (positions are 1-based over
+   the flat qudt:values list).
+  The array-level qudt:ArrayLengthCheck (values = elementCount) and these NTuple checks together tie value count,
+  element count, and spec positions to one another.
+  </p>
   <p>An heterogenous array can be multi-dimensional.
   Multiple indices are used but they are treated as extensions of the same structure.
   For example: for a 2D array arr[2][3], indices refer to the row and column positions.
-  A 2D array is still represented as a list, where each member of the list is a list.
   </p>
-  <p>Higher dimensional arrays can be represented as nested lists.
-  For each dimension a new nested list is defined.
-  </p>"""^^rdf:HTML ;
+  """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Heterogenous Array" ;
   rdfs:subClassOf qudt:Array ;
   sh:property qudt:HeterogenousArray-datatype ;
-  # A heterogeneous array is an N-Tuple laid out in a grid: its per-position
-  # element types are given by a qudt:NTupleSpec via qudt:conformsToTupleSpec,
-  # so it reuses the N-Tuple constraints verbatim (positions are 1-based over
-  # the flat qudt:values list). The array-level qudt:ArrayLengthCheck
-  # (values = elementCount) and these NTuple checks together tie value count,
-  # element count, and spec positions to one another.
   sh:sparql qudt:NTupleTypeCheck ;
   sh:sparql qudt:NTupleLengthCheck ;
   sh:sparql qudt:NTupleExtraValueCheck ;
@@ -1038,6 +1064,28 @@ qudt:Matrix
   rdfs:label "Matrix" ;
   rdfs:subClassOf qudt:Array .
 
+qudt:Matrix-2X4-FLOAT-SP
+  a qudt:Matrix ;
+  qudt:datatype datatype:FLOAT-SP ;
+  qudt:dimensionality 2 ;
+  qudt:dimensions (
+      2
+      4
+    ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Matrix example 2x4 - Single Precision" ;
+.
+qudt:Matrix-4X4-FLOATDP
+  a qudt:Matrix ;
+  qudt:datatype datatype:FLOAT-DP ;
+  qudt:dimensionality 2 ;
+  qudt:dimensions (
+      4
+      4
+    ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Matrix example 4x4 - Double precision" ;
+.
 qudt:MemoryOrderType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description "A sub-type of 'Enumerated Value'." ;
@@ -2414,21 +2462,21 @@ qudt:ansiSQLName
 
 qudt:arg1Type
   a rdf:Property ;
-  dcterms:description "This property relates a funciton data type with the type of its arg1." ;
+  dcterms:description "This property relates a function data type with the type of its arg1." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "arg1Type" ;
   rdfs:subPropertyOf qudt:argType .
 
 qudt:arg2Type
   a rdf:Property ;
-  dcterms:description "This property relates a funciton data type with the type of its arg2." ;
+  dcterms:description "This property relates a function data type with the type of its arg2." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "arg2Type" ;
   rdfs:subPropertyOf qudt:argType .
 
 qudt:arg3Type
   a rdf:Property ;
-  dcterms:description "This property relates a funciton data type with the type of its arg3." ;
+  dcterms:description "This property relates a function data type with the type of its arg3." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "arg3Type" ;
   rdfs:subPropertyOf qudt:argType .
@@ -2439,6 +2487,12 @@ qudt:argType
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "argType" ;
   rdfs:subPropertyOf qudt:elementDatatype .
+
+qudt:arrayKind
+  a rdf:Property ;
+  dcterms:description "This property connects an array with is type specification." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "array kind" .
 
 qudt:auralCue
   a rdf:Property ;
