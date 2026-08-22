@@ -2,9 +2,12 @@
 
 **Opened:** 2026-05-16 (branch `rh-pr1440`, post-merge with `main`)
 **Status:** open — flat representation confirmed; data order **implemented**. **Design revised
-2026-07-27: `qudt:ArraySpec` dropped in favour of a self-describing array (Option B, hybrid element
-types).** Schema constraints + examples drafted; **SHACL validation deferred** (not yet signed off).
-See "Design revision (2026-07-27)" below — it supersedes the `qudt:ArraySpec` sketch further down.
+2026-08-22 (branch `rh-arrays`): the blueprint node is back as `qudt:ArrayKind`, reached by
+`qudt:datatypeKind`.** This reverses the 2026-07-27 "self-describing array" decision. Array
+constraints are **validated** (valid examples clean, every invalid example flagged); three
+portability defects in the shared tuple engine were found and fixed in the process.
+Read the revisions newest-first: "Design revision (2026-08-22)" supersedes
+"Design revision (2026-07-27)", which in turn supersedes the `qudt:ArraySpec` sketch further down.
 **Related file:** `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl`
 
 ## Goal
@@ -13,7 +16,104 @@ Give `qudt:Array` the same spec-plus-values treatment as `qudt:NTuple`, so that 
 datatypes share a single modelling story. Stay entirely within the SHACL datatype schema; do not
 touch the parallel OWL side (`SCHEMA_QUDT-DATATYPE.ttl`) as part of this work.
 
+## Design revision (2026-08-22) — the `Array` / `ArrayKind` split
+
+**This section supersedes "Design revision (2026-07-27)" below.** The self-describing array is
+withdrawn: the type-level description of an array is separated from the instance that carries data.
+
+**Decisions:**
+
+1. **`qudt:ArrayKind` is a reusable blueprint**, reached from an instance by the new property
+   `qudt:datatypeKind`. It holds rank (`qudt:dimensionality`), extents (`qudt:dimensions`), total
+   cell count (`qudt:elementCount`), the linearisation (`qudt:dataOrder`), the
+   homogeneous/heterogeneous flag (`qudt:isHeterogeneous`) and the element type(s)
+   (`qudt:elementType` or `qudt:conformsToTupleSpec`).
+2. **`qudt:Array` is the instance** and carries only two things: the flat value list
+   (`qudt:values`) and a mandatory `qudt:datatypeKind` pointer (`sh:minCount 1`, `sh:maxCount 1`,
+   `sh:class qudt:ArrayKind`).
+3. **Why the reversal.** The 2026-07-27 rationale was that a blueprint pays off only when many
+   instances share it, and an array's `dimensions` vary per instance. In practice they don't vary as
+   much as assumed — `ex:3DHomogeneousArray1` and `ex:3DHomogeneousArray2` share one
+   `ex:3DHomogeneousArrayKind`, and two temperature arrays share another. The split also removes the
+   accepted trade-off of the previous revision: heterogeneous arrays **can** now share a reusable
+   positional-type blueprint, because the `qudt:conformsToTupleSpec` pointer lives on the kind.
+4. **Naming.** The blueprint is `ArrayKind`, not `ArraySpec`, and the link is the general
+   `qudt:datatypeKind` rather than an array-specific `conformsToArraySpec` — leaving room for other
+   structured datatypes to acquire a kind without a new property each time.
+5. **Which node a violation is reported against** follows from where the data lives: rank faults are
+   reported on the `ArrayKind` (it holds `dimensionality` and `dimensions`); length and element-type
+   faults are reported on the `Array` (it holds `qudt:values`).
+
+**Schema as implemented (`SCHEMA_QUDT-DATATYPES_NoOWL.ttl`):**
+
+| Shape | Property shapes | SPARQL constraints |
+|---|---|---|
+| `qudt:Array` | `qudt:Array-values`, `qudt:Array-datatypeKind` | `ArrayLengthCheck`, `ArrayElementTypeCheck` |
+| `qudt:ArrayKind` | `qudt:ArrayKind-dataOrder`, `-isHeterogeneous`, `-elementType`, `-elementCount`, `-conformsToTupleSpec`, plus `qudt:DimensionalityPropertyShape` and `qudt:DimensionsPropertyShape` | `ArrayRankCheck` |
+
+Property shapes declared on `qudt:ArrayKind` are named `qudt:ArrayKind-*`; only the two shapes
+genuinely declared on `qudt:Array` keep the `qudt:Array-*` prefix. (`DimensionalityPropertyShape`
+and `DimensionsPropertyShape` are shared and keep their generic names — renaming them is a separate
+decision.)
+
+**Validation — no longer deferred.** Item A of the old "Still to do" list is closed. All three array
+constraints plus the five tuple constraints were exercised against both example files (with the unit
+and quantity-kind vocabularies loaded, which `sh:class qudt:Unit` checks need):
+
+- **Valid examples: clean on all eight checks.**
+- **Invalid examples: every one flagged, on its own check and no other** — `badExampleArrayRank`
+  (rank, on the kind), `badExampleHomogeneousArrayLength` (length), `badExampleHomogeneousArrayType`
+  (element type), `badExampleHeterogeneousArrayType` (position 3, via the tuple engine), and the
+  IFC `cpaBad*` tuples correctly split across type / range / length / missing-value.
+
+**Three portability defects found and fixed while validating.** All three were pre-existing and
+affected plain `qudt:NTuple` as much as arrays; they are what the old "Validation status" section was
+seeing but misattributed to a `$this` pre-binding quirk. Each was isolated to a specific SPARQL
+construct — see `spec-plus-values-pattern.md`, Idioms 3 and 4, for the portable replacements.
+
+1. **`UNION` branches inside `FILTER NOT EXISTS`** (`NTupleTypeCheck`, `ArrayElementTypeCheck`).
+   A single branch works; UNION the branches and outer bindings stop being substituted, so every
+   position is flagged. Replaced by one `OPTIONAL { … BIND(true AS ?xMatch) }` per alternative plus a
+   `!BOUND(…)` filter.
+2. **An aggregate alias joined across a sub-SELECT boundary** (`NTupleTypeCheck`,
+   `NTupleRangeCheck`). `(COUNT(?previousCell) + 1 AS ?index)` was expected to join with the outer
+   `?memberSpec qudt:index ?index`; engines are not required to do so, and a 6-position tuple
+   produced a 6x6 cross product. Fixed by projecting the aggregate as `?position` and correlating
+   explicitly with `FILTER ( ?position = ?index )`.
+3. **`NTupleMissingRequiredValueCheck` was logically inverted** — it used `FILTER EXISTS`, firing when
+   a required value *was* present, and reported every position of a valid tuple as missing. Rewritten
+   without correlation at all: positions in a flat list are contiguous from 1, so a required position
+   is missing exactly when `?index > ?valueCount`, where `?valueCount` is one uncorrelated `COUNT`
+   joined on `$this`.
+
+**Examples updated to the split.** Valid: each array now points at a kind
+(`ex:3DHomogeneousArrayKind` shared by two arrays, `ex:3DTemperatureArrayKind` shared by two more,
+`ex:2by3HeterogeneousArrayKind`). Invalid: each bad array gained a companion kind, and
+`ex:badExampleArrayRank` **is** the `ArrayKind` (rank is a blueprint-level property), with a
+well-formed companion array so the violation is attributable to the kind alone.
+
+Also fixed in passing: `EXAMPLES_QUDT-DATATYPES.ttl` did not parse — an unclosed `qudt:values` list
+in `ex:exampleTuple3` (pre-existing) and an undeclared `x:` prefix on `ex:3DTemperatureArray2`.
+
+**Still open from this revision:**
+
+- `qudt:Vector`, `qudt:Matrix`, `qudt:HomogeneousArray` and `qudt:HeterogenousArray` remain
+  `rdfs:subClassOf qudt:Array`, but homogeneity and rank are now blueprint-level properties, so these
+  subclasses straddle the split. They arguably belong under `qudt:ArrayKind`. Note that the tuple
+  constraints hang off `qudt:HeterogenousArray`, so a heterogeneous array must currently be typed as
+  that class (not bare `qudt:Array`) for its per-position types to be checked at all.
+- `qudt:ArrayKind`'s `dcterms:description` is still a near-verbatim copy of `qudt:Array`'s (it
+  describes `qudt:values` as living on the kind), its `rdfs:label` is still `"Array"`, and whether
+  `rdfs:subClassOf qudt:StructuredDatatype` is right for a blueprint node is unsettled.
+- `ex:badExampleQuantityValueTuple` is defined twice in the invalid examples file, so its
+  position-3 fault is reported twice.
+
 ## Design revision (2026-07-27) — self-describing array, no `qudt:ArraySpec` (Option B)
+
+> **SUPERSEDED by "Design revision (2026-08-22)" above.** The blueprint node was reinstated as
+> `qudt:ArrayKind`, and the validation status recorded below ("DEFERRED") is out of date — the
+> constraints are validated, and the `NOT EXISTS` anomaly was diagnosed as three specific
+> non-portable SPARQL constructs, not a `$this` pre-binding quirk. Kept for the record.
 
 **This section supersedes the `qudt:ArraySpec` / `qudt:ArrayElementTypeSpec` /
 `qudt:arrayElementTypeSpecs` sketches later in this document.** After working through the temperature
@@ -83,6 +183,12 @@ restructuring to avoid re-referencing `$this` inside it. (pyshacl also has a nai
 any query containing the token `values`, so `qudt:values` must be aliased to test with it.)
 
 ## What already exists on the branch
+
+> **HISTORICAL (as of 2026-05-16).** Line numbers, shape names and the wiring below describe the
+> schema *before* both revisions. `qudt:DimensionalityShape` has since been deleted, the
+> `qudt:Array-*` shapes listed here were renamed `qudt:ArrayKind-*` and moved onto `qudt:ArrayKind`,
+> and `qudt:ArrayKind` itself did not yet exist. See "Design revision (2026-08-22)" for the current
+> shape.
 
 **Classes / node shapes** (all `sh:NodeShape` + `rdfs:Class`):
 
@@ -186,6 +292,11 @@ respectively.
 
 ## Sketched Turtle (Option B)
 
+> **HISTORICAL — never implemented.** This sketch proposes `qudt:ArraySpec` /
+> `qudt:conformsToArraySpec`, which the 2026-07-27 revision dropped. The blueprint idea returned on
+> 2026-08-22, but as `qudt:ArrayKind` reached by `qudt:datatypeKind`, and with a different shape.
+
+
 ```turtle
 qudt:Array
     a rdfs:Class, sh:NodeShape ;
@@ -254,11 +365,18 @@ qudt:ArrayElementTypeSpec
 The flat representation needs one more datum: **how the single `qudt:values` list maps back to
 logical N-D positions.** We reuse the `qudt:dataOrder` property already in the schema.
 
-**Placement: `qudt:dataOrder` on the instance (`qudt:Array`), next to `qudt:values`** — not on the
-spec. Rationale: the linearisation is a property of *this particular value's* list, so the same
-logical array (same `qudt:dimensions`, same `qudt:ArraySpec` blueprint) can be shipped in different
-orders without needing a distinct spec per order. Property is **optional**; absence means the
-default (`qudt:InnermostIndexFastest`), matching the array class prose.
+**Placement: superseded — `qudt:dataOrder` now sits on `qudt:ArrayKind`** (as
+`qudt:ArrayKind-dataOrder`), alongside the extents it linearises. The original argument below was for
+putting it on the instance next to `qudt:values`; it is kept for the record.
+
+> ~~**Placement: `qudt:dataOrder` on the instance (`qudt:Array`), next to `qudt:values`** — not on the
+> spec. Rationale: the linearisation is a property of *this particular value's* list, so the same
+> logical array (same `qudt:dimensions`, same `qudt:ArraySpec` blueprint) can be shipped in different
+> orders without needing a distinct spec per order.~~
+
+Consequence of the move: two arrays sharing a kind necessarily share its linearisation. Shipping the
+same logical array in a different order now means a second `ArrayKind`. The property remains
+**optional**; absence means the default (`qudt:InnermostIndexFastest`), matching the array class prose.
 
 ### What was orphaned, now wired
 
@@ -269,8 +387,8 @@ Both pieces existed but were wired to nothing:
 - `qudt:ArrayDataOrder` — enum shape whose description was a placeholder and whose `sh:in` listed
   three vocab individuals (`datatype:ByColumn/ByRow/ByLeftMostIndex`).
 
-Wiring done: `qudt:Array-dataOrder` property shape (`sh:class qudt:ArrayDataOrder`, `sh:maxCount 1`)
-added to `qudt:Array`; `qudt:ArrayDataOrder` given a real description and `sh:in ( qudt:InnermostIndexFastest
+Wiring done: the `sh:class qudt:ArrayDataOrder` / `sh:maxCount 1` property shape — originally
+`qudt:Array-dataOrder` on `qudt:Array`, now `qudt:ArrayKind-dataOrder` on `qudt:ArrayKind`; `qudt:ArrayDataOrder` given a real description and `sh:in ( qudt:InnermostIndexFastest
 qudt:OutermostIndexFastest )`.
 
 ### Enum values — renamed, redefined, relocated
@@ -502,9 +620,12 @@ shared spec and **heterogeneous** arrays need one spec per position. The discuss
 
 **Still to do:**
 
-A. **Resume SHACL validation (deferred).** Confirm the constraints in the project's real SHACL engine;
-   settle the `ArrayElementTypeCheck` / `NTuple*` `NOT EXISTS` + `$this` pre-binding question flagged in
-   the revision's "Validation status".
+A. ~~**Resume SHACL validation (deferred).**~~ **Done (2026-08-22)** — all eight array and tuple
+   constraints validated against both example files. The `NOT EXISTS` question was not a `$this`
+   pre-binding issue: it was `UNION` inside `NOT EXISTS`, an aggregate alias joined across a
+   sub-SELECT boundary, and an inverted `FILTER EXISTS`. All three fixed; see "Design revision
+   (2026-08-22)". Confirmation in the project's own SHACL engine (TopBraid/Jena ARQ) is still worth
+   doing, but the constraints no longer depend on the constructs that diverge between engines.
 B. **Migrate or retire the legacy old-style array examples** (`qudt:Array1D_Integers[-INVALID]`,
    `qudt:EX_Array1D_INVALID`, `qudt:Array_MassProperties_Rocket`, `qudt:Matrix-*`) that still use
    `qudt:value` (singular) / `qudt:datatype` — the retired `DimensionalityShape` no longer covers the

@@ -136,15 +136,25 @@ qudt:Array
   rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:Array-values ;
   sh:property qudt:Array-datatypeKind ;
+  sh:sparql qudt:ArrayLengthCheck ;
+  sh:sparql qudt:ArrayElementTypeCheck ;
   .
 
 qudt:Array-datatypeKind
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:datatypeKind ;
+  sh:class qudt:ArrayKind ;
   sh:minCount 1 ;
   sh:maxCount 1 ;
   sh:path qudt:datatypeKind .
+
+qudt:Array-values
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:description "The flat value list of an array (row-major etc. per qudt:dataOrder)." ;
+  sh:path qudt:values ;
+  sh:node qudt:RDFListShape ;
+  sh:maxCount 1 .
 
 qudt:ArrayKind
   a rdfs:Class, sh:NodeShape ;
@@ -179,40 +189,30 @@ qudt:ArrayKind
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Array" ;
   rdfs:subClassOf qudt:StructuredDatatype ;
-  sh:property qudt:Array-dataOrder ;
-  sh:property qudt:Array-isHeterogeneous ;
-  sh:property qudt:Array-elementType ;
-  sh:property qudt:Array-elementCount ;
-  sh:property qudt:Array-conformsToTupleSpec ;
+  sh:property qudt:ArrayKind-dataOrder ;
+  sh:property qudt:ArrayKind-isHeterogeneous ;
+  sh:property qudt:ArrayKind-elementType ;
+  sh:property qudt:ArrayKind-elementCount ;
+  sh:property qudt:ArrayKind-conformsToTupleSpec ;
   sh:property qudt:DimensionalityPropertyShape ;
   sh:property qudt:DimensionsPropertyShape ;
-  sh:sparql qudt:ArrayRankCheck ;
-  sh:sparql qudt:ArrayLengthCheck ;
-  sh:sparql qudt:ArrayElementTypeCheck .
+  sh:sparql qudt:ArrayRankCheck .
 
-qudt:Array-dataOrder
+qudt:ArrayKind-dataOrder
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:class qudt:ArrayDataOrder ;
   sh:maxCount 1 ;
   sh:path qudt:dataOrder .
 
-qudt:Array-isHeterogeneous
+qudt:ArrayKind-isHeterogeneous
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:datatype xsd:boolean ;
   sh:maxCount 1 ;
   sh:path qudt:isHeterogeneous .
 
-qudt:Array-values
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:description "The flat value list of an array (row-major etc. per qudt:dataOrder)." ;
-  sh:path qudt:values ;
-  sh:node qudt:RDFListShape ;
-  sh:maxCount 1 .
-
-qudt:Array-elementType
+qudt:ArrayKind-elementType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:description """
@@ -223,7 +223,7 @@ qudt:Array-elementType
   sh:nodeKind sh:IRI ;
   sh:maxCount 1 .
 
-qudt:Array-elementCount
+qudt:ArrayKind-elementCount
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:description """
@@ -236,7 +236,7 @@ qudt:Array-elementCount
   sh:minInclusive 0 ;
   sh:maxCount 1 .
 
-qudt:Array-conformsToTupleSpec
+qudt:ArrayKind-conformsToTupleSpec
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:description """
@@ -275,15 +275,17 @@ qudt:ArrayLengthCheck
     a sh:SPARQLConstraint ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
     rdfs:comment """
-    Length check for the number of cells in the flat qudt:values list.
-    This must equal the declared qudt:elementCount (= product of dimensions).
+    Length check for the number of cells in the flat qudt:values list of a
+    qudt:Array. This must equal the qudt:elementCount (= product of dimensions)
+    declared by the array's qudt:datatypeKind.
     """ ;
     rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
     sh:message "Array value count ({?valueCount}) does not equal the declared element count ({?elementCount})." ;
     sh:select """
         SELECT $this ?valueCount ?elementCount
         WHERE {
-            $this qudt:elementCount ?elementCount .
+            $this qudt:datatypeKind ?kind .
+            ?kind qudt:elementCount ?elementCount .
             {
                 SELECT $this (COUNT(?valueCell) AS ?valueCount)
                 WHERE {
@@ -301,9 +303,9 @@ qudt:ArrayElementTypeCheck
     a sh:SPARQLConstraint ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
     rdfs:comment """
-    Element-type check (homogeneous arrays): every cell in the flat value list
-    must satisfy the single qudt:elementType facet, either as a literal datatype
-    or as membership of a class. Heterogeneous arrays are checked per position by
+    Element-type check (homogeneous arrays): every cell in the array's flat value
+    list must satisfy the single qudt:elementType facet declared by its
+    qudt:datatypeKind, either as a literal datatype or as membership of a class. Heterogeneous arrays are checked per position by
     the reused NTuple constraints (see qudt:HeterogenousArray).
     """ ;
     rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -311,19 +313,18 @@ qudt:ArrayElementTypeCheck
     sh:select """
         SELECT $this ?value ?elementType
         WHERE {
-            $this qudt:elementType ?elementType .
+            $this qudt:datatypeKind ?kind .
+            ?kind qudt:elementType ?elementType .
             $this qudt:values ?values .
             ?values rdf:rest* ?valueCell .
             ?valueCell rdf:first ?value .
 
-            FILTER NOT EXISTS {
-                {
-                    $this qudt:elementType ?allowedDatatype .
-                    FILTER ( isLiteral(?value) && datatype(?value) = ?allowedDatatype )
-                } UNION {
-                    ?value rdf:type/rdfs:subClassOf* ?elementType .
-                }
+            OPTIONAL {
+                ?value rdf:type/rdfs:subClassOf* ?elementType .
+                BIND ( true AS ?classMatch )
             }
+            BIND ( ( isLiteral(?value) && datatype(?value) = ?elementType ) AS ?datatypeMatch )
+            FILTER ( !bound(?classMatch) && !COALESCE(?datatypeMatch, false) )
         }
     """ .
 
@@ -1211,7 +1212,9 @@ qudt:NTupleTypeCheck
     sh:select """
         SELECT $this ?index ?value
         WHERE {
-            $this qudt:conformsToTupleSpec ?spec .
+            # A qudt:NTuple states its spec directly; a heterogeneous qudt:Array
+            # reaches it through its qudt:datatypeKind blueprint.
+            $this ( qudt:conformsToTupleSpec | qudt:datatypeKind/qudt:conformsToTupleSpec ) ?spec .
 
             ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
             ?memberSpec qudt:index ?index .
@@ -1222,7 +1225,7 @@ qudt:NTupleTypeCheck
             }
 
             {
-                SELECT $this ?value (COUNT(?previousCell) + 1 AS ?index)
+                SELECT $this ?value (COUNT(?previousCell) + 1 AS ?position)
                 WHERE {
                     $this qudt:values ?values .
                     ?values rdf:rest* ?valueCell .
@@ -1236,25 +1239,41 @@ qudt:NTupleTypeCheck
                 GROUP BY $this ?value ?valueCell
             }
 
-            # Violation iff none of the four memberSpec patterns is satisfied by the value
-            FILTER NOT EXISTS {
-                {
-                    # (1) Numeric datatype — direct sh:datatype, or one inside an sh:or union
-                    ?memberSpec ( sh:datatype | sh:or/rdf:rest*/rdf:first/sh:datatype ) ?allowedDatatype .
-                    FILTER ( datatype(?value) = ?allowedDatatype )
-                } UNION {
-                    # (2) Concept class membership — sh:class <C> where <C> a qudt:Concept
-                    ?memberSpec sh:class ?targetClass .
-                    ?value rdf:type/rdfs:subClassOf* ?targetClass .
-                } UNION {
-                    # (3) Enumerated value — qudt:value <enum1>, <enum2>, ...
-                    ?memberSpec qudt:value ?value .
-                } UNION {
-                    # (4) Any IRI — sh:nodeKind sh:IRI on the memberSpec
-                    ?memberSpec sh:nodeKind sh:IRI .
-                    FILTER ( isIRI(?value) )
-                }
+            # Correlate the computed position with the memberSpec's declared index.
+            FILTER ( ?position = ?index )
+
+            # Each of the four memberSpec patterns is probed with its own OPTIONAL;
+            # the value is a violation iff none of them matched. (Expressed this
+            # way rather than as UNION branches inside FILTER NOT EXISTS, which
+            # is not portable: engines that do not substitute the outer ?value
+            # and ?memberSpec into a UNION'd EXISTS group flag every position.)
+
+            # (1) Numeric datatype — direct sh:datatype, or one inside an sh:or union
+            OPTIONAL {
+                ?memberSpec ( sh:datatype | sh:or/rdf:rest*/rdf:first/sh:datatype ) ?allowedDatatype .
+                FILTER ( datatype(?value) = ?allowedDatatype )
+                BIND ( true AS ?datatypeMatch )
             }
+            # (2) Concept class membership — sh:class <C> where <C> a qudt:Concept
+            OPTIONAL {
+                ?memberSpec sh:class ?targetClass .
+                ?value rdf:type/rdfs:subClassOf* ?targetClass .
+                BIND ( true AS ?classMatch )
+            }
+            # (3) Enumerated value — qudt:value <enum1>, <enum2>, ...
+            OPTIONAL {
+                ?memberSpec qudt:value ?value .
+                BIND ( true AS ?enumeratedMatch )
+            }
+            # (4) Any IRI — sh:nodeKind sh:IRI on the memberSpec
+            OPTIONAL {
+                ?memberSpec sh:nodeKind sh:IRI .
+                FILTER ( isIRI(?value) )
+                BIND ( true AS ?iriMatch )
+            }
+
+            FILTER ( !BOUND(?datatypeMatch) && !BOUND(?classMatch)
+                     && !BOUND(?enumeratedMatch) && !BOUND(?iriMatch) )
         }
     """ .
 
@@ -1270,7 +1289,9 @@ qudt:NTupleExtraValueCheck
     sh:select """
         SELECT $this ?index ?value
 WHERE {
-    $this qudt:conformsToTupleSpec ?spec .
+    # A qudt:NTuple states its spec directly; a heterogeneous qudt:Array
+    # reaches it through its qudt:datatypeKind blueprint.
+    $this ( qudt:conformsToTupleSpec | qudt:datatypeKind/qudt:conformsToTupleSpec ) ?spec .
 
     {
         SELECT $this ?value (COUNT(?previousCell) + 1 AS ?index)
@@ -1306,7 +1327,9 @@ qudt:NTupleMissingRequiredValueCheck
     sh:select """
         SELECT $this ?index
 WHERE {
-    $this qudt:conformsToTupleSpec ?spec .
+    # A qudt:NTuple states its spec directly; a heterogeneous qudt:Array
+    # reaches it through its qudt:datatypeKind blueprint.
+    $this ( qudt:conformsToTupleSpec | qudt:datatypeKind/qudt:conformsToTupleSpec ) ?spec .
 
     ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
     ?memberSpec qudt:index ?index .
@@ -1314,24 +1337,19 @@ WHERE {
     OPTIONAL { ?memberSpec sh:minCount ?minCount . }
     FILTER ( !BOUND(?minCount) || ?minCount > 0 )
 
-    FILTER EXISTS {
-        {
-            SELECT $this (COUNT(?previousCell) + 1 AS ?valueIndex)
-            WHERE {
-                $this qudt:values ?values .
-                ?values rdf:rest* ?valueCell .
-                ?valueCell rdf:first ?value .
-
-                OPTIONAL {
-                    ?values rdf:rest* ?previousCell .
-                    ?previousCell rdf:rest+ ?valueCell .
-                }
-            }
-            GROUP BY $this ?valueCell
+    # Values occupy positions 1..N contiguously, so a required position is
+    # missing exactly when its index exceeds the number of values present.
+    {
+        SELECT $this (COUNT(?valueCell) AS ?valueCount)
+        WHERE {
+            $this qudt:values ?values .
+            ?values rdf:rest* ?valueCell .
+            ?valueCell rdf:first ?value .
         }
-
-        FILTER ( ?valueIndex = ?index )
+        GROUP BY $this
     }
+
+    FILTER ( ?index > ?valueCount )
 }
     """ .
 
@@ -1361,7 +1379,9 @@ WHERE {
     {
         SELECT $this (COUNT(?memberSpec) AS ?totalCount)
         WHERE {
-            $this qudt:conformsToTupleSpec ?spec .
+            # A qudt:NTuple states its spec directly; a heterogeneous qudt:Array
+            # reaches it through its qudt:datatypeKind blueprint.
+            $this ( qudt:conformsToTupleSpec | qudt:datatypeKind/qudt:conformsToTupleSpec ) ?spec .
             ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
         }
         GROUP BY $this
@@ -1397,7 +1417,9 @@ qudt:NTupleRangeCheck
     sh:select """
         SELECT $this ?index ?value
         WHERE {
-            $this qudt:conformsToTupleSpec ?spec .
+            # A qudt:NTuple states its spec directly; a heterogeneous qudt:Array
+            # reaches it through its qudt:datatypeKind blueprint.
+            $this ( qudt:conformsToTupleSpec | qudt:datatypeKind/qudt:conformsToTupleSpec ) ?spec .
             ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
             ?memberSpec qudt:index ?index .
 
@@ -1407,7 +1429,7 @@ qudt:NTupleRangeCheck
             }
 
             {
-                SELECT $this ?value (COUNT(?previousCell) + 1 AS ?index)
+                SELECT $this ?value (COUNT(?previousCell) + 1 AS ?position)
                 WHERE {
                     $this qudt:values ?values .
                     ?values rdf:rest* ?valueCell .
@@ -1420,6 +1442,9 @@ qudt:NTupleRangeCheck
                 }
                 GROUP BY $this ?value ?valueCell
             }
+
+            # Correlate the computed position with the memberSpec's declared index.
+            FILTER ( ?position = ?index )
 
             OPTIONAL { ?memberSpec sh:minInclusive ?minInclusive . }
             OPTIONAL { ?memberSpec sh:maxInclusive ?maxInclusive . }
@@ -1474,7 +1499,7 @@ qudt:NTupleSpec
 qudt:NTupleMemberTypeSpec
     a rdfs:Class , sh:NodeShape ;
     dcterms:description """
-    <p> A specification for one tuple position. Member specifications
+    <p>A specification for a tuple position. Member specifications
     may use standard SHACL constraint properties such as sh:datatype, sh:class, sh:node, sh:in,
     sh:minInclusive, and sh:maxInclusive.
     """ ;
@@ -1531,7 +1556,9 @@ qudt:NTuple-values
 
 qudt:NumericType
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "Numeric data types are data types whose values denote quantities as defined by a mathematical number system." ;
+  dcterms:description """
+  Numeric data types are data types whose values denote quantities as defined by a mathematical number system.
+  """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Numeric Type" ;
   rdfs:subClassOf qudt:ScalarDatatype ;

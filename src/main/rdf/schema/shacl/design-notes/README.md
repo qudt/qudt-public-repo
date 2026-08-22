@@ -9,20 +9,27 @@ of the open threads; the open-thread docs assume familiarity with it.
 - **[spec-plus-values-pattern.md](spec-plus-values-pattern.md)** — the canonical
   way structured datatypes (tuples, arrays, future variants) are modelled in
   this schema. Covers the three cooperating shapes (instance / spec / member
-  type spec), the four-alternative type facet, and SPARQL-constraint idioms
-  including the SHACL pre-binding rule for sub-SELECTs that walk RDF lists via
-  `rdf:rest*/rdf:first`.
+  type spec), the four-alternative type facet, and SPARQL-constraint idioms —
+  the SHACL pre-binding rule for sub-SELECTs that walk RDF lists via
+  `rdf:rest*/rdf:first`, and two constructs (`UNION` inside `FILTER NOT EXISTS`,
+  and joining on an aggregate alias across a sub-SELECT boundary) that are
+  silently non-portable and have each already caused a whole constraint to
+  misfire. Read idioms 3 and 4 before writing a new `sh:sparql` constraint.
 
 ## Open threads
 
 - **[array-as-ntuple-parallel.md](array-as-ntuple-parallel.md)** *(opened 2026-05-16)* —
-  Giving `qudt:Array` a structured-datatype treatment. **Decided & implemented
-  (2026-07-27): Option B** — a *self-describing* `qudt:Array` (no separate
-  `ArraySpec`), flat values + `qudt:elementCount`, hybrid element types
-  (flat `qudt:elementType` for homogeneous, `qudt:conformsToTupleSpec` for
-  heterogeneous). The broken `qudt:DimensionalityShape` was replaced by
-  `ArrayRankCheck` + `ArrayLengthCheck`. **Still open:** SHACL validation in the
-  real engine is deferred, plus the "still to do" A–E list in the note.
+  Giving `qudt:Array` a structured-datatype treatment. **Current design
+  (2026-08-22): the `Array` / `ArrayKind` split.** A `qudt:Array` carries only
+  `qudt:values` plus a mandatory `qudt:datatypeKind` pointer; the reusable
+  `qudt:ArrayKind` blueprint holds rank, extents, `qudt:elementCount`,
+  `qudt:dataOrder` and the element type(s) (flat `qudt:elementType` for
+  homogeneous, `qudt:conformsToTupleSpec` → `qudt:NTupleSpec` for heterogeneous).
+  This reverses the brief 2026-07-27 "self-describing array" revision. Array and
+  tuple constraints are now **validated** — the note records three portability
+  defects found in the shared tuple engine while doing so. **Still open:** where
+  `qudt:Vector` / `qudt:Matrix` / `Homogeneous` / `Heterogenous` sit relative to
+  the split, plus the "still to do" B–E list in the note.
 
 ## Adding a new note
 

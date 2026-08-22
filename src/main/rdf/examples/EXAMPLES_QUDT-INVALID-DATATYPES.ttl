@@ -160,55 +160,92 @@ ex:badExampleQuantityValueTuple
     ) .
 
 #################################################################
-# Invalid array examples (flat-list representation, no ArraySpec).
-# Each violates exactly one Option-B rule; the intended violation is named in
-# the label / description. (These fire once the ArrayRankCheck / ArrayLengthCheck
-# / ArrayElementTypeCheck constraints are added to qudt:Array.)
+# Invalid array examples (flat-list representation, Array / ArrayKind split).
+# Each violates exactly one rule; the intended violation is named in the label
+# and description, and the node the constraint reports against is stated
+# explicitly -- rank faults are reported on the qudt:ArrayKind (the blueprint
+# holds dimensionality and dimensions), while length and element-type faults
+# are reported on the qudt:Array instance (it holds qudt:values).
 #################################################################
 
 # INVALID: qudt:elementCount (8) does not equal the length of the flat value
-# list (7). Should be flagged by ArrayLengthCheck.
-ex:badExampleHomogeneousArrayLength
-  a qudt:HomogeneousArray ;
+# list (7). Reported on the array by ArrayLengthCheck.
+ex:BadLengthArrayKind
+  a qudt:ArrayKind ;
   dcterms:description """
-  <p>elementCount is 8 (2&#215;2&#215;2) but the qudt:values list holds only 7 cells.</p>"""^^rdf:HTML ;
+  <p>Blueprint for the invalid array below: a 2&#215;2&#215;2 homogeneous array of
+  decimals, so eight cells are expected. This kind is itself well-formed.</p>"""^^rdf:HTML ;
   qudt:dimensionality 3 ;
   qudt:dimensions ( 2 2 2 ) ;
   qudt:elementCount 8 ;
+  qudt:isHeterogeneous false ;
   qudt:elementType xsd:decimal ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Array kind for the invalid short value list array" ;
+.
+ex:badExampleHomogeneousArrayLength
+  a qudt:Array ;
+  dcterms:description """
+  <p>The kind declares elementCount 8 (2&#215;2&#215;2) but the qudt:values list
+  holds only 7 cells.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:BadLengthArrayKind ;
   qudt:values ( 1.0 2.0 3.0 4.0 5.0 6.0 7.0 ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
   rdfs:label "Invalid homogeneous array - values list length does not match elementCount" ;
 .
 
-# INVALID: a cell violates the shared element type (xsd:decimal). Should be
-# flagged by ArrayElementTypeCheck.
-ex:badExampleHomogeneousArrayType
-  a qudt:HomogeneousArray ;
+# INVALID: a cell violates the shared element type (xsd:decimal). Reported on
+# the array by ArrayElementTypeCheck.
+ex:BadElementTypeArrayKind
+  a qudt:ArrayKind ;
   dcterms:description """
-  <p>elementType is xsd:decimal but the fourth cell is a string.</p>"""^^rdf:HTML ;
+  <p>Blueprint for the invalid array below: a 1-D homogeneous array of four
+  decimal cells. This kind is itself well-formed.</p>"""^^rdf:HTML ;
   qudt:dimensionality 1 ;
   qudt:dimensions ( 4 ) ;
   qudt:elementCount 4 ;
+  qudt:isHeterogeneous false ;
   qudt:elementType xsd:decimal ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Array kind for the invalid element type array" ;
+.
+ex:badExampleHomogeneousArrayType
+  a qudt:Array ;
+  dcterms:description """
+  <p>The kind declares elementType xsd:decimal but the fourth cell is a
+  string.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:BadElementTypeArrayKind ;
   qudt:values ( 1.0 2.0 3.0 "four" ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
   rdfs:label "Invalid homogeneous array - a cell violates the shared element type" ;
 .
 
 # INVALID: qudt:dimensionality (3) does not equal the number of entries in the
-# qudt:dimensions list (2). Should be flagged by ArrayRankCheck.
+# qudt:dimensions list (2). Rank is a property of the blueprint, so this is
+# reported on the qudt:ArrayKind by ArrayRankCheck, not on the array below.
 ex:badExampleArrayRank
-  a qudt:HomogeneousArray ;
+  a qudt:ArrayKind ;
   dcterms:description """
   <p>dimensionality is 3 but the dimensions list has only 2 entries.</p>"""^^rdf:HTML ;
   qudt:dimensionality 3 ;
   qudt:dimensions ( 2 3 ) ;
   qudt:elementCount 6 ;
+  qudt:isHeterogeneous false ;
   qudt:elementType xsd:decimal ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Invalid array kind - dimensionality does not match number of dimensions" ;
+.
+ex:exampleArrayWithBadRankKind
+  a qudt:Array ;
+  dcterms:description """
+  <p>A well-formed array instance -- six values matching the kind's
+  elementCount -- whose kind carries the rank fault. Present so that the
+  rank violation is reported only against
+  <code>ex:badExampleArrayRank</code>.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:badExampleArrayRank ;
   qudt:values ( 1.0 2.0 3.0 4.0 5.0 6.0 ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "Invalid array - dimensionality does not match number of dimensions" ;
+  rdfs:label "Array whose array kind has an invalid rank" ;
 .
 
 # Element-type blueprint for the heterogeneous array below (position 3 must be a
@@ -227,15 +264,29 @@ ex:TempPressureArraySpec
 .
 
 # INVALID: the value at position 3 is required to be a qudt:Unit but is the
-# string "DegC". Should be flagged by the per-position type check.
-ex:badExampleHeterogeneousArrayType
-  a qudt:HeterogenousArray ;
+# string "DegC". Reported on the array by the per-position NTuple type check,
+# which reaches the tuple spec through qudt:datatypeKind.
+ex:BadHeterogeneousArrayKind
+  a qudt:ArrayKind ;
   dcterms:description """
-  <p>Position 3 requires sh:class qudt:Unit but the cell is the string "DegC".</p>"""^^rdf:HTML ;
+  <p>Blueprint for the invalid heterogeneous array below: a 2&#215;3 grid whose
+  per-position types come from <code>ex:TempPressureArraySpec</code>. This kind
+  is itself well-formed.</p>"""^^rdf:HTML ;
   qudt:dimensionality 2 ;
   qudt:dimensions ( 2 3 ) ;
   qudt:elementCount 6 ;
+  qudt:dataOrder qudt:InnermostIndexFastest ;
+  qudt:isHeterogeneous true ;
   qudt:conformsToTupleSpec ex:TempPressureArraySpec ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Array kind for the invalid heterogeneous array" ;
+.
+ex:badExampleHeterogeneousArrayType
+  a qudt:HeterogenousArray ;
+  dcterms:description """
+  <p>Position 3 requires sh:class qudt:Unit but the cell is the string
+  "DegC".</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:BadHeterogeneousArrayKind ;
   qudt:values ( "Temp" 23.7 "DegC" "Pressure" 101.3 unit:PA ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
   rdfs:label "Invalid heterogeneous array - value at position 3 is not a unit" ;

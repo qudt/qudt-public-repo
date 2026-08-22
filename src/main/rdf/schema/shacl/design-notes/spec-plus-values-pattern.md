@@ -26,7 +26,10 @@ the way they do, and how to apply the pattern to a new datatype.
    - `qudt:values` — the ordered list of values, constrained by
      `sh:node qudt:RDFListShape`.
    - `qudt:conformsToXSpec` (e.g. `qudt:conformsToTupleSpec`) — points at the
-     spec instance.
+     spec instance. `qudt:Array` is the one variant that names the link
+     differently: it uses the general `qudt:datatypeKind` to reach its
+     `qudt:ArrayKind`, leaving room for other datatypes to acquire a kind
+     without a new property each time.
 2. **Spec shape** (e.g. `qudt:NTupleSpec`) — the *blueprint*. Holds an
    ordered list of per-position or per-element specs, walked via
    `sh:zeroOrMorePath rdf:rest / rdf:first`.
@@ -65,12 +68,14 @@ constraints off itself. `qudt:NTuple` uses five:
 | `NTupleTypeCheck` | Value at position `?index` satisfies the position's type facet |
 | `NTupleRangeCheck` | Value at position `?index` satisfies any numeric bounds on its member spec (`sh:minInclusive` / `sh:maxInclusive` / `sh:minExclusive` / `sh:maxExclusive`) |
 | `NTupleExtraValueCheck` | No value sits at a position with no matching spec |
-| `NTupleMissingRequiredValueCheck` | Every required spec position is filled |
+| `NTupleMissingRequiredValueCheck` | Every required spec position is filled — tested as `?index > ?valueCount`, since values occupy positions 1..N contiguously (see idiom 4) |
 | `NTupleLengthCheck` | Length of the values list lies within the range allowed by the spec — `[requiredCount, totalCount]`, where a member spec is optional (not counted as required) iff it declares `sh:minCount 0`. Assumes optional members are trailing. |
 
-`NTupleTypeCheck` and `NTupleRangeCheck` share the "compute the 1-based
-`?index` in a sub-SELECT, then join to the member spec by `?index`" idiom;
-all five rely on the same three idioms below.
+`NTupleTypeCheck` and `NTupleRangeCheck` share the "compute the 1-based position
+in a sub-SELECT, then correlate it with the member spec's `qudt:index`" idiom;
+all five rely on the four idioms below. Idioms 3 and 4 exist because the obvious
+way to write those two steps is silently non-portable — read them before writing
+a new constraint.
 
 > **Worked example — `IfcCompoundPlaneAngleMeasure`.** The IFC4 type
 > `LIST [3:4] OF INTEGER` (degrees, minutes, seconds, optional millionth-seconds)
@@ -121,12 +126,93 @@ rather than scanning every `rdf:List` in the dataset. The symptom of getting
 this wrong is either silent (the constraint doesn't fire) or noisy (phantom
 violations on unrelated focus nodes), depending on the SHACL engine.
 
-### Idiom 3: Four-alternative UNION for type validation
+### Idiom 3: Four-alternative type validation — `OPTIONAL` probes, not `UNION`
 
-The `NTupleTypeCheck` constraint uses a `FILTER NOT EXISTS { … UNION … UNION
-… UNION … }` with one branch per type-facet alternative. New "does this cell
-match its spec" constraints should reuse that four-branch pattern verbatim —
-see lines 1042–1059 in the schema file for the canonical version.
+"Does this cell match its spec" means "does it match **any** of the four type-facet
+alternatives", and the obvious way to write that is a `FILTER NOT EXISTS` whose
+body UNIONs one branch per alternative. **Do not.** `NTupleTypeCheck` and
+`ArrayElementTypeCheck` both did, and both flagged every position of every valid
+value. Bisecting the branches isolates it precisely:
+
+| Construct | Result on a valid tuple |
+|---|---|
+| `FILTER NOT EXISTS { <one branch> }` | correct |
+| `FILTER NOT EXISTS { <one branch with a property path> }` | correct |
+| `FILTER NOT EXISTS { A UNION B UNION C UNION D }` | **every position flagged** |
+
+A single branch is fine; UNION the branches and the outer `?value` / `?memberSpec`
+bindings stop being substituted into the group, so nothing ever matches and the
+`NOT EXISTS` is always true. Engines differ here, and the failure is silent —
+it looks like a data problem, not a query problem.
+
+Write the disjunction as one `OPTIONAL` probe per alternative, each binding its
+own flag, then require that none of them fired:
+
+```sparql
+# (1) Numeric datatype — direct sh:datatype, or one inside an sh:or union
+OPTIONAL {
+    ?memberSpec ( sh:datatype | sh:or/rdf:rest*/rdf:first/sh:datatype ) ?allowedDatatype .
+    FILTER ( datatype(?value) = ?allowedDatatype )
+    BIND ( true AS ?datatypeMatch )
+}
+# (2) Concept class membership
+OPTIONAL {
+    ?memberSpec sh:class ?targetClass .
+    ?value rdf:type/rdfs:subClassOf* ?targetClass .
+    BIND ( true AS ?classMatch )
+}
+# (3) Enumerated value
+OPTIONAL { ?memberSpec qudt:value ?value . BIND ( true AS ?enumeratedMatch ) }
+# (4) Any IRI
+OPTIONAL {
+    ?memberSpec sh:nodeKind sh:IRI .
+    FILTER ( isIRI(?value) )
+    BIND ( true AS ?iriMatch )
+}
+
+FILTER ( !BOUND(?datatypeMatch) && !BOUND(?classMatch)
+         && !BOUND(?enumeratedMatch) && !BOUND(?iriMatch) )
+```
+
+`OPTIONAL` is a join, so outer bindings are visible inside it by construction —
+there is no substitution question to get wrong. Search the schema file for
+`qudt:NTupleTypeCheck` for the canonical version.
+
+The same rule applies to a *single* facet compared against a value: express it
+as `OPTIONAL` + `BIND` + `!BOUND` rather than `NOT EXISTS` with a bare `FILTER`
+inside (see `qudt:ArrayElementTypeCheck`).
+
+### Idiom 4: Correlating a positional sub-SELECT
+
+Idiom 1 computes a cell's 1-based position in a sub-SELECT. Joining that back to
+the member spec's declared `qudt:index` is the second place these constraints go
+wrong. **Do not project the aggregate under the name you want to join on:**
+
+```sparql
+# WRONG — relies on the engine joining an aggregate alias across the boundary
+{ SELECT $this ?value (COUNT(?previousCell) + 1 AS ?index) WHERE { … } GROUP BY … }
+?memberSpec qudt:index ?index .
+```
+
+Engines are not required to unify an aggregate alias with an outer variable of
+the same name. Where they don't, you get a silent **cross product** — a 6-position
+tuple yields 36 rows, one per (index, value) pair, and every position looks like a
+violation. Project it under its own name and correlate explicitly:
+
+```sparql
+{ SELECT $this ?value (COUNT(?previousCell) + 1 AS ?position) WHERE { … } GROUP BY … }
+?memberSpec qudt:index ?index .
+FILTER ( ?position = ?index )
+```
+
+**Better still, avoid the correlation.** Some checks don't need per-position
+matching at all. `NTupleMissingRequiredValueCheck` originally correlated a
+positional sub-SELECT inside a `FILTER EXISTS`; values occupy positions 1..N
+contiguously, so "required position `?index` is missing" is just
+`?index > ?valueCount`, where `?valueCount` comes from one uncorrelated `COUNT`
+joined on `$this` alone. `ArrayLengthCheck` uses the same uncorrelated shape.
+An uncorrelated aggregate joined on `$this` is the most portable form available —
+prefer it whenever the check can be expressed that way.
 
 ## Checklist for a new structured datatype
 
@@ -135,13 +221,15 @@ some future `qudt:Foo`), work through this checklist:
 
 1. **Instance vs blueprint.** Does the datatype need its own spec/blueprint, or
    does it reuse an existing one? Rule of thumb: if the number/kind of
-   positions can vary across instances, you need a spec. **Exception —
-   `qudt:Array` (see [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md)):**
-   arrays deliberately do **not** use a separate spec node. They are
-   *self-describing* — rank, extents, `qudt:elementCount`, `qudt:values` and the
-   element type(s) all live on the one instance — because an array's shape
-   varies per instance, so a shared blueprint buys little. Heterogeneous arrays
-   still reuse the tuple engine via `qudt:conformsToTupleSpec` → `qudt:NTupleSpec`.
+   positions can vary across instances, you need a spec. **Arrays use a
+   blueprint** (see [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md)):
+   a `qudt:Array` carries only `qudt:values` plus a mandatory `qudt:datatypeKind`
+   pointer to a `qudt:ArrayKind`, which holds rank, extents, `qudt:elementCount`,
+   `qudt:dataOrder` and the element type(s). A brief 2026-07-27 revision made
+   arrays *self-describing* (everything on one instance, no blueprint); that was
+   reversed on 2026-08-22 once it became clear instances do share shapes in
+   practice. Heterogeneous arrays reuse the tuple engine via the kind's
+   `qudt:conformsToTupleSpec` → `qudt:NTupleSpec`.
 2. **List representation.** Are values a flat list, a nested list, or something
    else? A flat list with a companion `qudt:dimensions` extent list is usually
    easier to validate in SPARQL than deeply nested lists (nested-list
@@ -156,6 +244,8 @@ some future `qudt:Foo`), work through this checklist:
    need extra-value or missing-required checks.
 5. **Existing infrastructure to reuse.** Before adding new properties, check
    whether one of these already-defined pieces fits:
+   - `qudt:ArrayKind` (blueprint for anything array-shaped: rank, extents,
+     element count, data order, element type)
    - `qudt:dimensionality` (rank), `qudt:dimensions` (extent list),
      `qudt:elementCount`
    - `qudt:RDFListShape` (recursive well-formed-list shape)
@@ -173,9 +263,20 @@ some future `qudt:Foo`), work through this checklist:
   failure mode — you'll only notice when a validation report contains
   phantom violations.
 - **Confusing `qudt:value` (singular) with `qudt:values` (plural)** — the
-  existing `qudt:DimensionalityShape` constraint (line 490) walks
-  `qudt:value`, which no structured datatype actually declares. Don't copy
-  that shape verbatim; treat it as a known-broken example.
+  former `qudt:DimensionalityShape` walked `qudt:value`, which no structured
+  datatype actually declares, so it never matched anything. It has since been
+  deleted and replaced by `ArrayRankCheck` + `ArrayLengthCheck`; the lesson
+  stands.
+- **`UNION` inside `FILTER NOT EXISTS`** — see idiom 3. Silent, and it flags
+  *everything*, so it reads as a data problem rather than a query problem.
+- **Joining on an aggregate alias across a sub-SELECT boundary** — see idiom 4.
+  Produces a silent cross product, which again looks like every position failing.
+- **`FILTER EXISTS` where `NOT EXISTS` was meant** — `NTupleMissingRequiredValueCheck`
+  fired when a required value *was* present. An inverted check that reports every
+  position is easy to mistake for the two defects above; check the polarity first.
+- **Testing against the schema and examples alone** — `sh:class qudt:Unit` and
+  similar class facets need the unit and quantity-kind vocabularies loaded, or
+  every IRI-valued cell reports a false violation.
 - **Nested-list validation is hard in one SPARQL query** — for arbitrary-depth
   arrays, SHACL SPARQL can't easily walk N levels. Either fix N (specialise
   for `qudt:Matrix` / `qudt:Vector`) or switch to the

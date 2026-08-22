@@ -33,6 +33,46 @@
   owl:imports <http://www.linkedmodel.org/schema/dtype> ;
   owl:imports <http://www.linkedmodel.org/schema/vaem> ;
 .
+
+dcterms:contributor
+  a owl:AnnotationProperty ;
+  rdfs:label "contributor" ;
+  rdfs:range xsd:string ;
+.
+dcterms:creator
+  a owl:AnnotationProperty ;
+  rdfs:label "creator" ;
+  rdfs:range xsd:string ;
+.
+dcterms:description
+  a owl:AnnotationProperty ;
+  rdfs:label "description" ;
+  rdfs:range xsd:string ;
+.
+dcterms:rights
+  a owl:AnnotationProperty ;
+  rdfs:label "rights" ;
+  rdfs:range xsd:string ;
+.
+dcterms:subject
+  a owl:AnnotationProperty ;
+  rdfs:label "subject" ;
+  rdfs:range xsd:string ;
+.
+dcterms:title
+  a owl:AnnotationProperty ;
+  rdfs:label "title" ;
+  rdfs:range xsd:string ;
+.
+ex:Alarm_Enumeration
+  a qudt:Enumeration ;
+  qudt:element qudt:HighAlarm ;
+  qudt:element qudt:LowAlarm ;
+  qudt:element qudt:NoAlarm ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Room Temperature Alarm" ;
+.
+
 ex:DateCountTupleSpec
   a qudt:NTupleSpec ;
   qudt:tupleMemberSpecs (
@@ -179,6 +219,7 @@ ex:exampleTuple3
        "2026-05-12"^^xsd:date 
         23.7 
         unit:DEG_C 
+    ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
 .
 ex:exampleTuple5
@@ -195,16 +236,20 @@ ex:exampleTuple5
 .
 
 #################################################################
-# Array examples (flat-list representation, no ArraySpec)
+# Array examples (flat-list representation, Array / ArrayKind split)
 #
-# An array is self-describing: rank (qudt:dimensionality), per-dimension
-# extents (qudt:dimensions), total cell count (qudt:elementCount), the flat
-# value list (qudt:values) and its linearisation (qudt:dataOrder) all live on
-# the one instance. Element types use the hybrid representation:
+# A qudt:ArrayKind is the reusable blueprint: rank (qudt:dimensionality),
+# per-dimension extents (qudt:dimensions), total cell count
+# (qudt:elementCount) and the linearisation (qudt:dataOrder) live there, never
+# on the instance. Element types use the hybrid representation:
 #   - homogeneous: the flat qudt:elementType facet (one shared type), with any
-#     shared quantity kind / unit stated once on the array;
+#     shared quantity kind / unit stated once on the kind;
 #   - heterogeneous: qudt:conformsToTupleSpec pointing at a qudt:NTupleSpec that
 #     gives one type per position, addressed 1-based over the flat value list.
+#
+# A qudt:Array is the instance: it carries only the flat value list
+# (qudt:values) plus a qudt:datatypeKind pointer to its ArrayKind. Many arrays
+# may share one kind.
 #################################################################
 # Homogeneous 2x2x2 array of plain decimals (canonical homogeneous case).
 ex:3DHomogeneousArrayKind
@@ -272,9 +317,8 @@ ex:3DTemperatureArrayKind
   qudt:elementType xsd:decimal ;
   qudt:hasQuantityKind quantitykind:Temperature ;
   qudt:unit unit:DEG_C ;
-  qudt:values ( 20.1 20.4 21.0 19.8 22.3 21.7 20.9 20.2 ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
-  rdfs:label "Homogeneous 2x2x2 array of temperatures" ;
+  rdfs:label "Homogeneous 2x2x2 array kind of temperatures" ;
 .
 
 # Element-type blueprint for the heterogeneous array below: one type per
@@ -306,7 +350,7 @@ ex:3DTemperatureArray1
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Homogeneous 2x2x2 array 1 of temperatures" ;
 .
-x:3DTemperatureArray2
+ex:3DTemperatureArray2
   a qudt:Array ;
   dcterms:description """
   <p>A three-dimensional homogeneous array whose eight cells are all
@@ -333,14 +377,13 @@ ex:2by3HeterogeneousArrayKind
   qudt:dataOrder qudt:InnermostIndexFastest ;
   qudt:isHeterogeneous true ;
   qudt:conformsToTupleSpec ex:TempPressureArraySpec ;
-  qudt:values ( "Temp" 23.7 unit:DEG_C "Pressure" 101.3 unit:PA ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Heterogeneous 2x3 array kind (row-major)" ;
 .
 ex:2by3HeterogeneousArray
-  a qudt:ArrayKind ;
+  a qudt:HeterogenousArray ;
   dcterms:description """
-  <p>A two-dimensional heterogeneous array kind, effectively an N-Tuple laid
+  <p>A two-dimensional heterogeneous array, effectively an N-Tuple laid
   out in a grid. 
   The values are organized as follows: <code>row 0 = ("Temp", 23.7, DEG_C), row 1 = ("Pressure", 101.3, PA)</code>
   </p>"""^^rdf:HTML ;
@@ -350,44 +393,6 @@ ex:2by3HeterogeneousArray
   rdfs:label "Heterogeneous 2x3 array (row-major)" ;
 .
 
-dcterms:contributor
-  a owl:AnnotationProperty ;
-  rdfs:label "contributor" ;
-  rdfs:range xsd:string ;
-.
-dcterms:creator
-  a owl:AnnotationProperty ;
-  rdfs:label "creator" ;
-  rdfs:range xsd:string ;
-.
-dcterms:description
-  a owl:AnnotationProperty ;
-  rdfs:label "description" ;
-  rdfs:range xsd:string ;
-.
-dcterms:rights
-  a owl:AnnotationProperty ;
-  rdfs:label "rights" ;
-  rdfs:range xsd:string ;
-.
-dcterms:subject
-  a owl:AnnotationProperty ;
-  rdfs:label "subject" ;
-  rdfs:range xsd:string ;
-.
-dcterms:title
-  a owl:AnnotationProperty ;
-  rdfs:label "title" ;
-  rdfs:range xsd:string ;
-.
-ex:Alarm_Enumeration
-  a qudt:Enumeration ;
-  qudt:element qudt:HighAlarm ;
-  qudt:element qudt:LowAlarm ;
-  qudt:element qudt:NoAlarm ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
-  rdfs:label "Room Temperature Alarm" ;
-.
 ex:Array1D_Integers
   a qudt:Array ;
   dcterms:description """
