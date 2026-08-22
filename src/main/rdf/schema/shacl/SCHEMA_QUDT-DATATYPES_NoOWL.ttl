@@ -56,7 +56,7 @@
 qudt:AbstractDatatype
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>An "Abstract Datatype" (ADT) is a specification of a set of data and the set of operations that can be performed on the data. 
+  <p>An <em>Abstract Datatype</em> (ADT) is a specification of a set of data and the set of operations that can be performed on the data. 
   Such a data type is abstract in the sense that it is independent of various concrete implementations. 
   The definition can be mathematical, or it can be programmed as an interface. 
   A first class ADT supports the creation of multiple instances of the ADT, and the interface normally provides a constructor,
@@ -135,21 +135,21 @@ qudt:Array
   rdfs:label "Array" ;
   rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:Array-values ;
-  sh:property qudt:Array-arrayKind ;
+  sh:property qudt:Array-datatypeKind ;
   .
 
-qudt:Array-arrayKind
+qudt:Array-datatypeKind
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:ArrayKind ;
+  sh:class qudt:datatypeKind ;
   sh:minCount 1 ;
   sh:maxCount 1 ;
-  sh:path qudt:arrayKind .
+  sh:path qudt:datatypeKind .
 
 qudt:ArrayKind
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>An <em>Array Kind></em> is a data structure that stores a collection of elements, typically of the same type, in a contiguous block of memory. 
+  <p>An <em>Array Kind></em> is a data structure that soecifies the types of array elements, typically of the same type, in a contiguous block of memory. 
   Each element in an array is identified by an index or key, which is typically a numerical identifier, either starting at '0' or '1'.
   </p>
   <p>The key considerations for an Array are:
@@ -204,39 +204,45 @@ qudt:Array-isHeterogeneous
   sh:maxCount 1 ;
   sh:path qudt:isHeterogeneous .
 
-# The flat value list of an array (row-major etc. per qudt:dataOrder).
 qudt:Array-values
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:description "The flat value list of an array (row-major etc. per qudt:dataOrder)." ;
   sh:path qudt:values ;
   sh:node qudt:RDFListShape ;
   sh:maxCount 1 .
 
-# Homogeneous arrays: the single shared element-type facet (a datatype or a
-# class IRI). Heterogeneous arrays instead use qudt:conformsToTupleSpec below.
 qudt:Array-elementType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:description """
+  For Homogeneous arrays, the single shared element-type facet (a datatype or a class IRI). 
+  Heterogeneous arrays instead use qudt:conformsToTupleSpec.
+  """ ;
   sh:path qudt:elementType ;
   sh:nodeKind sh:IRI ;
   sh:maxCount 1 .
 
-# The total number of cells = product of the dimensions. Held explicitly
-# because SPARQL has no PRODUCT aggregate; ArrayLengthCheck compares it against
-# the length of the flat value list.
 qudt:Array-elementCount
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:description """
+  The total number of cells = product of the dimensions. 
+  Held explicitly because SPARQL has no PRODUCT aggregate.
+  ArrayLengthCheck compares it against the length of the flat value list.
+  """ ;
   sh:path qudt:elementCount ;
   sh:datatype xsd:integer ;
   sh:minInclusive 0 ;
   sh:maxCount 1 .
 
-# Heterogeneous arrays: per-position element types, reusing the N-Tuple
-# blueprint (qudt:NTupleSpec), addressed 1-based over the flat value list.
 qudt:Array-conformsToTupleSpec
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:description """
+  Used by heterogeneous arrays for per-position element types, reusing the N-Tuple
+  blueprint (qudt:NTupleSpec), addressed 1-based over the flat value list.
+  """ ;
   sh:path qudt:conformsToTupleSpec ;
   sh:class qudt:NTupleSpec ;
   sh:maxCount 1 .
@@ -265,11 +271,13 @@ qudt:ArrayRankCheck
         }
     """ .
 
-# Length check: the number of cells in the flat qudt:values list must equal the
-# declared qudt:elementCount (= product of dimensions).
 qudt:ArrayLengthCheck
     a sh:SPARQLConstraint ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    rdfs:comment """
+    Length check for the number of cells in the flat qudt:values list.
+    This must equal the declared qudt:elementCount (= product of dimensions).
+    """ ;
     rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
     sh:message "Array value count ({?valueCount}) does not equal the declared element count ({?elementCount})." ;
     sh:select """
@@ -289,13 +297,15 @@ qudt:ArrayLengthCheck
         }
     """ .
 
-# Element-type check (homogeneous arrays): every cell in the flat value list
-# must satisfy the single qudt:elementType facet, either as a literal datatype
-# or as membership of a class. Heterogeneous arrays are checked per position by
-# the reused NTuple constraints (see qudt:HeterogenousArray).
 qudt:ArrayElementTypeCheck
     a sh:SPARQLConstraint ;
     sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+    rdfs:comment """
+    Element-type check (homogeneous arrays): every cell in the flat value list
+    must satisfy the single qudt:elementType facet, either as a literal datatype
+    or as membership of a class. Heterogeneous arrays are checked per position by
+    the reused NTuple constraints (see qudt:HeterogenousArray).
+    """ ;
     rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
     sh:message "Array element {?value} does not satisfy the array's element type {?elementType}." ;
     sh:select """
@@ -2488,7 +2498,7 @@ qudt:argType
   rdfs:label "argType" ;
   rdfs:subPropertyOf qudt:elementDatatype .
 
-qudt:arrayKind
+qudt:datatypeKind
   a rdf:Property ;
   dcterms:description "This property connects an array with is type specification." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
