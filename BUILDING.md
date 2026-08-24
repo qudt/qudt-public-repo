@@ -198,7 +198,9 @@ This inspection is now gated (via the `owl-schema-inspect` profile): the command
 ## SHACL Datatypes to OWL Datatypes Schema Derivation
 
 For datatypes, SHACL is the source of truth:
-- `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl`
+- `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES-CORE_NoOWL.ttl`
+- `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES-SCALAR_NoOWL.ttl`
+- `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES-STRUCTURED_NoOWL.ttl`
 
 The OWL datatypes schema is derived to:
 - `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl`
@@ -273,7 +275,9 @@ mvn install
 
 Use this when changes are limited to vocab content and you are not changing:
 - `src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl`
-- `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl`
+- `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES-CORE_NoOWL.ttl`
+- `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES-SCALAR_NoOWL.ttl`
+- `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES-STRUCTURED_NoOWL.ttl`
 - `src/main/rdf/schema/shacl/SCHEMA_QUDT-COORDINATES_NoOWL.ttl`
 
 ### 2) SHACL main, datatype, and/or coordinates schema changed

@@ -1,6 +1,9 @@
 # The spec-plus-values pattern
 
-**Applies to:** `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl`
+**Applies to:** the SHACL datatype schemas in `src/main/rdf/schema/shacl/` —
+`SCHEMA_QUDT-DATATYPES-CORE_NoOWL.ttl` (terms shared by both branches),
+`-SCALAR_NoOWL.ttl` and `-STRUCTURED_NoOWL.ttl`. Structured datatypes live in the
+last of these; it imports scalar, which imports core.
 
 Every structured datatype in this schema — tuples, arrays, matrices, vectors,
 and whatever comes next — should follow the same three-shape pattern. This
@@ -39,7 +42,7 @@ the way they do, and how to apply the pattern to a new datatype.
    must be one of the four alternatives below.
 
 The canonical worked example is `qudt:NTuple`, defined in
-`SCHEMA_QUDT-DATATYPES_NoOWL.ttl` (search for `qudt:NTuple`). When designing a
+`SCHEMA_QUDT-DATATYPES-STRUCTURED_NoOWL.ttl` (search for `qudt:NTuple`). When designing a
 new structured datatype, start by reading that block.
 
 ## The four-alternative type facet
@@ -299,7 +302,7 @@ some future `qudt:Foo`), work through this checklist:
 ## Scope of this pattern
 
 This pattern applies to the SHACL datatype schema
-(`SCHEMA_QUDT-DATATYPES_NoOWL.ttl`) only. The parallel OWL datatype schema
+(the three `SCHEMA_QUDT-DATATYPES-*_NoOWL.ttl` files) only. The parallel OWL datatype schema
 (`SCHEMA_QUDT-DATATYPE.ttl`) has its own older class hierarchy
 (`qudt:TwoTuple`, `qudt:ThreeTuple`, `qudt:TupleMember`, etc.) with
 `qudt:elementDatatype` restrictions. The two sides do not yet share a single

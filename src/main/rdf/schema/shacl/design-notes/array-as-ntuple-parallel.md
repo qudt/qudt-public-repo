@@ -8,7 +8,8 @@ constraints are **validated** (valid examples clean, every invalid example flagg
 portability defects in the shared tuple engine were found and fixed in the process.
 Read the revisions newest-first: "Design revision (2026-08-22)" supersedes
 "Design revision (2026-07-27)", which in turn supersedes the `qudt:ArraySpec` sketch further down.
-**Related file:** `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl`
+**Related file:** `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES-STRUCTURED_NoOWL.ttl`
+(split out of the former `SCHEMA_QUDT-DATATYPES_NoOWL.ttl` on 2026-08-24)
 
 ## Goal
 
@@ -44,7 +45,7 @@ withdrawn: the type-level description of an array is separated from the instance
    reported on the `ArrayKind` (it holds `dimensionality` and `dimensions`); length and element-type
    faults are reported on the `Array` (it holds `qudt:values`).
 
-**Schema as implemented (`SCHEMA_QUDT-DATATYPES_NoOWL.ttl`):**
+**Schema as implemented (now `SCHEMA_QUDT-DATATYPES-STRUCTURED_NoOWL.ttl`):**
 
 Every array-shaped datatype now comes as an **instance/kind pair**: the instance carries the values,
 the kind carries the description.
@@ -178,7 +179,7 @@ and heterogeneous examples, the decision was to **not** give arrays a separate s
      is inherently a *hybrid*: the flat shortcut can't express per-position types, so heterogeneous
      arrays must use a second mechanism.)
 
-**Implemented in `SCHEMA_QUDT-DATATYPES_NoOWL.ttl` (2026-07-27):**
+**Implemented in the datatypes schema (2026-07-27; the file was still monolithic then):**
 
 - On `qudt:Array`: added property shapes `qudt:Array-values` (`sh:node qudt:RDFListShape`),
   `qudt:Array-elementType` (`sh:nodeKind sh:IRI`), `qudt:Array-elementCount` (`xsd:integer`),
@@ -439,7 +440,7 @@ varies fastest*, so they read the same at any rank:
 Decisions baked in:
 
 - **Namespace `qudt:`, not `datatype:`** — the individuals are now integral to the schema, so they
-  live in `SCHEMA_QUDT-DATATYPES_NoOWL.ttl` (not the vocab), `rdfs:isDefinedBy` the schema graph,
+  live in the SHACL datatype schema (not the vocab), `rdfs:isDefinedBy` the schema graph,
   alongside precedents like `qudt:UNARY-FUNCTION`. Since the names are brand new, there was no
   migration cost to choosing `qudt:`.
 - **Two values, no row/column/leftmost** — the innermost/outermost-fastest framing is complete for

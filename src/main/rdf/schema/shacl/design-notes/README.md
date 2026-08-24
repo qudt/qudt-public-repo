@@ -1,7 +1,8 @@
 # SHACL Datatype Schema — Design Notes
 
 Design decisions, patterns, and open threads for the SHACL datatype schema
-(`SCHEMA_QUDT-DATATYPES_NoOWL.ttl`). Read the pattern doc before touching one
+(`SCHEMA_QUDT-DATATYPES-CORE_NoOWL.ttl`, `-SCALAR_NoOWL.ttl` and
+`-STRUCTURED_NoOWL.ttl`). Read the pattern doc before touching one
 of the open threads; the open-thread docs assume familiarity with it.
 
 ## Patterns
