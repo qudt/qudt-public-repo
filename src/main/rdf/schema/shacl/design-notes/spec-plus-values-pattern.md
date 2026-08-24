@@ -66,13 +66,13 @@ shared spec instead of one-per-position.
 Every structured-datatype instance shape hangs one or more `sh:sparql`
 constraints off itself. `qudt:NTuple` uses five:
 
-| Constraint | Purpose |
-|---|---|
-| `NTupleTypeCheck` | Value at position `?index` satisfies the position's type facet |
-| `NTupleRangeCheck` | Value at position `?index` satisfies any numeric bounds on its member spec (`sh:minInclusive` / `sh:maxInclusive` / `sh:minExclusive` / `sh:maxExclusive`) |
-| `NTupleExtraValueCheck` | No value sits at a position with no matching spec |
-| `NTupleMissingRequiredValueCheck` | Every required spec position is filled — tested as `?index > ?valueCount`, since values occupy positions 1..N contiguously (see idiom 4) |
-| `NTupleLengthCheck` | Length of the values list lies within the range allowed by the spec — `[requiredCount, totalCount]`, where a member spec is optional (not counted as required) iff it declares `sh:minCount 0`. Assumes optional members are trailing. |
+|            Constraint             |                                                                                                                Purpose                                                                                                                 |
+|-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `NTupleTypeCheck`                 | Value at position `?index` satisfies the position's type facet                                                                                                                                                                         |
+| `NTupleRangeCheck`                | Value at position `?index` satisfies any numeric bounds on its member spec (`sh:minInclusive` / `sh:maxInclusive` / `sh:minExclusive` / `sh:maxExclusive`)                                                                             |
+| `NTupleExtraValueCheck`           | No value sits at a position with no matching spec                                                                                                                                                                                      |
+| `NTupleMissingRequiredValueCheck` | Every required spec position is filled — tested as `?index > ?valueCount`, since values occupy positions 1..N contiguously (see idiom 4)                                                                                               |
+| `NTupleLengthCheck`               | Length of the values list lies within the range allowed by the spec — `[requiredCount, totalCount]`, where a member spec is optional (not counted as required) iff it declares `sh:minCount 0`. Assumes optional members are trailing. |
 
 `NTupleTypeCheck` and `NTupleRangeCheck` share the "compute the 1-based position
 in a sub-SELECT, then correlate it with the member spec's `qudt:index`" idiom;
@@ -137,11 +137,11 @@ body UNIONs one branch per alternative. **Do not.** `NTupleTypeCheck` and
 `ArrayElementTypeCheck` both did, and both flagged every position of every valid
 value. Bisecting the branches isolates it precisely:
 
-| Construct | Result on a valid tuple |
-|---|---|
-| `FILTER NOT EXISTS { <one branch> }` | correct |
-| `FILTER NOT EXISTS { <one branch with a property path> }` | correct |
-| `FILTER NOT EXISTS { A UNION B UNION C UNION D }` | **every position flagged** |
+|                         Construct                         |  Result on a valid tuple   |
+|-----------------------------------------------------------|----------------------------|
+| `FILTER NOT EXISTS { <one branch> }`                      | correct                    |
+| `FILTER NOT EXISTS { <one branch with a property path> }` | correct                    |
+| `FILTER NOT EXISTS { A UNION B UNION C UNION D }`         | **every position flagged** |
 
 A single branch is fine; UNION the branches and the outer `?value` / `?memberSpec`
 bindings stop being substituted into the group, so nothing ever matches and the

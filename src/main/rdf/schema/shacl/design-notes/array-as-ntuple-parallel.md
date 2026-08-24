@@ -50,12 +50,12 @@ withdrawn: the type-level description of an array is separated from the instance
 Every array-shaped datatype now comes as an **instance/kind pair**: the instance carries the values,
 the kind carries the description.
 
-| Instance shape | Kind shape | Instance-side constraints |
-|---|---|---|
+|                       Instance shape                        |                                                                                         Kind shape                                                                                         |               Instance-side constraints               |
+|-------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|
 | `qudt:Array` (`qudt:ValuesList`, `qudt:Array-datatypeKind`) | `qudt:ArrayKind` (`qudt:ArrayKind-dataOrder`, `-isHeterogeneous`, `-elementType`, `-elementCount`, `-conformsToTupleSpec`, plus `DimensionalityPropertyShape` / `DimensionsPropertyShape`) | `ValuesListLengthCheck`, `ValuesListElementTypeCheck` |
-| `qudt:HomogeneousArray` | `qudt:HomogeneousArrayKind` | inherited |
-| `qudt:HeterogenousArray` | `qudt:HeterogenousArrayKind` | inherited, plus the four `NTuple*` checks |
-| `qudt:Vector` | `qudt:VectorKind` | `ValuesListLengthCheck`, `ValuesListElementTypeCheck` |
+| `qudt:HomogeneousArray`                                     | `qudt:HomogeneousArrayKind`                                                                                                                                                                | inherited                                             |
+| `qudt:HeterogenousArray`                                    | `qudt:HeterogenousArrayKind`                                                                                                                                                               | inherited, plus the four `NTuple*` checks             |
+| `qudt:Vector`                                               | `qudt:VectorKind`                                                                                                                                                                          | `ValuesListLengthCheck`, `ValuesListElementTypeCheck` |
 
 `ArrayRankCheck` is the one kind-side constraint (rank is a blueprint property). The value-list shape
 and its two checks are named `qudt:ValuesList` / `ValuesListLengthCheck` / `ValuesListElementTypeCheck`
@@ -226,17 +226,17 @@ any query containing the token `values`, so `qudt:values` must be aliased to tes
 
 **Classes / node shapes** (all `sh:NodeShape` + `rdfs:Class`):
 
-| Shape | Line | Notes |
-|---|---|---|
-| `qudt:Array` | 104 | Root shape — declares `qudt:DimensionalityShape` (SPARQL, has bugs), `qudt:Array-isHeterogeneous`, `qudt:DimensionalityPropertyShape`, `qudt:DimensionsPropertyShape` |
-| `qudt:HomogeneousArray` | 722 | Subclass — all elements same datatype (via a bare `qudt:datatype`) |
-| `qudt:HeterogenousArray` | 678 | Subclass — carries `qudt:datatype` pointing at a list of per-position datatypes |
-| `qudt:Matrix` | 892 | Subclass of `qudt:Array`, N-dimensional |
-| `qudt:MultiDimensionalArray` | 924 | Subclass — elements are described as N-tuples in the docs |
-| `qudt:Vector` | 2086 | 1-D |
-| `qudt:TypeMatrix`, `qudt:TypeVector` | 1968, 1978 | Matrices/vectors whose *cells are datatypes* — analogous to `qudt:NTupleMemberTypeSpec` |
-| `qudt:Array2DvalueList` | 143 | Purpose-built list shape for 2-D case: `[[…],[…],[…]]` |
-| `qudt:IntegerListShape` | 785 | Recursive `RDFListShape` whose elements are `xsd:integer` — reusable for the extent list |
+|                Shape                 |    Line    |                                                                                 Notes                                                                                 |
+|--------------------------------------|------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `qudt:Array`                         | 104        | Root shape — declares `qudt:DimensionalityShape` (SPARQL, has bugs), `qudt:Array-isHeterogeneous`, `qudt:DimensionalityPropertyShape`, `qudt:DimensionsPropertyShape` |
+| `qudt:HomogeneousArray`              | 722        | Subclass — all elements same datatype (via a bare `qudt:datatype`)                                                                                                    |
+| `qudt:HeterogenousArray`             | 678        | Subclass — carries `qudt:datatype` pointing at a list of per-position datatypes                                                                                       |
+| `qudt:Matrix`                        | 892        | Subclass of `qudt:Array`, N-dimensional                                                                                                                               |
+| `qudt:MultiDimensionalArray`         | 924        | Subclass — elements are described as N-tuples in the docs                                                                                                             |
+| `qudt:Vector`                        | 2086       | 1-D                                                                                                                                                                   |
+| `qudt:TypeMatrix`, `qudt:TypeVector` | 1968, 1978 | Matrices/vectors whose *cells are datatypes* — analogous to `qudt:NTupleMemberTypeSpec`                                                                               |
+| `qudt:Array2DvalueList`              | 143        | Purpose-built list shape for 2-D case: `[[…],[…],[…]]`                                                                                                                |
+| `qudt:IntegerListShape`              | 785        | Recursive `RDFListShape` whose elements are `xsd:integer` — reusable for the extent list                                                                              |
 
 **Dimensionality machinery** (usable as-is):
 
@@ -252,12 +252,12 @@ any query containing the token `values`, so `qudt:values` must be aliased to tes
 
 ## What's missing for the NTuple-parallel pattern
 
-| NTuple pattern | Array analog | Currently present? |
-|---|---|---|
-| `qudt:NTuple-values` → `sh:node qudt:RDFListShape` | `qudt:Array-values` → same | **No** — `qudt:Array` doesn't declare a `qudt:values` property shape |
-| `qudt:NTuple-conformsToTupleSpec` → `qudt:NTupleSpec` | `qudt:Array-conformsToArraySpec` → `qudt:ArraySpec` | **No** — the array's "spec" is fused into the instance shape (dimensionality/dimensions/datatype live directly on `qudt:Array`) |
-| `qudt:NTupleMemberTypeSpec` with 4 type-facet alternatives | `qudt:ArrayElementTypeSpec` with the same 4 alternatives (no `qudt:index` since all cells share the facet in the homogeneous case) | **No** — homogeneous arrays use bare `qudt:datatype`, heterogenous ones a list of `qudt:datatype`, neither reuses the four-alternative facet |
-| `NTupleTypeCheck`, `NTupleExtraValueCheck`, `NTupleMissingRequiredValueCheck`, `NTupleLengthCheck` | Analogous array constraints | Only `qudt:DimensionalityShape` (line 490) exists, and it has three bugs (see below) |
+|                                           NTuple pattern                                           |                                                            Array analog                                                            |                                                              Currently present?                                                              |
+|----------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| `qudt:NTuple-values` → `sh:node qudt:RDFListShape`                                                 | `qudt:Array-values` → same                                                                                                         | **No** — `qudt:Array` doesn't declare a `qudt:values` property shape                                                                         |
+| `qudt:NTuple-conformsToTupleSpec` → `qudt:NTupleSpec`                                              | `qudt:Array-conformsToArraySpec` → `qudt:ArraySpec`                                                                                | **No** — the array's "spec" is fused into the instance shape (dimensionality/dimensions/datatype live directly on `qudt:Array`)              |
+| `qudt:NTupleMemberTypeSpec` with 4 type-facet alternatives                                         | `qudt:ArrayElementTypeSpec` with the same 4 alternatives (no `qudt:index` since all cells share the facet in the homogeneous case) | **No** — homogeneous arrays use bare `qudt:datatype`, heterogenous ones a list of `qudt:datatype`, neither reuses the four-alternative facet |
+| `NTupleTypeCheck`, `NTupleExtraValueCheck`, `NTupleMissingRequiredValueCheck`, `NTupleLengthCheck` | Analogous array constraints                                                                                                        | Only `qudt:DimensionalityShape` (line 490) exists, and it has three bugs (see below)                                                         |
 
 ## Existing `qudt:DimensionalityShape` — known-broken
 
@@ -329,7 +329,6 @@ respectively.
 > **HISTORICAL — never implemented.** This sketch proposes `qudt:ArraySpec` /
 > `qudt:conformsToArraySpec`, which the 2026-07-27 revision dropped. The blueprint idea returned on
 > 2026-08-22, but as `qudt:ArrayKind` reached by `qudt:datatypeKind`, and with a different shape.
-
 
 ```turtle
 qudt:Array
@@ -404,9 +403,10 @@ logical N-D positions.** We reuse the `qudt:dataOrder` property already in the s
 putting it on the instance next to `qudt:values`; it is kept for the record.
 
 > ~~**Placement: `qudt:dataOrder` on the instance (`qudt:Array`), next to `qudt:values`** — not on the
-> spec. Rationale: the linearisation is a property of *this particular value's* list, so the same
-> logical array (same `qudt:dimensions`, same `qudt:ArraySpec` blueprint) can be shipped in different
-> orders without needing a distinct spec per order.~~
+>
+>> spec. Rationale: the linearisation is a property of *this particular value's* list, so the same
+>> logical array (same `qudt:dimensions`, same `qudt:ArraySpec` blueprint) can be shipped in different
+>> orders without needing a distinct spec per order.~~
 
 Consequence of the move: two arrays sharing a kind necessarily share its linearisation. Shipping the
 same logical array in a different order now means a second `ArrayKind`. The property remains
@@ -432,10 +432,10 @@ The old `datatype:ByRow` / `datatype:ByColumn` / `datatype:ByLeftMostIndex` were
 ways). Replaced by **two** first-class enumerated-value individuals stated purely as *which index
 varies fastest*, so they read the same at any rank:
 
-| Value | Meaning | `arr[2][3]` sequence |
-|---|---|---|
-| `qudt:InnermostIndexFastest` | The **innermost (last) index varies fastest**; values sharing the same outer indices occur contiguously before the outer index advances. **Default** when `qudt:dataOrder` is absent. | (0,0)(0,1)(0,2) (1,0)(1,1)(1,2) |
-| `qudt:OutermostIndexFastest` | The **outermost (first) index varies fastest**; values sharing the same inner indices occur contiguously before the inner index advances. | (0,0)(1,0) (0,1)(1,1) (0,2)(1,2) |
+|            Value             |                                                                                        Meaning                                                                                        |       `arr[2][3]` sequence       |
+|------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
+| `qudt:InnermostIndexFastest` | The **innermost (last) index varies fastest**; values sharing the same outer indices occur contiguously before the outer index advances. **Default** when `qudt:dataOrder` is absent. | (0,0)(0,1)(0,2) (1,0)(1,1)(1,2)  |
+| `qudt:OutermostIndexFastest` | The **outermost (first) index varies fastest**; values sharing the same inner indices occur contiguously before the inner index advances.                                             | (0,0)(1,0) (0,1)(1,1) (0,2)(1,2) |
 
 Decisions baked in:
 
@@ -534,7 +534,7 @@ only array-specific check is that `∏(dimensions) = 6 = list length`.
 **Option A — nested:**
 
 ```turtle
-    qudt:values ( ( "Temp" 23.7 unit:DEG_C ) ( "Pressure" 101.3 unit:PA ) ) ;
+qudt:values ( ( "Temp" 23.7 unit:DEG_C ) ( "Pressure" 101.3 unit:PA ) ) ;
 ```
 
 To type-check cell (r,c) you must walk *two* levels and derive a per-position index from
@@ -572,7 +572,7 @@ is `∏(2,2,2) = 8 = list length`. Both are single flat-list walks.
 **Option A — nested:**
 
 ```turtle
-    qudt:values ( ( ( 1.0 2.0 ) ( 3.0 4.0 ) ) ( ( 5.0 6.0 ) ( 7.0 8.0 ) ) ) ;
+qudt:values ( ( ( 1.0 2.0 ) ( 3.0 4.0 ) ) ( ( 5.0 6.0 ) ( 7.0 8.0 ) ) ) ;
 ```
 
 Validating "at depth *d* every sublist has length `dimensions[d]`" needs a depth-3 walk here, and
@@ -583,14 +583,14 @@ the pattern doc — SHACL property paths don't parameterise on depth.
 
 **Flat wins on both cases, decisively:**
 
-| | Flat (Option B) | Nested (Option A) |
-|---|---|---|
-| Reuses `NTuple*` constraints | Yes, verbatim | No — needs per-depth variants |
-| Type check | one `rdf:rest*/rdf:first` walk | walk N levels, derive index |
-| Length/shape check | `∏(dims) = COUNT` | one shape per rank |
-| Scales to arbitrary N | Yes | No |
-| Heterogeneous ≡ NTuple unification | Falls out for free | Breaks |
-| Cost | needs `∏(dims)` (no SPARQL `PRODUCT`) | — |
+|                                    |            Flat (Option B)            |       Nested (Option A)       |
+|------------------------------------|---------------------------------------|-------------------------------|
+| Reuses `NTuple*` constraints       | Yes, verbatim                         | No — needs per-depth variants |
+| Type check                         | one `rdf:rest*/rdf:first` walk        | walk N levels, derive index   |
+| Length/shape check                 | `∏(dims) = COUNT`                     | one shape per rank            |
+| Scales to arbitrary N              | Yes                                   | No                            |
+| Heterogeneous ≡ NTuple unification | Falls out for free                    | Breaks                        |
+| Cost                               | needs `∏(dims)` (no SPARQL `PRODUCT`) | —                             |
 
 The single cost of flat — computing `∏(dimensions)` without a SPARQL `PRODUCT` aggregate — is
 the `qudt:elementCount` question below, and is far cheaper than per-rank nested validation.
@@ -642,7 +642,7 @@ shared spec and **heterogeneous** arrays need one spec per position. The discuss
 ## Next session — where to pick up
 
 1. ~~Confirm the flat-vs-nested direction with a small worked example.~~ **Done — flat.**
-1b. ~~Wire `qudt:dataOrder` on the instance + define the enum values.~~ **Done — implemented.**
+   1b. ~~Wire `qudt:dataOrder` on the instance + define the enum values.~~ **Done — implemented.**
 2. ~~Decide `qudt:elementCount`, draft the spec + constraints.~~ **Done, revised** — `qudt:ArraySpec`
    **dropped**; `qudt:elementCount` is a scalar on the instance; three array constraints + tuple-engine
    reuse for heterogeneous. See "Design revision (2026-07-27)".
@@ -655,17 +655,17 @@ shared spec and **heterogeneous** arrays need one spec per position. The discuss
 **Still to do:**
 
 A. ~~**Resume SHACL validation (deferred).**~~ **Done (2026-08-22)** — all eight array and tuple
-   constraints validated against both example files. The `NOT EXISTS` question was not a `$this`
-   pre-binding issue: it was `UNION` inside `NOT EXISTS`, an aggregate alias joined across a
-   sub-SELECT boundary, and an inverted `FILTER EXISTS`. All three fixed; see "Design revision
-   (2026-08-22)". Confirmation in the project's own SHACL engine (TopBraid/Jena ARQ) is still worth
-   doing, but the constraints no longer depend on the constructs that diverge between engines.
+constraints validated against both example files. The `NOT EXISTS` question was not a `$this`
+pre-binding issue: it was `UNION` inside `NOT EXISTS`, an aggregate alias joined across a
+sub-SELECT boundary, and an inverted `FILTER EXISTS`. All three fixed; see "Design revision
+(2026-08-22)". Confirmation in the project's own SHACL engine (TopBraid/Jena ARQ) is still worth
+doing, but the constraints no longer depend on the constructs that diverge between engines.
 B. **Migrate or retire the legacy old-style array examples** (`qudt:Array1D_Integers[-INVALID]`,
-   `qudt:EX_Array1D_INVALID`, `qudt:Array_MassProperties_Rocket`, `qudt:Matrix-*`) that still use
-   `qudt:value` (singular) / `qudt:datatype` — the retired `DimensionalityShape` no longer covers the
-   invalid ones.
+`qudt:EX_Array1D_INVALID`, `qudt:Array_MassProperties_Rocket`, `qudt:Matrix-*`) that still use
+`qudt:value` (singular) / `qudt:datatype` — the retired `DimensionalityShape` no longer covers the
+invalid ones.
 C. **Finish deprecating `qudt:HeterogenousArray-datatype`** in favour of `qudt:conformsToTupleSpec`.
 D. Rewrite the nested-list prose on `qudt:HomogeneousArray`, `qudt:HeterogenousArray`, and
-   `qudt:MultiDimensionalArray` to match the flat representation.
+`qudt:MultiDimensionalArray` to match the flat representation.
 E. Hold the "specifying the types of an array's values" discussion (see "Open discussion" above), now
-   in light of the Option-B hybrid decision.
+in light of the Option-B hybrid decision.

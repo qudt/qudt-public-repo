@@ -1,10 +1,10 @@
-@prefix ex: <http://example.org#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix datatype: <http://qudt.org/vocab/datatype/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ex: <http://example.org#> .
 @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
@@ -13,16 +13,23 @@
 
 <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype>
   a owl:Ontology ;
-  owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/datatype> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/quantitykind> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/unit> ;
   owl:imports <http://www.linkedmodel.org/schema/dtype> ;
   owl:imports <http://www.linkedmodel.org/schema/vaem> ;
-  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/quantitykind>;
-  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/unit> ;
   rdfs:label "QUDT Examples of Bad Datatypes v$$QUDT_VERSION$$" ;
   vaem:hasGraphMetadata vaem:GMD_INVALID-DATATYPES ;
   vaem:hasGraphRole vaem:VocabularyGraph .
+
+ex:IfcCompoundPlaneAngleMeasure
+  a rdfs:Class, sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "IfcCompoundPlaneAngleMeasure" ;
+  rdfs:subClassOf qudt:NTuple ;
+  sh:sparql ex:IfcCompoundPlaneAngleConsistentSign .
 
 dcterms:contributor
   a owl:AnnotationProperty ;
@@ -54,148 +61,6 @@ dcterms:title
   rdfs:label "title" ;
   rdfs:range xsd:string .
 
-
-ex:MeasurementTupleSpec
-    a qudt:NTupleSpec ;
-    qudt:tupleMemberSpecs (
-        [
-            a qudt:NTupleMemberTypeSpec ;
-            qudt:index 1 ;
-            sh:datatype xsd:date ;
-        ]
-        [
-            a qudt:NTupleMemberTypeSpec ;
-            qudt:index 2 ;
-            sh:datatype xsd:decimal ;
-        ]
-        [
-            a qudt:NTupleMemberTypeSpec ;
-            qudt:index 3 ;
-            sh:class qudt:Unit ;
-        ]
-    ) 
-.
-
-ex:QuantityValueUnitTupleSpec
-    a qudt:NTupleSpec ;
-    qudt:tupleMemberSpecs (
-        [
-            a qudt:NTupleMemberTypeSpec ;
-            qudt:index 1 ;
-            sh:class qudt:QuantityKind ;
-        ]
-        [
-            a qudt:NTupleMemberTypeSpec ;
-            qudt:index 2 ;
-            sh:datatype xsd:decimal ;
-        ]
-        [
-            a qudt:NTupleMemberTypeSpec ;
-            qudt:index 3 ;
-            sh:class qudt:Unit ;
-        ]
-    ) 
-.
-
-ex:StatusFlagTupleSpec
-  a qudt:NTupleSpec ;
-  qudt:tupleMemberSpecs (
-      [
-        a qudt:NTupleMemberTypeSpec ;
-        qudt:index 1 ;
-        sh:datatype xsd:string ;
-        sh:minLength 1 ;
-      ]
-      [
-        a qudt:NTupleMemberTypeSpec ;
-        qudt:index 2 ;
-        sh:datatype xsd:boolean ;
-      ]
-    ) ;
-.
-
-ex:badExampleTuple2a
-    a qudt:NTuple ;
-    qudt:conformsToTupleSpec ex:StatusFlagTupleSpec ;
-    qudt:values (
-        "Approved"
-        42
-    ) .
-
-ex:badExampleTuple2b
-    a qudt:NTuple ;
-    qudt:conformsToTupleSpec ex:StatusFlagTupleSpec ;
-    qudt:values (
-        "Approved"
-        true
-        42
-    ) .
-
-ex:badExampleTuple3
-    a qudt:NTuple ;
-    qudt:conformsToTupleSpec ex:MeasurementTupleSpec ;
-    qudt:values (
-        "2026-05-12"^^xsd:date
-        "23.7"^^xsd:decimal
-        42
-    ) .
-
-ex:badExampleQuantityValueTuple
-  a qudt:NTuple ;
-  qudt:conformsToTupleSpec ex:QuantityValueUnitTupleSpec ;
-  qudt:values (
-      quantitykind:Temperature
-      25.6
-      "DegC"
-    ) ;
-.
-  
-ex:badExampleQuantityValueTuple
-    a qudt:NTuple ;
-    qudt:conformsToTupleSpec ex:QuantityValueUnitTupleSpec ;
-    qudt:values (
-        quantitykind:Temperature
-        "25.6"^^xsd:decimal
-        "DegC"
-    ) .
-
-#################################################################
-# Invalid array examples (flat-list representation, Array / ArrayKind split).
-# Each violates exactly one rule; the intended violation is named in the label
-# and description, and the node the constraint reports against is stated
-# explicitly -- rank faults are reported on the qudt:ArrayKind (the blueprint
-# holds dimensionality and dimensions), while length and element-type faults
-# are reported on the qudt:Array instance (it holds qudt:values).
-#################################################################
-
-# INVALID: qudt:elementCount (8) does not equal the length of the flat value
-# list (7). Reported on the array by ArrayLengthCheck.
-ex:BadLengthArrayKind
-  a qudt:HomogeneousArrayKind ;
-  dcterms:description """
-  <p>Blueprint for the invalid array below: a 2&#215;2&#215;2 homogeneous array of
-  decimals, so eight cells are expected. This kind is itself well-formed.</p>"""^^rdf:HTML ;
-  qudt:dimensionality 3 ;
-  qudt:dimensions ( 2 2 2 ) ;
-  qudt:elementCount 8 ;
-  qudt:isHeterogeneous false ;
-  qudt:elementType xsd:decimal ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "Array kind for the invalid short value list array" ;
-.
-ex:badExampleHomogeneousArrayLength
-  a qudt:HomogeneousArray ;
-  dcterms:description """
-  <p>The kind declares elementCount 8 (2&#215;2&#215;2) but the qudt:values list
-  holds only 7 cells.</p>"""^^rdf:HTML ;
-  qudt:datatypeKind ex:BadLengthArrayKind ;
-  qudt:values ( 1.0 2.0 3.0 4.0 5.0 6.0 7.0 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "Invalid homogeneous array - values list length does not match elementCount" ;
-.
-
-# INVALID: a cell violates the shared element type (xsd:decimal). Reported on
-# the array by ArrayElementTypeCheck.
 ex:BadElementTypeArrayKind
   a qudt:HomogeneousArrayKind ;
   dcterms:description """
@@ -204,11 +69,187 @@ ex:BadElementTypeArrayKind
   qudt:dimensionality 1 ;
   qudt:dimensions ( 4 ) ;
   qudt:elementCount 4 ;
-  qudt:isHeterogeneous false ;
   qudt:elementType xsd:decimal ;
+  qudt:isHeterogeneous false ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "Array kind for the invalid element type array" ;
-.
+  rdfs:label "Array kind for the invalid element type array" .
+
+ex:BadHeterogeneousArrayKind
+  a qudt:HeterogenousArrayKind ;
+  dcterms:description """
+  <p>Blueprint for the invalid heterogeneous array below: a 2&#215;3 grid whose
+  per-position types come from <code>ex:TempPressureArraySpec</code>. This kind
+  is itself well-formed.</p>"""^^rdf:HTML ;
+  qudt:conformsToTupleSpec ex:TempPressureArraySpec ;
+  qudt:dataOrder qudt:InnermostIndexFastest ;
+  qudt:dimensionality 2 ;
+  qudt:dimensions ( 2 3 ) ;
+  qudt:elementCount 6 ;
+  qudt:isHeterogeneous true ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Array kind for the invalid heterogeneous array" .
+
+ex:BadLengthArrayKind
+  a qudt:HomogeneousArrayKind ;
+  dcterms:description """
+  <p>Blueprint for the invalid array below: a 2&#215;2&#215;2 homogeneous array of
+  decimals, so eight cells are expected. This kind is itself well-formed.</p>"""^^rdf:HTML ;
+  qudt:dimensionality 3 ;
+  qudt:dimensions ( 2 2 2 ) ;
+  qudt:elementCount 8 ;
+  qudt:elementType xsd:decimal ;
+  qudt:isHeterogeneous false ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Array kind for the invalid short value list array" .
+
+ex:IfcCompoundPlaneAngleConsistentSign
+  a sh:SPARQLConstraint ;
+  sh:message "Compound plane angle has components of mixed sign (ConsistentSign)." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+      SELECT $this WHERE {
+          $this qudt:values ?values .
+          ?values rdf:rest*/rdf:first ?a .
+          ?values rdf:rest*/rdf:first ?b .
+          FILTER ( ?a > 0 && ?b < 0 )
+      }
+  """ .
+
+ex:IfcCompoundPlaneAngleMeasureSpec
+  a qudt:NTupleSpec ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:integer ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:integer ;
+    sh:maxExclusive 60 ;
+    sh:minExclusive -60 ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:datatype xsd:integer ;
+    sh:maxExclusive 60 ;
+    sh:minExclusive -60 ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 4 ;
+    sh:datatype xsd:integer ;
+    sh:maxExclusive 1000000 ;
+    sh:minCount 0 ;
+    sh:minExclusive -1000000 ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "IfcCompoundPlaneAngleMeasure: (degrees, minutes, seconds, [millionth-seconds])" .
+
+ex:MeasurementTupleSpec
+  a qudt:NTupleSpec ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:date ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:decimal ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:class qudt:Unit ;
+  ] ) .
+
+ex:QuantityValueUnitTupleSpec
+  a qudt:NTupleSpec ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:class qudt:QuantityKind ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:decimal ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:class qudt:Unit ;
+  ] ) .
+
+ex:StatusFlagTupleSpec
+  a qudt:NTupleSpec ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:string ;
+    sh:minLength 1 ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:boolean ;
+  ] ) .
+
+ex:TempPressureArraySpec
+  a qudt:NTupleSpec ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:string ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:decimal ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:class qudt:Unit ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 4 ;
+    sh:datatype xsd:string ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 5 ;
+    sh:datatype xsd:decimal ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 6 ;
+    sh:class qudt:Unit ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> .
+
+ex:badExampleArrayRank
+  a qudt:HomogeneousArrayKind ;
+  dcterms:description """
+  <p>dimensionality is 3 but the dimensions list has only 2 entries.</p>"""^^rdf:HTML ;
+  qudt:dimensionality 3 ;
+  qudt:dimensions ( 2 3 ) ;
+  qudt:elementCount 6 ;
+  qudt:elementType xsd:decimal ;
+  qudt:isHeterogeneous false ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Invalid array kind - dimensionality does not match number of dimensions" .
+
+ex:badExampleHeterogeneousArrayType
+  a qudt:HeterogenousArray ;
+  dcterms:description """
+  <p>Position 3 requires sh:class qudt:Unit but the cell is the string
+  "DegC".</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:BadHeterogeneousArrayKind ;
+  qudt:values ( "Temp" 23.7 "DegC" "Pressure" 101.3 unit:PA ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Invalid heterogeneous array - value at position 3 is not a unit" .
+
+ex:badExampleHomogeneousArrayLength
+  a qudt:HomogeneousArray ;
+  dcterms:description """
+  <p>The kind declares elementCount 8 (2&#215;2&#215;2) but the qudt:values list
+  holds only 7 cells.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:BadLengthArrayKind ;
+  qudt:values ( 1.0 2.0 3.0 4.0 5.0 6.0 7.0 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Invalid homogeneous array - values list length does not match elementCount" .
+
 ex:badExampleHomogeneousArrayType
   a qudt:HomogeneousArray ;
   dcterms:description """
@@ -217,24 +258,71 @@ ex:badExampleHomogeneousArrayType
   qudt:datatypeKind ex:BadElementTypeArrayKind ;
   qudt:values ( 1.0 2.0 3.0 "four" ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "Invalid homogeneous array - a cell violates the shared element type" ;
-.
+  rdfs:label "Invalid homogeneous array - a cell violates the shared element type" .
 
-# INVALID: qudt:dimensionality (3) does not equal the number of entries in the
-# qudt:dimensions list (2). Rank is a property of the blueprint, so this is
-# reported on the qudt:ArrayKind by ArrayRankCheck, not on the array below.
-ex:badExampleArrayRank
-  a qudt:HomogeneousArrayKind ;
-  dcterms:description """
-  <p>dimensionality is 3 but the dimensions list has only 2 entries.</p>"""^^rdf:HTML ;
-  qudt:dimensionality 3 ;
-  qudt:dimensions ( 2 3 ) ;
-  qudt:elementCount 6 ;
-  qudt:isHeterogeneous false ;
-  qudt:elementType xsd:decimal ;
+ex:badExampleQuantityValueTuple
+  a qudt:NTuple ;
+  qudt:conformsToTupleSpec ex:QuantityValueUnitTupleSpec ;
+  qudt:values ( quantitykind:Temperature 25.6 "DegC" ) ;
+  qudt:values ( quantitykind:Temperature 25.6 "DegC" ) .
+
+ex:badExampleTuple2a
+  a qudt:NTuple ;
+  qudt:conformsToTupleSpec ex:StatusFlagTupleSpec ;
+  qudt:values ( "Approved" 42 ) .
+
+ex:badExampleTuple2b
+  a qudt:NTuple ;
+  qudt:conformsToTupleSpec ex:StatusFlagTupleSpec ;
+  qudt:values ( "Approved" true 42 ) .
+
+ex:badExampleTuple3
+  a qudt:NTuple ;
+  qudt:conformsToTupleSpec ex:MeasurementTupleSpec ;
+  qudt:values ( "2026-05-12"^^xsd:date 23.7 42 ) .
+
+ex:cpaBadLengthShort
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 52 31 ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "Invalid array kind - dimensionality does not match number of dimensions" ;
-.
+  rdfs:label "only 2 members - violates LIST [3:4] (too short)" .
+
+ex:cpaBadMicroseconds
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 52 31 12 1000000 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "millionth-seconds = 1000000 - violates MicrosecondsInRange" .
+
+ex:cpaBadMinutes
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 52 60 0 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "minutes = 60 - violates MinutesInRange" .
+
+ex:cpaBadSeconds
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 52 31 75 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "seconds = 75 - violates SecondsInRange" .
+
+ex:cpaBadSign
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 52 -31 12 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "mixed signs - violates ConsistentSign" .
+
+ex:cpaBadType
+  a ex:IfcCompoundPlaneAngleMeasure ;
+  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
+  qudt:values ( 52 31 "12" ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "seconds is a string - violates the integer member type" .
+
 ex:exampleArrayWithBadRankKind
   a qudt:HomogeneousArray ;
   dcterms:description """
@@ -245,147 +333,7 @@ ex:exampleArrayWithBadRankKind
   qudt:datatypeKind ex:badExampleArrayRank ;
   qudt:values ( 1.0 2.0 3.0 4.0 5.0 6.0 ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "Array whose array kind has an invalid rank" ;
-.
-
-# Element-type blueprint for the heterogeneous array below (position 3 must be a
-# qudt:Unit).
-ex:TempPressureArraySpec
-  a qudt:NTupleSpec ;
-  qudt:tupleMemberSpecs (
-      [ a qudt:NTupleMemberTypeSpec ; qudt:index 1 ; sh:datatype xsd:string  ]
-      [ a qudt:NTupleMemberTypeSpec ; qudt:index 2 ; sh:datatype xsd:decimal ]
-      [ a qudt:NTupleMemberTypeSpec ; qudt:index 3 ; sh:class    qudt:Unit    ]
-      [ a qudt:NTupleMemberTypeSpec ; qudt:index 4 ; sh:datatype xsd:string  ]
-      [ a qudt:NTupleMemberTypeSpec ; qudt:index 5 ; sh:datatype xsd:decimal ]
-      [ a qudt:NTupleMemberTypeSpec ; qudt:index 6 ; sh:class    qudt:Unit    ]
-    ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-.
-
-# INVALID: the value at position 3 is required to be a qudt:Unit but is the
-# string "DegC". Reported on the array by the per-position NTuple type check,
-# which reaches the tuple spec through qudt:datatypeKind.
-ex:BadHeterogeneousArrayKind
-  a qudt:HeterogenousArrayKind ;
-  dcterms:description """
-  <p>Blueprint for the invalid heterogeneous array below: a 2&#215;3 grid whose
-  per-position types come from <code>ex:TempPressureArraySpec</code>. This kind
-  is itself well-formed.</p>"""^^rdf:HTML ;
-  qudt:dimensionality 2 ;
-  qudt:dimensions ( 2 3 ) ;
-  qudt:elementCount 6 ;
-  qudt:dataOrder qudt:InnermostIndexFastest ;
-  qudt:isHeterogeneous true ;
-  qudt:conformsToTupleSpec ex:TempPressureArraySpec ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "Array kind for the invalid heterogeneous array" ;
-.
-ex:badExampleHeterogeneousArrayType
-  a qudt:HeterogenousArray ;
-  dcterms:description """
-  <p>Position 3 requires sh:class qudt:Unit but the cell is the string
-  "DegC".</p>"""^^rdf:HTML ;
-  qudt:datatypeKind ex:BadHeterogeneousArrayKind ;
-  qudt:values ( "Temp" 23.7 "DegC" "Pressure" 101.3 unit:PA ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "Invalid heterogeneous array - value at position 3 is not a unit" ;
-.
-
-#################################################################
-# Invalid IfcCompoundPlaneAngleMeasure examples (IFC4).
-#   LIST [3:4] OF INTEGER = (degrees, minutes, seconds, [millionth-seconds]).
-# Shape + spec duplicated here so this graph validates standalone. Each
-# instance violates one IFC WHERE rule (or the LIST cardinality / integer type).
-#################################################################
-
-ex:IfcCompoundPlaneAngleMeasure
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:subClassOf qudt:NTuple ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "IfcCompoundPlaneAngleMeasure" ;
-  sh:sparql ex:IfcCompoundPlaneAngleConsistentSign ;
-.
-
-ex:IfcCompoundPlaneAngleConsistentSign
-  a sh:SPARQLConstraint ;
-  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:message "Compound plane angle has components of mixed sign (ConsistentSign)." ;
-  sh:select """
-      SELECT $this WHERE {
-          $this qudt:values ?values .
-          ?values rdf:rest*/rdf:first ?a .
-          ?values rdf:rest*/rdf:first ?b .
-          FILTER ( ?a > 0 && ?b < 0 )
-      }
-  """ ;
-.
-
-ex:IfcCompoundPlaneAngleMeasureSpec
-  a qudt:NTupleSpec ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "IfcCompoundPlaneAngleMeasure: (degrees, minutes, seconds, [millionth-seconds])" ;
-  qudt:tupleMemberSpecs (
-      [ a qudt:NTupleMemberTypeSpec ; qudt:index 1 ; sh:datatype xsd:integer ]
-      [ a qudt:NTupleMemberTypeSpec ; qudt:index 2 ; sh:datatype xsd:integer ; sh:minExclusive -60 ; sh:maxExclusive 60 ]
-      [ a qudt:NTupleMemberTypeSpec ; qudt:index 3 ; sh:datatype xsd:integer ; sh:minExclusive -60 ; sh:maxExclusive 60 ]
-      [ a qudt:NTupleMemberTypeSpec ; qudt:index 4 ; sh:datatype xsd:integer ; sh:minExclusive -1000000 ; sh:maxExclusive 1000000 ; sh:minCount 0 ]
-    ) ;
-.
-
-# INVALID: minutes = 60, outside (-60, 60) — violates MinutesInRange.
-ex:cpaBadMinutes
-  a ex:IfcCompoundPlaneAngleMeasure ;
-  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
-  qudt:values ( 52 60 0 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "minutes = 60 - violates MinutesInRange" ;
-.
-
-# INVALID: seconds = 75, outside (-60, 60) — violates SecondsInRange.
-ex:cpaBadSeconds
-  a ex:IfcCompoundPlaneAngleMeasure ;
-  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
-  qudt:values ( 52 31 75 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "seconds = 75 - violates SecondsInRange" ;
-.
-
-# INVALID: millionth-seconds = 1000000, outside (-1e6, 1e6) — violates MicrosecondsInRange.
-ex:cpaBadMicroseconds
-  a ex:IfcCompoundPlaneAngleMeasure ;
-  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
-  qudt:values ( 52 31 12 1000000 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "millionth-seconds = 1000000 - violates MicrosecondsInRange" ;
-.
-
-# INVALID: components have mixed sign — violates ConsistentSign.
-ex:cpaBadSign
-  a ex:IfcCompoundPlaneAngleMeasure ;
-  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
-  qudt:values ( 52 -31 12 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "mixed signs - violates ConsistentSign" ;
-.
-
-# INVALID: only 2 members — violates the LIST [3:4] cardinality (too short).
-ex:cpaBadLengthShort
-  a ex:IfcCompoundPlaneAngleMeasure ;
-  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
-  qudt:values ( 52 31 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "only 2 members - violates LIST [3:4] (too short)" ;
-.
-
-# INVALID: seconds is a string, not an integer — violates the member type.
-ex:cpaBadType
-  a ex:IfcCompoundPlaneAngleMeasure ;
-  qudt:conformsToTupleSpec ex:IfcCompoundPlaneAngleMeasureSpec ;
-  qudt:values ( 52 31 "12" ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "seconds is a string - violates the integer member type" ;
-.
+  rdfs:label "Array whose array kind has an invalid rank" .
 
 qudt:Array1D_Integers-INVALID
   a qudt:Array ;
