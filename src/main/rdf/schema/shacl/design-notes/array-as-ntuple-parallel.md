@@ -46,15 +46,39 @@ withdrawn: the type-level description of an array is separated from the instance
 
 **Schema as implemented (`SCHEMA_QUDT-DATATYPES_NoOWL.ttl`):**
 
-| Shape | Property shapes | SPARQL constraints |
-|---|---|---|
-| `qudt:Array` | `qudt:Array-values`, `qudt:Array-datatypeKind` | `ArrayLengthCheck`, `ArrayElementTypeCheck` |
-| `qudt:ArrayKind` | `qudt:ArrayKind-dataOrder`, `-isHeterogeneous`, `-elementType`, `-elementCount`, `-conformsToTupleSpec`, plus `qudt:DimensionalityPropertyShape` and `qudt:DimensionsPropertyShape` | `ArrayRankCheck` |
+Every array-shaped datatype now comes as an **instance/kind pair**: the instance carries the values,
+the kind carries the description.
 
-Property shapes declared on `qudt:ArrayKind` are named `qudt:ArrayKind-*`; only the two shapes
-genuinely declared on `qudt:Array` keep the `qudt:Array-*` prefix. (`DimensionalityPropertyShape`
-and `DimensionsPropertyShape` are shared and keep their generic names — renaming them is a separate
+| Instance shape | Kind shape | Instance-side constraints |
+|---|---|---|
+| `qudt:Array` (`qudt:ValuesList`, `qudt:Array-datatypeKind`) | `qudt:ArrayKind` (`qudt:ArrayKind-dataOrder`, `-isHeterogeneous`, `-elementType`, `-elementCount`, `-conformsToTupleSpec`, plus `DimensionalityPropertyShape` / `DimensionsPropertyShape`) | `ValuesListLengthCheck`, `ValuesListElementTypeCheck` |
+| `qudt:HomogeneousArray` | `qudt:HomogeneousArrayKind` | inherited |
+| `qudt:HeterogenousArray` | `qudt:HeterogenousArrayKind` | inherited, plus the four `NTuple*` checks |
+| `qudt:Vector` | `qudt:VectorKind` | `ValuesListLengthCheck`, `ValuesListElementTypeCheck` |
+
+`ArrayRankCheck` is the one kind-side constraint (rank is a blueprint property). The value-list shape
+and its two checks are named `qudt:ValuesList` / `ValuesListLengthCheck` / `ValuesListElementTypeCheck`
+rather than `Array*`, because `qudt:Vector` shares them.
+
+**The instance/kind distinction is load-bearing for the tuple checks.** The four `NTuple*`
+constraints read `$this qudt:values`, so they must hang off the *instance* class
+(`qudt:HeterogenousArray`), never the kind. Putting them on `qudt:HeterogenousArrayKind` makes them
+match nothing on a real blueprint and pass silently — a whole dimension of checking disappears with
+no error.
+
+Property shapes declared on a kind are named for that kind (`qudt:ArrayKind-*`); only the shapes
+genuinely declared on the instance keep the instance prefix. (`DimensionalityPropertyShape` and
+`DimensionsPropertyShape` are shared and keep their generic names — renaming them is a separate
 decision.)
+
+**`qudt:Vector` is a sibling of `qudt:Array`, not a subclass.** It is `rdfs:subClassOf
+qudt:StructuredDatatype` and carries its own `qudt:ValuesList` + `qudt:Vector-datatypeKind`; the
+"a vector is a rank-1 array" relationship is expressed on the kind side, where `qudt:VectorKind`
+is `rdfs:subClassOf qudt:ArrayKind`. `qudt:Vector-datatypeKind` is deliberately `sh:minCount 0`
+for now: the four existing vector instances (`ex:Vector3D_FLOAT-DP`, `-SP`,
+`ex:Vector_DroneVelocities_3D`, `datatype:QuaternionVector-DP`) still describe themselves in the
+legacy `qudt:datatype` / `qudt:dimensions` / `qudt:value` (singular) style and have no kind.
+Tighten to `sh:minCount 1` once they are migrated.
 
 **Validation — no longer deferred.** Item A of the old "Still to do" list is closed. All three array
 constraints plus the five tuple constraints were exercised against both example files (with the unit
@@ -97,11 +121,20 @@ in `ex:exampleTuple3` (pre-existing) and an undeclared `x:` prefix on `ex:3DTemp
 
 **Still open from this revision:**
 
-- `qudt:Vector`, `qudt:Matrix`, `qudt:HomogeneousArray` and `qudt:HeterogenousArray` remain
-  `rdfs:subClassOf qudt:Array`, but homogeneity and rank are now blueprint-level properties, so these
-  subclasses straddle the split. They arguably belong under `qudt:ArrayKind`. Note that the tuple
-  constraints hang off `qudt:HeterogenousArray`, so a heterogeneous array must currently be typed as
-  that class (not bare `qudt:Array`) for its per-position types to be checked at all.
+- ~~`qudt:Vector`, `qudt:Matrix`, `qudt:HomogeneousArray` and `qudt:HeterogenousArray` straddle the
+  split.~~ **Resolved for three of the four (2026-08-24)** — `Homogeneous`/`HeterogenousArray` and
+  `Vector` now each have an instance/kind pair, as tabulated above. A heterogeneous array must be
+  typed `qudt:HeterogenousArray` (not bare `qudt:Array`) for its per-position types to be checked.
+  **Still open: `qudt:Matrix`**, along with `qudt:MultiDimensionalArray` and
+  `qudt:AssociativeArray`, which remain instance-side subclasses of `qudt:Array` with no
+  corresponding kind. A `qudt:MatrixKind` under `qudt:ArrayKind` is the obvious parallel, but nothing
+  currently requires it.
+- `qudt:TableType` and `qudt:TimeSeriesArrayType` were renamed with a `Type` suffix while the array
+  blueprints use `Kind`. `TimeSeriesArrayType` is `rdfs:subClassOf qudt:ArrayKind`, so it is a kind
+  in all but name; the two suffixes should be reconciled.
+- `qudt:Table-*` and `qudt:TimeSeriesArray-*` property shapes still carry the pre-rename prefixes.
+- `qudt:StructuredDatatype-nTuple` and `qudt:TimeSeriesArray-vector` are defined but no longer
+  referenced by any `sh:property` — deliberate detachment, pending a decision to delete them.
 - `qudt:ArrayKind`'s `dcterms:description` is still a near-verbatim copy of `qudt:Array`'s (it
   describes `qudt:values` as living on the kind), its `rdfs:label` is still `"Array"`, and whether
   `rdfs:subClassOf qudt:StructuredDatatype` is right for a blueprint node is unsettled.

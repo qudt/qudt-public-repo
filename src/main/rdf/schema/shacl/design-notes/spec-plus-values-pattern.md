@@ -228,8 +228,12 @@ some future `qudt:Foo`), work through this checklist:
    `qudt:dataOrder` and the element type(s). A brief 2026-07-27 revision made
    arrays *self-describing* (everything on one instance, no blueprint); that was
    reversed on 2026-08-22 once it became clear instances do share shapes in
-   practice. Heterogeneous arrays reuse the tuple engine via the kind's
-   `qudt:conformsToTupleSpec` → `qudt:NTupleSpec`.
+   practice. Each array-shaped variant comes as an **instance/kind pair** —
+   `HomogeneousArray`/`HomogeneousArrayKind`, `HeterogenousArray`/`HeterogenousArrayKind`,
+   `Vector`/`VectorKind`. Heterogeneous arrays reuse the tuple engine via the kind's
+   `qudt:conformsToTupleSpec` → `qudt:NTupleSpec`, but the tuple constraints
+   themselves hang off the **instance** class: they read `qudt:values`, which a
+   blueprint never carries.
 2. **List representation.** Are values a flat list, a nested list, or something
    else? A flat list with a companion `qudt:dimensions` extent list is usually
    easier to validate in SPARQL than deeply nested lists (nested-list
@@ -274,6 +278,10 @@ some future `qudt:Foo`), work through this checklist:
 - **`FILTER EXISTS` where `NOT EXISTS` was meant** — `NTupleMissingRequiredValueCheck`
   fired when a required value *was* present. An inverted check that reports every
   position is easy to mistake for the two defects above; check the polarity first.
+- **Putting a value-reading constraint on a blueprint class** — a `qudt:*Kind` never
+  carries `qudt:values`, so a constraint that walks the value list matches nothing
+  there and reports success. Silent loss of an entire check; after moving a
+  constraint between classes, confirm a known-bad example is still flagged.
 - **Testing against the schema and examples alone** — `sh:class qudt:Unit` and
   similar class facets need the unit and quantity-kind vocabularies loaded, or
   every IRI-valued cell reports a false violation.
