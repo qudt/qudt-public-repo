@@ -15,6 +15,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Deleted incorrect qudt:normativeReference "http://www.iso.org/iso/catalogue_detail?csnumber=43012" from quantitykind:ActiveEnergy
 - Deleted incorrect qudt:isonormativeReference "http://www.iso.org/iso/catalogue_detail?csnumber=43012", from quantitykind:Capacitance, quantitykind:ElectricPotential, quantitykind:Impedance, quantitykind:RateOfChangeOfFrequency
 - Correct typo in quantitykind:ElectricFlux  qudt:expression "$electric-flux$"^^qudt:LatexString ;
+- Fixed some iec61360Code values (removed) and some UNECE Common Code values (removed) to harmonize with the IEC CDD as per G. Rossi
 
 ### Changed
 
