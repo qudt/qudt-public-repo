@@ -1,3 +1,2 @@
-The biggest difference you will see in this release is our scrubbing of the QuantityKind vocabulary to remove commensurability inconsistencies and missing or spurious `qudt:applicableUnit` assertions.
-
-**Breaking:** `unit:BIT`, `unit:BYTE`, `unit:OCTET` and their prefixed/compound ladder are now counting/storage units rather than information-entropy units; consumers using them for information content should switch to `unit:SHANNON`.
+Please note that for those running local Maven builds, Java 25+ is now required to support our stable blank node ordering.
+(If you don't know what I'm talking about, you likely don't need to worry about it! If you are interested, this was Pull Request #1516).
