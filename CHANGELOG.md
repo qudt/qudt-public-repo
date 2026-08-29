@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.5.1] - 2026-08-29
+
 ### Added
 
 - Added `quantitykind:RadonExposure` (time-integrated radon activity concentration, ISO 16641), with the existing `unit:BQ-SEC-PER-M3` re-homed to it from `quantitykind:AbsoluteActivity` and the new `unit:BQ-HR-PER-M3` ([Henrike Fleischhack](https://github.com/henrikef)).
@@ -955,9 +957,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 [#1498]: https://github.com/qudt/qudt-public-repo/issues/1498
 [#1501]: https://github.com/qudt/qudt-public-repo/issues/1501
 [#1502]: https://github.com/qudt/qudt-public-repo/issues/1502
-[#1503]: https://github.com/qudt/qudt-public-repo/issues/1503
 [#1505]: https://github.com/qudt/qudt-public-repo/issues/1505
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.5.0...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.5.1...HEAD
+[3.5.1]: https://github.com/qudt/qudt-public-repo/compare/v3.5.0...v3.5.1
 [3.5.0]: https://github.com/qudt/qudt-public-repo/compare/v3.4.0...v3.5.0
 [3.4.0]: https://github.com/qudt/qudt-public-repo/compare/v3.3.0...v3.4.0
 [3.3.0]: https://github.com/qudt/qudt-public-repo/compare/v3.2.1...v3.3.0
