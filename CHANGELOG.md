@@ -10,10 +10,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Changed
 
 - Completed deprecation of `qkdv:A0E0L0I0M0H0T0D0` (invalid dimension vector, all 8 exponents zero) with `dcterms:isReplacedBy qkdv:A0E0L0I0M0H0T0D1` and `qudt:deprecatedInVersion` ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
+- Classified the 38 `qkdv:QuantityKindDimensionVector` individuals that had no unit-system subclass as `qudt:QuantityKindDimensionVector_SI`, matching the classification already used by every other non-deprecated dimension vector in the vocabulary ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
 
 ### Added
 
-- Added SHACL QA shapes to catch `QuantityKindDimensionVector` data-quality issues going forward: missing unit-system classification (warning), no referencing Unit/QuantityKind/PhysicalConstant (warning), and dimensionlessExponent inconsistent with the 7 physical exponents (violation) ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
+- Added SHACL QA shapes to catch `QuantityKindDimensionVector` data-quality issues going forward: missing unit-system classification (warning), no referencing Unit/QuantityKind/PhysicalConstant (info), and dimensionlessExponent inconsistent with the 7 physical exponents (violation) ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
 
 ## [3.5.1] - 2026-08-29
 
