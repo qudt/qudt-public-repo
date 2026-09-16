@@ -11,6 +11,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Completed deprecation of `qkdv:A0E0L0I0M0H0T0D0` (invalid dimension vector, all 8 exponents zero) with `dcterms:isReplacedBy qkdv:A0E0L0I0M0H0T0D1` and `qudt:deprecatedInVersion` ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
 - Classified the 38 `qkdv:QuantityKindDimensionVector` individuals that had no unit-system subclass as `qudt:QuantityKindDimensionVector_SI`, matching the classification already used by every other non-deprecated dimension vector in the vocabulary ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
+- Deprecated 4 further `qkdv:QuantityKindDimensionVector` individuals with the same all-zero-vs-dimensionless naming defect as `A0E0L0I0M0H0T0D0` (`A0E0L2I0M1H0T-3D-1`, `A0E1L0I0M0H0T0D-1`, `A0E0L0I0M1H0T-3D1`, `A0E0L4I0M1H0T-3D-1`), each `dcterms:isReplacedBy` its already-in-use, correctly-named `D0` counterpart ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
 
 ### Added
 
