@@ -461,7 +461,7 @@ qudt:IntegerListShape
   ] ;
   sh:property [
     sh:or ( [
-      sh:node ( ) ;
+      sh:hasValue ( ) ;
     ] [
       sh:node qudt:IntegerListShape ;
     ] ) ;
@@ -600,6 +600,31 @@ qudt:NTupleMemberTypeSpec
   sh:node qudt:NTupleMemberTypeSpec-type ;
   sh:property qudt:NTupleMemberTypeSpec-index .
 
+qudt:NTupleSpec
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+    <p>A SHACL node shape that defines the ordered member constraints
+        for a tuple. A tuple specification contains an RDF list of
+        member specifications, each describing the constraints for a
+        particular tuple position.
+    </p>
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
+  rdfs:label "N-Tuple Specification" ;
+  sh:property [
+    sh:maxCount 1 ;
+    sh:minCount 1 ;
+    sh:node qudt:RDFListShape ;
+    sh:path qudt:tupleMemberSpecs ;
+  ] ;
+  sh:property [
+    sh:class qudt:NTupleMemberTypeSpec ;
+    sh:node qudt:NTupleMemberTypeSpec ;
+    sh:path ( qudt:tupleMemberSpecs [
+      sh:zeroOrMorePath rdf:rest ;
+    ] rdf:first ) ;
+  ] .
+
 qudt:OrderedCollection
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
@@ -660,7 +685,7 @@ qudt:QuantityKindList
   ] ;
   sh:property [
     sh:or ( [
-      sh:node ( ) ;
+      sh:hasValue ( ) ;
     ] [
       sh:node qudt:QuantityKindList ;
     ] ) ;
@@ -714,7 +739,7 @@ qudt:ScalarListShape
   ] ;
   sh:property [
     sh:or ( [
-      sh:node ( ) ;
+      sh:hasValue ( ) ;
     ] [
       sh:node qudt:ScalarListShape ;
     ] ) ;
@@ -1011,6 +1036,13 @@ qudt:columns
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
   rdfs:label "columns" .
 
+qudt:conformsToTupleSpec
+  a rdf:Property ;
+  rdfs:comment "Points at the qudt:NTupleSpec that gives the per-position element types of a tuple or of a heterogeneous array. On an array kind the positions are addressed 1-based over the flat value list of each instance." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
+  rdfs:label "conforms to tuple spec" ;
+  rdfs:range qudt:NTupleSpec .
+
 qudt:dataOrder
   a rdf:Property ;
   rdfs:comment "The order in which the values of a multi-dimensional array are laid out in the array's flat value list. When absent, the default is qudt:InnermostIndexFastest." ;
@@ -1098,10 +1130,23 @@ qudt:incrementDatatype
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
   rdfs:label "increment datatype" .
 
+qudt:index
+  a rdf:Property ;
+  rdfs:comment "The 1-based position within a tuple that a qudt:NTupleMemberTypeSpec constrains." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
+  rdfs:label "index" .
+
 qudt:isHeterogeneous
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
   rdfs:label "is heterogeneous" .
+
+qudt:nTuple
+  a rdf:Property ;
+  rdfs:comment "Relates a structured datatype to the qudt:NTuple that carries its ordered member values." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
+  rdfs:label "n-tuple" ;
+  rdfs:range qudt:NTuple .
 
 qudt:optional
   a rdf:Property ;
@@ -1131,6 +1176,12 @@ qudt:rows
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
   rdfs:label "rows" .
+
+qudt:tupleMemberSpecs
+  a rdf:Property ;
+  rdfs:comment "The ordered RDF list of qudt:NTupleMemberTypeSpec resources held by a qudt:NTupleSpec, one per tuple position." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
+  rdfs:label "tuple member specs" .
 
 qudt:values
   a rdf:Property ;
@@ -1215,6 +1266,13 @@ qudt:ArrayRankCheck
             FILTER ( ?dimensionCount != ?dimensionality )
         }
     """ .
+
+qudt:BalancedTree-maxDepth
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
+  sh:datatype xsd:integer ;
+  sh:maxCount 1 ;
+  sh:path qudt:maxDepth .
 
 qudt:CompositeDataStructure-dataElement
   a sh:PropertyShape ;
@@ -1632,31 +1690,6 @@ qudt:NTupleRangeCheck
             )
         }
     """ .
-
-qudt:NTupleSpec
-  a rdfs:class, sh:NodeShape ;
-  dcterms:description """
-    <p>A SHACL node shape that defines the ordered member constraints
-        for a tuple. A tuple specification contains an RDF list of
-        member specifications, each describing the constraints for a
-        particular tuple position.
-    </p>
-    """ ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  rdfs:label "N-Tuple Specification" ;
-  sh:property [
-    sh:maxCount 1 ;
-    sh:minCount 1 ;
-    sh:node qudt:RDFListShape ;
-    sh:path qudt:tupleMemberSpecs ;
-  ] ;
-  sh:property [
-    sh:class qudt:NTupleMemberTypeSpec ;
-    sh:node qudt:NTupleMemberTypeSpec ;
-    sh:path ( qudt:tupleMemberSpecs [
-      sh:zeroOrMorePath rdf:rest ;
-    ] rdf:first ) ;
-  ] .
 
 qudt:NTupleTypeCheck
   a sh:SPARQLConstraint ;
