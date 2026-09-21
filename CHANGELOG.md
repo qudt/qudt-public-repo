@@ -7,6 +7,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+- Added `unit:GM-PER-TONNE` and `unit:KiloGM-PER-TONNE` as dimensionless mass-ratio units.
+
 ## [3.5.1] - 2026-08-29
 
 ### Added
