@@ -1,0 +1,25 @@
+name: Test issue labeling
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/scripts/issue-labeling*'
+      - '.github/prompts/**'
+      - '.github/workflows/*-issues.yml'
+      - '.github/workflows/test-issue-labeling.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Test issue labeling
+        run: node --test .github/scripts/issue-labeling.test.cjs

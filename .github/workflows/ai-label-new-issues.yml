@@ -1,0 +1,166 @@
+name: AI label new issues
+
+on:
+  issues:
+    types: [opened, reopened, edited]
+
+permissions:
+  contents: read
+  issues: write
+  copilot-requests: write
+
+jobs:
+  classify:
+    if: ${{ !contains(github.event.issue.labels.*.name, 'ai/suggested-labels') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: ai-label-issue-${{ github.event.issue.number }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check current issue and prepare input
+        id: prepare
+        uses: actions/github-script@v7
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        with:
+          script: |
+            const { prepareIssue } = require('./.github/scripts/issue-labeling.cjs');
+            await prepareIssue({
+              github, context, core,
+              issueNumber: Number(process.env.ISSUE_NUMBER)
+            });
+
+      - name: Load prompt version
+        if: steps.prepare.outputs.classify == 'true'
+        run: |
+          PROMPT_VERSION="$(tr -d '\r\n' < .github/prompts/issue-label-system.version)"
+
+          if [ -z "$PROMPT_VERSION" ]; then
+            echo "Prompt version file is empty"
+            exit 1
+          fi
+
+          echo "PROMPT_VERSION=$PROMPT_VERSION" >> "$GITHUB_ENV"
+
+      - name: Build repository context
+        if: steps.prepare.outputs.classify == 'true'
+        run: |
+          {
+            echo "Prompt version:"
+            echo "$PROMPT_VERSION"
+
+            echo ""
+            echo "Curated QUDT repository context:"
+            cat .github/ai-context/qudt-repository-context.txt
+
+            echo ""
+            echo "Checked-out repository revision:"
+            git rev-parse HEAD
+
+            echo ""
+            echo "Current relevant repository file map:"
+
+            {
+              if [ -f pom.xml ]; then
+                echo "pom.xml"
+              fi
+
+              for path in \
+                .github/workflows \
+                src/main/rdf/schema \
+                src/main/rdf/validation \
+                src/main/rdf/vocab \
+                src/main/rdf/community \
+                src/main/rdf/submissions \
+                src/build
+              do
+                if [ -d "$path" ]; then
+                  find "$path" -maxdepth 3 -type f
+                fi
+              done
+            } | sort | sed -n '1,400p'
+
+            if [ -f README.md ]; then
+              echo ""
+              echo "README excerpt:"
+              sed -n '1,100p' README.md
+            fi
+
+            if [ -f BUILDING.md ]; then
+              echo ""
+              echo "BUILDING excerpt:"
+              sed -n '1,220p' BUILDING.md
+            fi
+
+            if [ -f CHANGELOG.md ]; then
+              echo ""
+              echo "Recent changelog excerpt:"
+              sed -n '1,160p' CHANGELOG.md
+            fi
+          } > repository-context.txt
+
+      - name: Build user prompt
+        if: steps.prepare.outputs.classify == 'true'
+        run: |
+          {
+            echo "Repository context:"
+            cat repository-context.txt
+
+            echo ""
+            echo "Existing issue labels:"
+            cat issue-labels.json
+
+            echo ""
+            echo "Issue title:"
+            cat issue-title.txt
+
+            echo ""
+            echo "Issue body:"
+            cat issue-body.md
+          } > issue-prompt.txt
+
+      - name: Set up Node.js for GitHub Copilot CLI
+        if: steps.prepare.outputs.classify == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+
+      - name: Install GitHub Copilot CLI
+        if: steps.prepare.outputs.classify == 'true'
+        run: npm install --global @github/copilot
+
+      - name: Classify issue with GitHub Copilot
+        id: classify
+        if: steps.prepare.outputs.classify == 'true'
+        uses: actions/ai-inference@v3
+        env:
+          # Organization-owned repositories should use the short-lived workflow
+          # token. No Copilot PAT or repository secret is required.
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          # If COPILOT_MODEL is unset, Copilot CLI selects an allowed default.
+          model: ${{ vars.COPILOT_MODEL }}
+          system-prompt-file: .github/prompts/issue-label-system.txt
+          prompt-file: issue-prompt.txt
+
+      - name: Validate and apply safe labels
+        if: steps.prepare.outputs.classify == 'true'
+        uses: actions/github-script@v7
+        env:
+          AI_RESPONSE: ${{ steps.classify.outputs.response }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        with:
+          script: |
+            const { applyLabels } = require('./.github/scripts/issue-labeling.cjs');
+            await applyLabels({
+              github, context, core,
+              issueNumber: Number(process.env.ISSUE_NUMBER),
+              response: process.env.AI_RESPONSE || "",
+              dryRun: false,
+              promptVersion: process.env.PROMPT_VERSION
+            });

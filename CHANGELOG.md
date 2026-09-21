@@ -15,6 +15,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added automatic issue labeling and on-demand labeling of existing issues, with historical label checks to prevent relabeling after maintainer review.
 - Added SHACL QA shapes to catch `QuantityKindDimensionVector` data-quality issues going forward: missing unit-system classification (warning), no referencing Unit/QuantityKind/PhysicalConstant (info), and dimensionlessExponent inconsistent with the 7 physical exponents (violation) ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
 - Added `unit:GM-PER-TONNE` and `unit:KiloGM-PER-TONNE` as dimensionless mass-ratio units.
 
