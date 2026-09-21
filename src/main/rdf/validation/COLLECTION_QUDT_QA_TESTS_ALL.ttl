@@ -319,6 +319,82 @@ qudt:DerivableDimensionVectorMissing
   ] ;
   sh:targetClass qudt:Unit .
 
+qudt:DimensionVectorMissingUnitSystemType
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Ensures every non-deprecated QuantityKindDimensionVector is classified under at least one unit-system subclass (SI/CGS/ISO/Imperial)" ;
+  sh:severity sh:Warning ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "A dimension vector with no unit-system subclass is never published (the website's publish filter selects on a system-specific subtype)" ;
+    sh:message "{$this} is not classified under any unit-system subclass (SI/CGS/ISO/Imperial) and will not be published" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+SELECT $this
+WHERE {
+    FILTER NOT EXISTS { $this qudt:deprecated true }
+    FILTER NOT EXISTS {
+        $this a ?type .
+        ?type rdfs:subClassOf* qudt:QuantityKindDimensionVector .
+        FILTER(?type != qudt:QuantityKindDimensionVector)
+    }
+}
+""" ;
+  ] ;
+  sh:targetClass qudt:QuantityKindDimensionVector .
+
+qudt:DimensionVectorUnreferenced
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Flags QuantityKindDimensionVector individuals not reachable from any Unit, QuantityKind or PhysicalConstant" ;
+  sh:severity sh:Info ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "A dimension vector with no referencing Unit/QuantityKind/PhysicalConstant is orphaned data" ;
+    sh:message "{$this} is not referenced by any Unit, QuantityKind or PhysicalConstant via hasDimensionVector, numeratorDimensionVector or denominatorDimensionVector" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+SELECT $this
+WHERE {
+    FILTER NOT EXISTS { $this qudt:deprecated true }
+    FILTER NOT EXISTS {
+        ?ref ?p $this .
+        FILTER(?p IN (qudt:hasDimensionVector, qudt:numeratorDimensionVector, qudt:denominatorDimensionVector))
+    }
+}
+""" ;
+  ] ;
+  sh:targetClass qudt:QuantityKindDimensionVector .
+
+qudt:DimensionlessExponentInconsistentWithPhysicalExponents
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Ensures dimensionlessExponent is 1 exactly when the 7 physical exponents are all 0, and 0 otherwise" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Per QUDT convention, dimensionlessExponent is 1 iff the 7 physical exponents are all 0, else 0" ;
+    sh:message "{$this} has dimensionlessExponent {?dle}, inconsistent with its 7 physical exponents being all-zero: {?allZero}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+SELECT $this ?dle ?allZero
+WHERE {
+    FILTER NOT EXISTS { $this qudt:deprecated true }
+    $this qudt:dimensionExponentForAmountOfSubstance ?a ;
+          qudt:dimensionExponentForElectricCurrent ?e ;
+          qudt:dimensionExponentForLength ?l ;
+          qudt:dimensionExponentForLuminousIntensity ?j ;
+          qudt:dimensionExponentForMass ?m ;
+          qudt:dimensionExponentForThermodynamicTemperature ?h ;
+          qudt:dimensionExponentForTime ?t ;
+          qudt:dimensionlessExponent ?dle .
+    BIND((?a = 0 && ?e = 0 && ?l = 0 && ?j = 0 && ?m = 0 && ?h = 0 && ?t = 0) AS ?allZero)
+    FILTER( (?allZero && ?dle != 1) || (!?allZero && ?dle != 0) )
+}
+""" ;
+  ] ;
+  sh:targetClass qudt:QuantityKindDimensionVector .
+
 qudt:ExactMatchGoesBothWaysConstraint
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
