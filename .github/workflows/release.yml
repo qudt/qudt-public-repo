@@ -158,14 +158,18 @@ jobs:
 
       # build release
       - name: Build with Maven, deploying to sonatype staging repo
-        run: | 
+        run: |
           mvn -Pzip -B release:clean release:prepare release:perform \
             -DtagNameFormat="v@{project.version}" \
-            -DreleaseVersion=${{ inputs.release_version }} \
-            -DdevelopmentVersion=${{ steps.resolve_versions.outputs.next_snapshot_version }} \
-            -Darguments="-DqudtPrevReleaseYear=${{ inputs.previous_release_year }} -DqudtPrevReleaseMonth=${{ inputs.previous_release_month }}"
+            -DreleaseVersion="${release_version}" \
+            -DdevelopmentVersion="${next_snapshot_version}" \
+            -Darguments="-DqudtPrevReleaseYear=${previous_release_year} -DqudtPrevReleaseMonth=${previous_release_month}"
         env:
           password: ${{ secrets.GITHUB_TOKEN }}
+          release_version: ${{ inputs.release_version }}
+          next_snapshot_version: ${{ steps.resolve_versions.outputs.next_snapshot_version }}
+          previous_release_year: ${{ inputs.previous_release_year }}
+          previous_release_month: ${{ inputs.previous_release_month }}
 
       # Guard the irreversible steps that follow: the GitHub Release asset and the qudt-r2
       # website publish both consume this exact zip, and qudt-r2 deploys it to the live site
