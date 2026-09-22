@@ -24,7 +24,7 @@ DOI reference for citations: https://doi.org/10.25504/FAIRsharing.d3pqw7
 
 Here is the core design pattern of the QUDT ontology:
 
-![QUDT Triad Pattern](https://github.com/qudt/qudt-public-repo/wiki/Quantity_Triad_Pattern.png)
+![QUDT Triad Pattern](https://github.com/qudt/qudt-public-repo/wiki/Quantity_Triad_Pattern.svg)
 
 Our current plan is to deliver this material in even more powerful ways. The [website](https://qudt.org) now hosts a SPARQL endpoint, as well as an engine supporting SPARQL and GraphQL queries. Fully resolvable URIs at the graph and instance level are available online. Eventually we will also support resolvable class URIs as well. We are also creating a series of <a href="https://github.com/qudt/qudt-public-repo/wiki/User-Guide-for-QUDT"> User Guides</a> on the wiki for this repository.
 
