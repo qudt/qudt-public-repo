@@ -7,12 +7,12 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.5.2] - 2026-09-22
+
 ### Added
 
 - Added SHACL QA shapes to catch `QuantityKindDimensionVector` data-quality issues going forward: missing unit-system classification (warning), no referencing Unit/QuantityKind/PhysicalConstant (info), and dimensionlessExponent inconsistent with the 7 physical exponents (violation) ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
 - Added `unit:GM-PER-TONNE` and `unit:KiloGM-PER-TONNE` as dimensionless mass-ratio units.
-
-### Changed
 
 ### Deprecated
 
@@ -974,7 +974,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 [#1501]: https://github.com/qudt/qudt-public-repo/issues/1501
 [#1502]: https://github.com/qudt/qudt-public-repo/issues/1502
 [#1505]: https://github.com/qudt/qudt-public-repo/issues/1505
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.5.1...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.5.2...HEAD
+[3.5.2]: https://github.com/qudt/qudt-public-repo/compare/v3.5.1...v3.5.2
 [3.5.1]: https://github.com/qudt/qudt-public-repo/compare/v3.5.0...v3.5.1
 [3.5.0]: https://github.com/qudt/qudt-public-repo/compare/v3.4.0...v3.5.0
 [3.4.0]: https://github.com/qudt/qudt-public-repo/compare/v3.3.0...v3.4.0
