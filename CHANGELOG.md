@@ -7,17 +7,26 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
-### Changed
+### Added
 
-- Completed deprecation of `qkdv:A0E0L0I0M0H0T0D0` (invalid dimension vector, all 8 exponents zero) with `dcterms:isReplacedBy qkdv:A0E0L0I0M0H0T0D1` and `qudt:deprecatedInVersion` ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
-- Classified the 38 `qkdv:QuantityKindDimensionVector` individuals that had no unit-system subclass as `qudt:QuantityKindDimensionVector_SI` ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
-- Deprecated 4 further `qkdv:QuantityKindDimensionVector` individuals with the same all-zero-vs-dimensionless naming defect as `A0E0L0I0M0H0T0D0` (`A0E0L2I0M1H0T-3D-1`, `A0E1L0I0M0H0T0D-1`, `A0E0L0I0M1H0T-3D1`, `A0E0L4I0M1H0T-3D-1`), each `dcterms:isReplacedBy` its already-in-use, correctly-named `D0` counterpart ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
+- Added `unit:GM-PER-KiloW-HR` and `unit:KiloGM-PER-KiloW-HR` (`quantitykind:MassPerEnergy`), used for emission factors such as the carbon intensity of electricity, `unit:CCY_EUR-PER-MegaW-HR` (`quantitykind:CostPerEnergy`), used for wholesale electricity prices, and its power counterpart `unit:CCY_EUR-PER-MegaW` (`quantitykind:CostPerPower`), alongside the existing `unit:CCY_EUR-PER-KiloW`.
+
+## [3.5.2] - 2026-09-22
 
 ### Added
 
 - Added automatic issue labeling and on-demand labeling of existing issues, with historical label checks to prevent relabeling after maintainer review.
 - Added SHACL QA shapes to catch `QuantityKindDimensionVector` data-quality issues going forward: missing unit-system classification (warning), no referencing Unit/QuantityKind/PhysicalConstant (info), and dimensionlessExponent inconsistent with the 7 physical exponents (violation) ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
 - Added `unit:GM-PER-TONNE` and `unit:KiloGM-PER-TONNE` as dimensionless mass-ratio units.
+
+### Deprecated
+
+- Completed deprecation of `qkdv:A0E0L0I0M0H0T0D0` (invalid dimension vector, all 8 exponents zero) with `dcterms:isReplacedBy qkdv:A0E0L0I0M0H0T0D1` and `qudt:deprecatedInVersion` ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
+- Deprecated 4 further `qkdv:QuantityKindDimensionVector` individuals with the same all-zero-vs-dimensionless naming defect as `A0E0L0I0M0H0T0D0` (`A0E0L2I0M1H0T-3D-1`, `A0E1L0I0M0H0T0D-1`, `A0E0L0I0M1H0T-3D1`, `A0E0L4I0M1H0T-3D-1`), each `dcterms:isReplacedBy` its already-in-use, correctly-named `D0` counterpart ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
+
+### Fixed
+
+- Classified the 38 `qkdv:QuantityKindDimensionVector` individuals that had no unit-system subclass as `qudt:QuantityKindDimensionVector_SI` ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
 
 ## [3.5.1] - 2026-08-29
 
@@ -970,7 +979,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 [#1501]: https://github.com/qudt/qudt-public-repo/issues/1501
 [#1502]: https://github.com/qudt/qudt-public-repo/issues/1502
 [#1505]: https://github.com/qudt/qudt-public-repo/issues/1505
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.5.1...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.5.2...HEAD
+[3.5.2]: https://github.com/qudt/qudt-public-repo/compare/v3.5.1...v3.5.2
 [3.5.1]: https://github.com/qudt/qudt-public-repo/compare/v3.5.0...v3.5.1
 [3.5.0]: https://github.com/qudt/qudt-public-repo/compare/v3.4.0...v3.5.0
 [3.4.0]: https://github.com/qudt/qudt-public-repo/compare/v3.3.0...v3.4.0
