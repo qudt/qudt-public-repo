@@ -11,6 +11,12 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Added `unit:GM-PER-KiloW-HR` and `unit:KiloGM-PER-KiloW-HR` (`quantitykind:MassPerEnergy`), used for emission factors such as the carbon intensity of electricity, `unit:CCY_EUR-PER-MegaW-HR` (`quantitykind:CostPerEnergy`), used for wholesale electricity prices, and its power counterpart `unit:CCY_EUR-PER-MegaW` (`quantitykind:CostPerPower`), alongside the existing `unit:CCY_EUR-PER-KiloW`.
 
+### Fixed
+
+- Corrected the quantity kind of `constant:MagneticConstant` and `constant:ElectromagneticPermeabilityOfVacuum` (μ₀) from `quantitykind:Permittivity` to `quantitykind:ElectromagneticPermeability`, added their missing `qudt:hasDimensionVector`, and corrected the unit of `constant:Value_MagneticConstant` from `unit:FARAD-PER-M` to `unit:H-PER-M`.
+- Corrected the quantity kind of `constant:BohrMagneton` and `constant:NuclearMagneton` from `quantitykind:MagneticDipoleMoment` (weber metre) to `quantitykind:MagneticMoment` (joule per tesla, the unit of their values), added their missing `qudt:hasDimensionVector`, and clarified their descriptions.
+- Rewrote the descriptions of `quantitykind:MagneticMoment`, `quantitykind:MagneticAreaMoment` and `quantitykind:MagneticDipoleMoment`, which contradicted each other, to distinguish the magnetic (area) moment (A·m²) from the magnetic dipole moment of IEC 60050-121 (j = μ₀m, Wb·m). Corrected the `latexDefinition` and symbol of `quantitykind:MagneticDipoleMoment` accordingly.
+
 ## [3.5.2] - 2026-09-22
 
 ### Added
