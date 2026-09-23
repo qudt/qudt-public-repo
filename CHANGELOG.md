@@ -14,6 +14,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Corrected the quantity kind of `constant:MagneticConstant` and `constant:ElectromagneticPermeabilityOfVacuum` (μ₀) from `quantitykind:Permittivity` to `quantitykind:ElectromagneticPermeability`, added their missing `qudt:hasDimensionVector`, and corrected the unit of `constant:Value_MagneticConstant` from `unit:FARAD-PER-M` to `unit:H-PER-M`.
+- Updated `constant:Value_MagneticConstant` to the 2022 CODATA value 1.256 637 061 27(20) × 10⁻⁶ H/m, adding its standard uncertainty, and removed `qudt:exactConstant true` from both μ₀ constants: since the 2019 SI redefinition μ₀ is a measured value rather than exactly 4π × 10⁻⁷ H/m.
 - Corrected the quantity kind of `constant:BohrMagneton` and `constant:NuclearMagneton` from `quantitykind:MagneticDipoleMoment` (weber metre) to `quantitykind:MagneticMoment` (joule per tesla, the unit of their values), added their missing `qudt:hasDimensionVector`, and clarified their descriptions.
 - Rewrote the descriptions of `quantitykind:MagneticMoment`, `quantitykind:MagneticAreaMoment` and `quantitykind:MagneticDipoleMoment`, which contradicted each other, to distinguish the magnetic (area) moment (A·m²) from the magnetic dipole moment of IEC 60050-121 (j = μ₀m, Wb·m). Corrected the `latexDefinition` and symbol of `quantitykind:MagneticDipoleMoment` accordingly.
 
