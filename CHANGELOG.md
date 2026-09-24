@@ -15,6 +15,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Changed
 
 - Removed `qudt:hasDimensionVector` from the ten physical constants that stated one (`constant:AtomicMassConstant`, `constant:AvogadroConstant`, `constant:FaradayConstant`, `constant:FirstRadiationConstant`, `constant:GravitationalConstant`, `constant:JosephsonConstant`, `constant:MolarGasConstant`, `constant:PlanckConstant`, `constant:StefanBoltzmannConstant` and `constant:UniversalGasConstant`). A constant's dimension vector is fully determined by its quantity kind and by the unit of its value, so stating it again is redundant (DRY) and risks inconsistency: that of `constant:GravitationalConstant` was wrong. Obtain it via `qudt:hasQuantityKind/qudt:hasDimensionVector` or `qudt:quantityValue/qudt:hasUnit/qudt:hasDimensionVector`.
+- The SHACL schema no longer declares `qudt:hasDimensionVector` for `qudt:PhysicalConstant` (property shape `qudt:PhysicalConstant-hasDimensionVector` removed; the derived OWL schema drops the corresponding restriction). The closed-world QA check therefore now reports the triple on any constant, which keeps the change above in force.
 
 ### Fixed
 
