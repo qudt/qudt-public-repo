@@ -12,6 +12,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `unit:GM-PER-KiloW-HR` and `unit:KiloGM-PER-KiloW-HR` (`quantitykind:MassPerEnergy`), used for emission factors such as the carbon intensity of electricity, `unit:CCY_EUR-PER-MegaW-HR` (`quantitykind:CostPerEnergy`), used for wholesale electricity prices, and its power counterpart `unit:CCY_EUR-PER-MegaW` (`quantitykind:CostPerPower`), alongside the existing `unit:CCY_EUR-PER-KiloW`.
 - Added `quantitykind:GravitationalConstant` (L³M⁻¹T⁻², IEC 62720 UAD059, ISO 80000-4), the quantity kind of the Newtonian constant of gravitation _G_. Its units `unit:N-M2-PER-KiloGM2` and `unit:M3-PER-KiloGM-SEC2` are now `qudt:unitForQuantityKind` it instead of `qudt:categorizedByQuantityKind quantitykind:Unknown`.
 
+- Added two SHACL QA shapes for physical constants: `qudt:InconsistentConstantUnitAndQuantityKindDimensionVectorConstraint` (violation) requires the unit of a constant's value to have the dimension vector of the constant's quantity kind, and `qudt:ConstantUnitNotApplicableToQuantityKindWarning` (warning) flags a value unit that is not an applicable unit of the constant's quantity kind.
+
 ### Changed
 
 - Removed `qudt:hasDimensionVector` from the ten physical constants that stated one (`constant:AtomicMassConstant`, `constant:AvogadroConstant`, `constant:FaradayConstant`, `constant:FirstRadiationConstant`, `constant:GravitationalConstant`, `constant:JosephsonConstant`, `constant:MolarGasConstant`, `constant:PlanckConstant`, `constant:StefanBoltzmannConstant` and `constant:UniversalGasConstant`). A constant's dimension vector is fully determined by its quantity kind and by the unit of its value, so stating it again is redundant (DRY) and risks inconsistency: that of `constant:GravitationalConstant` was wrong. Obtain it via `qudt:hasQuantityKind/qudt:hasDimensionVector` or `qudt:quantityValue/qudt:hasUnit/qudt:hasDimensionVector`.
@@ -19,6 +21,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Corrected the quantity kind of `constant:ConductanceQuantum` from `quantitykind:ElectricConductivity` (S/m) to `quantitykind:Conductance` (S), and of `constant:Pi` from `quantitykind:Angle` to `quantitykind:DimensionlessRatio`, since π is the ratio of a circle's circumference to its diameter.
+- Linked `unit:EV-SEC` to `quantitykind:Action`, `unit:MI-PER-HR` to `quantitykind:Speed` and `unit:PER-M3` to `quantitykind:NumberDensity` via `qudt:unitForQuantityKind`, so that the units of the Planck constant in eV·s, the speed of light in mph and the Loschmidt constant are applicable units of their quantity kinds.
 - Corrected the quantity kind of `constant:GravitationalConstant` from `quantitykind:GravitationalAttraction`, which is a force, to `quantitykind:GravitationalConstant`. Gave its duplicate `constant:NewtonianConstantOfGravitation` the same quantity kind, and linked the two with `qudt:exactMatch`.
 - Corrected the quantity kind of `constant:MagneticConstant` and `constant:ElectromagneticPermeabilityOfVacuum` (μ₀) from `quantitykind:Permittivity` to `quantitykind:ElectromagneticPermeability`, and corrected the unit of `constant:Value_MagneticConstant` from `unit:FARAD-PER-M` to `unit:H-PER-M`.
 - Updated `constant:Value_MagneticConstant` to the 2022 CODATA value 1.256 637 061 27(20) × 10⁻⁶ H/m, adding its standard uncertainty, and removed `qudt:exactConstant true` from both μ₀ constants: since the 2019 SI redefinition μ₀ is a measured value rather than exactly 4π × 10⁻⁷ H/m.

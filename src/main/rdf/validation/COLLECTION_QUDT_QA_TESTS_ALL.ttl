@@ -536,6 +536,54 @@ FILTER (?udv != ?qdv) .
   ] ;
   sh:targetClass qudt:Unit .
 
+qudt:InconsistentConstantUnitAndQuantityKindDimensionVectorConstraint
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Checks that the unit of a PhysicalConstant's value has the dimension vector of the constant's quantity kind" ;
+  sh:severity sh:Violation ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Constants carry no dimension vector of their own (it is derivable), so their dimensional consistency is checked between the unit of their value and their quantity kind" ;
+    sh:message "Constant {$this} has a value in unit {?unit} with dimension vector {?udv}, which is not the dimension vector {?qdv} of its quantity kind {?qk}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+SELECT $this ?unit ?udv ?qk ?qdv
+WHERE {
+FILTER NOT EXISTS {$this qudt:deprecated true} .
+$this qudt:quantityValue/qudt:hasUnit ?unit .
+?unit qudt:hasDimensionVector ?udv .
+$this qudt:hasQuantityKind ?qk .
+?qk qudt:hasDimensionVector ?qdv .
+FILTER (?udv != qkdv:NotApplicable) .
+FILTER (?qdv != qkdv:NotApplicable) .
+FILTER (?udv != ?qdv) .
+}
+""" ;
+  ] ;
+  sh:targetClass qudt:PhysicalConstant .
+
+qudt:ConstantUnitNotApplicableToQuantityKindWarning
+  a sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/all> ;
+  rdfs:label "Warns when the unit of a PhysicalConstant's value is not an applicable unit of the constant's quantity kind" ;
+  sh:severity sh:Warning ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    rdfs:comment "Usually means the unit lacks a qudt:unitForQuantityKind link to the quantity kind, or the constant has the wrong quantity kind" ;
+    sh:message "Constant {$this} has a value in unit {?unit}, which is not an applicable unit of its quantity kind {?qk}" ;
+    sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/allPrefixes> ;
+    sh:select """
+SELECT $this ?unit ?qk
+WHERE {
+FILTER NOT EXISTS {$this qudt:deprecated true} .
+$this qudt:quantityValue/qudt:hasUnit ?unit .
+$this qudt:hasQuantityKind ?qk .
+FILTER NOT EXISTS {?qk qudt:applicableUnit ?unit} .
+}
+""" ;
+  ] ;
+  sh:targetClass qudt:PhysicalConstant .
+
 qudt:MissingBaseForNonBaseUnit
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/usertest> ;
