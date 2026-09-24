@@ -10,9 +10,11 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Added
 
 - Added `unit:GM-PER-KiloW-HR` and `unit:KiloGM-PER-KiloW-HR` (`quantitykind:MassPerEnergy`), used for emission factors such as the carbon intensity of electricity, `unit:CCY_EUR-PER-MegaW-HR` (`quantitykind:CostPerEnergy`), used for wholesale electricity prices, and its power counterpart `unit:CCY_EUR-PER-MegaW` (`quantitykind:CostPerPower`), alongside the existing `unit:CCY_EUR-PER-KiloW`.
+- Added `quantitykind:GravitationalConstant` (L³M⁻¹T⁻², IEC 62720 UAD059, ISO 80000-4), the quantity kind of the Newtonian constant of gravitation _G_. Its units `unit:N-M2-PER-KiloGM2` and `unit:M3-PER-KiloGM-SEC2` are now `qudt:unitForQuantityKind` it instead of `qudt:categorizedByQuantityKind quantitykind:Unknown`.
 
 ### Fixed
 
+- Corrected `constant:GravitationalConstant`: its dimension vector was L³M¹T⁻² (now L³M⁻¹T⁻²) and its quantity kind was `quantitykind:GravitationalAttraction`, which is a force (now `quantitykind:GravitationalConstant`). Gave its duplicate `constant:NewtonianConstantOfGravitation` the same quantity kind and its missing dimension vector, and linked the two with `qudt:exactMatch`.
 - Corrected the quantity kind of `constant:MagneticConstant` and `constant:ElectromagneticPermeabilityOfVacuum` (μ₀) from `quantitykind:Permittivity` to `quantitykind:ElectromagneticPermeability`, added their missing `qudt:hasDimensionVector`, and corrected the unit of `constant:Value_MagneticConstant` from `unit:FARAD-PER-M` to `unit:H-PER-M`.
 - Updated `constant:Value_MagneticConstant` to the 2022 CODATA value 1.256 637 061 27(20) × 10⁻⁶ H/m, adding its standard uncertainty, and removed `qudt:exactConstant true` from both μ₀ constants: since the 2019 SI redefinition μ₀ is a measured value rather than exactly 4π × 10⁻⁷ H/m.
 - Corrected the quantity kind of `constant:BohrMagneton`, `constant:NuclearMagneton`, `constant:BohrMagnetonInEVPerT` and `constant:NuclearMagnetonInEVPerT` from `quantitykind:MagneticDipoleMoment` (weber metre) to `quantitykind:MagneticMoment` (joule per tesla, the dimension of their values), added the missing `qudt:hasDimensionVector` to these and to the other six magneton constants expressed in Hz/T, MHz/T, m⁻¹/T and K/T, and clarified the Bohr and nuclear magneton descriptions.
