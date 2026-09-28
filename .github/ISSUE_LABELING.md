@@ -7,18 +7,25 @@ preserved. Classification rules and the 16 approved labels are defined in
 
 ## Setup
 
-- Confirm that the organization permits **Allow use of Copilot CLI billed to the
-  organization**. Enterprise policy may override this setting. See
-  [GitHub's Copilot CLI setup instructions](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli-in-actions).
+- Create a fine-grained personal access token (PAT) owned by a user with
+  Copilot access, granting the account permission **Copilot Requests**. See
+  [GitHub's Copilot CLI authentication instructions](https://docs.github.com/en/copilot/how-tos/copilot-cli/automate-copilot-cli/automate-with-actions#authenticate).
+- Store the token as the repository Actions secret **COPILOT_PAT** under
+  **Settings > Secrets and variables > Actions**. Keep it valid and replace the
+  secret when rotating or renewing the token. A missing secret fails the job
+  before inference or label changes; there is no organization-billing fallback.
 - Allow `actions/checkout`, `actions/setup-node`, `actions/ai-inference`, and
   `actions/github-script` in the organization's Actions policy.
-- The workflows use the built-in `GITHUB_TOKEN` with `contents: read`,
-  `issues: write`, and `copilot-requests: write`. No personal token or additional
-  repository secret is needed for this configuration.
-- Optionally set the Actions variable `COPILOT_MODEL` to an allowed model
-  identifier. Otherwise Copilot chooses its default model.
-- Review [Copilot authentication and billing in Actions](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/copilot-cli-in-github-actions)
-  and configure an appropriate organization budget.
+- Copilot authenticates with `COPILOT_PAT` through `COPILOT_GITHUB_TOKEN`.
+  Repository reads and label updates use the built-in `GITHUB_TOKEN` with
+  `contents: read` and `issues: write`; the PAT does not need issue-write access.
+- Optionally set the Actions variable `COPILOT_MODEL` to a model available to the
+  token owner. Leave it unset for default model selection.
+- Usage draws from the token owner's Copilot allowance and applicable budget.
+  Organization-provided Copilot access remains subject to its CLI policy. The
+  **Allow use of Copilot CLI billed to the organization** setting is not required
+  for this PAT configuration. See
+  [Copilot authentication and billing in Actions](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/copilot-cli-in-github-actions).
 
 ### Label names and descriptions
 
@@ -92,8 +99,9 @@ between the final read and write.
 
 ## Troubleshooting and testing
 
-- For Copilot authentication or model errors, check the organization policy,
-  allowed model, and billing configuration using the GitHub links above.
+- For Copilot authentication or model errors, check that `COPILOT_PAT` is set,
+  unexpired, and has Copilot Requests permission. Check the token owner's
+  Copilot access, allowed model, applicable policies, and remaining allowance.
 - For label-write failures, confirm `issues: write` access and check that labels
   are available. Descriptions are not required. Check the issue's actual labels
   and job logs before retrying a failed run.
@@ -116,8 +124,7 @@ QUDT's `mvn -Pzip install` build checks Markdown formatting. Workflow syntax can
 also be checked with actionlint 1.7.12:
 
 ```shell
-actionlint -ignore 'unknown permission scope "copilot-requests"' .github/workflows/ai-label-new-issues.yml .github/workflows/ai-label-existing-issues.yml .github/workflows/test-issue-labeling.yml
+actionlint .github/workflows/ai-label-new-issues.yml .github/workflows/ai-label-existing-issues.yml .github/workflows/test-issue-labeling.yml
 ```
 
-The narrow exception accounts for actionlint 1.7.12 not yet recognizing the
-GitHub-documented `copilot-requests` permission; other lint errors remain failures.
+Verify authentication with a small manual dry run after configuring the secret.

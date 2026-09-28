@@ -7,7 +7,6 @@ on:
 permissions:
   contents: read
   issues: write
-  copilot-requests: write
 
 jobs:
   classify:
@@ -124,6 +123,16 @@ jobs:
             cat issue-body.md
           } > issue-prompt.txt
 
+      - name: Check Copilot token
+        if: steps.prepare.outputs.classify == 'true'
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_PAT }}
+        run: |
+          if [ -z "$COPILOT_GITHUB_TOKEN" ]; then
+            echo "::error::Set the COPILOT_PAT Actions secret to a fine-grained PAT with Copilot Requests permission."
+            exit 1
+          fi
+
       - name: Set up Node.js for GitHub Copilot CLI
         if: steps.prepare.outputs.classify == 'true'
         uses: actions/setup-node@v7
@@ -139,9 +148,8 @@ jobs:
         if: steps.prepare.outputs.classify == 'true'
         uses: actions/ai-inference@v3
         env:
-          # Organization-owned repositories should use the short-lived workflow
-          # token. No Copilot PAT or repository secret is required.
-          GITHUB_TOKEN: ${{ github.token }}
+          # Copilot uses the PAT owner's allowance; label updates use GITHUB_TOKEN.
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_PAT }}
         with:
           # If COPILOT_MODEL is unset, Copilot CLI selects an allowed default.
           model: ${{ vars.COPILOT_MODEL }}

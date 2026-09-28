@@ -9,6 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added automatic issue labeling and on-demand labeling of existing issues, using a personal Copilot token, with historical label checks to prevent relabeling after maintainer review.
 - Added `unit:GM-PER-KiloW-HR` and `unit:KiloGM-PER-KiloW-HR` (`quantitykind:MassPerEnergy`), used for emission factors such as the carbon intensity of electricity, `unit:CCY_EUR-PER-MegaW-HR` (`quantitykind:CostPerEnergy`), used for wholesale electricity prices, and its power counterpart `unit:CCY_EUR-PER-MegaW` (`quantitykind:CostPerPower`), alongside the existing `unit:CCY_EUR-PER-KiloW`.
 - Added `quantitykind:GravitationalConstant` (L³M⁻¹T⁻², IEC 62720 UAD059, ISO 80000-4), the quantity kind of the Newtonian constant of gravitation _G_. Its units `unit:N-M2-PER-KiloGM2` and `unit:M3-PER-KiloGM-SEC2` are now `qudt:unitForQuantityKind` it instead of `qudt:categorizedByQuantityKind quantitykind:Unknown`.
 
@@ -30,7 +31,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
-- Added automatic issue labeling and on-demand labeling of existing issues, with historical label checks to prevent relabeling after maintainer review.
 - Added SHACL QA shapes to catch `QuantityKindDimensionVector` data-quality issues going forward: missing unit-system classification (warning), no referencing Unit/QuantityKind/PhysicalConstant (info), and dimensionlessExponent inconsistent with the 7 physical exponents (violation) ([#1533](https://github.com/qudt/qudt-public-repo/issues/1533)).
 - Added `unit:GM-PER-TONNE` and `unit:KiloGM-PER-TONNE` as dimensionless mass-ratio units.
 
