@@ -71,7 +71,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.qudt</groupId>
     <artifactId>qudt-public-repo</artifactId>
-    <version>3.4.1-SNAPSHOT</version>
+    <version>3.5.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -101,6 +101,7 @@
         <qudt.allInOne.extensions />
         <!-- default value; overridden to "fix.profile.is.active" by the fix profile -->
         <fix.profile.is.inactive>fix.profile.is.inactive</fix.profile.is.inactive>
+        <rdfio.plugin.version>1.7.1</rdfio.plugin.version>
     </properties>
     <scm>
         <connection>scm:git:https://github.com/qudt/qudt-public-repo.git</connection>
@@ -138,7 +139,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>4.1.1</version>
+                <version>5.1.0</version>
                 <executions>
                 <!-- Ported execution: defineAdditionalProperties -->
                 <execution>
@@ -606,7 +607,7 @@ validAspectDirs.each { aspectDir ->
                     <dependency>
                         <groupId>org.apache.groovy</groupId>
                         <artifactId>groovy-ant</artifactId>
-                        <version>4.0.23</version>
+                        <version>5.0.7</version>
                         <scope>runtime</scope>
                     </dependency>
     <dependency>
@@ -700,7 +701,7 @@ validAspectDirs.each { aspectDir ->
             <plugin>
                 <groupId>io.github.qudtlib</groupId>
                 <artifactId>rdfio-maven-plugin</artifactId>
-                <version>1.7.0</version>
+                <version>${rdfio.plugin.version}</version>
                 <executions>
                     <execution>
                         <!--
@@ -1791,6 +1792,25 @@ validAspectDirs.each { aspectDir ->
                                         <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
                                     </add>
 
+                                    <shaclInfer> <!-- close qudt:specializationOf (+ skos:broader) across the qudt:exactMatch cliques. Must precede applicableUnit inference: that inference traverses qudt:specializationOf only, so a kind whose only path to a unit-bearing ancestor runs through an exactMatch synonym (which the unitForQuantityKind fan-out below cannot help with when the synonym has no direct units) would otherwise end up with no applicable units. Safe this early because the rule's inputs (exactMatch, authored specializationOf, quantity-kind dimension vectors) are all present; dimension-vector inference at savepoint 07 concerns units only. -->
+                                        <message>Inferring skos:broader across qudt:specializationOf + qudt:exactMatch (commensurability-family closure)</message>
+                                        <shapes>
+                                            <file>src/build/inference/inferBroaderAcrossExactMatch.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
+                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                        </data>
+                                        <inferred>
+                                            <graph>inferred:broaderAcrossExactMatch</graph>
+                                            <file>target/inferred/broaderAcrossExactMatch.ttl</file>
+                                        </inferred>
+                                    </shaclInfer>
+                                    <add>
+                                        <graph>inferred:broaderAcrossExactMatch</graph>
+                                        <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
+                                    </add>
+
                                     <shaclInfer> <!-- fan qudt:unitForQuantityKind out across the qudt:exactMatch closure, so exactMatch siblings share applicable units; must precede the hasQuantityKind materialize below so propagated links are materialized too -->
                                         <message>Propagating qudt:unitForQuantityKind across qudt:exactMatch</message>
                                         <shapes>
@@ -2133,26 +2153,6 @@ validAspectDirs.each { aspectDir ->
                                         </sparqlAsk>
                                     </until>
                                     <savepoint><id>07-infer-dimensionVector</id></savepoint>
-
-                                    <shaclInfer>
-                                        <message>Inferring skos:broader across qudt:specializationOf + qudt:exactMatch (commensurability-family closure)</message>
-                                        <shapes>
-                                            <file>src/build/inference/inferBroaderAcrossExactMatch.ttl</file>
-                                        </shapes>
-                                        <data>
-                                            <file>target/dist/schema/SCHEMA_QUDT.ttl</file>
-                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
-                                        </data>
-                                        <inferred>
-                                            <graph>inferred:broaderAcrossExactMatch</graph>
-                                            <file>target/inferred/broaderAcrossExactMatch.ttl</file>
-                                        </inferred>
-                                    </shaclInfer>
-                                    <add>
-                                        <graph>inferred:broaderAcrossExactMatch</graph>
-                                        <toGraph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</toGraph>
-                                    </add>
-                                    <savepoint><id>07.5-infer-broader-across-exactmatch</id></savepoint>
 
                                     <forEachEnv>
                                         <env id="symbol">
@@ -2866,7 +2866,39 @@ validAspectDirs.each { aspectDir ->
                                     <savepoint><id>10-infer-labels-factors</id></savepoint>
 
                                     <sparqlUpdate>
-                                        <message>Fixing English labels not in title case (capitalize first letter; split CamelCase)</message>
+                                        <message>Removing untagged rdfs:label duplicates that are redundant with an existing English-tagged label of identical text</message>
+                                        <sparql>
+                                            <![CDATA[
+                                                DELETE {
+                                                    GRAPH ?g { ?s rdfs:label ?untaggedLabel }
+                                                }
+                                                INSERT {
+                                                    GRAPH <fix:labels:lang-dedup:toDelete> { ?s rdfs:label ?untaggedLabel }
+                                                }
+                                                WHERE {
+                                                    GRAPH ?g {
+                                                        ?s rdfs:label ?untaggedLabel .
+                                                        ?s rdfs:label ?taggedLabel .
+                                                        { ?s a qudt:QuantityKind } UNION { ?s a qudt:Prefix }
+                                                        FILTER NOT EXISTS { ?s qudt:deprecated true }
+                                                    }
+                                                    FILTER(STRSTARTS(STR(?g), "dist:"))
+                                                    FILTER(LANG(?untaggedLabel) = "")
+                                                    FILTER(LANG(?taggedLabel) IN ("en", "en-US", "en-UK"))
+                                                    FILTER(STR(?untaggedLabel) = STR(?taggedLabel))
+                                                }
+                                            ]]>
+                                        </sparql>
+                                    </sparqlUpdate>
+                                    <write>
+                                        <graph>fix:labels:lang-dedup:toDelete</graph>
+                                        <toFile>target/fix/labels/lang-dedup/toDelete.ttl</toFile>
+                                    </write>
+
+                                    <savepoint><id>10-infer-labels-lang-dedup</id></savepoint>
+
+                                    <sparqlUpdate>
+                                        <message>Fixing English labels not in title case (capitalize first letter; split CamelCase) and tagging untagged labels as English</message>
                                         <sparql>
                                             <![CDATA[
                                                 DELETE { GRAPH ?g { ?s rdfs:label ?oldLabel } }
@@ -2885,8 +2917,8 @@ validAspectDirs.each { aspectDir ->
                                                     FILTER(LANG(?oldLabel) IN ("", "en", "en-US", "en-UK"))
                                                     FILTER(!REGEX(STR(?oldLabel), "^\\p{Ll}-"))
                                                     BIND(qfn:titleCase(STR(?oldLabel)) AS ?fixed)
-                                                    BIND(IF(LANG(?oldLabel) = "", ?fixed, STRLANG(?fixed, LANG(?oldLabel))) AS ?newLabel)
-                                                    FILTER(STR(?fixed) != STR(?oldLabel))
+                                                    BIND(IF(LANG(?oldLabel) = "", STRLANG(?fixed, "en"), STRLANG(?fixed, LANG(?oldLabel))) AS ?newLabel)
+                                                    FILTER(STR(?fixed) != STR(?oldLabel) || LANG(?oldLabel) = "")
                                                 }
                                             ]]>
                                         </sparql>
@@ -3987,7 +4019,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
-                <version>2.46.1</version>
+                <version>3.9.0</version>
                 <!-- DO NOT specify multiple formats for the same file! The results are unpredictable! -->
                 <configuration>
                         <!-- default configuration - this is the one that is used if the plugin is
@@ -4010,8 +4042,9 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                             <format>
                                 <failOnWarning>false</failOnWarning>
                                 <verify>true</verify>
-                                <turtleFormatterVersion>1.2.16</turtleFormatterVersion>
+                                <turtleFormatterVersion>2.0.1</turtleFormatterVersion>
                                 <turtle>
+                                    <preserveBlankNodeLabelsAndOrdering>false</preserveBlankNodeLabelsAndOrdering>
                                     <predicateOrder>rdf:type,owl:imports</predicateOrder>
                                     <firstPredicateInNewLine>true</firstPredicateInNewLine>
                                 </turtle>
@@ -4516,7 +4549,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
-                        <version>1.7.0</version>
+                        <version>${rdfio.plugin.version}</version>
                         <executions>
                             <execution>
                                 <!--
@@ -4614,7 +4647,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
-                        <version>1.7.0</version>
+                        <version>${rdfio.plugin.version}</version>
                         <executions>
                     <execution>
                         <id>derive-owl-schema-pipeline</id>
@@ -5114,7 +5147,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
-                        <version>1.7.0</version>
+                        <version>${rdfio.plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>derive-owl-datatypes-schema-pipeline</id>
@@ -5391,7 +5424,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
-                        <version>1.7.0</version>
+                        <version>${rdfio.plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>derive-owl-coordinates-schema-pipeline</id>
@@ -5668,7 +5701,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
-                        <version>1.7.0</version>
+                        <version>${rdfio.plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>inspect-owl-datatypes-schema-diff</id>
@@ -7052,7 +7085,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
-                        <version>1.7.0</version>
+                        <version>${rdfio.plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>inspect-owl-coordinates-schema-diff</id>
@@ -7230,7 +7263,7 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                     <plugin>
                         <groupId>io.github.qudtlib</groupId>
                         <artifactId>rdfio-maven-plugin</artifactId>
-                        <version>1.7.0</version>
+                        <version>${rdfio.plugin.version}</version>
                         <executions>
                     <execution>
                         <!--
