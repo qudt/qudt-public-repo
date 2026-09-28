@@ -16,6 +16,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `rdfs:seeAlso` links between `quantitykind:AbsorbedDose` and `quantitykind:DoseEquivalent`, and between `quantitykind:AbsorbedDoseRate` and `quantitykind:DoseEquivalentRate`, plus a description for `quantitykind:DoseEquivalentRate` and its classification `qudt:organizedUnder quantitykind:SpecificPower`, mirroring `quantitykind:AbsorbedDoseRate` ([#380](https://github.com/qudt/qudt-public-repo/issues/380)).
 - Added `quantitykind:MassConcentration` to `unit:GM-PER-DeciL`, `unit:MilliGM-PER-DeciL`, and `unit:NanoGM-PER-DeciL`
 - Added `unit:NUM-PER-TONNE`
+- Added `unit:MilliEQ-PER-KiloGM` (`quantitykind:ReactiveChargePerMass`), requested for the NERC P06 vocabulary ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
+- Added descriptions for `quantitykind:ReactiveChargePerMass` and, in `unit:EQ`, the rule that one equivalent is one mole of unit charges and that converting to an amount of a particular ion requires its charge number, which belongs to the quantity, not the unit ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
 
 ### Changed
 
@@ -23,6 +25,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - The SHACL schema no longer declares `qudt:hasDimensionVector` for `qudt:PhysicalConstant` (property shape `qudt:PhysicalConstant-hasDimensionVector` removed; the derived OWL schema drops the corresponding restriction). The closed-world QA check therefore now reports the triple on any constant, which keeps the change above in force.
 - Corrected the description of `unit:GM-PER-DeciL`, `unit:MilliGM-PER-DeciL`, and `unit:NanoGM-PER-DeciL` replacing 'amount-of-substance' with 'mass concentration'
 - Updated `actions/checkout` from v3 and v4 to v5 in all GitHub workflows. v3 and v4 target Node.js 16 and 20, which GitHub is retiring on its runners; v5 targets Node.js 24.
+- Made the equivalent quantity kinds consistent: `quantitykind:MassEquivalent`, `quantitykind:CO2Equivalent` and `quantitykind:EquivalentDensity` are now `qudt:organizedUnder` (previously `qudt:specializationOf`) `Mass`, `MassEquivalent` and `Density`, matching `quantitykind:MolarEquivalent` and `quantitykind:EquivalentConcentration`. Their conversion to the plain quantity depends on the substance measured (charge number, global-warming potential, toxicity), so they are no longer asserted commensurable with it, or with each other. `MassEquivalent` and `EquivalentDensity` now carry direct units (`GM`, `KiloGM`, `MilliGM`; `GM-PER-L`, `KiloGM-PER-M3`) instead of inheriting every mass or density unit ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
+- `quantitykind:ReactiveChargePerMass` is now `qudt:organizedUnder quantitykind:AmountOfSubstancePerMass`, and `unit:CentiMOL-PER-KiloGM` is an applicable unit for it, so that cmol(+)/kg and meq/100 g are available for the same quantity kind ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
 
 ### Fixed
 
@@ -35,6 +39,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Corrected the quantity kind of the nine particle magnetic moment constants whose values are in J/T (`constant:ElectronMagneticMoment`, `constant:ProtonMagneticMoment`, `constant:NeutronMagneticMoment`, `constant:MuonMagneticMoment`, `constant:DeuteronMagneticMoment`, `constant:TritonMagneticMoment`, `constant:ShieldedHelionMagneticMoment`, `constant:ShieldedProtonMagneticMoment` and `constant:AtomicUnitOfMagneticDipoleMoment`) from `quantitykind:MagneticDipoleMoment` to `quantitykind:MagneticMoment`.
 - Updated the values and standard uncertainties of the ten Bohr and nuclear magneton constants (in J/T, eV/T, Hz/T or MHz/T, m⁻¹/T and K/T) from CODATA 2006 to the 2022 CODATA recommended values.
 - Rewrote the descriptions of `quantitykind:MagneticMoment`, `quantitykind:MagneticAreaMoment` and `quantitykind:MagneticDipoleMoment`, which contradicted each other, to distinguish the magnetic (area) moment (A·m²) from the magnetic dipole moment of IEC 60050-121 (j = μ₀m, Wb·m). Corrected the `latexDefinition` and symbol of `quantitykind:MagneticDipoleMoment` accordingly.
+- Corrected `qudt:ucumCode` on the 13 equivalent units from the case-insensitive UCUM form (`EQ`, `mEQ.L-1`, …) to the case-sensitive form (`eq`, `meq.L-1`, …) that the `qudt:UCUMcs` datatype declares ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
 
 ## [3.5.2] - 2026-09-22
 
