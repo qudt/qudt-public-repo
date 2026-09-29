@@ -15,7 +15,6 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `quantitykind:GravitationalConstant` (L³M⁻¹T⁻², IEC 62720 UAD059, ISO 80000-4), the quantity kind of the Newtonian constant of gravitation _G_. Its units `unit:N-M2-PER-KiloGM2` and `unit:M3-PER-KiloGM-SEC2` are now `qudt:unitForQuantityKind` it instead of `qudt:categorizedByQuantityKind quantitykind:Unknown`.
 - Added `quantitykind:MassConcentration` to `unit:GM-PER-DeciL`, `unit:MilliGM-PER-DeciL`, and `unit:NanoGM-PER-DeciL`
 
-
 ### Changed
 
 - Removed `qudt:hasDimensionVector` from the ten physical constants that stated one (`constant:AtomicMassConstant`, `constant:AvogadroConstant`, `constant:FaradayConstant`, `constant:FirstRadiationConstant`, `constant:GravitationalConstant`, `constant:JosephsonConstant`, `constant:MolarGasConstant`, `constant:PlanckConstant`, `constant:StefanBoltzmannConstant` and `constant:UniversalGasConstant`). A constant's dimension vector is fully determined by its quantity kind and by the unit of its value, so stating it again is redundant (DRY) and risks inconsistency: that of `constant:GravitationalConstant` was wrong. Obtain it via `qudt:hasQuantityKind/qudt:hasDimensionVector` or `qudt:quantityValue/qudt:hasUnit/qudt:hasDimensionVector`.
