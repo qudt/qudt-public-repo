@@ -14,6 +14,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `rdfs:seeAlso` links between `quantitykind:AbsorbedDose` and `quantitykind:DoseEquivalent`, and between `quantitykind:AbsorbedDoseRate` and `quantitykind:DoseEquivalentRate`, plus a description for `quantitykind:DoseEquivalentRate` and its classification `qudt:organizedUnder quantitykind:SpecificPower`, mirroring `quantitykind:AbsorbedDoseRate` ([#380](https://github.com/qudt/qudt-public-repo/issues/380)).
 - Added `quantitykind:GravitationalConstant` (L³M⁻¹T⁻², IEC 62720 UAD059, ISO 80000-4), the quantity kind of the Newtonian constant of gravitation _G_. Its units `unit:N-M2-PER-KiloGM2` and `unit:M3-PER-KiloGM-SEC2` are now `qudt:unitForQuantityKind` it instead of `qudt:categorizedByQuantityKind quantitykind:Unknown`.
 - Added `quantitykind:MassConcentration` to `unit:GM-PER-DeciL`, `unit:MilliGM-PER-DeciL`, and `unit:NanoGM-PER-DeciL`
+- Added `unit:NUM-PER-TONNE`
 
 ### Changed
 
