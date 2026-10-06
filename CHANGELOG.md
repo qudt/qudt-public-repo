@@ -22,6 +22,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Removed `qudt:hasDimensionVector` from the ten physical constants that stated one (`constant:AtomicMassConstant`, `constant:AvogadroConstant`, `constant:FaradayConstant`, `constant:FirstRadiationConstant`, `constant:GravitationalConstant`, `constant:JosephsonConstant`, `constant:MolarGasConstant`, `constant:PlanckConstant`, `constant:StefanBoltzmannConstant` and `constant:UniversalGasConstant`). A constant's dimension vector is fully determined by its quantity kind and by the unit of its value, so stating it again is redundant (DRY) and risks inconsistency: that of `constant:GravitationalConstant` was wrong. Obtain it via `qudt:hasQuantityKind/qudt:hasDimensionVector` or `qudt:quantityValue/qudt:hasUnit/qudt:hasDimensionVector`.
 - The SHACL schema no longer declares `qudt:hasDimensionVector` for `qudt:PhysicalConstant` (property shape `qudt:PhysicalConstant-hasDimensionVector` removed; the derived OWL schema drops the corresponding restriction). The closed-world QA check therefore now reports the triple on any constant, which keeps the change above in force.
 - Corrected the description of `unit:GM-PER-DeciL`, `unit:MilliGM-PER-DeciL`, and `unit:NanoGM-PER-DeciL` replacing 'amount-of-substance' with 'mass concentration'
+- Updated `actions/checkout` from v3 and v4 to v5 in all GitHub workflows. v3 and v4 target Node.js 16 and 20, which GitHub is retiring on its runners; v5 targets Node.js 24.
 
 ### Fixed
 
