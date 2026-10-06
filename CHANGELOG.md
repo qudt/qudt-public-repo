@@ -15,6 +15,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added two SHACL QA shapes for physical constants: `qudt:InconsistentConstantUnitAndQuantityKindDimensionVectorConstraint` (violation) requires the unit of a constant's value to have the dimension vector of the constant's quantity kind, and `qudt:ConstantUnitNotApplicableToQuantityKindWarning` (warning) flags a value unit that is not an applicable unit of the constant's quantity kind.
 - Added `rdfs:seeAlso` links between `quantitykind:AbsorbedDose` and `quantitykind:DoseEquivalent`, and between `quantitykind:AbsorbedDoseRate` and `quantitykind:DoseEquivalentRate`, plus a description for `quantitykind:DoseEquivalentRate` and its classification `qudt:organizedUnder quantitykind:SpecificPower`, mirroring `quantitykind:AbsorbedDoseRate` ([#380](https://github.com/qudt/qudt-public-repo/issues/380)).
 - Added `quantitykind:MassConcentration` to `unit:GM-PER-DeciL`, `unit:MilliGM-PER-DeciL`, and `unit:NanoGM-PER-DeciL`
+- Added `unit:NUM-PER-TONNE`
 
 ### Changed
 
