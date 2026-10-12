@@ -4056,12 +4056,25 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                             </replaceRegex>
                         </rdf>
                     <markdown>
+                        <!--
+                            Scoped to tracked documentation. The previous `**/*.md` glob
+                            picked up any markdown file on disk — IDE/skill files under
+                            `.claude/`, a CLAUDE.md at the repo root, local drafts — and
+                            could fail a build the moment any of them existed, even though
+                            git ignored them. The sibling `<excludes>` block below used
+                            `<include>` tags (invalid for an exclude), so it did nothing;
+                            that means `target/**` markdown has in fact been going through
+                            flexmark too. Review the behaviour change for target/** before
+                            pushing this edit.
+                        -->
                         <includes>
-                            <include>**/*.md</include>
+                            <include>README.md</include>
+                            <include>CHANGELOG.md</include>
+                            <include>BUILDING.md</include>
+                            <include>LICENSE.md</include>
+                            <include>.github/**/*.md</include>
+                            <include>src/**/*.md</include>
                         </includes>
-                        <excludes>
-                            <include>target/**/*.*</include>
-                        </excludes>
                         <flexmark />
                     </markdown>
                     <formats>
@@ -4074,14 +4087,22 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                 <include>target/dist/**/*.*</include>
                             </includes>
                             <excludes>
-                                <include>target/**/*.ttl</include>
-                                <include>target/**/*.xlsx</include>
-                                <include>target/**/*.xls</include>
-                                <include>target/**/*.gif</include>
-                                <include>target/**/*.zip</include>
-                                <include>target/**/*.pdf</include>
-                                <include>target/**/*.ppt</include>
-                                <include>target/**/*.pptx</include>
+                                <!--
+                                    Was using <include> tags inside <excludes> (invalid for an
+                                    exclude block), so these exclusions have been no-ops. That means
+                                    Spotless has been running the placeholder-substitution <format>
+                                    across target/**/*.ttl plus the binary types below. Switching to
+                                    real <exclude> tags restores the intended behaviour; review the
+                                    change before pushing.
+                                -->
+                                <exclude>target/**/*.ttl</exclude>
+                                <exclude>target/**/*.xlsx</exclude>
+                                <exclude>target/**/*.xls</exclude>
+                                <exclude>target/**/*.gif</exclude>
+                                <exclude>target/**/*.zip</exclude>
+                                <exclude>target/**/*.pdf</exclude>
+                                <exclude>target/**/*.ppt</exclude>
+                                <exclude>target/**/*.pptx</exclude>
                             </excludes>
                             <replaceRegex>
                                 <name>full version replacement</name>
@@ -4215,7 +4236,15 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                     <include>target/dist/**/*.ttl</include>
                                 </includes>
                                 <excludes>
-                                    <include>src/**/*.*</include>
+                                    <!--
+                                        Was <include>src/**/*.*</include> (invalid for an exclude
+                                        block), so this no-op intent — "don't touch src when
+                                        formatting dist" — never applied. The <includes> above
+                                        already scopes to target/dist/**/*.ttl, so in practice no
+                                        src files were touched, but the exclude is now expressed
+                                        correctly.
+                                    -->
+                                    <exclude>src/**/*.*</exclude>
                                 </excludes>
                                 <replaceRegex>
                                     <name>fix turtle-formatter newlines on windows and mac</name>
