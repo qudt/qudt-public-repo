@@ -16,6 +16,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `rdfs:seeAlso` links between `quantitykind:AbsorbedDose` and `quantitykind:DoseEquivalent`, and between `quantitykind:AbsorbedDoseRate` and `quantitykind:DoseEquivalentRate`, plus a description for `quantitykind:DoseEquivalentRate` and its classification `qudt:organizedUnder quantitykind:SpecificPower`, mirroring `quantitykind:AbsorbedDoseRate` ([#380](https://github.com/qudt/qudt-public-repo/issues/380)).
 - Added `quantitykind:MassConcentration` to `unit:GM-PER-DeciL`, `unit:MilliGM-PER-DeciL`, and `unit:NanoGM-PER-DeciL`
 - Added `unit:NUM-PER-TONNE`
+- Added `quantitykind:AmountOfOsmoticallyActiveEntities` (`qudt:organizedUnder quantitykind:AmountOfSubstance`) and `quantitykind:Osmolality` (`qudt:organizedUnder quantitykind:MolalityOfSolute`), the quantity kinds of the osmole units. An amount in osmoles counts the particles a solute dissociates into, so it is not asserted convertible to a plain amount of substance or molality.
+- Added `unit:MilliOSM-PER-L` (mOsm/L, `quantitykind:OsmoticConcentration`), the usual unit of osmolarity.
 
 ### Changed
 
@@ -23,6 +25,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - The SHACL schema no longer declares `qudt:hasDimensionVector` for `qudt:PhysicalConstant` (property shape `qudt:PhysicalConstant-hasDimensionVector` removed; the derived OWL schema drops the corresponding restriction). The closed-world QA check therefore now reports the triple on any constant, which keeps the change above in force.
 - Corrected the description of `unit:GM-PER-DeciL`, `unit:MilliGM-PER-DeciL`, and `unit:NanoGM-PER-DeciL` replacing 'amount-of-substance' with 'mass concentration'
 - Updated `actions/checkout` from v3 and v4 to v5 in all GitHub workflows. v3 and v4 target Node.js 16 and 20, which GitHub is retiring on its runners; v5 targets Node.js 24.
+- `unit:OSM` and `unit:MilliOSM` are now `qudt:unitForQuantityKind quantitykind:AmountOfOsmoticallyActiveEntities`, and `unit:MilliOSM-PER-KiloGM` is now `qudt:unitForQuantityKind quantitykind:Osmolality`, instead of `quantitykind:AmountOfSubstance` and `quantitykind:AmountOfSubstancePerMass`.
+- `quantitykind:OsmoticConcentration` is now `qudt:organizedUnder` (previously `qudt:specializationOf`) `quantitykind:AmountOfSubstanceConcentration`, and its description says it counts osmoles, not moles. It therefore no longer inherits the amount-of-substance concentration units; its unit is the new `unit:MilliOSM-PER-L`.
 
 ### Fixed
 
@@ -35,6 +39,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Corrected the quantity kind of the nine particle magnetic moment constants whose values are in J/T (`constant:ElectronMagneticMoment`, `constant:ProtonMagneticMoment`, `constant:NeutronMagneticMoment`, `constant:MuonMagneticMoment`, `constant:DeuteronMagneticMoment`, `constant:TritonMagneticMoment`, `constant:ShieldedHelionMagneticMoment`, `constant:ShieldedProtonMagneticMoment` and `constant:AtomicUnitOfMagneticDipoleMoment`) from `quantitykind:MagneticDipoleMoment` to `quantitykind:MagneticMoment`.
 - Updated the values and standard uncertainties of the ten Bohr and nuclear magneton constants (in J/T, eV/T, Hz/T or MHz/T, m⁻¹/T and K/T) from CODATA 2006 to the 2022 CODATA recommended values.
 - Rewrote the descriptions of `quantitykind:MagneticMoment`, `quantitykind:MagneticAreaMoment` and `quantitykind:MagneticDipoleMoment`, which contradicted each other, to distinguish the magnetic (area) moment (A·m²) from the magnetic dipole moment of IEC 60050-121 (j = μ₀m, Wb·m). Corrected the `latexDefinition` and symbol of `quantitykind:MagneticDipoleMoment` accordingly.
+- Corrected `qudt:conversionMultiplier` of `unit:OSM`, `unit:MilliOSM` and `unit:MilliOSM-PER-KiloGM` from 0.0 to 1.0, 0.001 and 0.001 (UCUM defines 1 osm as 1 mol), and their `qudt:ucumCode` from `Osmol`, `mOsmol` and `mOsmol.kg-1` to `osm`, `mosm` and `mosm.kg-1`. Replaced the description of `unit:OSM`, which gave an outdated gas-volume definition, and added a description for `unit:MilliOSM`.
 
 ## [3.5.2] - 2026-09-22
 
