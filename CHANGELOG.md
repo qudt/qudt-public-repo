@@ -18,6 +18,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `unit:NUM-PER-TONNE`
 - Added `unit:MilliEQ-PER-KiloGM` (`quantitykind:ReactiveChargePerMass`), requested for the NERC P06 vocabulary ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
 - Added descriptions for `quantitykind:ReactiveChargePerMass` and, in `unit:EQ`, the rule that one equivalent is one mole of unit charges and that converting to an amount of a particular ion requires its charge number, which belongs to the quantity, not the unit ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
+- Added `quantitykind:AmountOfBiologicallyActiveSubstancePerMass` (IU/mg, the potency of a preparation), `qudt:organizedUnder quantitykind:MassFraction`, as the quantity kind of `unit:IU-PER-MilliGM`.
 
 ### Changed
 
@@ -27,6 +28,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Updated `actions/checkout` from v3 and v4 to v5 in all GitHub workflows. v3 and v4 target Node.js 16 and 20, which GitHub is retiring on its runners; v5 targets Node.js 24.
 - Made the equivalent quantity kinds consistent: `quantitykind:MassEquivalent`, `quantitykind:CO2Equivalent` and `quantitykind:EquivalentDensity` are now `qudt:organizedUnder` (previously `qudt:specializationOf`) `Mass`, `MassEquivalent` and `Density`, matching `quantitykind:MolarEquivalent` and `quantitykind:EquivalentConcentration`. Their conversion to the plain quantity depends on the substance measured (charge number, global-warming potential, toxicity), so they are no longer asserted commensurable with it, or with each other. `MassEquivalent` and `EquivalentDensity` now carry direct units (`GM`, `KiloGM`, `MilliGM`; `GM-PER-L`, `KiloGM-PER-M3`) instead of inheriting every mass or density unit ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
 - `quantitykind:ReactiveChargePerMass` is now `qudt:organizedUnder quantitykind:AmountOfSubstancePerMass`, and `unit:CentiMOL-PER-KiloGM` is an applicable unit for it, so that cmol(+)/kg and meq/100 g are available for the same quantity kind ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
+- `unit:IU-PER-MilliGM` is now `qudt:unitForQuantityKind quantitykind:AmountOfBiologicallyActiveSubstancePerMass` instead of `quantitykind:MassFraction`. IU/mg is a potency whose relation to a plain mass fraction depends on the substance, so it is no longer asserted convertible to a mass fraction, and is no longer an applicable unit of `quantitykind:MassFraction`.
 
 ### Fixed
 
