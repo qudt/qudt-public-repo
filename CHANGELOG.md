@@ -16,6 +16,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `rdfs:seeAlso` links between `quantitykind:AbsorbedDose` and `quantitykind:DoseEquivalent`, and between `quantitykind:AbsorbedDoseRate` and `quantitykind:DoseEquivalentRate`, plus a description for `quantitykind:DoseEquivalentRate` and its classification `qudt:organizedUnder quantitykind:SpecificPower`, mirroring `quantitykind:AbsorbedDoseRate` ([#380](https://github.com/qudt/qudt-public-repo/issues/380)).
 - Added `quantitykind:MassConcentration` to `unit:GM-PER-DeciL`, `unit:MilliGM-PER-DeciL`, and `unit:NanoGM-PER-DeciL`
 - Added `unit:NUM-PER-TONNE`
+- Added `quantitykind:AmountOfBiologicallyActiveSubstancePerMass` (IU/mg, the potency of a preparation), `qudt:organizedUnder quantitykind:MassFraction`, as the quantity kind of `unit:IU-PER-MilliGM`.
 
 ### Changed
 
@@ -23,6 +24,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - The SHACL schema no longer declares `qudt:hasDimensionVector` for `qudt:PhysicalConstant` (property shape `qudt:PhysicalConstant-hasDimensionVector` removed; the derived OWL schema drops the corresponding restriction). The closed-world QA check therefore now reports the triple on any constant, which keeps the change above in force.
 - Corrected the description of `unit:GM-PER-DeciL`, `unit:MilliGM-PER-DeciL`, and `unit:NanoGM-PER-DeciL` replacing 'amount-of-substance' with 'mass concentration'
 - Updated `actions/checkout` from v3 and v4 to v5 in all GitHub workflows. v3 and v4 target Node.js 16 and 20, which GitHub is retiring on its runners; v5 targets Node.js 24.
+- `unit:IU-PER-MilliGM` is now `qudt:unitForQuantityKind quantitykind:AmountOfBiologicallyActiveSubstancePerMass` instead of `quantitykind:MassFraction`. IU/mg is a potency whose relation to a plain mass fraction depends on the substance, so it is no longer asserted convertible to a mass fraction, and is no longer an applicable unit of `quantitykind:MassFraction`.
 
 ### Fixed
 
