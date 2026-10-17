@@ -18,6 +18,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `unit:NUM-PER-TONNE`
 - Added `unit:MilliEQ-PER-KiloGM` (`quantitykind:ReactiveChargePerMass`), requested for the NERC P06 vocabulary ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
 - Added descriptions for `quantitykind:ReactiveChargePerMass` and, in `unit:EQ`, the rule that one equivalent is one mole of unit charges and that converting to an amount of a particular ion requires its charge number, which belongs to the quantity, not the unit ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
+- Added `quantitykind:ToxicEquivalent` (TEQ of dioxin-like compounds), `qudt:organizedUnder quantitykind:MassEquivalent`, with `unit:MilliGM`, `unit:MicroGM`, `unit:NanoGM` and `unit:PicoGM` as applicable units. TEQ values use ordinary mass units; no dedicated TEQ unit is defined ([#1524](https://github.com/qudt/qudt-public-repo/pull/1524), [Maxim Van de Wynckel](https://github.com/Maximvdw)).
 - Added `quantitykind:AmountOfBiologicallyActiveSubstancePerMass` (IU/mg, the potency of a preparation), `qudt:organizedUnder quantitykind:MassFraction`, as the quantity kind of `unit:IU-PER-MilliGM`.
 
 ### Changed
