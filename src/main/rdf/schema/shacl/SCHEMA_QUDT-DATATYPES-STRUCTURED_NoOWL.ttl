@@ -1729,17 +1729,27 @@ qudt:NTupleTypeCheck
             # Correlate the computed position with the memberSpec's declared index.
             FILTER ( ?position = ?index )
 
-            # Each of the four memberSpec patterns is probed with its own OPTIONAL;
+            # Each memberSpec pattern is probed with its own OPTIONAL;
             # the value is a violation iff none of them matched. (Expressed this
             # way rather than as UNION branches inside FILTER NOT EXISTS, which
             # is not portable: engines that do not substitute the outer ?value
             # and ?memberSpec into a UNION'd EXISTS group flag every position.)
 
-            # (1) Numeric datatype — direct sh:datatype, or one inside an sh:or union
+            # (1) Numeric datatype — direct sh:datatype, or one inside an sh:or union.
+            #     The (…)+ recurses through nested unions, so a union may reference
+            #     another (qudt:MaybeNumericUnionType -> qudt:NumericTypeUnion).
             OPTIONAL {
-                ?memberSpec ( sh:datatype | sh:or/rdf:rest*/rdf:first/sh:datatype ) ?allowedDatatype .
+                ?memberSpec ( sh:datatype | (sh:or/rdf:rest*/rdf:first)+/sh:datatype ) ?allowedDatatype .
                 FILTER ( datatype(?value) = ?allowedDatatype )
                 BIND ( true AS ?datatypeMatch )
+            }
+            # (1b) Specific value inside an sh:or union — sh:hasValue. This is how the
+            #      Nothing case of qudt:MaybeNumericUnionType lets rdf:nil fill an
+            #      optional position.
+            OPTIONAL {
+                ?memberSpec (sh:or/rdf:rest*/rdf:first)+/sh:hasValue ?allowedValue .
+                FILTER ( sameTerm(?value, ?allowedValue) )
+                BIND ( true AS ?hasValueMatch )
             }
             # (2) Concept class membership — sh:class <C> where <C> a qudt:Concept
             OPTIONAL {
@@ -1759,7 +1769,7 @@ qudt:NTupleTypeCheck
                 BIND ( true AS ?iriMatch )
             }
 
-            FILTER ( !BOUND(?datatypeMatch) && !BOUND(?classMatch)
+            FILTER ( !BOUND(?datatypeMatch) && !BOUND(?hasValueMatch) && !BOUND(?classMatch)
                      && !BOUND(?enumeratedMatch) && !BOUND(?iriMatch) )
         }
     """ .

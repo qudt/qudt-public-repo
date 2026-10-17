@@ -51,7 +51,8 @@ new structured datatype, start by reading that block.
 must satisfy exactly one of four kinds of type expectation:
 
 1. **Numeric datatype union** — `sh:or qudt:NumericTypeUnion` (or a bare
-   `sh:datatype`).
+   `sh:datatype`). For an *optional* position use `sh:or qudt:MaybeNumericUnionType`
+   instead — see [Optional positions](#optional-positions--maybe) below.
 2. **Concept-class membership** — `sh:class <C>` where `<C> a qudt:Concept`.
 3. **Enumerated value** — `qudt:value <e1>, <e2>, …`.
 4. **Any IRI** — `sh:nodeKind sh:IRI`.
@@ -60,6 +61,61 @@ New structured datatypes should reuse this pattern rather than invent parallel
 type-facet machinery. When a datatype's cells all share one type (homogeneous
 array, vector of scalars), reuse the facet without the `qudt:index` — one
 shared spec instead of one-per-position.
+
+## Optional positions — `Maybe`
+
+A tuple member can be optional in two different ways:
+
+|             Mechanism              |                    How the value is written                     |  Where it can be used   |
+|------------------------------------|-----------------------------------------------------------------|-------------------------|
+| `sh:minCount 0` on the member spec | omitted — the values list is shorter                            | trailing positions only |
+| `sh:or qudt:MaybeNumericUnionType` | `rdf:nil` — written `( )` — holds the place of the absent value | any position            |
+
+A list cannot have a hole, so an absent value in the *middle* of a tuple needs a
+placeholder to keep the positions of the values after it. `rdf:nil` is that
+placeholder. `qudt:MaybeNumericUnionType` (in `SCHEMA_QUDT_NoOWL.ttl`, next to
+`qudt:NumericTypeUnion`) is named for the Maybe type of functional programming —
+`Maybe Numeric = Just Numeric | Nothing` — and is written exactly that way:
+
+```turtle
+qudt:MaybeNumericUnionType
+  a rdf:List ;
+  rdf:first [ sh:or qudt:NumericTypeUnion ] ;   # Just — reuses the union rather than copying it
+  rdf:rest  ( [ sh:hasValue ( ) ] ) .           # Nothing — rdf:nil
+```
+
+So a spec position declared with it accepts any value `qudt:NumericTypeUnion`
+accepts, or `rdf:nil`, and nothing else:
+
+```turtle
+ex:OptionalReadingTupleSpec  qudt:tupleMemberSpecs (
+    [ qudt:index 1 ; sh:datatype xsd:date ]
+    [ qudt:index 2 ; sh:or qudt:MaybeNumericUnionType ]
+    [ qudt:index 3 ; sh:class qudt:Unit ] ) .
+
+ex:exampleTupleMaybeJust     qudt:values ( "2026-05-12"^^xsd:date 23.7 unit:DEG_C ) .
+ex:exampleTupleMaybeNothing  qudt:values ( "2026-05-12"^^xsd:date ( ) unit:DEG_C ) .
+```
+
+How a Nothing cell behaves in each check:
+
+- **`NTupleTypeCheck`** accepts it through probe (1b), which matches any
+  `sh:hasValue` member of the position's union (see idiom 3). `rdf:nil` at a
+  position whose facet is not a Maybe union is still a violation
+  (`ex:badExampleTupleNothingInRequiredPosition`).
+- **`NTupleLengthCheck`, `NTupleExtraValueCheck`, `NTupleMissingRequiredValueCheck`**
+  count it as present: it occupies its position.
+- **`NTupleRangeCheck`** never reports it. Comparing an IRI with a numeric bound
+  is a SPARQL type error, which `FILTER` treats as false — Nothing has no bounds.
+
+Other Maybe types follow the same shape: a two-member union whose first member
+is the "Just" facet (`[ sh:or <union> ]`, `[ sh:datatype … ]`, `[ sh:class … ]`)
+and whose second is `[ sh:hasValue ( ) ]`. `NTupleTypeCheck` follows nested unions
+to any depth, so no constraint change is needed for a new one. One caveat: a
+position declared `sh:nodeKind sh:IRI` already accepts `rdf:nil`, since it is an IRI.
+
+Not yet confirmed in the project's SHACL engine — the same deferred status as the
+other tuple checks (see [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md)).
 
 ## SPARQL constraint idioms
 
@@ -152,11 +208,19 @@ Write the disjunction as one `OPTIONAL` probe per alternative, each binding its
 own flag, then require that none of them fired:
 
 ```sparql
-# (1) Numeric datatype — direct sh:datatype, or one inside an sh:or union
+# (1) Numeric datatype — direct sh:datatype, or one inside an sh:or union,
+#     following nested unions to any depth
 OPTIONAL {
-    ?memberSpec ( sh:datatype | sh:or/rdf:rest*/rdf:first/sh:datatype ) ?allowedDatatype .
+    ?memberSpec ( sh:datatype | (sh:or/rdf:rest*/rdf:first)+/sh:datatype ) ?allowedDatatype .
     FILTER ( datatype(?value) = ?allowedDatatype )
     BIND ( true AS ?datatypeMatch )
+}
+# (1b) A specific value inside an sh:or union — sh:hasValue (e.g. rdf:nil, the
+#      Nothing case of qudt:MaybeNumericUnionType)
+OPTIONAL {
+    ?memberSpec (sh:or/rdf:rest*/rdf:first)+/sh:hasValue ?allowedValue .
+    FILTER ( sameTerm(?value, ?allowedValue) )
+    BIND ( true AS ?hasValueMatch )
 }
 # (2) Concept class membership
 OPTIONAL {
@@ -173,13 +237,20 @@ OPTIONAL {
     BIND ( true AS ?iriMatch )
 }
 
-FILTER ( !BOUND(?datatypeMatch) && !BOUND(?classMatch)
+FILTER ( !BOUND(?datatypeMatch) && !BOUND(?hasValueMatch) && !BOUND(?classMatch)
          && !BOUND(?enumeratedMatch) && !BOUND(?iriMatch) )
 ```
 
 `OPTIONAL` is a join, so outer bindings are visible inside it by construction —
 there is no substitution question to get wrong. Search the schema file for
 `qudt:NTupleTypeCheck` for the canonical version.
+
+The `(sh:or/rdf:rest*/rdf:first)+` in probes (1) and (1b) is what lets one union
+reference another. A single-level `sh:or/rdf:rest*/rdf:first/…` only sees the
+union's direct members; for `qudt:MaybeNumericUnionType` those are
+`[ sh:or qudt:NumericTypeUnion ]` and `[ sh:hasValue ( ) ]`, neither of which
+carries an `sh:datatype`, so every Maybe position would be flagged. The `+`
+form matches everything the single-level path did, so flat unions are unaffected.
 
 The same rule applies to a *single* facet compared against a value: express it
 as `OPTIONAL` + `BIND` + `!BOUND` rather than `NOT EXISTS` with a bare `FILTER`
@@ -261,6 +332,8 @@ some future `qudt:Foo`), work through this checklist:
    - `qudt:ArrayDataOrder` (`qudt:InnermostIndexFastest` / `qudt:OutermostIndexFastest`
      enumeration)
    - `qudt:NumericTypeUnion` (numeric datatype disjunction)
+   - `qudt:MaybeNumericUnionType` (optional numeric position — a numeric value or
+     an `rdf:nil` placeholder; see [Optional positions](#optional-positions--maybe))
 
 ## Common pitfalls
 
@@ -278,6 +351,10 @@ some future `qudt:Foo`), work through this checklist:
   *everything*, so it reads as a data problem rather than a query problem.
 - **Joining on an aggregate alias across a sub-SELECT boundary** — see idiom 4.
   Produces a silent cross product, which again looks like every position failing.
+- **A union that references another union, read with a single-level path** — see
+  idiom 3. `sh:or/rdf:rest*/rdf:first/sh:datatype` stops at the outer union's
+  members, so a nested union such as `qudt:MaybeNumericUnionType` matches nothing
+  and every position using it is flagged. Use `(sh:or/rdf:rest*/rdf:first)+`.
 - **`FILTER EXISTS` where `NOT EXISTS` was meant** — `NTupleMissingRequiredValueCheck`
   fired when a required value *was* present. An inverted check that reports every
   position is easy to mistake for the two defects above; check the polarity first.

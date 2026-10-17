@@ -16,6 +16,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `rdfs:seeAlso` links between `quantitykind:AbsorbedDose` and `quantitykind:DoseEquivalent`, and between `quantitykind:AbsorbedDoseRate` and `quantitykind:DoseEquivalentRate`, plus a description for `quantitykind:DoseEquivalentRate` and its classification `qudt:organizedUnder quantitykind:SpecificPower`, mirroring `quantitykind:AbsorbedDoseRate` ([#380](https://github.com/qudt/qudt-public-repo/issues/380)).
 - Added `quantitykind:MassConcentration` to `unit:GM-PER-DeciL`, `unit:MilliGM-PER-DeciL`, and `unit:NanoGM-PER-DeciL`
 - Added `unit:NUM-PER-TONNE`
+- Added `qudt:MaybeNumericUnionType` for optional positions in tuple value lists. Named for the Maybe type of functional programming, it accepts either a value accepted by `qudt:NumericTypeUnion` (Just) or `rdf:nil` (Nothing), which holds the place of an absent value so that the positions of later values are preserved. `qudt:NTupleTypeCheck` now follows `sh:or` unions that reference other unions, and accepts `sh:hasValue` union members. Added the tuple spec `ex:OptionalReadingTupleSpec` with one example tuple for each case, and an invalid example that puts `rdf:nil` in a position that is not optional.
 
 ### Changed
 
@@ -23,6 +24,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - The SHACL schema no longer declares `qudt:hasDimensionVector` for `qudt:PhysicalConstant` (property shape `qudt:PhysicalConstant-hasDimensionVector` removed; the derived OWL schema drops the corresponding restriction). The closed-world QA check therefore now reports the triple on any constant, which keeps the change above in force.
 - Corrected the description of `unit:GM-PER-DeciL`, `unit:MilliGM-PER-DeciL`, and `unit:NanoGM-PER-DeciL` replacing 'amount-of-substance' with 'mass concentration'
 - Updated `actions/checkout` from v3 and v4 to v5 in all GitHub workflows. v3 and v4 target Node.js 16 and 20, which GitHub is retiring on its runners; v5 targets Node.js 24.
+- Moved the SHACL shapes for `qudt:Enumeration` and `qudt:EnumeratedValue`, together with their property shapes, from the main SHACL schema (`SCHEMA_QUDT_NoOWL.ttl`) to the scalar datatype schema (`SCHEMA_QUDT-DATATYPES-SCALAR_NoOWL.ttl`), since enumerations are scalar datatypes. The two declarations of `qudt:Enumeration` there are merged into one, keeping the label "Enumeration".
+- Moved `qudt:TextTypeUnion` from the scalar datatype schema to the main SHACL schema, alongside `qudt:LatexString`, which it references. The `dcterms:description` constraint on `qudt:EnumeratedValue` is attached from the main schema accordingly.
 
 ### Fixed
 
@@ -33,6 +36,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Updated `constant:Value_MagneticConstant` to the 2022 CODATA value 1.256 637 061 27(20) × 10⁻⁶ H/m, adding its standard uncertainty, and removed `qudt:exactConstant true` from both μ₀ constants: since the 2019 SI redefinition μ₀ is a measured value rather than exactly 4π × 10⁻⁷ H/m.
 - Corrected the quantity kind of `constant:BohrMagneton`, `constant:NuclearMagneton`, `constant:BohrMagnetonInEVPerT` and `constant:NuclearMagnetonInEVPerT` from `quantitykind:MagneticDipoleMoment` (weber metre) to `quantitykind:MagneticMoment` (joule per tesla, the dimension of their values), and clarified the Bohr and nuclear magneton descriptions.
 - Corrected the quantity kind of the nine particle magnetic moment constants whose values are in J/T (`constant:ElectronMagneticMoment`, `constant:ProtonMagneticMoment`, `constant:NeutronMagneticMoment`, `constant:MuonMagneticMoment`, `constant:DeuteronMagneticMoment`, `constant:TritonMagneticMoment`, `constant:ShieldedHelionMagneticMoment`, `constant:ShieldedProtonMagneticMoment` and `constant:AtomicUnitOfMagneticDipoleMoment`) from `quantitykind:MagneticDipoleMoment` to `quantitykind:MagneticMoment`.
+- Corrected a typo in the description of `qudt:QuantityType`.
 - Updated the values and standard uncertainties of the ten Bohr and nuclear magneton constants (in J/T, eV/T, Hz/T or MHz/T, m⁻¹/T and K/T) from CODATA 2006 to the 2022 CODATA recommended values.
 - Rewrote the descriptions of `quantitykind:MagneticMoment`, `quantitykind:MagneticAreaMoment` and `quantitykind:MagneticDipoleMoment`, which contradicted each other, to distinguish the magnetic (area) moment (A·m²) from the magnetic dipole moment of IEC 60050-121 (j = μ₀m, Wb·m). Corrected the `latexDefinition` and symbol of `quantitykind:MagneticDipoleMoment` accordingly.
 
