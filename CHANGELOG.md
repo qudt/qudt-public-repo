@@ -33,6 +33,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Corrected the descriptions of `unit:IN-PER-YR`, `unit:KiloGM-PER-YR`, `unit:KiloTONNE-PER-YR`, `unit:M3-PER-YR` and `unit:MegaTONNE-PER-YR`, which said the year has 365 days; their conversion multipliers, like `unit:YR` and the UCUM `a`, use the Julian year of 365.25 days.
 - Corrected the quantity kind of `constant:ConductanceQuantum` from `quantitykind:ElectricConductivity` (S/m) to `quantitykind:Conductance` (S), and of `constant:Pi` from `quantitykind:Angle` to `quantitykind:DimensionlessRatio`, since π is the ratio of a circle's circumference to its diameter.
 - Linked `unit:EV-SEC` to `quantitykind:Action`, `unit:MI-PER-HR` to `quantitykind:Speed` and `unit:PER-M3` to `quantitykind:NumberDensity` via `qudt:unitForQuantityKind`, so that the units of the Planck constant in eV·s, the speed of light in mph and the Loschmidt constant are applicable units of their quantity kinds.
 - Corrected the quantity kind of `constant:GravitationalConstant` from `quantitykind:GravitationalAttraction`, which is a force, to `quantitykind:GravitationalConstant`. Gave its duplicate `constant:NewtonianConstantOfGravitation` the same quantity kind, and linked the two with `qudt:exactMatch`.
