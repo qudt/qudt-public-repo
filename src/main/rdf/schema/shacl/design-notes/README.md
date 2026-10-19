@@ -18,6 +18,14 @@ of the open threads; the open-thread docs assume familiarity with it.
   silently non-portable and have each already caused a whole constraint to
   misfire. Read idioms 3 and 4 before writing a new `sh:sparql` constraint.
 
+## How-to
+
+- **[validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md)** *(written 2026-10-19)* —
+  how to run the tuple and array constraints against the examples in the build's own SHACL
+  engine (TopBraid SHACL 1.4.3), which the build itself never does. Includes the checker and
+  script, the expected result for every bad example, and how to compare a change against an
+  earlier version. Run it after changing any `sh:sparql` constraint, type union or example.
+
 ## Open threads
 
 - **[array-as-ntuple-parallel.md](array-as-ntuple-parallel.md)** *(opened 2026-05-16)* —
@@ -28,8 +36,9 @@ of the open threads; the open-thread docs assume familiarity with it.
   `qudt:dataOrder` and the element type(s) (flat `qudt:elementType` for
   homogeneous, `qudt:conformsToTupleSpec` → `qudt:NTupleSpec` for heterogeneous).
   This reverses the brief 2026-07-27 "self-describing array" revision. Array and
-  tuple constraints are now **validated** — the note records three portability
-  defects found in the shared tuple engine while doing so. **Still open:** where
+  tuple constraints are now **validated**, and confirmed in TopBraid on 2026-10-19 — the
+  note records three portability defects found in the shared tuple engine while doing so.
+  **Still open:** where
   `qudt:Vector` / `qudt:Matrix` / `Homogeneous` / `Heterogenous` sit relative to
   the split, plus the "still to do" B–E list in the note.
 

@@ -5,7 +5,9 @@
 2026-08-22 (branch `rh-arrays`): the blueprint node is back as `qudt:ArrayKind`, reached by
 `qudt:datatypeKind`.** This reverses the 2026-07-27 "self-describing array" decision. Array
 constraints are **validated** (valid examples clean, every invalid example flagged); three
-portability defects in the shared tuple engine were found and fixed in the process.
+portability defects in the shared tuple engine were found and fixed in the process. Confirmed on
+2026-10-19 in the build's own SHACL engine, TopBraid SHACL 1.4.3 — see
+[validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md).
 Read the revisions newest-first: "Design revision (2026-08-22)" supersedes
 "Design revision (2026-07-27)", which in turn supersedes the `qudt:ArraySpec` sketch further down.
 **Related file:** `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES-STRUCTURED_NoOWL.ttl`
@@ -658,12 +660,19 @@ A. ~~**Resume SHACL validation (deferred).**~~ **Done (2026-08-22)** — all eig
 constraints validated against both example files. The `NOT EXISTS` question was not a `$this`
 pre-binding issue: it was `UNION` inside `NOT EXISTS`, an aggregate alias joined across a
 sub-SELECT boundary, and an inverted `FILTER EXISTS`. All three fixed; see "Design revision
-(2026-08-22)". Confirmation in the project's own SHACL engine (TopBraid/Jena ARQ) is still worth
-doing, but the constraints no longer depend on the constructs that diverge between engines.
-B. **Migrate or retire the legacy old-style array examples** (`qudt:Array1D_Integers[-INVALID]`,
-`qudt:EX_Array1D_INVALID`, `qudt:Array_MassProperties_Rocket`, `qudt:Matrix-*`) that still use
-`qudt:value` (singular) / `qudt:datatype` — the retired `DimensionalityShape` no longer covers the
-invalid ones.
+(2026-08-22)". **Confirmed on 2026-10-19** in the build's own engine, TopBraid SHACL 1.4.3, with
+all three example files loaded together: every bad example fires exactly its intended check. The
+one defect the check found was outside the eight constraints: after the 2026-08-24 schema split, the
+IFC `ConsistentSign` constraint's `sh:prefixes` still named the pre-split
+`<…/schema/shacl/datatype>`, so it could not run and `ex:cpaBadSign` was never reported (fixed in
+`9bbeffad`). How to run the check: [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md).
+B. **Migrate or retire the legacy old-style array examples** that still use `qudt:value` (singular)
+and `qudt:datatype`; the retired `DimensionalityShape` no longer covers them. The engine check
+(2026-10-19) lists them. Six valid arrays — `ex:Array1D_Integers`, `ex:Array_MassProperties_Rocket`
+and four `ex:StateSpaceMatrix-*` — fail the required `qudt:datatypeKind`. In the invalid examples,
+the two legacy arrays (`qudt:Array1D_Integers-INVALID`, `qudt:EX_Array1D_INVALID`) fail only that
+check, not their intended dimension error, and six more `qudt:`-named resources (three lists, a
+collection and two quantities) are tested by no current constraint.
 C. **Finish deprecating `qudt:HeterogenousArray-datatype`** in favour of `qudt:conformsToTupleSpec`.
 D. Rewrite the nested-list prose on `qudt:HomogeneousArray`, `qudt:HeterogenousArray`, and
 `qudt:MultiDimensionalArray` to match the flat representation.

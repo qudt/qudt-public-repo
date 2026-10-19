@@ -190,8 +190,10 @@ those two probes to follow unions as probe (1) does. Until then, an enumerated
 position can list `( )` as one more allowed value (`qudt:value ex:A, ex:B, ( )`).
 A position declared `sh:nodeKind sh:IRI` already accepts `rdf:nil`, since it is an IRI.
 
-Not yet confirmed in the project's SHACL engine — the same deferred status as the
-other tuple checks (see [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md)).
+Confirmed on 2026-10-19 in the build's own SHACL engine, TopBraid SHACL 1.4.3: all the Maybe
+examples are clean, each Maybe invalid example is flagged at its intended position, and with
+`NTupleTypeCheck` as it was before this change every `( )` cell is flagged. See
+[validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md).
 
 ## SPARQL constraint idioms
 
@@ -444,8 +446,17 @@ some future `qudt:Foo`), work through this checklist:
   there and reports success. Silent loss of an entire check; after moving a
   constraint between classes, confirm a known-bad example is still flagged.
 - **Testing against the schema and examples alone** — `sh:class qudt:Unit` and
-  similar class facets need the unit and quantity-kind vocabularies loaded, or
-  every IRI-valued cell reports a false violation.
+  similar class facets need the unit and quantity-kind vocabularies (or typed stubs)
+  and the datatype vocabulary loaded, or every IRI-valued cell reports a false
+  violation. The examples must also be in the *shapes* graph, or constraints defined
+  in them don't run. And a passing build is not a test at all: it never runs these
+  constraints against the examples. See
+  [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md).
+- **A stale `sh:prefixes` target** — if the node a constraint's `sh:prefixes` points
+  at no longer exists, the query can't be parsed and the constraint never runs. The
+  only trace is one result on the *shape* itself, none on the data. After renaming or
+  splitting a schema, check that every `sh:prefixes` still points at an existing
+  ontology node.
 - **Nested-list validation is hard in one SPARQL query** — for arbitrary-depth
   arrays, SHACL SPARQL can't easily walk N levels. Either fix N (specialise
   for `qudt:Matrix` / `qudt:Vector`) or switch to the
