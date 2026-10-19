@@ -19,6 +19,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `unit:MilliEQ-PER-KiloGM` (`quantitykind:ReactiveChargePerMass`), requested for the NERC P06 vocabulary ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
 - Added descriptions for `quantitykind:ReactiveChargePerMass` and, in `unit:EQ`, the rule that one equivalent is one mole of unit charges and that converting to an amount of a particular ion requires its charge number, which belongs to the quantity, not the unit ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
 - Added `quantitykind:AmountOfBiologicallyActiveSubstancePerMass` (IU/mg, the potency of a preparation), `qudt:organizedUnder quantitykind:MassFraction`, as the quantity kind of `unit:IU-PER-MilliGM`.
+- Added `quantitykind:AmountOfOsmoticallyActiveEntities` (`qudt:organizedUnder quantitykind:AmountOfSubstance`) and `quantitykind:Osmolality` (`qudt:organizedUnder quantitykind:MolalityOfSolute`), the quantity kinds of the osmole units. An amount in osmoles counts the particles a solute dissociates into, so it is not asserted convertible to a plain amount of substance or molality.
+- Added `unit:MilliOSM-PER-L` (mOsm/L, `quantitykind:OsmoticConcentration`), the usual unit of osmolarity.
 
 ### Changed
 
@@ -29,6 +31,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Made the equivalent quantity kinds consistent: `quantitykind:MassEquivalent`, `quantitykind:CO2Equivalent` and `quantitykind:EquivalentDensity` are now `qudt:organizedUnder` (previously `qudt:specializationOf`) `Mass`, `MassEquivalent` and `Density`, matching `quantitykind:MolarEquivalent` and `quantitykind:EquivalentConcentration`. Their conversion to the plain quantity depends on the substance measured (charge number, global-warming potential, toxicity), so they are no longer asserted commensurable with it, or with each other. `MassEquivalent` and `EquivalentDensity` now carry direct units (`GM`, `KiloGM`, `MilliGM`; `GM-PER-L`, `KiloGM-PER-M3`) instead of inheriting every mass or density unit ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
 - `quantitykind:ReactiveChargePerMass` is now `qudt:organizedUnder quantitykind:AmountOfSubstancePerMass`, and `unit:CentiMOL-PER-KiloGM` is an applicable unit for it, so that cmol(+)/kg and meq/100 g are available for the same quantity kind ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
 - `unit:IU-PER-MilliGM` is now `qudt:unitForQuantityKind quantitykind:AmountOfBiologicallyActiveSubstancePerMass` instead of `quantitykind:MassFraction`. IU/mg is a potency whose relation to a plain mass fraction depends on the substance, so it is no longer asserted convertible to a mass fraction, and is no longer an applicable unit of `quantitykind:MassFraction`.
+- `unit:OSM` and `unit:MilliOSM` are now `qudt:unitForQuantityKind quantitykind:AmountOfOsmoticallyActiveEntities`, and `unit:MilliOSM-PER-KiloGM` is now `qudt:unitForQuantityKind quantitykind:Osmolality`, instead of `quantitykind:AmountOfSubstance` and `quantitykind:AmountOfSubstancePerMass`.
+- `quantitykind:OsmoticConcentration` is now `qudt:organizedUnder` (previously `qudt:specializationOf`) `quantitykind:AmountOfSubstanceConcentration`, and its description says it counts osmoles, not moles. It therefore no longer inherits the amount-of-substance concentration units; its unit is the new `unit:MilliOSM-PER-L`.
 
 ### Fixed
 
@@ -42,6 +46,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Updated the values and standard uncertainties of the ten Bohr and nuclear magneton constants (in J/T, eV/T, Hz/T or MHz/T, m⁻¹/T and K/T) from CODATA 2006 to the 2022 CODATA recommended values.
 - Rewrote the descriptions of `quantitykind:MagneticMoment`, `quantitykind:MagneticAreaMoment` and `quantitykind:MagneticDipoleMoment`, which contradicted each other, to distinguish the magnetic (area) moment (A·m²) from the magnetic dipole moment of IEC 60050-121 (j = μ₀m, Wb·m). Corrected the `latexDefinition` and symbol of `quantitykind:MagneticDipoleMoment` accordingly.
 - Corrected `qudt:ucumCode` on the 13 equivalent units from the case-insensitive UCUM form (`EQ`, `mEQ.L-1`, …) to the case-sensitive form (`eq`, `meq.L-1`, …) that the `qudt:UCUMcs` datatype declares ([#250](https://github.com/qudt/qudt-public-repo/issues/250)).
+- Corrected `qudt:conversionMultiplier` of `unit:OSM`, `unit:MilliOSM` and `unit:MilliOSM-PER-KiloGM` from 0.0 to 1.0, 0.001 and 0.001 (UCUM defines 1 osm as 1 mol), and their `qudt:ucumCode` from `Osmol`, `mOsmol` and `mOsmol.kg-1` to `osm`, `mosm` and `mosm.kg-1`. Replaced the description of `unit:OSM`, which gave an outdated gas-volume definition, and added a description for `unit:MilliOSM`.
 
 ## [3.5.2] - 2026-09-22
 
