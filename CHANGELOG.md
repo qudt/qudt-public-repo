@@ -9,6 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added `LICENSING.md`, which states the CC BY 4.0 attribution requirement (credit QUDT.org, link the license, indicate changes) and identifies UCUM-derived content as third-party material under the UCUM license, and `CITATION.cff`, which enables GitHub's *Cite this repository* button. The README gains *Citing QUDT* and *License* sections, and the FAIRsharing DOI is now described as the registry record it identifies rather than as the citation for QUDT.
 - Added automatic issue labeling and on-demand labeling of existing issues, using a personal Copilot token, with historical label checks to prevent relabeling after maintainer review.
 - Added `unit:GM-PER-KiloW-HR` and `unit:KiloGM-PER-KiloW-HR` (`quantitykind:MassPerEnergy`), used for emission factors such as the carbon intensity of electricity, `unit:CCY_EUR-PER-MegaW-HR` (`quantitykind:CostPerEnergy`), used for wholesale electricity prices, and its power counterpart `unit:CCY_EUR-PER-MegaW` (`quantitykind:CostPerPower`), alongside the existing `unit:CCY_EUR-PER-KiloW`.
 - Added `quantitykind:GravitationalConstant` (L³M⁻¹T⁻², IEC 62720 UAD059, ISO 80000-4), the quantity kind of the Newtonian constant of gravitation _G_. Its units `unit:N-M2-PER-KiloGM2` and `unit:M3-PER-KiloGM-SEC2` are now `qudt:unitForQuantityKind` it instead of `qudt:categorizedByQuantityKind quantitykind:Unknown`.
@@ -24,6 +25,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
+- Replaced `LICENSE.md` with `LICENSE`, containing the unmodified CC BY 4.0 legal code, so that GitHub detects the repository license as CC BY 4.0 instead of "Other". The contributing guide now states that contributions are licensed under CC BY 4.0.
 - Removed `qudt:hasDimensionVector` from the ten physical constants that stated one (`constant:AtomicMassConstant`, `constant:AvogadroConstant`, `constant:FaradayConstant`, `constant:FirstRadiationConstant`, `constant:GravitationalConstant`, `constant:JosephsonConstant`, `constant:MolarGasConstant`, `constant:PlanckConstant`, `constant:StefanBoltzmannConstant` and `constant:UniversalGasConstant`). A constant's dimension vector is fully determined by its quantity kind and by the unit of its value, so stating it again is redundant (DRY) and risks inconsistency: that of `constant:GravitationalConstant` was wrong. Obtain it via `qudt:hasQuantityKind/qudt:hasDimensionVector` or `qudt:quantityValue/qudt:hasUnit/qudt:hasDimensionVector`.
 - The SHACL schema no longer declares `qudt:hasDimensionVector` for `qudt:PhysicalConstant` (property shape `qudt:PhysicalConstant-hasDimensionVector` removed; the derived OWL schema drops the corresponding restriction). The closed-world QA check therefore now reports the triple on any constant, which keeps the change above in force.
 - Corrected the description of `unit:GM-PER-DeciL`, `unit:MilliGM-PER-DeciL`, and `unit:NanoGM-PER-DeciL` replacing 'amount-of-substance' with 'mass concentration'
