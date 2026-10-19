@@ -11,7 +11,7 @@ of the open threads; the open-thread docs assume familiarity with it.
   way structured datatypes (tuples, arrays, future variants) are modelled in
   this schema. Covers the three cooperating shapes (instance / spec / member
   type spec), the four-alternative type facet, optional tuple positions
-  (`qudt:MaybeNumericUnionType`, with an `rdf:nil` placeholder), and SPARQL-constraint idioms —
+  (the `qudt:Maybe…UnionType` family in CORE, with an `rdf:nil` placeholder), and SPARQL-constraint idioms —
   the SHACL pre-binding rule for sub-SELECTs that walk RDF lists via
   `rdf:rest*/rdf:first`, and two constructs (`UNION` inside `FILTER NOT EXISTS`,
   and joining on an aggregate alias across a sub-SELECT boundary) that are

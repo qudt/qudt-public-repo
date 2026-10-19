@@ -51,8 +51,8 @@ new structured datatype, start by reading that block.
 must satisfy exactly one of four kinds of type expectation:
 
 1. **Numeric datatype union** — `sh:or qudt:NumericTypeUnion` (or a bare
-   `sh:datatype`). For an *optional* position use `sh:or qudt:MaybeNumericUnionType`
-   instead — see [Optional positions](#optional-positions--maybe) below.
+   `sh:datatype`). For an *optional* position use the matching
+   `sh:or qudt:Maybe…UnionType` instead — see [Optional positions](#optional-positions--maybe) below.
 2. **Concept-class membership** — `sh:class <C>` where `<C> a qudt:Concept`.
 3. **Enumerated value** — `qudt:value <e1>, <e2>, …`.
 4. **Any IRI** — `sh:nodeKind sh:IRI`.
@@ -69,23 +69,91 @@ A tuple member can be optional in two different ways:
 |             Mechanism              |                    How the value is written                     |  Where it can be used   |
 |------------------------------------|-----------------------------------------------------------------|-------------------------|
 | `sh:minCount 0` on the member spec | omitted — the values list is shorter                            | trailing positions only |
-| `sh:or qudt:MaybeNumericUnionType` | `rdf:nil` — written `( )` — holds the place of the absent value | any position            |
+| `sh:or qudt:Maybe…UnionType`       | `rdf:nil` — written `( )` — holds the place of the absent value | any position            |
 
 A list cannot have a hole, so an absent value in the *middle* of a tuple needs a
 placeholder to keep the positions of the values after it. `rdf:nil` is that
-placeholder. `qudt:MaybeNumericUnionType` (in `SCHEMA_QUDT_NoOWL.ttl`, next to
-`qudt:NumericTypeUnion`) is named for the Maybe type of functional programming —
-`Maybe Numeric = Just Numeric | Nothing` — and is written exactly that way:
+placeholder. The `qudt:Maybe…UnionType` family is named for the Maybe type of
+functional programming — `Maybe X = Just X | Nothing` — and each union is written
+exactly that way, as a two-member list:
 
 ```turtle
-qudt:MaybeNumericUnionType
+qudt:MaybeDateUnionType
   a rdf:List ;
-  rdf:first [ sh:or qudt:NumericTypeUnion ] ;   # Just — reuses the union rather than copying it
-  rdf:rest  ( [ sh:hasValue ( ) ] ) .           # Nothing — rdf:nil
+  rdf:first [ sh:datatype xsd:date ] ;   # Just — an xsd:date literal
+  rdf:rest  ( [ sh:hasValue ( ) ] ) .    # Nothing — rdf:nil
 ```
 
-So a spec position declared with it accepts any value `qudt:NumericTypeUnion`
-accepts, or `rdf:nil`, and nothing else:
+The family lives in **`SCHEMA_QUDT-DATATYPES-CORE_NoOWL.ttl`**, the schema for terms
+shared by both branches: the unions are scalar types, and the structured tuple
+machinery is what consumes them. Thirty-one of them name a single XSD datatype and
+reference nothing but `xsd:` and `rdf:nil`. The thirty-second,
+`qudt:MaybeNumericUnionType`, takes `[ sh:or qudt:NumericTypeUnion ]` as its Just
+member so it stays in step with that union. Because `qudt:NumericTypeUnion` lives in
+the main schema, this is an upward reference from CORE. Note also that
+`qudt:NumericTypeUnion` includes `xsd:string`, so `MaybeNumericUnionType` accepts
+strings.
+
+### The Maybe unions
+
+Each name is `qudt:Maybe` + the XSD local name with its first letter capitalised +
+`UnionType`. The literal is the form used for that position in the EXAMPLES files.
+
+|        Family        |                        XSD datatype → union                        |               Example literal               |
+|----------------------|--------------------------------------------------------------------|---------------------------------------------|
+| Numeric, boolean     | `xsd:boolean` → `qudt:MaybeBooleanUnionType`                       | `true`                                      |
+|                      | `xsd:decimal` → `qudt:MaybeDecimalUnionType`                       | `23.7`                                      |
+|                      | `xsd:double` → `qudt:MaybeDoubleUnionType`                         | `2.37e1`                                    |
+|                      | `xsd:float` → `qudt:MaybeFloatUnionType`                           | `"23.7"^^xsd:float`                         |
+|                      | `xsd:integer` → `qudt:MaybeIntegerUnionType`                       | `42`                                        |
+|                      | `xsd:int` → `qudt:MaybeIntUnionType`                               | `"42"^^xsd:int`                             |
+|                      | `xsd:long` → `qudt:MaybeLongUnionType`                             | `"42"^^xsd:long`                            |
+|                      | `xsd:nonNegativeInteger` → `qudt:MaybeNonNegativeIntegerUnionType` | `"42"^^xsd:nonNegativeInteger`              |
+|                      | `qudt:NumericTypeUnion` → `qudt:MaybeNumericUnionType`             | any value the union accepts                 |
+| Other integers       | `xsd:positiveInteger` → `qudt:MaybePositiveIntegerUnionType`       | `"42"^^xsd:positiveInteger`                 |
+|                      | `xsd:negativeInteger` → `qudt:MaybeNegativeIntegerUnionType`       | `"-42"^^xsd:negativeInteger`                |
+|                      | `xsd:nonPositiveInteger` → `qudt:MaybeNonPositiveIntegerUnionType` | `"-42"^^xsd:nonPositiveInteger`             |
+|                      | `xsd:short` → `qudt:MaybeShortUnionType`                           | `"42"^^xsd:short`                           |
+|                      | `xsd:byte` → `qudt:MaybeByteUnionType`                             | `"42"^^xsd:byte`                            |
+|                      | `xsd:unsignedLong` → `qudt:MaybeUnsignedLongUnionType`             | `"42"^^xsd:unsignedLong`                    |
+|                      | `xsd:unsignedInt` → `qudt:MaybeUnsignedIntUnionType`               | `"42"^^xsd:unsignedInt`                     |
+|                      | `xsd:unsignedShort` → `qudt:MaybeUnsignedShortUnionType`           | `"42"^^xsd:unsignedShort`                   |
+|                      | `xsd:unsignedByte` → `qudt:MaybeUnsignedByteUnionType`             | `"42"^^xsd:unsignedByte`                    |
+| Date, time, duration | `xsd:date` → `qudt:MaybeDateUnionType`                             | `"2026-05-12"^^xsd:date`                    |
+|                      | `xsd:time` → `qudt:MaybeTimeUnionType`                             | `"14:30:00"^^xsd:time`                      |
+|                      | `xsd:dateTime` → `qudt:MaybeDateTimeUnionType`                     | `"2026-05-12T14:30:00"^^xsd:dateTime`       |
+|                      | `xsd:dateTimeStamp` → `qudt:MaybeDateTimeStampUnionType`           | `"2026-05-12T14:30:00Z"^^xsd:dateTimeStamp` |
+|                      | `xsd:gYear` → `qudt:MaybeGYearUnionType`                           | `"2026"^^xsd:gYear`                         |
+|                      | `xsd:gMonth` → `qudt:MaybeGMonthUnionType`                         | `"--05"^^xsd:gMonth`                        |
+|                      | `xsd:gDay` → `qudt:MaybeGDayUnionType`                             | `"---12"^^xsd:gDay`                         |
+|                      | `xsd:gYearMonth` → `qudt:MaybeGYearMonthUnionType`                 | `"2026-05"^^xsd:gYearMonth`                 |
+|                      | `xsd:gMonthDay` → `qudt:MaybeGMonthDayUnionType`                   | `"--05-12"^^xsd:gMonthDay`                  |
+|                      | `xsd:duration` → `qudt:MaybeDurationUnionType`                     | `"P1Y2M3DT4H"^^xsd:duration`                |
+|                      | `xsd:dayTimeDuration` → `qudt:MaybeDayTimeDurationUnionType`       | `"P3DT4H"^^xsd:dayTimeDuration`             |
+|                      | `xsd:yearMonthDuration` → `qudt:MaybeYearMonthDurationUnionType`   | `"P1Y2M"^^xsd:yearMonthDuration`            |
+| Binary               | `xsd:hexBinary` → `qudt:MaybeHexBinaryUnionType`                   | `"0FB7"^^xsd:hexBinary`                     |
+|                      | `xsd:base64Binary` → `qudt:MaybeBase64BinaryUnionType`             | `"D7c="^^xsd:base64Binary`                  |
+
+**Matching is exact on the datatype.** `xsd:int`, `xsd:long` and the other integer
+types all derive from `xsd:integer`, `xsd:dateTimeStamp` from `xsd:dateTime`, and the
+two duration subtypes from `xsd:duration`, but a position accepts only the datatype
+its union names. The plain Turtle literal `42` is an `xsd:integer`, so it fails a
+`MaybeIntUnionType` position (`ex:badExampleTupleIntegerInIntPosition`); a date fails a
+`MaybeDateTimeUnionType` position (`ex:badExampleTupleDateInDateTimePosition`). Pick the
+union for the exact datatype the literals will carry.
+
+The EXAMPLES file has one spec per family — `ex:OptionalNumbersTupleSpec`,
+`ex:OptionalIntegersTupleSpec`, `ex:OptionalTemporalTupleSpec` and
+`ex:OptionalBinaryTupleSpec` — each with a tuple holding a value at every position
+(`…Just`) and one alternating values and `( )` (`…Mixed`).
+
+In the derived OWL datatype schema the unions are kept and retyped as `qudt:List`, the
+same treatment `qudt:DateTypeUnion` gets.
+
+### Using a Maybe union
+
+A spec position declared with one accepts any value its Just member accepts, or
+`rdf:nil`, and nothing else:
 
 ```turtle
 ex:OptionalReadingTupleSpec  qudt:tupleMemberSpecs (
@@ -108,11 +176,19 @@ How a Nothing cell behaves in each check:
 - **`NTupleRangeCheck`** never reports it. Comparing an IRI with a numeric bound
   is a SPARQL type error, which `FILTER` treats as false — Nothing has no bounds.
 
-Other Maybe types follow the same shape: a two-member union whose first member
-is the "Just" facet (`[ sh:or <union> ]`, `[ sh:datatype … ]`, `[ sh:class … ]`)
-and whose second is `[ sh:hasValue ( ) ]`. `NTupleTypeCheck` follows nested unions
-to any depth, so no constraint change is needed for a new one. One caveat: a
-position declared `sh:nodeKind sh:IRI` already accepts `rdf:nil`, since it is an IRI.
+A new Maybe union follows the same shape: a two-member union whose first member is
+the Just facet and whose second is `[ sh:hasValue ( ) ]`. The Just facet must be a
+**datatype facet** — `[ sh:datatype … ]` or `[ sh:or <datatype union> ]`.
+`NTupleTypeCheck` follows nested unions to any depth for datatypes (probe 1) and for
+`sh:hasValue` (probe 1b), so no constraint change is needed for such a union.
+
+Class and enumerated facets do **not** work inside a union yet. Probes (2) and (3) read
+`sh:class` and `qudt:value` only directly on the member spec, so in
+`sh:or ( [ sh:class qudt:Unit ] [ sh:hasValue ( ) ] )` the Nothing case passes but every
+real unit is rejected. Making a class or enumerated position optional this way needs
+those two probes to follow unions as probe (1) does. Until then, an enumerated
+position can list `( )` as one more allowed value (`qudt:value ex:A, ex:B, ( )`).
+A position declared `sh:nodeKind sh:IRI` already accepts `rdf:nil`, since it is an IRI.
 
 Not yet confirmed in the project's SHACL engine — the same deferred status as the
 other tuple checks (see [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md)).
@@ -332,8 +408,9 @@ some future `qudt:Foo`), work through this checklist:
    - `qudt:ArrayDataOrder` (`qudt:InnermostIndexFastest` / `qudt:OutermostIndexFastest`
      enumeration)
    - `qudt:NumericTypeUnion` (numeric datatype disjunction)
-   - `qudt:MaybeNumericUnionType` (optional numeric position — a numeric value or
-     an `rdf:nil` placeholder; see [Optional positions](#optional-positions--maybe))
+   - the `qudt:Maybe…UnionType` family in CORE (an optional position of one XSD
+     datatype — a value or an `rdf:nil` placeholder; see
+     [The Maybe unions](#the-maybe-unions))
 
 ## Common pitfalls
 
@@ -355,6 +432,10 @@ some future `qudt:Foo`), work through this checklist:
   idiom 3. `sh:or/rdf:rest*/rdf:first/sh:datatype` stops at the outer union's
   members, so a nested union such as `qudt:MaybeNumericUnionType` matches nothing
   and every position using it is flagged. Use `(sh:or/rdf:rest*/rdf:first)+`.
+- **Choosing a Maybe union for a related but different datatype** — datatype matching
+  is exact, so the Turtle literal `42` (an `xsd:integer`) fails a `MaybeIntUnionType`
+  position, and a date fails a `MaybeDateTimeUnionType` one. It looks like a data
+  error; check the literal's exact datatype first.
 - **`FILTER EXISTS` where `NOT EXISTS` was meant** — `NTupleMissingRequiredValueCheck`
   fired when a required value *was* present. An inverted check that reports every
   position is easy to mistake for the two defects above; check the polarity first.

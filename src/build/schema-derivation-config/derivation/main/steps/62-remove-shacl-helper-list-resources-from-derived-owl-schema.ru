@@ -10,9 +10,9 @@ PREFIX qudt: <http://qudt.org/schema/qudt/>
                                             }
                                             WHERE {
                                                 VALUES ?helper {
-                                                    qudt:MaybeNumericUnionType
                                                     qudt:NumericTypeUnion
                                                     qudt:NumericListShape
+                                                    qudt:TextTypeUnion
                                                 }
                                                 GRAPH <work:schema:derived> {
                                                     ?helper ?p ?o .
