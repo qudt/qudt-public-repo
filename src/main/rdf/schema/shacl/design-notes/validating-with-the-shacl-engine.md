@@ -1,7 +1,7 @@
 # Validating the datatype constraints with the SHACL engine
 
 **Written:** 2026-10-19 (branch `rh-arrays-cusp2`)
-**Status:** current — the expected results below are the baseline as of commit `9bbeffad`
+**Status:** current — keep the expected results below in step with the examples
 **Related files:** the four SHACL schemas in `src/main/rdf/schema/shacl/` and the three
 `EXAMPLES_QUDT-*DATATYPES.ttl` files in `src/main/rdf/examples/`
 
@@ -185,6 +185,7 @@ Every bad example fires exactly its intended check:
 | `ex:badExampleTupleDateInDateTimePosition`    | `qudt:NTupleTypeCheck`                                           |
 | `ex:badExampleTupleIntegerInIntPosition`      | `qudt:NTupleTypeCheck`                                           |
 | `ex:badExampleTupleNothingInRequiredPosition` | `qudt:NTupleTypeCheck`                                           |
+| `ex:badExampleTupleTimeInAnyDatePosition`     | `qudt:NTupleTypeCheck`                                           |
 | `ex:cpaBadLengthShort`                        | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck` |
 | `ex:cpaBadMicroseconds`                       | `qudt:NTupleRangeCheck`                                          |
 | `ex:cpaBadMinutes`                            | `qudt:NTupleRangeCheck`                                          |

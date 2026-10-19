@@ -87,52 +87,59 @@ qudt:MaybeDateUnionType
 The family lives in **`SCHEMA_QUDT-DATATYPES-CORE_NoOWL.ttl`**, the schema for terms
 shared by both branches: the unions are scalar types, and the structured tuple
 machinery is what consumes them. Thirty-one of them name a single XSD datatype and
-reference nothing but `xsd:` and `rdf:nil`. The thirty-second,
-`qudt:MaybeNumericUnionType`, takes `[ sh:or qudt:NumericTypeUnion ]` as its Just
-member so it stays in step with that union. Because `qudt:NumericTypeUnion` lives in
-the main schema, this is an upward reference from CORE. Note also that
-`qudt:NumericTypeUnion` includes `xsd:string`, so `MaybeNumericUnionType` accepts
-strings.
+reference nothing but `xsd:` and `rdf:nil`. Two more wrap an existing union, taking
+`[ sh:or <union> ]` as their Just member so they stay in step with it:
+
+- `qudt:MaybeAnyDateUnionType` wraps `qudt:DateTypeUnion` (`xsd:date`, `xsd:dateTime`,
+  `xsd:gYear`, `xsd:gMonth`), which also lives in CORE.
+- `qudt:MaybeNumericUnionType` wraps `qudt:NumericTypeUnion`. That union lives in the main
+  schema, so this is an upward reference from CORE. Note also that
+  `qudt:NumericTypeUnion` includes `xsd:string`, so `MaybeNumericUnionType` accepts
+  strings.
+
+The other datatype unions — `qudt:DateTypeUnion`, `qudt:IntegerUnionList`,
+`qudt:NonNegativeIntegerUnionList` and `qudt:XSDatomicTypeUnion` — live in CORE too.
 
 ### The Maybe unions
 
 Each name is `qudt:Maybe` + the XSD local name with its first letter capitalised +
 `UnionType`. The literal is the form used for that position in the EXAMPLES files.
 
-|        Family        |                        XSD datatype → union                        |               Example literal               |
-|----------------------|--------------------------------------------------------------------|---------------------------------------------|
-| Numeric, boolean     | `xsd:boolean` → `qudt:MaybeBooleanUnionType`                       | `true`                                      |
-|                      | `xsd:decimal` → `qudt:MaybeDecimalUnionType`                       | `23.7`                                      |
-|                      | `xsd:double` → `qudt:MaybeDoubleUnionType`                         | `2.37e1`                                    |
-|                      | `xsd:float` → `qudt:MaybeFloatUnionType`                           | `"23.7"^^xsd:float`                         |
-|                      | `xsd:integer` → `qudt:MaybeIntegerUnionType`                       | `42`                                        |
-|                      | `xsd:int` → `qudt:MaybeIntUnionType`                               | `"42"^^xsd:int`                             |
-|                      | `xsd:long` → `qudt:MaybeLongUnionType`                             | `"42"^^xsd:long`                            |
-|                      | `xsd:nonNegativeInteger` → `qudt:MaybeNonNegativeIntegerUnionType` | `"42"^^xsd:nonNegativeInteger`              |
-|                      | `qudt:NumericTypeUnion` → `qudt:MaybeNumericUnionType`             | any value the union accepts                 |
-| Other integers       | `xsd:positiveInteger` → `qudt:MaybePositiveIntegerUnionType`       | `"42"^^xsd:positiveInteger`                 |
-|                      | `xsd:negativeInteger` → `qudt:MaybeNegativeIntegerUnionType`       | `"-42"^^xsd:negativeInteger`                |
-|                      | `xsd:nonPositiveInteger` → `qudt:MaybeNonPositiveIntegerUnionType` | `"-42"^^xsd:nonPositiveInteger`             |
-|                      | `xsd:short` → `qudt:MaybeShortUnionType`                           | `"42"^^xsd:short`                           |
-|                      | `xsd:byte` → `qudt:MaybeByteUnionType`                             | `"42"^^xsd:byte`                            |
-|                      | `xsd:unsignedLong` → `qudt:MaybeUnsignedLongUnionType`             | `"42"^^xsd:unsignedLong`                    |
-|                      | `xsd:unsignedInt` → `qudt:MaybeUnsignedIntUnionType`               | `"42"^^xsd:unsignedInt`                     |
-|                      | `xsd:unsignedShort` → `qudt:MaybeUnsignedShortUnionType`           | `"42"^^xsd:unsignedShort`                   |
-|                      | `xsd:unsignedByte` → `qudt:MaybeUnsignedByteUnionType`             | `"42"^^xsd:unsignedByte`                    |
-| Date, time, duration | `xsd:date` → `qudt:MaybeDateUnionType`                             | `"2026-05-12"^^xsd:date`                    |
-|                      | `xsd:time` → `qudt:MaybeTimeUnionType`                             | `"14:30:00"^^xsd:time`                      |
-|                      | `xsd:dateTime` → `qudt:MaybeDateTimeUnionType`                     | `"2026-05-12T14:30:00"^^xsd:dateTime`       |
-|                      | `xsd:dateTimeStamp` → `qudt:MaybeDateTimeStampUnionType`           | `"2026-05-12T14:30:00Z"^^xsd:dateTimeStamp` |
-|                      | `xsd:gYear` → `qudt:MaybeGYearUnionType`                           | `"2026"^^xsd:gYear`                         |
-|                      | `xsd:gMonth` → `qudt:MaybeGMonthUnionType`                         | `"--05"^^xsd:gMonth`                        |
-|                      | `xsd:gDay` → `qudt:MaybeGDayUnionType`                             | `"---12"^^xsd:gDay`                         |
-|                      | `xsd:gYearMonth` → `qudt:MaybeGYearMonthUnionType`                 | `"2026-05"^^xsd:gYearMonth`                 |
-|                      | `xsd:gMonthDay` → `qudt:MaybeGMonthDayUnionType`                   | `"--05-12"^^xsd:gMonthDay`                  |
-|                      | `xsd:duration` → `qudt:MaybeDurationUnionType`                     | `"P1Y2M3DT4H"^^xsd:duration`                |
-|                      | `xsd:dayTimeDuration` → `qudt:MaybeDayTimeDurationUnionType`       | `"P3DT4H"^^xsd:dayTimeDuration`             |
-|                      | `xsd:yearMonthDuration` → `qudt:MaybeYearMonthDurationUnionType`   | `"P1Y2M"^^xsd:yearMonthDuration`            |
-| Binary               | `xsd:hexBinary` → `qudt:MaybeHexBinaryUnionType`                   | `"0FB7"^^xsd:hexBinary`                     |
-|                      | `xsd:base64Binary` → `qudt:MaybeBase64BinaryUnionType`             | `"D7c="^^xsd:base64Binary`                  |
+|        Family        |                        XSD datatype → union                        |                 Example literal                  |
+|----------------------|--------------------------------------------------------------------|--------------------------------------------------|
+| Numeric, boolean     | `xsd:boolean` → `qudt:MaybeBooleanUnionType`                       | `true`                                           |
+|                      | `xsd:decimal` → `qudt:MaybeDecimalUnionType`                       | `23.7`                                           |
+|                      | `xsd:double` → `qudt:MaybeDoubleUnionType`                         | `2.37e1`                                         |
+|                      | `xsd:float` → `qudt:MaybeFloatUnionType`                           | `"23.7"^^xsd:float`                              |
+|                      | `xsd:integer` → `qudt:MaybeIntegerUnionType`                       | `42`                                             |
+|                      | `xsd:int` → `qudt:MaybeIntUnionType`                               | `"42"^^xsd:int`                                  |
+|                      | `xsd:long` → `qudt:MaybeLongUnionType`                             | `"42"^^xsd:long`                                 |
+|                      | `xsd:nonNegativeInteger` → `qudt:MaybeNonNegativeIntegerUnionType` | `"42"^^xsd:nonNegativeInteger`                   |
+|                      | `qudt:NumericTypeUnion` → `qudt:MaybeNumericUnionType`             | any value the union accepts                      |
+| Other integers       | `xsd:positiveInteger` → `qudt:MaybePositiveIntegerUnionType`       | `"42"^^xsd:positiveInteger`                      |
+|                      | `xsd:negativeInteger` → `qudt:MaybeNegativeIntegerUnionType`       | `"-42"^^xsd:negativeInteger`                     |
+|                      | `xsd:nonPositiveInteger` → `qudt:MaybeNonPositiveIntegerUnionType` | `"-42"^^xsd:nonPositiveInteger`                  |
+|                      | `xsd:short` → `qudt:MaybeShortUnionType`                           | `"42"^^xsd:short`                                |
+|                      | `xsd:byte` → `qudt:MaybeByteUnionType`                             | `"42"^^xsd:byte`                                 |
+|                      | `xsd:unsignedLong` → `qudt:MaybeUnsignedLongUnionType`             | `"42"^^xsd:unsignedLong`                         |
+|                      | `xsd:unsignedInt` → `qudt:MaybeUnsignedIntUnionType`               | `"42"^^xsd:unsignedInt`                          |
+|                      | `xsd:unsignedShort` → `qudt:MaybeUnsignedShortUnionType`           | `"42"^^xsd:unsignedShort`                        |
+|                      | `xsd:unsignedByte` → `qudt:MaybeUnsignedByteUnionType`             | `"42"^^xsd:unsignedByte`                         |
+| Date, time, duration | `xsd:date` → `qudt:MaybeDateUnionType`                             | `"2026-05-12"^^xsd:date`                         |
+|                      | `xsd:time` → `qudt:MaybeTimeUnionType`                             | `"14:30:00"^^xsd:time`                           |
+|                      | `xsd:dateTime` → `qudt:MaybeDateTimeUnionType`                     | `"2026-05-12T14:30:00"^^xsd:dateTime`            |
+|                      | `xsd:dateTimeStamp` → `qudt:MaybeDateTimeStampUnionType`           | `"2026-05-12T14:30:00Z"^^xsd:dateTimeStamp`      |
+|                      | `xsd:gYear` → `qudt:MaybeGYearUnionType`                           | `"2026"^^xsd:gYear`                              |
+|                      | `xsd:gMonth` → `qudt:MaybeGMonthUnionType`                         | `"--05"^^xsd:gMonth`                             |
+|                      | `xsd:gDay` → `qudt:MaybeGDayUnionType`                             | `"---12"^^xsd:gDay`                              |
+|                      | `xsd:gYearMonth` → `qudt:MaybeGYearMonthUnionType`                 | `"2026-05"^^xsd:gYearMonth`                      |
+|                      | `xsd:gMonthDay` → `qudt:MaybeGMonthDayUnionType`                   | `"--05-12"^^xsd:gMonthDay`                       |
+|                      | `xsd:duration` → `qudt:MaybeDurationUnionType`                     | `"P1Y2M3DT4H"^^xsd:duration`                     |
+|                      | `xsd:dayTimeDuration` → `qudt:MaybeDayTimeDurationUnionType`       | `"P3DT4H"^^xsd:dayTimeDuration`                  |
+|                      | `xsd:yearMonthDuration` → `qudt:MaybeYearMonthDurationUnionType`   | `"P1Y2M"^^xsd:yearMonthDuration`                 |
+|                      | `qudt:DateTypeUnion` → `qudt:MaybeAnyDateUnionType`                | any of `xsd:date`, `dateTime`, `gYear`, `gMonth` |
+| Binary               | `xsd:hexBinary` → `qudt:MaybeHexBinaryUnionType`                   | `"0FB7"^^xsd:hexBinary`                          |
+|                      | `xsd:base64Binary` → `qudt:MaybeBase64BinaryUnionType`             | `"D7c="^^xsd:base64Binary`                       |
 
 **Matching is exact on the datatype.** `xsd:int`, `xsd:long` and the other integer
 types all derive from `xsd:integer`, `xsd:dateTimeStamp` from `xsd:dateTime`, and the
@@ -140,12 +147,15 @@ two duration subtypes from `xsd:duration`, but a position accepts only the datat
 its union names. The plain Turtle literal `42` is an `xsd:integer`, so it fails a
 `MaybeIntUnionType` position (`ex:badExampleTupleIntegerInIntPosition`); a date fails a
 `MaybeDateTimeUnionType` position (`ex:badExampleTupleDateInDateTimePosition`). Pick the
-union for the exact datatype the literals will carry.
+union for the exact datatype the literals will carry — or, where a position should take
+any of several date types, `qudt:MaybeAnyDateUnionType`. Even that union is exact about
+its own members: an `xsd:time` fails it (`ex:badExampleTupleTimeInAnyDatePosition`).
 
 The EXAMPLES file has one spec per family — `ex:OptionalNumbersTupleSpec`,
 `ex:OptionalIntegersTupleSpec`, `ex:OptionalTemporalTupleSpec` and
-`ex:OptionalBinaryTupleSpec` — each with a tuple holding a value at every position
-(`…Just`) and one alternating values and `( )` (`…Mixed`).
+`ex:OptionalBinaryTupleSpec` — plus `ex:OptionalAnyDateTupleSpec`, each with a tuple
+holding a value at every position (`…Just`) and one alternating values and `( )`
+(`…Mixed`).
 
 In the derived OWL datatype schema the unions are kept and retyped as `qudt:List`, the
 same treatment `qudt:DateTypeUnion` gets.
@@ -410,6 +420,7 @@ some future `qudt:Foo`), work through this checklist:
    - `qudt:ArrayDataOrder` (`qudt:InnermostIndexFastest` / `qudt:OutermostIndexFastest`
      enumeration)
    - `qudt:NumericTypeUnion` (numeric datatype disjunction)
+   - `qudt:DateTypeUnion` (date, dateTime, gYear, gMonth), in CORE
    - the `qudt:Maybe…UnionType` family in CORE (an optional position of one XSD
      datatype — a value or an `rdf:nil` placeholder; see
      [The Maybe unions](#the-maybe-unions))

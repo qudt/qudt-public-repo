@@ -423,6 +423,57 @@ qudt:Datatype-vbName
   sh:minCount 0 ;
   sh:path qudt:vbName .
 
+qudt:DateTypeUnion
+  a rdf:List ;
+  dcterms:description """
+  An rdf:List that can be used in property constraints as the type in an sh:or to indicate
+   that all values of a property must be an xsd date type.
+  """ ;
+  rdf:first [
+    sh:datatype xsd:date ;
+  ] ;
+  rdf:rest ( [
+    sh:datatype xsd:dateTime ;
+  ] [
+    sh:datatype xsd:gYear ;
+  ] [
+    sh:datatype xsd:gMonth ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/core> ;
+  rdfs:label "Date Type Union" .
+
+qudt:IntegerUnionList
+  a rdf:List ;
+  rdf:first [
+    sh:datatype xsd:int ;
+  ] ;
+  rdf:rest ( [
+    sh:datatype xsd:nonNegativeInteger ;
+  ] [
+    sh:datatype xsd:positiveInteger ;
+  ] [
+    sh:datatype xsd:integer ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/core> ;
+  rdfs:label "Integer Union List" .
+
+qudt:MaybeAnyDateUnionType
+  a rdf:List ;
+  dcterms:description """
+  An rdf:List for use as the value of sh:or in a tuple member specification, after the Maybe type of
+   functional programming: it accepts either a value accepted by qudt:DateTypeUnion - an xsd:date,
+   xsd:dateTime, xsd:gYear or xsd:gMonth literal - (Just) or rdf:nil (Nothing), making the position
+   optional while preserving the positions of the values after it.
+  """ ;
+  rdf:first [
+    sh:or qudt:DateTypeUnion ;
+  ] ;
+  rdf:rest ( [
+    sh:hasValue ( ) ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/core> ;
+  rdfs:label "Maybe Any Date Union Type" .
+
 qudt:MaybeBase64BinaryUnionType
   a rdf:List ;
   dcterms:description """
@@ -935,6 +986,37 @@ qudt:MaybeYearMonthDurationUnionType
   ] ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/core> ;
   rdfs:label "Maybe Year Month Duration Union Type" .
+
+qudt:NonNegativeIntegerUnionList
+  a rdf:List ;
+  rdf:first [
+    sh:datatype xsd:nonNegativeInteger ;
+  ] ;
+  rdf:rest ( [
+    sh:datatype xsd:positiveInteger ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/core> ;
+  rdfs:label "Non-negative union list" .
+
+qudt:XSDatomicTypeUnion
+  a rdf:List ;
+  dcterms:description """
+  <p>In XML Schema Definition (XSD) xsd:anySimpleType is the base type for all simple types.
+  Simple types in XSD represent atomic values without any child elements or complex structures.
+  All simple types are compliant with xsd:anySimpleType.
+  </p>
+  <p>In XSD, the atomic types are: xsd:string, xsd:boolean, xsd:decimal, xsd:float,
+   xsd:double, xsd:duration, xsd:dateTime, xsd:time, xsd:date, xsd:gYearMonth, xsd:gYear, xsd:gMonthDay,
+   xsd:gDay, xsd:gMonth, xsd:hexBinary, xsd:base64Binary, xsd:anyURI, xsd:QName, and xsd:NOTATION.
+  </p>"""^^rdf:HTML ;
+  rdf:first [
+    sh:datatype xsd:anySimpleType ;
+  ] ;
+  rdf:rest ( [
+    sh:datatype xsd:anySimpleType ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/core> ;
+  rdfs:label "XSD Atomic Type Union" .
 
 vaem:GMD_SCHEMA-SHACL-DATATYPE-CORE
   a vaem:GraphMetaData ;
