@@ -7,13 +7,13 @@
 @prefix ex: <http://example.org#> .
 @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
-@prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix unit: <http://qudt.org/vocab/unit/> .
 @prefix vaem: <http://www.linkedmodel.org/schema/vaem#> .
 
 <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype>
   a owl:Ontology ;
-  owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/IFC/datatype> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/datatype> ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/quantitykind> ;
@@ -23,13 +23,6 @@
   rdfs:label "QUDT Examples of Bad Datatypes v$$QUDT_VERSION$$" ;
   vaem:hasGraphMetadata vaem:GMD_INVALID-DATATYPES ;
   vaem:hasGraphRole vaem:VocabularyGraph .
-
-ex:IfcCompoundPlaneAngleMeasure
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "IfcCompoundPlaneAngleMeasure" ;
-  rdfs:subClassOf qudt:NTuple ;
-  sh:sparql ex:IfcCompoundPlaneAngleConsistentSign .
 
 dcterms:contributor
   a owl:AnnotationProperty ;
@@ -102,122 +95,6 @@ ex:BadLengthArrayKind
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
   rdfs:label "Array kind for the invalid short value list array" .
 
-ex:IfcCompoundPlaneAngleConsistentSign
-  a sh:SPARQLConstraint ;
-  sh:message "Compound plane angle has components of mixed sign (ConsistentSign)." ;
-  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:select """
-      SELECT $this WHERE {
-          $this qudt:values ?values .
-          ?values rdf:rest*/rdf:first ?a .
-          ?values rdf:rest*/rdf:first ?b .
-          FILTER ( ?a > 0 && ?b < 0 )
-      }
-  """ .
-
-ex:IfcCompoundPlaneAngleMeasureSpec
-  a qudt:NTupleSpec ;
-  qudt:tupleMemberSpecs ( [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 1 ;
-    sh:datatype xsd:integer ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 2 ;
-    sh:datatype xsd:integer ;
-    sh:maxExclusive 60 ;
-    sh:minExclusive -60 ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 3 ;
-    sh:datatype xsd:integer ;
-    sh:maxExclusive 60 ;
-    sh:minExclusive -60 ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 4 ;
-    sh:datatype xsd:integer ;
-    sh:maxExclusive 1000000 ;
-    sh:minCount 0 ;
-    sh:minExclusive -1000000 ;
-  ] ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
-  rdfs:label "IfcCompoundPlaneAngleMeasure: (degrees, minutes, seconds, [millionth-seconds])" .
-
-ex:MeasurementTupleSpec
-  a qudt:NTupleSpec ;
-  qudt:tupleMemberSpecs ( [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 1 ;
-    sh:datatype xsd:date ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 2 ;
-    sh:datatype xsd:decimal ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 3 ;
-    sh:class qudt:Unit ;
-  ] ) .
-
-ex:QuantityValueUnitTupleSpec
-  a qudt:NTupleSpec ;
-  qudt:tupleMemberSpecs ( [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 1 ;
-    sh:class qudt:QuantityKind ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 2 ;
-    sh:datatype xsd:decimal ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 3 ;
-    sh:class qudt:Unit ;
-  ] ) .
-
-ex:StatusFlagTupleSpec
-  a qudt:NTupleSpec ;
-  qudt:tupleMemberSpecs ( [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 1 ;
-    sh:datatype xsd:string ;
-    sh:minLength 1 ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 2 ;
-    sh:datatype xsd:boolean ;
-  ] ) .
-
-ex:TempPressureArraySpec
-  a qudt:NTupleSpec ;
-  qudt:tupleMemberSpecs ( [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 1 ;
-    sh:datatype xsd:string ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 2 ;
-    sh:datatype xsd:decimal ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 3 ;
-    sh:class qudt:Unit ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 4 ;
-    sh:datatype xsd:string ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 5 ;
-    sh:datatype xsd:decimal ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 6 ;
-    sh:class qudt:Unit ;
-  ] ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> .
-
 ex:badExampleArrayRank
   a qudt:HomogeneousArrayKind ;
   dcterms:description """
@@ -263,7 +140,6 @@ ex:badExampleHomogeneousArrayType
 ex:badExampleQuantityValueTuple
   a qudt:NTuple ;
   qudt:conformsToTupleSpec ex:QuantityValueUnitTupleSpec ;
-  qudt:values ( quantitykind:Temperature 25.6 "DegC" ) ;
   qudt:values ( quantitykind:Temperature 25.6 "DegC" ) .
 
 ex:badExampleTuple2a
