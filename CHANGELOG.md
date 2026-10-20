@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.5.3] - 2026-10-20
+
 ### Added
 
 - Added `LICENSING.md`, which states the CC BY 4.0 attribution requirement (credit QUDT.org, link the license, indicate changes) and identifies UCUM-derived content as third-party material under the UCUM license, and `CITATION.cff`, which enables GitHub's *Cite this repository* button. The README gains *Citing QUDT* and *License* sections, and the FAIRsharing DOI is now described as the registry record it identifies rather than as the citation for QUDT.
@@ -1019,7 +1021,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 [#1501]: https://github.com/qudt/qudt-public-repo/issues/1501
 [#1502]: https://github.com/qudt/qudt-public-repo/issues/1502
 [#1505]: https://github.com/qudt/qudt-public-repo/issues/1505
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.5.2...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.5.3...HEAD
+[3.5.3]: https://github.com/qudt/qudt-public-repo/compare/v3.5.2...v3.5.3
 [3.5.2]: https://github.com/qudt/qudt-public-repo/compare/v3.5.1...v3.5.2
 [3.5.1]: https://github.com/qudt/qudt-public-repo/compare/v3.5.0...v3.5.1
 [3.5.0]: https://github.com/qudt/qudt-public-repo/compare/v3.4.0...v3.5.0
