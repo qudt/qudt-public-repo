@@ -11,7 +11,6 @@ PREFIX qudt: <http://qudt.org/schema/qudt/>
                                             WHERE {
                                                 VALUES ?helper {
                                                     qudt:NumericUnionType
-                                                    qudt:NumericListShape
                                                     qudt:TextUnionType
                                                 }
                                                 GRAPH <work:schema:derived> {

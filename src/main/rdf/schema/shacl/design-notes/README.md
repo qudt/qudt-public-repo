@@ -40,7 +40,8 @@ of the open threads; the open-thread docs assume familiarity with it.
   note records three portability defects found in the shared tuple engine while doing so.
   **Still open:** where
   `qudt:Vector` / `qudt:Matrix` / `Homogeneous` / `Heterogenous` sit relative to
-  the split, plus the "still to do" B–E list in the note.
+  the split, plus the "still to do" B–G list in the note. F and G (added 2026-10-21): how to
+  allow structured datatypes as numeric values, and how a vector can be a subtype of array.
 
 ## Adding a new note
 

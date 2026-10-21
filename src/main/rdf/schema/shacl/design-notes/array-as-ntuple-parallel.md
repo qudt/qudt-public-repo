@@ -678,3 +678,17 @@ D. Rewrite the nested-list prose on `qudt:HomogeneousArray`, `qudt:HeterogenousA
 `qudt:MultiDimensionalArray` to match the flat representation.
 E. Hold the "specifying the types of an array's values" discussion (see "Open discussion" above), now
 in light of the Option-B hybrid decision.
+F. **Consider how to allow structured datatypes for numeric values** *(added 2026-10-21)*.
+`qudt:Quantifiable-value` accepts a number, a `qudt:DataItem` or a `qudt:EnumeratedValue`, so a
+quantity whose value is a vector, matrix or array fails. `ex:Quantity_DroneVelocity3D`, whose value
+is `ex:Vector_DroneVelocities_3D`, is the case in the examples; see its open item in
+[validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md). To decide: which
+structured datatypes may be a value, whether that is one more `sh:or` alternative (all of
+`qudt:StructuredDatatype`, or a narrower class), and whether their elements must then be numeric.
+G. **Consider how a vector can be a subtype of array** *(added 2026-10-21)*. Today `qudt:Vector` is
+a sibling of `qudt:Array`, and "a vector is a rank-1 array" is stated only on the kind side, where
+`qudt:VectorKind` is `rdfs:subClassOf qudt:ArrayKind` (see "`qudt:Vector` is a sibling of
+`qudt:Array`, not a subclass" above). Making `qudt:Vector` `rdfs:subClassOf qudt:Array` would apply
+the `qudt:Array` shapes to every vector, including the required `qudt:datatypeKind`, so the four
+legacy vector instances would need migrating first (see B). Decide this before F: if a vector is
+an array, F may only need to admit `qudt:Array`.

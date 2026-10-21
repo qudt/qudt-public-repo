@@ -212,7 +212,8 @@ The valid and IFC examples are clean, apart from three open items:
   alternatives: a number, a `qudt:DataItem` or a `qudt:EnumeratedValue`. This appeared on
   2026-10-21, when `qudt:Quantifiable-value` changed from `sh:node ( … )`, which never
   checked anything, to `sh:or`. Either the shape should also accept structured values or
-  the example should state its value another way.
+  the example should state its value another way. See "Still to do" F and G in
+  [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md).
 
 Any other result on an example subject is a regression.
 
