@@ -158,7 +158,7 @@ awk -F'\t' 'NR==FNR {s[$1]=1; next} ($1 in s) {print $1 "\t" $3}' "$WORK/subject
   don't run.
 - **Data graph:** the same files, plus `VOCAB_QUDT-DATATYPES.ttl` and the stub.
   - SPARQL constraints are evaluated against the data graph, so the union lists they walk
-    (`qudt:NumericTypeUnion`, the `qudt:Maybe…UnionType` family) must be in it.
+    (`qudt:NumericUnionType`, the `qudt:Maybe…UnionType` family) must be in it.
   - The datatype vocabulary supplies the `qudt:Datatype` instances the examples refer to.
   - The stub gives a type to every `unit:` and `quantitykind:` IRI the examples use, so
     `sh:class qudt:Unit` facets resolve. Loading the full unit and quantity-kind
@@ -168,7 +168,7 @@ awk -F'\t' 'NR==FNR {s[$1]=1; next} ($1 in s) {print $1 "\t" $3}' "$WORK/subject
 - Results on resources other than the examples — the stub's units, schema resources — are
   expected; step 5 filters them out. The full list is in `$WORK/results.tsv`.
 
-## Expected results (2026-10-19)
+## Expected results (2026-10-21)
 
 Every bad example fires exactly its intended check:
 
@@ -197,7 +197,7 @@ Every bad example fires exactly its intended check:
 `SELECT` constraint yields one result per solution row; `SELECT DISTINCT $this` would make it
 one.
 
-The valid and IFC examples are clean, apart from two open items:
+The valid and IFC examples are clean, apart from three open items:
 
 - `ex:ResourceLabelRatingTupleSpec` — position 2 uses only `sh:languageIn ( "en" )`, which is
   not one of the type facets `qudt:NTupleMemberTypeSpec-type` accepts, so the spec fails that
@@ -206,6 +206,13 @@ The valid and IFC examples are clean, apart from two open items:
   `ex:Array_MassProperties_Rocket` and four `ex:StateSpaceMatrix-*`) and the two legacy invalid
   ones (`qudt:Array1D_Integers-INVALID`, `qudt:EX_Array1D_INVALID`). See "Still to do" B in
   [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md).
+- `ex:Quantity_DroneVelocity3D` fails `qudt:Quantifiable-value` (`sh:OrConstraintComponent`).
+  Its `qudt:value` is `ex:Vector_DroneVelocities_3D`, a `qudt:Vector`, which is a
+  `qudt:StructuredDatatype` and not a `qudt:DataItem`, so it matches none of the
+  alternatives: a number, a `qudt:DataItem` or a `qudt:EnumeratedValue`. This appeared on
+  2026-10-21, when `qudt:Quantifiable-value` changed from `sh:node ( … )`, which never
+  checked anything, to `sh:or`. Either the shape should also accept structured values or
+  the example should state its value another way.
 
 Any other result on an example subject is a regression.
 

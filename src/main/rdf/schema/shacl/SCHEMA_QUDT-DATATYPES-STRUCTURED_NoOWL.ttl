@@ -734,7 +734,11 @@ qudt:ScalarListShape
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
   rdfs:subClassOf qudt:List ;
   sh:property [
-    sh:or qudt:NumericTypeUnion ;
+    sh:or ( [
+      sh:or qudt:NumericUnionType ;
+    ] [
+      sh:datatype xsd:string ;
+    ] ) ;
     sh:path rdf:first ;
   ] ;
   sh:property [
@@ -1737,7 +1741,7 @@ qudt:NTupleTypeCheck
 
             # (1) Numeric datatype — direct sh:datatype, or one inside an sh:or union.
             #     The (…)+ recurses through nested unions, so a union may reference
-            #     another (qudt:MaybeNumericUnionType -> qudt:NumericTypeUnion).
+            #     another (qudt:MaybeNumericUnionType -> qudt:NumericUnionType).
             OPTIONAL {
                 ?memberSpec ( sh:datatype | (sh:or/rdf:rest*/rdf:first)+/sh:datatype ) ?allowedDatatype .
                 FILTER ( datatype(?value) = ?allowedDatatype )

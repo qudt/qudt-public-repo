@@ -50,7 +50,7 @@ new structured datatype, start by reading that block.
 `qudt:NTupleMemberTypeSpec-type` declares that every member spec
 must satisfy exactly one of four kinds of type expectation:
 
-1. **Numeric datatype union** — `sh:or qudt:NumericTypeUnion` (or a bare
+1. **Numeric datatype union** — `sh:or qudt:NumericUnionType` (or a bare
    `sh:datatype`). For an *optional* position use the matching
    `sh:or qudt:Maybe…UnionType` instead — see [Optional positions](#optional-positions--maybe) below.
 2. **Concept-class membership** — `sh:class <C>` where `<C> a qudt:Concept`.
@@ -90,15 +90,14 @@ machinery is what consumes them. Thirty-one of them name a single XSD datatype a
 reference nothing but `xsd:` and `rdf:nil`. Two more wrap an existing union, taking
 `[ sh:or <union> ]` as their Just member so they stay in step with it:
 
-- `qudt:MaybeAnyDateUnionType` wraps `qudt:DateTypeUnion` (`xsd:date`, `xsd:dateTime`,
+- `qudt:MaybeAnyDateUnionType` wraps `qudt:DateUnionType` (`xsd:date`, `xsd:dateTime`,
   `xsd:gYear`, `xsd:gMonth`), which also lives in CORE.
-- `qudt:MaybeNumericUnionType` wraps `qudt:NumericTypeUnion`. That union lives in the main
-  schema, so this is an upward reference from CORE. Note also that
-  `qudt:NumericTypeUnion` includes `xsd:string`, so `MaybeNumericUnionType` accepts
-  strings.
+- `qudt:MaybeNumericUnionType` wraps `qudt:NumericUnionType`. That union lives in the main
+  schema, so this is an upward reference from CORE. `qudt:NumericUnionType` holds only
+  numeric datatypes, so `MaybeNumericUnionType` rejects strings.
 
-The other datatype unions — `qudt:DateTypeUnion`, `qudt:IntegerUnionList`,
-`qudt:NonNegativeIntegerUnionList` and `qudt:XSDatomicTypeUnion` — live in CORE too.
+The other datatype unions — `qudt:DateUnionType`, `qudt:IntegerUnionList`,
+`qudt:NonNegativeIntegerUnionList` and `qudt:XSDatomicUnionType` — live in CORE too.
 
 ### The Maybe unions
 
@@ -115,7 +114,7 @@ Each name is `qudt:Maybe` + the XSD local name with its first letter capitalised
 |                      | `xsd:int` → `qudt:MaybeIntUnionType`                               | `"42"^^xsd:int`                                  |
 |                      | `xsd:long` → `qudt:MaybeLongUnionType`                             | `"42"^^xsd:long`                                 |
 |                      | `xsd:nonNegativeInteger` → `qudt:MaybeNonNegativeIntegerUnionType` | `"42"^^xsd:nonNegativeInteger`                   |
-|                      | `qudt:NumericTypeUnion` → `qudt:MaybeNumericUnionType`             | any value the union accepts                      |
+|                      | `qudt:NumericUnionType` → `qudt:MaybeNumericUnionType`             | any value the union accepts                      |
 | Other integers       | `xsd:positiveInteger` → `qudt:MaybePositiveIntegerUnionType`       | `"42"^^xsd:positiveInteger`                      |
 |                      | `xsd:negativeInteger` → `qudt:MaybeNegativeIntegerUnionType`       | `"-42"^^xsd:negativeInteger`                     |
 |                      | `xsd:nonPositiveInteger` → `qudt:MaybeNonPositiveIntegerUnionType` | `"-42"^^xsd:nonPositiveInteger`                  |
@@ -137,7 +136,7 @@ Each name is `qudt:Maybe` + the XSD local name with its first letter capitalised
 |                      | `xsd:duration` → `qudt:MaybeDurationUnionType`                     | `"P1Y2M3DT4H"^^xsd:duration`                     |
 |                      | `xsd:dayTimeDuration` → `qudt:MaybeDayTimeDurationUnionType`       | `"P3DT4H"^^xsd:dayTimeDuration`                  |
 |                      | `xsd:yearMonthDuration` → `qudt:MaybeYearMonthDurationUnionType`   | `"P1Y2M"^^xsd:yearMonthDuration`                 |
-|                      | `qudt:DateTypeUnion` → `qudt:MaybeAnyDateUnionType`                | any of `xsd:date`, `dateTime`, `gYear`, `gMonth` |
+|                      | `qudt:DateUnionType` → `qudt:MaybeAnyDateUnionType`                | any of `xsd:date`, `dateTime`, `gYear`, `gMonth` |
 | Binary               | `xsd:hexBinary` → `qudt:MaybeHexBinaryUnionType`                   | `"0FB7"^^xsd:hexBinary`                          |
 |                      | `xsd:base64Binary` → `qudt:MaybeBase64BinaryUnionType`             | `"D7c="^^xsd:base64Binary`                       |
 
@@ -158,7 +157,7 @@ holding a value at every position (`…Just`) and one alternating values and `( 
 (`…Mixed`).
 
 In the derived OWL datatype schema the unions are kept and retyped as `qudt:List`, the
-same treatment `qudt:DateTypeUnion` gets.
+same treatment `qudt:DateUnionType` gets.
 
 ### Using a Maybe union
 
@@ -336,7 +335,7 @@ there is no substitution question to get wrong. Search the schema file for
 The `(sh:or/rdf:rest*/rdf:first)+` in probes (1) and (1b) is what lets one union
 reference another. A single-level `sh:or/rdf:rest*/rdf:first/…` only sees the
 union's direct members; for `qudt:MaybeNumericUnionType` those are
-`[ sh:or qudt:NumericTypeUnion ]` and `[ sh:hasValue ( ) ]`, neither of which
+`[ sh:or qudt:NumericUnionType ]` and `[ sh:hasValue ( ) ]`, neither of which
 carries an `sh:datatype`, so every Maybe position would be flagged. The `+`
 form matches everything the single-level path did, so flat unions are unaffected.
 
@@ -419,8 +418,8 @@ some future `qudt:Foo`), work through this checklist:
    - `qudt:Array2DvalueList` (2-D-specific shape)
    - `qudt:ArrayDataOrder` (`qudt:InnermostIndexFastest` / `qudt:OutermostIndexFastest`
      enumeration)
-   - `qudt:NumericTypeUnion` (numeric datatype disjunction)
-   - `qudt:DateTypeUnion` (date, dateTime, gYear, gMonth), in CORE
+   - `qudt:NumericUnionType` (numeric datatype disjunction)
+   - `qudt:DateUnionType` (date, dateTime, gYear, gMonth), in CORE
    - the `qudt:Maybe…UnionType` family in CORE (an optional position of one XSD
      datatype — a value or an `rdf:nil` placeholder; see
      [The Maybe unions](#the-maybe-unions))
@@ -468,6 +467,18 @@ some future `qudt:Foo`), work through this checklist:
   only trace is one result on the *shape* itself, none on the data. After renaming or
   splitting a schema, check that every `sh:prefixes` still points at an existing
   ontology node.
+- **A list where SHACL expects one shape or one datatype** — `sh:node` takes a single
+  node shape and `sh:datatype` a single datatype IRI; neither reads a list of
+  alternatives. `qudt:Quantifiable-value` once used `sh:node ( … )`: the engine takes
+  the list's first cell as a shape with no constraints, so every value conformed and
+  the check was a silent no-op. The `qudt:numericValue` stub used
+  `sh:datatype qudt:NumericUnionType`, which demands literals typed with the union's
+  own IRI, so every value would fail. Use `sh:or` for alternatives. Each `sh:or`
+  member constrains the value node itself: write `[ sh:class qudt:DataItem ]`, not
+  `[ sh:property [ sh:path qudt:value ; sh:class qudt:DataItem ] ]`, which checks
+  the value's own `qudt:value`. Fixing such a no-op can expose data that was never
+  checked: once `qudt:Quantifiable-value` used `sh:or`, `ex:Quantity_DroneVelocity3D`
+  failed (see [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md)).
 - **Nested-list validation is hard in one SPARQL query** — for arbitrary-depth
   arrays, SHACL SPARQL can't easily walk N levels. Either fix N (specialise
   for `qudt:Matrix` / `qudt:Vector`) or switch to the

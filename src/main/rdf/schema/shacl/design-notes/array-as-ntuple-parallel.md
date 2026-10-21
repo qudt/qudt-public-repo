@@ -387,7 +387,7 @@ qudt:ArrayElementTypeSpec
     # For heterogenous arrays, allow multiple ArrayElementTypeSpec instances with qudt:index —
     # then the machinery collapses onto the NTuple pattern.
     sh:node (
-        [ sh:or qudt:NumericTypeUnion ]
+        [ sh:or qudt:NumericUnionType ]
         [ sh:property [ sh:path sh:class ; sh:class qudt:Concept ] ]
         [ sh:property [ sh:path qudt:value ; sh:class qudt:EnumeratedValue ] ]
         [ sh:nodeKind sh:IRI ]

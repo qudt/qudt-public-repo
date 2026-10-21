@@ -350,7 +350,7 @@ qudt:NumericListShape
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:subClassOf rdf:List ;
   sh:property [
-    sh:or qudt:NumericTypeUnion ;
+    sh:or qudt:NumericUnionType ;
     sh:path rdf:first ;
   ] ;
   sh:property [
@@ -1960,7 +1960,7 @@ qudt:Citation-description
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
-  sh:or qudt:TextTypeUnion ;
+  sh:or qudt:TextUnionType ;
   sh:path dcterms:description .
 
 qudt:Citation-url
@@ -2093,7 +2093,7 @@ qudt:DataItem-value
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:node qudt:NumericListShape ;
+  sh:node qudt:ScalarListShape ;
   sh:path qudt:value .
 
 qudt:EnumeratedQuantity-enumeratedValue
@@ -2117,7 +2117,7 @@ qudt:EnumeratedValue-description
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:or qudt:TextTypeUnion ;
+  sh:or qudt:TextUnionType ;
   sh:path dcterms:description .
 
 qudt:FactorUnit-exponent
@@ -2206,18 +2206,17 @@ qudt:LatexString
   rdfs:label "Latex String" ;
   rdfs:subClassOf xsd:string .
 
-qudt:NumericTypeUnion
+qudt:NumericUnionType
   a rdf:List ;
   dcterms:description """
   An rdf:List that can be used in property constraints as value for sh:or to indicate that all values
-   of a property must be a string, an integer, a float, a double or a decimal.
+   of a property must be numeric: an integer (xsd:integer, xsd:int, xsd:nonNegativeInteger or
+   xsd:positiveInteger), a float, a double or a decimal.
   """ ;
   rdf:first [
-    sh:datatype xsd:string ;
+    sh:datatype xsd:nonNegativeInteger ;
   ] ;
   rdf:rest ( [
-    sh:datatype xsd:nonNegativeInteger ;
-  ] [
     sh:datatype xsd:positiveInteger ;
   ] [
     sh:datatype xsd:integer ;
@@ -2231,7 +2230,7 @@ qudt:NumericTypeUnion
     sh:datatype xsd:decimal ;
   ] ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  rdfs:label "Numeric Type Union" .
+  rdfs:label "Numeric Union Type" .
 
 qudt:OrderedType-literal
   a sh:PropertyShape ;
@@ -2439,18 +2438,12 @@ qudt:Quantifiable-value
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:node ( [
-    sh:or qudt:NumericTypeUnion ;
+  sh:or ( [
+    sh:or qudt:NumericUnionType ;
   ] [
-    sh:property [
-      sh:class qudt:DataItem ;
-      sh:path qudt:value ;
-    ] ;
+    sh:class qudt:DataItem ;
   ] [
-    sh:property [
-      sh:class qudt:EnumeratedValue ;
-      sh:path qudt:value ;
-    ] ;
+    sh:class qudt:EnumeratedValue ;
   ] ) ;
   sh:path qudt:value .
 
@@ -2525,35 +2518,35 @@ qudt:QuantityKind-baseCGSUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:or qudt:TextTypeUnion ;
+  sh:or qudt:TextUnionType ;
   sh:path qudt:baseCGSUnitDimensions .
 
 qudt:QuantityKind-baseISOUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:or qudt:TextTypeUnion ;
+  sh:or qudt:TextUnionType ;
   sh:path qudt:baseISOUnitDimensions .
 
 qudt:QuantityKind-baseImperialUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:or qudt:TextTypeUnion ;
+  sh:or qudt:TextUnionType ;
   sh:path qudt:baseImperialUnitDimensions .
 
 qudt:QuantityKind-baseSIUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:or qudt:TextTypeUnion ;
+  sh:or qudt:TextUnionType ;
   sh:path qudt:baseSIUnitDimensions .
 
 qudt:QuantityKind-baseUSCustomaryUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:or qudt:TextTypeUnion ;
+  sh:or qudt:TextUnionType ;
   sh:path qudt:baseUSCustomaryUnitDimensions .
 
 qudt:QuantityKind-belongsToSystemOfQuantities
@@ -2746,7 +2739,7 @@ qudt:ScalarDataItem-value
   sh:or ( [
     sh:class qudt:QuantityValue ;
   ] [
-    sh:or qudt:NumericTypeUnion ;
+    sh:or qudt:NumericUnionType ;
   ] ) ;
   sh:path qudt:value .
 
@@ -2884,7 +2877,7 @@ qudt:SystemOfUnits-prefix
   sh:class qudt:Prefix ;
   sh:path qudt:prefix .
 
-qudt:TextTypeUnion
+qudt:TextUnionType
   a rdf:List ;
   dcterms:description """
   An rdf:List that can be used in property constraints as value for sh:or to indicate that all values of a property
@@ -2899,7 +2892,7 @@ qudt:TextTypeUnion
     sh:datatype qudt:LatexString ;
   ] ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  rdfs:label "Text Type Union" .
+  rdfs:label "Text Union Type" .
 
 qudt:UCUMcs
   a rdfs:Datatype, sh:NodeShape ;
