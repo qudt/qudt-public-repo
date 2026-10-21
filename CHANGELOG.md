@@ -7,6 +7,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+- Added `qudt:organizedUnder quantitykind:DimensionlessRatio` to `quantitykind:RefractiveIndex`, like `quantitykind:SpeedRatio`, and `unit:FRACTION` as one of its units ([#397](https://github.com/qudt/qudt-public-repo/issues/397)).
+
 ## [3.5.3] - 2026-10-20
 
 ### Added
