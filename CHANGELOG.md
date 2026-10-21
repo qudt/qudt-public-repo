@@ -12,6 +12,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `qudt:organizedUnder quantitykind:DimensionlessRatio` to `quantitykind:RefractiveIndex`, like `quantitykind:SpeedRatio`, and `unit:FRACTION` as one of its units ([#397](https://github.com/qudt/qudt-public-repo/issues/397)).
 - Added `quantitykind:MassFraction` to `unit:PERMILLE`, `unit:GM-PER-KiloGM`, and `unit:KiloGM-PER-KiloGM`, in which mass fractions such as sea-water salinity and specific humidity are commonly given ([#1562](https://github.com/qudt/qudt-public-repo/issues/1562)).
 
+### Fixed
+
+- Corrected the Wikidata and OM links of `unit:PERMILLE`, which were those of `unit:PERCENT`: `qudt:wikidataMatch` is now Q181011 (per mille) instead of Q11229 (percent), and `qudt:omUnit om-2/percent` is removed, since OM 2.0 defines no per mille unit ([#1566](https://github.com/qudt/qudt-public-repo/issues/1566)).
+
 ## [3.5.3] - 2026-10-20
 
 ### Added
