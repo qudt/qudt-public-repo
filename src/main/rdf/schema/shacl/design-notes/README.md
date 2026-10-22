@@ -37,11 +37,12 @@ of the open threads; the open-thread docs assume familiarity with it.
   homogeneous, `qudt:conformsToTupleSpec` → `qudt:NTupleSpec` for heterogeneous).
   This reverses the brief 2026-07-27 "self-describing array" revision. Array and
   tuple constraints are now **validated**, and confirmed in TopBraid on 2026-10-19 — the
-  note records three portability defects found in the shared tuple engine while doing so.
-  **Still open:** where
-  `qudt:Vector` / `qudt:Matrix` / `Homogeneous` / `Heterogenous` sit relative to
-  the split, plus the "still to do" B–G list in the note. F and G (added 2026-10-21): how to
-  allow structured datatypes as numeric values, and how a vector can be a subtype of array.
+  note records four defects found in the shared tuple engine while doing so. Since 2026-10-22
+  `qudt:Vector` and its kind are separate from `qudt:Array` and its kind, and a vector may be
+  heterogeneous (item G, resolved). **Still open:** where `qudt:Matrix` / `Homogeneous` /
+  `Heterogenous` sit relative to the split, plus the "still to do" B–F list in the note. F (added
+  2026-10-21) is settled on quantities pointing at structured values directly, apart from whether
+  their elements must be numeric.
 
 ## Adding a new note
 

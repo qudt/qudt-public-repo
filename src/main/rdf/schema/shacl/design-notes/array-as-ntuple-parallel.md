@@ -52,12 +52,12 @@ withdrawn: the type-level description of an array is separated from the instance
 Every array-shaped datatype now comes as an **instance/kind pair**: the instance carries the values,
 the kind carries the description.
 
-|                       Instance shape                        |                                                                                         Kind shape                                                                                         |               Instance-side constraints               |
-|-------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|
-| `qudt:Array` (`qudt:ValuesList`, `qudt:Array-datatypeKind`) | `qudt:ArrayKind` (`qudt:ArrayKind-dataOrder`, `-isHeterogeneous`, `-elementType`, `-elementCount`, `-conformsToTupleSpec`, plus `DimensionalityPropertyShape` / `DimensionsPropertyShape`) | `ValuesListLengthCheck`, `ValuesListElementTypeCheck` |
-| `qudt:HomogeneousArray`                                     | `qudt:HomogeneousArrayKind`                                                                                                                                                                | inherited                                             |
-| `qudt:HeterogenousArray`                                    | `qudt:HeterogenousArrayKind`                                                                                                                                                               | inherited, plus the four `NTuple*` checks             |
-| `qudt:Vector`                                               | `qudt:VectorKind`                                                                                                                                                                          | `ValuesListLengthCheck`, `ValuesListElementTypeCheck` |
+|                       Instance shape                        |                                                                                                     Kind shape                                                                                                     |                               Instance-side constraints                               |
+|-------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| `qudt:Array` (`qudt:ValuesList`, `qudt:Array-datatypeKind`) | `qudt:ArrayKind` (`qudt:ArrayKind-dataOrder`, `-elementCount`, `-conformsToTupleSpec`, `qudt:StructuredDataKind-elementType` / `-isHeterogeneous`, plus `DimensionalityPropertyShape` / `DimensionsPropertyShape`) | `ValuesListLengthCheck`, `ValuesListElementTypeCheck`                                 |
+| `qudt:HomogeneousArray`                                     | `qudt:HomogeneousArrayKind`                                                                                                                                                                                        | inherited                                                                             |
+| `qudt:HeterogenousArray`                                    | `qudt:HeterogenousArrayKind`                                                                                                                                                                                       | inherited, plus the four `NTuple*` checks                                             |
+| `qudt:Vector`                                               | `qudt:VectorKind` (`qudt:VectorKind-elementCount`, `-conformsToTupleSpec`, `qudt:StructuredDataKind-elementType` / `-isHeterogeneous`)                                                                             | `ValuesListLengthCheck`, `ValuesListElementTypeCheck`, plus the four `NTuple*` checks |
 
 `ArrayRankCheck` is the one kind-side constraint (rank is a blueprint property). The value-list shape
 and its two checks are named `qudt:ValuesList` / `ValuesListLengthCheck` / `ValuesListElementTypeCheck`
@@ -72,12 +72,18 @@ no error.
 Property shapes declared on a kind are named for that kind (`qudt:ArrayKind-*`); only the shapes
 genuinely declared on the instance keep the instance prefix. (`DimensionalityPropertyShape` and
 `DimensionsPropertyShape` are shared and keep their generic names — renaming them is a separate
-decision.)
+decision.) The element-type and heterogeneity shapes, shared by array and vector kinds since
+2026-10-22, are named `qudt:StructuredDataKind-*`; there is no `qudt:StructuredDataKind` class.
 
-**`qudt:Vector` is a sibling of `qudt:Array`, not a subclass.** It is `rdfs:subClassOf
-qudt:StructuredDatatype` and carries its own `qudt:ValuesList` + `qudt:Vector-datatypeKind`; the
-"a vector is a rank-1 array" relationship is expressed on the kind side, where `qudt:VectorKind`
-is `rdfs:subClassOf qudt:ArrayKind`. `qudt:Vector-datatypeKind` is deliberately `sh:minCount 0`
+**`qudt:Vector` is a sibling of `qudt:Array`, not a subclass, and so is its kind.** `qudt:Vector`
+is `rdfs:subClassOf qudt:StructuredDatatype` and carries its own `qudt:ValuesList` +
+`qudt:Vector-datatypeKind`. Until 2026-10-22 the "a vector is a rank-1 array" relationship was
+expressed on the kind side, with `qudt:VectorKind` `rdfs:subClassOf qudt:ArrayKind`; it is now
+`rdfs:subClassOf qudt:Concept`, with its own shapes for the component count and types, and no rank,
+dimensions or data order. A vector may be homogeneous (one `qudt:elementType`) or heterogeneous (a
+`qudt:conformsToTupleSpec` with one type per component), so `qudt:Vector` carries the four `NTuple*`
+checks as well as the two `ValuesList*` checks. `ex:GeoPositionVector` and
+`ex:badExampleHeterogeneousVectorLength` exercise them. `qudt:Vector-datatypeKind` is deliberately `sh:minCount 0`
 for now: the four existing vector instances (`ex:Vector3D_FLOAT-DP`, `-SP`,
 `ex:Vector_DroneVelocities_3D`, `datatype:QuaternionVector-DP`) still describe themselves in the
 legacy `qudt:datatype` / `qudt:dimensions` / `qudt:value` (singular) style and have no kind.
@@ -112,6 +118,17 @@ construct — see `spec-plus-values-pattern.md`, Idioms 3 and 4, for the portabl
    without correlation at all: positions in a flat list are contiguous from 1, so a required position
    is missing exactly when `?index > ?valueCount`, where `?valueCount` is one uncorrelated `COUNT`
    joined on `$this`.
+
+**A fourth defect, found 2026-10-22.** `NTupleLengthCheck` reaches the tuple spec in two
+sub-SELECTs. The one that counts all positions followed
+`qudt:conformsToTupleSpec | qudt:datatypeKind/qudt:conformsToTupleSpec`, but the one that counts
+required positions read only `$this qudt:conformsToTupleSpec`. For a value whose spec comes through
+its kind, the second sub-SELECT returned no row, the join removed the solution, and the check never
+fired: no heterogeneous array's length was ever checked by it. Now both sub-SELECTs use the same
+path, and `ex:badExampleHeterogeneousArrayLength` and `ex:badExampleHeterogeneousVectorLength`
+report it. The array's and vector's length errors were still caught by `ValuesListLengthCheck` and by
+`NTupleExtraValueCheck` or `NTupleMissingRequiredValueCheck`, which is why this went unnoticed. When
+several sub-SELECTs reach the same resource, write the same path in each.
 
 **Examples updated to the split.** Valid: each array now points at a kind
 (`ex:3DHomogeneousArrayKind` shared by two arrays, `ex:3DTemperatureArrayKind` shared by two more,
@@ -693,12 +710,10 @@ structured datatypes may be a value, whether that is one more `sh:or` alternativ
 `qudt:StructuredDataItem` wrapper was tried on 2026-10-21 and withdrawn. `qudt:ArrayKind` is now a
 `qudt:Concept`, so a kind cannot be a value. Still to decide: whether the elements of a structured
 value must then be numeric.
-G. **Consider how a vector can be a subtype of array** *(added 2026-10-21)*. Today `qudt:Vector` is
-a sibling of `qudt:Array`, and "a vector is a rank-1 array" is stated only on the kind side, where
-`qudt:VectorKind` is `rdfs:subClassOf qudt:ArrayKind` (see "`qudt:Vector` is a sibling of
-`qudt:Array`, not a subclass" above). Making `qudt:Vector` `rdfs:subClassOf qudt:Array` would apply
-the `qudt:Array` shapes to every vector, including the required `qudt:datatypeKind`, so the four
-legacy vector instances would need migrating first (see B). Since 2026-10-22 `qudt:ArrayKind` is a
-`qudt:Concept` rather than a `qudt:StructuredDatatype`, so the kind side is no longer a datatype.
-F now admits every `qudt:StructuredDatatype`, so G no longer affects which values a quantity
-accepts.
+G. ~~**Consider how a vector can be a subtype of array**~~ *(added 2026-10-21)*. **Resolved
+2026-10-22, the other way round:** a vector is not an array on either side. `qudt:VectorKind` is no
+longer `rdfs:subClassOf qudt:ArrayKind`; both kinds are `qudt:Concept`s, sharing only the
+`qudt:StructuredDataKind-*` element-type and heterogeneity shapes, and vectors may be heterogeneous.
+See "`qudt:Vector` is a sibling of `qudt:Array`, not a subclass, and so is its kind" above. Making
+`qudt:Vector` a subclass of `qudt:Array` would have applied the array shapes to every vector,
+including the required `qudt:datatypeKind` and the rank and dimensions a vector does not need.

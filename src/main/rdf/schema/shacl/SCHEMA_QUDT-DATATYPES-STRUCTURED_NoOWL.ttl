@@ -177,10 +177,10 @@ qudt:ArrayKind
   sh:property qudt:ArrayKind-conformsToTupleSpec ;
   sh:property qudt:ArrayKind-dataOrder ;
   sh:property qudt:ArrayKind-elementCount ;
-  sh:property qudt:ArrayKind-elementType ;
-  sh:property qudt:ArrayKind-isHeterogeneous ;
   sh:property qudt:DimensionalityPropertyShape ;
   sh:property qudt:DimensionsPropertyShape ;
+  sh:property qudt:StructuredDataKind-elementType ;
+  sh:property qudt:StructuredDataKind-isHeterogeneous ;
   sh:sparql qudt:ArrayRankCheck .
 
 qudt:AssociativeArray
@@ -944,6 +944,10 @@ qudt:Vector
   rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:ValuesList ;
   sh:property qudt:Vector-datatypeKind ;
+  sh:sparql qudt:NTupleExtraValueCheck ;
+  sh:sparql qudt:NTupleLengthCheck ;
+  sh:sparql qudt:NTupleMissingRequiredValueCheck ;
+  sh:sparql qudt:NTupleTypeCheck ;
   sh:sparql qudt:ValuesListElementTypeCheck ;
   sh:sparql qudt:ValuesListLengthCheck .
 
@@ -951,23 +955,26 @@ qudt:VectorKind
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
   <p>A <em>Vector Kind</em> is the blueprint for a <code>qudt:Vector</code> value: it declares the
-  number of components, the shared component type, and any shared quantity kind or unit.
+  number of components (<code>qudt:elementCount</code>), their types, and any shared quantity kind
+  or unit.
   </p>
-  <p>A vector is represented as a rank-1 array, which is why a <em>Vector Kind</em> is a kind of
-  <code>qudt:ArrayKind</code>. 
-  The subsumption is representational rather than algebraic: a vector in the mathematical sense is an element of a vector space,
-   closed under addition and scalar multiplication, and an array carries no such structure. 
-  This schema describes representation, so the containment holds in that sense only,
-   and it does not hold in reverse -- an array of strings is not a vector.
+  <p>Component types are given one of two ways. A homogeneous vector kind declares one shared
+  <code>qudt:elementType</code>. A heterogeneous vector kind instead points, via
+  <code>qudt:conformsToTupleSpec</code>, at a <code>qudt:NTupleSpec</code> that gives one type per
+  component, addressed 1-based. <code>qudt:isHeterogeneous</code> says which applies.
   </p>
-  <p>Because vector-space operations require every component to be drawn from a single field, a
-   <em>Vector Kind</em> is homogeneous: it declares one shared <code>qudt:elementType</code> rather
-    than per-position types.
+  <p>A vector in the mathematical sense, an element of a vector space, draws every component from a
+  single field, so it is the homogeneous case. This schema describes representation: a heterogeneous
+  vector is a one-dimensional sequence of values, not a vector-space element.
   </p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
   rdfs:label "Vector Kind" ;
-  rdfs:subClassOf qudt:ArrayKind .
+  rdfs:subClassOf qudt:Concept ;
+  sh:property qudt:StructuredDataKind-elementType ;
+  sh:property qudt:StructuredDataKind-isHeterogeneous ;
+  sh:property qudt:VectorKind-conformsToTupleSpec ;
+  sh:property qudt:VectorKind-elementCount .
 
 qudt:alignment
   a rdf:Property ;
@@ -1004,7 +1011,7 @@ qudt:argType
 
 qudt:conformsToTupleSpec
   a rdf:Property ;
-  rdfs:comment "Points at the qudt:NTupleSpec that gives the per-position element types of a tuple or of a heterogeneous array. On an array kind the positions are addressed 1-based over the flat value list of each instance." ;
+  rdfs:comment "Points at the qudt:NTupleSpec that gives the per-position element types of a tuple or of a heterogeneous array or vector. On an array or vector kind the positions are addressed 1-based over the flat value list of each instance." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
   rdfs:label "conforms to tuple spec" ;
   rdfs:range qudt:NTupleSpec .
@@ -1187,24 +1194,6 @@ qudt:ArrayKind-elementCount
   sh:maxCount 1 ;
   sh:minInclusive 0 ;
   sh:path qudt:elementCount .
-
-qudt:ArrayKind-elementType
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  sh:description """
-  For Homogeneous arrays, the single shared element-type facet (a datatype or a class IRI). 
-  Heterogeneous arrays instead use qudt:conformsToTupleSpec.
-  """ ;
-  sh:maxCount 1 ;
-  sh:nodeKind sh:IRI ;
-  sh:path qudt:elementType .
-
-qudt:ArrayKind-isHeterogeneous
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  sh:datatype xsd:boolean ;
-  sh:maxCount 1 ;
-  sh:path qudt:isHeterogeneous .
 
 qudt:ArrayRankCheck
   a sh:SPARQLConstraint ;
@@ -1457,7 +1446,7 @@ qudt:NTupleExtraValueCheck
         SELECT $this ?index ?value
 WHERE {
     # A qudt:NTuple states its spec directly; a heterogeneous qudt:Array
-    # reaches it through its qudt:datatypeKind blueprint.
+    # or qudt:Vector reaches it through its qudt:datatypeKind blueprint.
     $this ( qudt:conformsToTupleSpec | qudt:datatypeKind/qudt:conformsToTupleSpec ) ?spec .
 
     {
@@ -1505,7 +1494,7 @@ WHERE {
         SELECT $this (COUNT(?memberSpec) AS ?totalCount)
         WHERE {
             # A qudt:NTuple states its spec directly; a heterogeneous qudt:Array
-            # reaches it through its qudt:datatypeKind blueprint.
+            # or qudt:Vector reaches it through its qudt:datatypeKind blueprint.
             $this ( qudt:conformsToTupleSpec | qudt:datatypeKind/qudt:conformsToTupleSpec ) ?spec .
             ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
         }
@@ -1516,7 +1505,8 @@ WHERE {
     {
         SELECT $this (COUNT(?requiredSpec) AS ?requiredCount)
         WHERE {
-            $this qudt:conformsToTupleSpec ?rspec .
+            # The spec is reached the same way as for the total above.
+            $this ( qudt:conformsToTupleSpec | qudt:datatypeKind/qudt:conformsToTupleSpec ) ?rspec .
             ?rspec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?requiredSpec .
             OPTIONAL { ?requiredSpec sh:minCount ?minCount . }
             FILTER ( !BOUND(?minCount) || ?minCount > 0 )
@@ -1583,7 +1573,7 @@ qudt:NTupleMissingRequiredValueCheck
         SELECT $this ?index
 WHERE {
     # A qudt:NTuple states its spec directly; a heterogeneous qudt:Array
-    # reaches it through its qudt:datatypeKind blueprint.
+    # or qudt:Vector reaches it through its qudt:datatypeKind blueprint.
     $this ( qudt:conformsToTupleSpec | qudt:datatypeKind/qudt:conformsToTupleSpec ) ?spec .
 
     ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
@@ -1617,7 +1607,7 @@ qudt:NTupleRangeCheck
         SELECT $this ?index ?value
         WHERE {
             # A qudt:NTuple states its spec directly; a heterogeneous qudt:Array
-            # reaches it through its qudt:datatypeKind blueprint.
+            # or qudt:Vector reaches it through its qudt:datatypeKind blueprint.
             $this ( qudt:conformsToTupleSpec | qudt:datatypeKind/qudt:conformsToTupleSpec ) ?spec .
             ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
             ?memberSpec qudt:index ?index .
@@ -1668,7 +1658,7 @@ qudt:NTupleTypeCheck
         SELECT $this ?index ?value
         WHERE {
             # A qudt:NTuple states its spec directly; a heterogeneous qudt:Array
-            # reaches it through its qudt:datatypeKind blueprint.
+            # or qudt:Vector reaches it through its qudt:datatypeKind blueprint.
             $this ( qudt:conformsToTupleSpec | qudt:datatypeKind/qudt:conformsToTupleSpec ) ?spec .
 
             ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
@@ -1791,6 +1781,24 @@ qudt:StringType-elementType
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
   sh:class qudt:CharacterType ;
   sh:path qudt:elementDatatype .
+
+qudt:StructuredDataKind-elementType
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
+  sh:description """
+  For Homogeneous arrays and vectors, the single shared element-type facet (a datatype or a class IRI). 
+  Heterogeneous structures instead use qudt:conformsToTupleSpec.
+  """ ;
+  sh:maxCount 1 ;
+  sh:nodeKind sh:IRI ;
+  sh:path qudt:elementType .
+
+qudt:StructuredDataKind-isHeterogeneous
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
+  sh:datatype xsd:boolean ;
+  sh:maxCount 1 ;
+  sh:path qudt:isHeterogeneous .
 
 qudt:StructuredDatatype-nTuple
   a sh:PropertyShape ;
@@ -1946,6 +1954,28 @@ qudt:Vector-datatypeKind
   sh:maxCount 1 ;
   sh:minCount 0 ;
   sh:path qudt:datatypeKind .
+
+qudt:VectorKind-conformsToTupleSpec
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
+  sh:class qudt:NTupleSpec ;
+  sh:description """
+  Used by heterogeneous vectors for per-component types, reusing the N-Tuple
+  blueprint (qudt:NTupleSpec), addressed 1-based over the value list.
+  """ ;
+  sh:maxCount 1 ;
+  sh:path qudt:conformsToTupleSpec .
+
+qudt:VectorKind-elementCount
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
+  sh:datatype xsd:integer ;
+  sh:description """
+  The number of values in the vector.
+  """ ;
+  sh:maxCount 1 ;
+  sh:minInclusive 0 ;
+  sh:path qudt:elementCount .
 
 vaem:GMD_SCHEMA-SHACL-DATATYPE-STRUCTURED
   a vaem:GraphMetaData ;

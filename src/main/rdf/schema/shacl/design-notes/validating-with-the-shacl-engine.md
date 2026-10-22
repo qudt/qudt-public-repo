@@ -172,26 +172,28 @@ awk -F'\t' 'NR==FNR {s[$1]=1; next} ($1 in s) {print $1 "\t" $3}' "$WORK/subject
 
 Every bad example fires exactly its intended check:
 
-|                    Example                    |                             Check(s)                             |
-|-----------------------------------------------|------------------------------------------------------------------|
-| `ex:badExampleArrayRank`                      | `qudt:ArrayRankCheck`                                            |
-| `ex:badExampleHeterogeneousArrayType`         | `qudt:NTupleTypeCheck`                                           |
-| `ex:badExampleHomogeneousArrayLength`         | `qudt:ValuesListLengthCheck`                                     |
-| `ex:badExampleHomogeneousArrayType`           | `qudt:ValuesListElementTypeCheck`                                |
-| `ex:badExampleQuantityValueTuple`             | `qudt:NTupleTypeCheck`                                           |
-| `ex:badExampleTuple2a`                        | `qudt:NTupleTypeCheck`                                           |
-| `ex:badExampleTuple2b`                        | `qudt:NTupleExtraValueCheck`, `qudt:NTupleLengthCheck`           |
-| `ex:badExampleTuple3`                         | `qudt:NTupleTypeCheck`                                           |
-| `ex:badExampleTupleDateInDateTimePosition`    | `qudt:NTupleTypeCheck`                                           |
-| `ex:badExampleTupleIntegerInIntPosition`      | `qudt:NTupleTypeCheck`                                           |
-| `ex:badExampleTupleNothingInRequiredPosition` | `qudt:NTupleTypeCheck`                                           |
-| `ex:badExampleTupleTimeInAnyDatePosition`     | `qudt:NTupleTypeCheck`                                           |
-| `ex:cpaBadLengthShort`                        | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck` |
-| `ex:cpaBadMicroseconds`                       | `qudt:NTupleRangeCheck`                                          |
-| `ex:cpaBadMinutes`                            | `qudt:NTupleRangeCheck`                                          |
-| `ex:cpaBadSeconds`                            | `qudt:NTupleRangeCheck`                                          |
-| `ex:cpaBadSign`                               | `ex:IfcCompoundPlaneAngleConsistentSign` (reported twice)        |
-| `ex:cpaBadType`                               | `qudt:NTupleTypeCheck`                                           |
+|                    Example                    |                                            Check(s)                                            |
+|-----------------------------------------------|------------------------------------------------------------------------------------------------|
+| `ex:badExampleArrayRank`                      | `qudt:ArrayRankCheck`                                                                          |
+| `ex:badExampleHeterogeneousArrayLength`       | `qudt:NTupleExtraValueCheck`, `qudt:NTupleLengthCheck`, `qudt:ValuesListLengthCheck`           |
+| `ex:badExampleHeterogeneousArrayType`         | `qudt:NTupleTypeCheck`                                                                         |
+| `ex:badExampleHeterogeneousVectorLength`      | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck`, `qudt:ValuesListLengthCheck` |
+| `ex:badExampleHomogeneousArrayLength`         | `qudt:ValuesListLengthCheck`                                                                   |
+| `ex:badExampleHomogeneousArrayType`           | `qudt:ValuesListElementTypeCheck`                                                              |
+| `ex:badExampleQuantityValueTuple`             | `qudt:NTupleTypeCheck`                                                                         |
+| `ex:badExampleTuple2a`                        | `qudt:NTupleTypeCheck`                                                                         |
+| `ex:badExampleTuple2b`                        | `qudt:NTupleExtraValueCheck`, `qudt:NTupleLengthCheck`                                         |
+| `ex:badExampleTuple3`                         | `qudt:NTupleTypeCheck`                                                                         |
+| `ex:badExampleTupleDateInDateTimePosition`    | `qudt:NTupleTypeCheck`                                                                         |
+| `ex:badExampleTupleIntegerInIntPosition`      | `qudt:NTupleTypeCheck`                                                                         |
+| `ex:badExampleTupleNothingInRequiredPosition` | `qudt:NTupleTypeCheck`                                                                         |
+| `ex:badExampleTupleTimeInAnyDatePosition`     | `qudt:NTupleTypeCheck`                                                                         |
+| `ex:cpaBadLengthShort`                        | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck`                               |
+| `ex:cpaBadMicroseconds`                       | `qudt:NTupleRangeCheck`                                                                        |
+| `ex:cpaBadMinutes`                            | `qudt:NTupleRangeCheck`                                                                        |
+| `ex:cpaBadSeconds`                            | `qudt:NTupleRangeCheck`                                                                        |
+| `ex:cpaBadSign`                               | `ex:IfcCompoundPlaneAngleConsistentSign` (reported twice)                                      |
+| `ex:cpaBadType`                               | `qudt:NTupleTypeCheck`                                                                         |
 
 `ex:cpaBadSign` is reported once per positive/negative pair in `( 52 -31 12 )`, because a
 `SELECT` constraint yields one result per solution row; `SELECT DISTINCT $this` would make it
