@@ -168,7 +168,7 @@ awk -F'\t' 'NR==FNR {s[$1]=1; next} ($1 in s) {print $1 "\t" $3}' "$WORK/subject
 - Results on resources other than the examples — the stub's units, schema resources — are
   expected; step 5 filters them out. The full list is in `$WORK/results.tsv`.
 
-## Expected results (2026-10-21)
+## Expected results (2026-10-22)
 
 Every bad example fires exactly its intended check:
 
@@ -197,7 +197,7 @@ Every bad example fires exactly its intended check:
 `SELECT` constraint yields one result per solution row; `SELECT DISTINCT $this` would make it
 one.
 
-The valid and IFC examples are clean, apart from three open items:
+The valid and IFC examples are clean, apart from two open items:
 
 - `ex:ResourceLabelRatingTupleSpec` — position 2 uses only `sh:languageIn ( "en" )`, which is
   not one of the type facets `qudt:NTupleMemberTypeSpec-type` accepts, so the spec fails that
@@ -206,15 +206,11 @@ The valid and IFC examples are clean, apart from three open items:
   `ex:Array_MassProperties_Rocket` and four `ex:StateSpaceMatrix-*`) and the two legacy invalid
   ones (`qudt:Array1D_Integers-INVALID`, `qudt:EX_Array1D_INVALID`). See "Still to do" B in
   [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md).
-- `ex:Quantity_DroneVelocity3D` fails `qudt:Quantifiable-value` (`sh:OrConstraintComponent`).
-  Its `qudt:value` is `ex:Vector_DroneVelocities_3D`, a `qudt:Vector`, which is a
-  `qudt:StructuredDatatype` and not a `qudt:DataItem`, so it matches none of the
-  alternatives: a number, a `qudt:DataItem` or a `qudt:EnumeratedValue`. This appeared on
-  2026-10-21, when `qudt:Quantifiable-value` changed from `sh:node ( … )`, which never
-  checked anything, to `sh:or`. Either the shape should also accept structured values or
-  the example should state its value another way, for example through a
-  `qudt:StructuredDataItem` (added 2026-10-21) whose `qudt:value` is the vector. See "Still to
-  do" F and G in [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md).
+
+`ex:Quantity_DroneVelocity3D`, whose value is a vector, failed `qudt:Quantifiable-value` from
+2026-10-21, when the shape first checked anything, until 2026-10-22, when it began accepting any
+`qudt:StructuredDatatype` instance. See "Still to do" F in
+[array-as-ntuple-parallel.md](array-as-ntuple-parallel.md).
 
 Any other result on an example subject is a regression.
 

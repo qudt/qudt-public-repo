@@ -132,10 +132,11 @@ in `ex:exampleTuple3` (pre-existing) and an undeclared `x:` prefix on `ex:3DTemp
   `qudt:AssociativeArray`, which remain instance-side subclasses of `qudt:Array` with no
   corresponding kind. A `qudt:MatrixKind` under `qudt:ArrayKind` is the obvious parallel, but nothing
   currently requires it.
-- `qudt:TableType` and `qudt:TimeSeriesArrayType` were renamed with a `Type` suffix while the array
-  blueprints use `Kind`. `TimeSeriesArrayType` is `rdfs:subClassOf qudt:ArrayKind`, so it is a kind
-  in all but name; the two suffixes should be reconciled.
-- `qudt:Table-*` and `qudt:TimeSeriesArray-*` property shapes still carry the pre-rename prefixes.
+- `qudt:TimeSeriesArrayType` was renamed with a `Type` suffix while the array blueprints use
+  `Kind`. `TimeSeriesArrayType` is `rdfs:subClassOf qudt:ArrayKind`, so it is a kind in all but
+  name; the suffix should be reconciled. (`qudt:TableType`, renamed the same way, and the other
+  table datatypes were removed on 2026-10-22.)
+- `qudt:TimeSeriesArray-*` property shapes still carry the pre-rename prefix.
 - `qudt:StructuredDatatype-nTuple` and `qudt:TimeSeriesArray-vector` are defined but no longer
   referenced by any `sh:property` — deliberate detachment, pending a decision to delete them.
 - `qudt:ArrayKind`'s `dcterms:description` is still a near-verbatim copy of `qudt:Array`'s (it
@@ -685,17 +686,19 @@ is `ex:Vector_DroneVelocities_3D`, is the case in the examples; see its open ite
 [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md). To decide: which
 structured datatypes may be a value, whether that is one more `sh:or` alternative (all of
 `qudt:StructuredDatatype`, or a narrower class), and whether their elements must then be numeric.
-**Progress (2026-10-21):** `qudt:StructuredDataItem` now gives one route. It is a `qudt:DataItem`,
-which `qudt:Quantifiable-value` already accepts, and its `qudt:value` must be a
-`qudt:StructuredDatatype` instance, so a quantity can hold a vector through it. `qudt:DataItem` is now
-the parent of `qudt:ScalarDataItem`, `qudt:StructuredDataItem` and `qudt:List`, and no longer
-constrains `qudt:value` itself; the list check moved to `qudt:List-value`. Still to decide: whether
-quantities must use this wrapper or may also point at a structured value directly. The drone example
-still does the latter, so it still fails.
+**Progress (2026-10-22):** a quantity points at its structured value directly.
+`qudt:Quantifiable-value` now accepts any `qudt:StructuredDatatype` instance in place of a
+`qudt:DataItem`, and `qudt:List` is now also a `qudt:StructuredDatatype`, so
+`ex:Quantity_DroneVelocity3D` and the list-valued room-temperature quantities pass. A
+`qudt:StructuredDataItem` wrapper was tried on 2026-10-21 and withdrawn. `qudt:ArrayKind` is now a
+`qudt:Concept`, so a kind cannot be a value. Still to decide: whether the elements of a structured
+value must then be numeric.
 G. **Consider how a vector can be a subtype of array** *(added 2026-10-21)*. Today `qudt:Vector` is
 a sibling of `qudt:Array`, and "a vector is a rank-1 array" is stated only on the kind side, where
 `qudt:VectorKind` is `rdfs:subClassOf qudt:ArrayKind` (see "`qudt:Vector` is a sibling of
 `qudt:Array`, not a subclass" above). Making `qudt:Vector` `rdfs:subClassOf qudt:Array` would apply
 the `qudt:Array` shapes to every vector, including the required `qudt:datatypeKind`, so the four
-legacy vector instances would need migrating first (see B). Decide this before F: if a vector is
-an array, F may only need to admit `qudt:Array`.
+legacy vector instances would need migrating first (see B). Since 2026-10-22 `qudt:ArrayKind` is a
+`qudt:Concept` rather than a `qudt:StructuredDatatype`, so the kind side is no longer a datatype.
+F now admits every `qudt:StructuredDatatype`, so G no longer affects which values a quantity
+accepts.

@@ -474,11 +474,12 @@ some future `qudt:Foo`), work through this checklist:
   the check was a silent no-op. The `qudt:numericValue` stub used
   `sh:datatype qudt:NumericUnionType`, which demands literals typed with the union's
   own IRI, so every value would fail. Use `sh:or` for alternatives. Each `sh:or`
-  member constrains the value node itself: write `[ sh:class qudt:DataItem ]`, not
-  `[ sh:property [ sh:path qudt:value ; sh:class qudt:DataItem ] ]`, which checks
-  the value's own `qudt:value`. Fixing such a no-op can expose data that was never
+  member constrains the value node itself: write `[ sh:class qudt:StructuredDatatype ]`,
+  not `[ sh:property [ sh:path qudt:value ; sh:class qudt:StructuredDatatype ] ]`, which
+  checks the value's own `qudt:value`. Fixing such a no-op can expose data that was never
   checked: once `qudt:Quantifiable-value` used `sh:or`, `ex:Quantity_DroneVelocity3D`
-  failed (see [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md)).
+  failed, until the shape was widened to accept structured values (see
+  [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md)).
 - **Nested-list validation is hard in one SPARQL query** — for arbitrary-depth
   arrays, SHACL SPARQL can't easily walk N levels. Either fix N (specialise
   for `qudt:Matrix` / `qudt:Vector`) or switch to the

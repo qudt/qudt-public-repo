@@ -152,26 +152,28 @@ qudt:ArrayDataOrder
 qudt:ArrayKind
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>An <em>Array Kind</em> is the blueprint for an array value. It describes the shape and
-  element types of an array without holding any data: the rank
+  <p>An <em>Array Kind</em> is the blueprint for an array value. 
+  It describes the shape and element types of an array without holding any data: the rank
   (<code>qudt:dimensionality</code>), the extent of each dimension
   (<code>qudt:dimensions</code>), the total number of cells
   (<code>qudt:elementCount</code>), the linearisation of the value list
   (<code>qudt:dataOrder</code>), and the element type.
   </p>
-  <p>The values themselves live on the <code>qudt:Array</code> instance, which points at its kind
-  with <code>qudt:datatypeKind</code>. One kind may therefore be shared by many arrays, which is
-  the reason the description is held separately from the data.
+  <p>The values live on the <code>qudt:Array</code> instance, which points at its kind
+   with <code>qudt:datatypeKind</code>. 
+  One kind may therefore be shared by many arrays, which is
+   the reason the description is held separately from the data.
   </p>
-  <p>Element types are given one of two ways. A homogeneous array kind declares a single shared
-  <code>qudt:elementType</code>, together with any quantity kind or unit shared by every cell. A
-  heterogeneous array kind instead points, via <code>qudt:conformsToTupleSpec</code>, at a
+  <p>Element types are given one of two ways. 
+  A homogeneous array kind declares a single shared
+   <code>qudt:elementType</code>, together with any quantity kind or unit shared by every cell. 
+  A heterogeneous array kind instead points, via <code>qudt:conformsToTupleSpec</code>, at a
   <code>qudt:NTupleSpec</code> that gives one type per position, addressed 1-based over the flat
-  value list.
+   value list.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
   rdfs:label "Array Kind" ;
-  rdfs:subClassOf qudt:StructuredDatatype ;
+  rdfs:subClassOf qudt:Concept ;
   sh:property qudt:ArrayKind-conformsToTupleSpec ;
   sh:property qudt:ArrayKind-dataOrder ;
   sh:property qudt:ArrayKind-elementCount ;
@@ -253,13 +255,6 @@ qudt:CompositeDatatype
   rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:CompositeDatatype-alignment ;
   sh:property qudt:CompositeDatatype-padding .
-
-qudt:CompositeTable
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A sub-type of 'Table Type'." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  rdfs:label "Composite Table Type" ;
-  rdfs:subClassOf qudt:TableType .
 
 qudt:DataSetElement
   a rdfs:Class, sh:NodeShape ;
@@ -468,13 +463,6 @@ qudt:IntegerListShape
     sh:path rdf:rest ;
   ] .
 
-qudt:InterpolatedTable
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A sub-type of 'Table Type'." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  rdfs:label "Interpolated Table Type" ;
-  rdfs:subClassOf qudt:TableType .
-
 qudt:LargeObject
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
@@ -491,6 +479,7 @@ qudt:List
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
   rdfs:label "List" ;
   rdfs:subClassOf qudt:DataItem ;
+  rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:DatatypePropertyShape ;
   sh:property qudt:List-value ;
   sh:property qudt:MaybeQuantityPropertyShape ;
@@ -808,17 +797,6 @@ qudt:StateSpaceMatrix
   rdfs:label "State Space Matrix Type" ;
   rdfs:subClassOf qudt:Matrix .
 
-qudt:StructuredDataItem
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Structured Data Item</em> holds a value that is compliant with a specified <em>Structured Datatype</em>.
-  </p>"""^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  rdfs:label "Structured Data Item" ;
-  rdfs:subClassOf qudt:DataItem ;
-  sh:property qudt:StructuredDataItem-datatype ;
-  sh:property qudt:StructuredDataItem-value .
-
 qudt:StructuredDatatype
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
@@ -828,24 +806,6 @@ qudt:StructuredDatatype
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
   rdfs:label "Structured Data Type" ;
   rdfs:subClassOf qudt:Datatype .
-
-qudt:TableType
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Table Type</em> specifies the properties of table data structures. 
-  A table is both a mode of visual communication and a means of arranging data. 
-  The precise conventions and terminology for describing tables varies depending on the context. 
-  Moreover, tables differ significantly in variety, structure, flexibility, notation, representation and use.
-  </p>
-  """^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  rdfs:label "Table Type" ;
-  rdfs:subClassOf qudt:StructuredDatatype ;
-  sh:property qudt:DimensionsPropertyShape ;
-  sh:property qudt:Table-byRow ;
-  sh:property qudt:Table-columns ;
-  sh:property qudt:Table-dimensionality ;
-  sh:property qudt:Table-rows .
 
 qudt:ThreeTuple
   a rdfs:Class, sh:NodeShape ;
@@ -994,15 +954,15 @@ qudt:VectorKind
   number of components, the shared component type, and any shared quantity kind or unit.
   </p>
   <p>A vector is represented as a rank-1 array, which is why a <em>Vector Kind</em> is a kind of
-  <code>qudt:ArrayKind</code>. The subsumption is representational rather than algebraic: a vector
-  in the mathematical sense is an element of a vector space, closed under addition and scalar
-  multiplication, and an array carries no such structure. This schema describes representation, so
-  the containment holds in that sense only, and it does not hold in reverse -- an array of strings
-  is not a vector.
+  <code>qudt:ArrayKind</code>. 
+  The subsumption is representational rather than algebraic: a vector in the mathematical sense is an element of a vector space,
+   closed under addition and scalar multiplication, and an array carries no such structure. 
+  This schema describes representation, so the containment holds in that sense only,
+   and it does not hold in reverse -- an array of strings is not a vector.
   </p>
   <p>Because vector-space operations require every component to be drawn from a single field, a
-  <em>Vector Kind</em> is homogeneous: it declares one shared <code>qudt:elementType</code> rather
-  than per-position types.
+   <em>Vector Kind</em> is homogeneous: it declares one shared <code>qudt:elementType</code> rather
+    than per-position types.
   </p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
@@ -1041,16 +1001,6 @@ qudt:argType
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
   rdfs:label "argType" ;
   rdfs:subPropertyOf qudt:elementDatatype .
-
-qudt:byRow
-  a rdf:Property ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  rdfs:label "by row" .
-
-qudt:columns
-  a rdf:Property ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  rdfs:label "columns" .
 
 qudt:conformsToTupleSpec
   a rdf:Property ;
@@ -1187,11 +1137,6 @@ qudt:returnType
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
   rdfs:label "return type" ;
   rdfs:subPropertyOf qudt:elementDatatype .
-
-qudt:rows
-  a rdf:Property ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  rdfs:label "rows" .
 
 qudt:tupleMemberSpecs
   a rdf:Property ;
@@ -1847,54 +1792,12 @@ qudt:StringType-elementType
   sh:class qudt:CharacterType ;
   sh:path qudt:elementDatatype .
 
-qudt:StructuredDataItem-datatype
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  sh:class qudt:StructuredDatatype ;
-  sh:maxCount 1 ;
-  sh:path qudt:datatype .
-
-qudt:StructuredDataItem-value
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  sh:class qudt:StructuredDatatype ;
-  sh:maxCount 1 ;
-  sh:path qudt:value .
-
 qudt:StructuredDatatype-nTuple
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
   sh:class qudt:NTuple ;
   sh:maxCount 1 ;
   sh:path qudt:nTuple .
-
-qudt:Table-byRow
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  sh:datatype xsd:boolean ;
-  sh:maxCount 1 ;
-  sh:path qudt:byRow .
-
-qudt:Table-columns
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  sh:datatype xsd:integer ;
-  sh:maxCount 1 ;
-  sh:path qudt:columns .
-
-qudt:Table-dimensionality
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  sh:datatype xsd:integer ;
-  sh:maxCount 1 ;
-  sh:path qudt:dimensionality .
-
-qudt:Table-rows
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype/structured> ;
-  sh:datatype xsd:integer ;
-  sh:maxCount 1 ;
-  sh:path qudt:rows .
 
 qudt:ThreeTuple-elementType
   a sh:PropertyShape ;
