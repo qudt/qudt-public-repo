@@ -685,6 +685,13 @@ is `ex:Vector_DroneVelocities_3D`, is the case in the examples; see its open ite
 [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md). To decide: which
 structured datatypes may be a value, whether that is one more `sh:or` alternative (all of
 `qudt:StructuredDatatype`, or a narrower class), and whether their elements must then be numeric.
+**Progress (2026-10-21):** `qudt:StructuredDataItem` now gives one route. It is a `qudt:DataItem`,
+which `qudt:Quantifiable-value` already accepts, and its `qudt:value` must be a
+`qudt:StructuredDatatype` instance, so a quantity can hold a vector through it. `qudt:DataItem` is now
+the parent of `qudt:ScalarDataItem`, `qudt:StructuredDataItem` and `qudt:List`, and no longer
+constrains `qudt:value` itself; the list check moved to `qudt:List-value`. Still to decide: whether
+quantities must use this wrapper or may also point at a structured value directly. The drone example
+still does the latter, so it still fails.
 G. **Consider how a vector can be a subtype of array** *(added 2026-10-21)*. Today `qudt:Vector` is
 a sibling of `qudt:Array`, and "a vector is a rank-1 array" is stated only on the kind side, where
 `qudt:VectorKind` is `rdfs:subClassOf qudt:ArrayKind` (see "`qudt:Vector` is a sibling of
