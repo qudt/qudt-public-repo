@@ -10,8 +10,8 @@ portability defects in the shared tuple engine were found and fixed in the proce
 [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md).
 Read the revisions newest-first: "Design revision (2026-08-22)" supersedes
 "Design revision (2026-07-27)", which in turn supersedes the `qudt:ArraySpec` sketch further down.
-**Related file:** `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES-STRUCTURED_NoOWL.ttl`
-(split out of the former `SCHEMA_QUDT-DATATYPES_NoOWL.ttl` on 2026-08-24)
+**Related file:** `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl`
+(split into core, scalar and structured files on 2026-08-24, merged back on 2026-10-23)
 
 ## Goal
 
@@ -47,7 +47,7 @@ withdrawn: the type-level description of an array is separated from the instance
    reported on the `ArrayKind` (it holds `dimensionality` and `dimensions`); length and element-type
    faults are reported on the `Array` (it holds `qudt:values`).
 
-**Schema as implemented (now `SCHEMA_QUDT-DATATYPES-STRUCTURED_NoOWL.ttl`):**
+**Schema as implemented (now `SCHEMA_QUDT-DATATYPES_NoOWL.ttl`):**
 
 Every array-shaped datatype now comes as an **instance/kind pair**: the instance carries the values,
 the kind carries the description.
@@ -683,7 +683,8 @@ all three example files loaded together: every bad example fires exactly its int
 one defect the check found was outside the eight constraints: after the 2026-08-24 schema split, the
 IFC `ConsistentSign` constraint's `sh:prefixes` still named the pre-split
 `<…/schema/shacl/datatype>`, so it could not run and `ex:cpaBadSign` was never reported (fixed in
-`9bbeffad`). How to run the check: [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md).
+`9bbeffad`; since the merge of 2026-10-23 that IRI is the datatype schema's again, and the
+constraint points at it). How to run the check: [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md).
 B. **Migrate or retire the legacy old-style array examples** that still use `qudt:value` (singular)
 and `qudt:datatype`; the retired `DimensionalityShape` no longer covers them. The engine check
 (2026-10-19) lists them. Six valid arrays — `ex:Array1D_Integers`, `ex:Array_MassProperties_Rocket`
@@ -696,7 +697,8 @@ D. Rewrite the nested-list prose on `qudt:HomogeneousArray`, `qudt:HeterogenousA
 `qudt:MultiDimensionalArray` to match the flat representation.
 E. Hold the "specifying the types of an array's values" discussion (see "Open discussion" above), now
 in light of the Option-B hybrid decision.
-F. **Consider how to allow structured datatypes for numeric values** *(added 2026-10-21)*.
+F. ~~**Consider how to allow structured datatypes for numeric values**~~ *(added 2026-10-21)*.
+**Resolved 2026-10-23.**
 `qudt:Quantifiable-value` accepts a number, a `qudt:DataItem` or a `qudt:EnumeratedValue`, so a
 quantity whose value is a vector, matrix or array fails. `ex:Quantity_DroneVelocity3D`, whose value
 is `ex:Vector_DroneVelocities_3D`, is the case in the examples; see its open item in
@@ -708,8 +710,10 @@ structured datatypes may be a value, whether that is one more `sh:or` alternativ
 `qudt:DataItem`, and `qudt:List` is now also a `qudt:StructuredDatatype`, so
 `ex:Quantity_DroneVelocity3D` and the list-valued room-temperature quantities pass. A
 `qudt:StructuredDataItem` wrapper was tried on 2026-10-21 and withdrawn. `qudt:ArrayKind` is now a
-`qudt:Concept`, so a kind cannot be a value. Still to decide: whether the elements of a structured
-value must then be numeric.
+`qudt:Concept`, so a kind cannot be a value. **Decided 2026-10-23:** the elements of a structured
+value need not be numeric. `qudt:Quantifiable-value` accepts any `qudt:StructuredDatatype` instance
+whatever its element types, for example a heterogeneous array or vector that mixes strings,
+decimals and units, so no further constraint is needed.
 G. ~~**Consider how a vector can be a subtype of array**~~ *(added 2026-10-21)*. **Resolved
 2026-10-22, the other way round:** a vector is not an array on either side. `qudt:VectorKind` is no
 longer `rdfs:subClassOf qudt:ArrayKind`; both kinds are `qudt:Concept`s, sharing only the

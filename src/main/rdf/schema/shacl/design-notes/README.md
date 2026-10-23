@@ -1,8 +1,9 @@
 # SHACL Datatype Schema — Design Notes
 
 Design decisions, patterns, and open threads for the SHACL datatype schema
-(`SCHEMA_QUDT-DATATYPES-CORE_NoOWL.ttl`, `-SCALAR_NoOWL.ttl` and
-`-STRUCTURED_NoOWL.ttl`). Read the pattern doc before touching one
+(`SCHEMA_QUDT-DATATYPES_NoOWL.ttl`, graph `<http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype>`).
+It was split into core, scalar and structured schemas on 2026-08-24 and merged back into one
+on 2026-10-23. Read the pattern doc before touching one
 of the open threads; the open-thread docs assume familiarity with it.
 
 ## Patterns
@@ -11,7 +12,7 @@ of the open threads; the open-thread docs assume familiarity with it.
   way structured datatypes (tuples, arrays, future variants) are modelled in
   this schema. Covers the three cooperating shapes (instance / spec / member
   type spec), the four-alternative type facet, optional tuple positions
-  (the `qudt:Maybe…UnionType` family in CORE, with an `rdf:nil` placeholder), and SPARQL-constraint idioms —
+  (the `qudt:Maybe…UnionType` family, with an `rdf:nil` placeholder), and SPARQL-constraint idioms —
   the SHACL pre-binding rule for sub-SELECTs that walk RDF lists via
   `rdf:rest*/rdf:first`, and two constructs (`UNION` inside `FILTER NOT EXISTS`,
   and joining on an aggregate alias across a sub-SELECT boundary) that are
@@ -40,9 +41,9 @@ of the open threads; the open-thread docs assume familiarity with it.
   note records four defects found in the shared tuple engine while doing so. Since 2026-10-22
   `qudt:Vector` and its kind are separate from `qudt:Array` and its kind, and a vector may be
   heterogeneous (item G, resolved). **Still open:** where `qudt:Matrix` / `Homogeneous` /
-  `Heterogenous` sit relative to the split, plus the "still to do" B–F list in the note. F (added
-  2026-10-21) is settled on quantities pointing at structured values directly, apart from whether
-  their elements must be numeric.
+  `Heterogenous` sit relative to the split, plus the "still to do" B–E list in the note. F (added
+  2026-10-21) is resolved: quantities point at structured values directly, and their elements need
+  not be numeric.
 
 ## Adding a new note
 

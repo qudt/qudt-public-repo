@@ -2,7 +2,7 @@
 
 **Written:** 2026-10-19 (branch `rh-arrays-cusp2`)
 **Status:** current — keep the expected results below in step with the examples
-**Related files:** the four SHACL schemas in `src/main/rdf/schema/shacl/` and the three
+**Related files:** the datatype and main SHACL schemas in `src/main/rdf/schema/shacl/` and the three
 `EXAMPLES_QUDT-*DATATYPES.ttl` files in `src/main/rdf/examples/`
 
 ## Why this is needed
@@ -97,8 +97,7 @@ WORK=${WORK:-/tmp/qudt-engine-check}
 mkdir -p "$WORK"
 SH=src/main/rdf/schema/shacl
 EX=src/main/rdf/examples
-SCHEMAS=("$SH/SCHEMA_QUDT-DATATYPES-CORE_NoOWL.ttl" "$SH/SCHEMA_QUDT-DATATYPES-SCALAR_NoOWL.ttl"
-         "$SH/SCHEMA_QUDT-DATATYPES-STRUCTURED_NoOWL.ttl" "$SH/SCHEMA_QUDT_NoOWL.ttl")
+SCHEMAS=("$SH/SCHEMA_QUDT-DATATYPES_NoOWL.ttl" "$SH/SCHEMA_QUDT_NoOWL.ttl")
 EXAMPLES=("$EX/EXAMPLES_QUDT-DATATYPES.ttl" "$EX/EXAMPLES_QUDT-INVALID-DATATYPES.ttl"
           "$EX/EXAMPLES_QUDT-IFC-DATATYPES.ttl")
 
@@ -152,7 +151,7 @@ awk -F'\t' 'NR==FNR {s[$1]=1; next} ($1 in s) {print $1 "\t" $3}' "$WORK/subject
 
 ### What goes into each graph, and why
 
-- **Shapes graph:** the four SHACL schemas and the three example files. The examples must be
+- **Shapes graph:** the datatype and main SHACL schemas and the three example files. The examples must be
   shapes too, because some constraints are defined in them
   (`ex:IfcCompoundPlaneAngleConsistentSign`); leave them out and those constraints silently
   don't run.
@@ -222,9 +221,10 @@ To see what a constraint change does, run the check once against the current fil
 against an earlier copy of the changed file, then diff the two summaries:
 
 ```bash
-git show <rev>:src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES-STRUCTURED_NoOWL.ttl > /tmp/structured-old.ttl
-# point the STRUCTURED entry of SCHEMAS in engine-check.sh at /tmp/structured-old.ttl,
+git show <rev>:src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl > /tmp/datatypes-old.ttl
+# point the datatype entry of SCHEMAS in engine-check.sh at /tmp/datatypes-old.ttl,
 # rerun with a different WORK directory, and diff the two outputs
+# (for a revision between 2026-08-24 and 2026-10-23, take the three split files instead)
 ```
 
 This is how the `qudt:Maybe…UnionType` change to `NTupleTypeCheck` was confirmed: with the
@@ -237,6 +237,8 @@ check as it was before `73ed45d2`, every `( )` cell in the Maybe examples is fla
   exists, the query can't be parsed and the constraint doesn't run. TopBraid reports a single
   result on the *shape* (`sh:SPARQLConstraintComponent`) and none on the data, which is easy to
   miss. This happened to `ConsistentSign` when the datatype schema was split on 2026-08-24.
+  When the files were merged back on 2026-10-23, every `sh:prefixes` was pointed at the merged
+  graph `<…/schema/shacl/datatype>`.
 - **The same resource defined in two example files.** Loaded together, a duplicated tuple spec
   has two member lists, giving spurious max-count and length violations. Define each resource
   in one file and import that file where it's needed.
