@@ -315,8 +315,7 @@ qudt:CurrencyUnit
 qudt:DataItem
   a owl:Class ;
   dcterms:description """
-  <p>A <em>Data Item</em> holds a value that maybe a scalar or structured datatype.
-  <em>Quantity Value</em> specifies which case applies.
+  <p>A <em>Data Item</em> is a parent class for a scalar or structured data object.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
   rdfs:label "Data Item" ;
@@ -444,99 +443,6 @@ qudt:EnumeratedQuantity
     a owl:Restriction ;
     owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
     owl:onProperty qudt:enumeration ;
-  ] .
-
-qudt:EnumeratedValue
-  a owl:Class ;
-  dcterms:description """
-  <p>An <em>Enumerated Value</em> class defines the members of an enumeration. 
-  An enumeration is a set of literals from which a single value is selected. 
-  Each literal can have a tag as an integer within a standard encoding appropriate to the range of integer values. 
-  Consistency of enumeration types will allow them, and the enumerated values, to be referred to unambiguously either through symbolic name or encoding. 
-  </p>
-  <p>Enumerated values are also controlled vocabularies and as such need to be standardized. 
-  Without this consistency enumeration literals can be stated differently and result in  data conflicts and misinterpretations.
-  </p>
-  <p>The tags are a set of positive whole numbers, not necessarily contiguous and having no numerical significance, each corresponding to the associated literal identifier. 
-  An order attribute can also be given on the enumeration elements. 
-  An enumeration can itself be a member of an enumeration. 
-  This allows enumerations to be enumerated in a selection. 
-  </p>
-  <p>Enumerations are also subclasses of Scalar Datatype. 
-  This allows them to be used as the reference of a datatype specification.
-  </p>
-  """^^rdf:HTML ;
-  qudt:informativeReference "https://en.wikipedia.org/wiki/Enumeration"^^xsd:anyURI ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
-  rdfs:label "Enumerated Value" ;
-  rdfs:subClassOf dtype:EnumeratedValue ;
-  rdfs:subClassOf qudt:Verifiable ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:allValuesFrom xsd:string ;
-    owl:onProperty qudt:abbreviation ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
-    owl:onProperty dcterms:description ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
-    owl:onProperty qudt:abbreviation ;
-  ] .
-
-qudt:Enumeration
-  a owl:Class ;
-  dcterms:description """
-  <p>An <em>Enumeration</em> is a set of literals from which a single value is selected. 
-  Each literal can have a tag as an integer within a standard encoding appropriate to the range of integer values. 
-  Consistency of enumeration types will allow them, and the enumerated values, to be referred to unambiguously either through symbolic name or encoding. 
-  Enumerated values are also controlled vocabularies and as such need to be standardized. 
-  Without this consistency enumeration literals can be stated differently and result in  data conflicts and misinterpretations.
-  </p>
-  <p>The tags are a set of positive whole numbers, not necessarily contiguous and having no numerical significance, each corresponding to the associated literal identifier. 
-  An order attribute can also be given on the enumeration elements. An enumeration can itself be a member of an enumeration. This allows enumerations to be enumerated in a selection. 
-  Enumerations are also subclasses of <em>Scalar Datatype</em>. 
-  This allows them to be used as the reference of a datatype specification.
-  </p>
-  """^^rdf:HTML ;
-  qudt:dbpediaMatch "http://dbpedia.org/resource/Enumeration"^^xsd:anyURI ;
-  qudt:informativeReference "https://en.wikipedia.org/wiki/Enumerated_type"^^xsd:anyURI ;
-  qudt:informativeReference "https://en.wikipedia.org/wiki/Enumeration"^^xsd:anyURI ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
-  rdfs:label "Enumeration" ;
-  rdfs:subClassOf qudt:Concept ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:allValuesFrom qudt:EnumeratedValue ;
-    owl:onProperty qudt:default ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:allValuesFrom qudt:EnumeratedValue ;
-    owl:onProperty qudt:element ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:allValuesFrom xsd:string ;
-    owl:onProperty qudt:abbreviation ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
-    owl:onProperty qudt:abbreviation ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:maxCardinality "1"^^xsd:nonNegativeInteger ;
-    owl:onProperty qudt:default ;
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-    owl:onProperty qudt:element ;
   ] .
 
 qudt:FactorUnit
@@ -1298,7 +1204,7 @@ qudt:QuantityType
   a owl:Class ;
   dcterms:description """
   A $\\textit{Quantity Type}$ is an enumeration of quantity kinds. 
-  It specializes $\\boxed{dtype:EnumeratedValue}$ by constrinaing $\\boxed{dtype:value}$ to instances of $\\boxed{qudt:QuantityKind}$.
+  It specializes $\\boxed{dtype:EnumeratedValue}$ by constraining $\\boxed{dtype:value}$ to instances of $\\boxed{qudt:QuantityKind}$.
   """^^qudt:LatexString ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
   rdfs:label "Quantity type" ;
@@ -1312,7 +1218,9 @@ qudt:QuantityType
 qudt:QuantityValue
   a owl:Class ;
   dcterms:description """
-  <p>A <em>Quantity Value</em> 
+  <p>A <em>Quantity Value</em> has two aspects: <em>Quantifiable</em> and <em>Verifiable</em>.
+  <em>Quantifiable</em> specifies its value and type.
+  <em>Verifiable</em> optionally provides normative and informative references.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
   rdfs:label "Quantity value" ;
@@ -1371,11 +1279,11 @@ qudt:RuleType
 qudt:ScalarDataItem
   a owl:Class ;
   dcterms:description """
-  <p>A <em>Data Item</em> holds a value that is compliant with a specified <em>Datatype</em>.
+  <p>A <em>Scalar Data Item</em> holds a value that is compliant with a specified <em>Datatype</em>.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
   rdfs:label "Scalar Data Item" ;
-  rdfs:subClassOf qudt:Concept ;
+  rdfs:subClassOf qudt:DataItem ;
   rdfs:subClassOf [
     a owl:Restriction ;
     owl:allValuesFrom qudt:ScalarDatatype ;
@@ -2017,13 +1925,6 @@ qudt:datatype
   a owl:ObjectProperty ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/datatype> .
 
-qudt:default
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  dcterms:description "The default element in an enumeration"^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
-  rdfs:label "default" ;
-  rdfs:range qudt:EnumeratedValue .
-
 qudt:definedUnitOfSystem
   a owl:ObjectProperty ;
   dcterms:description "This property relates a unit of measure with the unit system that defines the unit."^^rdf:HTML ;
@@ -2077,13 +1978,6 @@ qudt:dimensionVectorForSI
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
   rdfs:label "dimension vector for SI" ;
   rdfs:range qudt:QuantityKindDimensionVector_SI .
-
-qudt:element
-  a owl:ObjectProperty ;
-  dcterms:description "An element of an enumeration"^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/qudt> ;
-  rdfs:label "element" ;
-  rdfs:range qudt:EnumeratedValue .
 
 qudt:enumeratedValue
   a owl:ObjectProperty, owl:FunctionalProperty ;
