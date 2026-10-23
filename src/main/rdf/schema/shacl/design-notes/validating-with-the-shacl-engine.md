@@ -244,6 +244,13 @@ check as it was before `73ed45d2`, every `( )` cell in the Maybe examples is fla
   in one file and import that file where it's needed.
 - **Missing vocabularies.** Without the datatype vocabulary and typed units and quantity kinds,
   class facets report false violations.
+- **The XSD datatype declarations are load-bearing.** The datatype schema declares every XSD
+  datatype it uses (`xsd:boolean a rdfs:Datatype` and so on) because
+  `qudt:ScalarDatatype-rdfsDatatype` requires `sh:class rdfs:Datatype` on `qudt:rdfsDatatype`.
+  Without them, every datatype in `VOCAB_QUDT-DATATYPES.ttl` fails that shape (33 results on
+  2026-10-23). The Maven build never validates the vocabulary against these shapes, so only this
+  check notices. OWL derivation step 40 (`40-add-xsd-datatype-statements.ru`) adds the same
+  declarations to the derived OWL schema; keep the two lists in step.
 - **Examples left out of the shapes graph.** Constraints defined in the examples don't run, and
   nothing reports their absence.
 
