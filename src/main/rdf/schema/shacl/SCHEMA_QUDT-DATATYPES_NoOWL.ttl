@@ -948,7 +948,8 @@ qudt:MassPropertiesArray
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Mass Properties Array" ;
-  rdfs:subClassOf qudt:HeterogenousArray .
+  rdfs:subClassOf qudt:HeterogenousArray ;
+  sh:property qudt:QuantityKindsPropertyShape .
 
 qudt:MathsFunctionType
   a rdfs:Class, sh:NodeShape ;
@@ -1935,6 +1936,7 @@ qudt:Vector
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Vector" ;
   rdfs:subClassOf qudt:StructuredDatatype ;
+  sh:property qudt:QuantityKindsPropertyShape ;
   sh:property qudt:ValuesList ;
   sh:property qudt:Vector-datatypeKind ;
   sh:sparql qudt:NTupleExtraValueCheck ;
@@ -2043,34 +2045,6 @@ qudt:ansiSQLName
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "ANSI SQL name" ;
   rdfs:subPropertyOf qudt:id .
-
-qudt:arg1Type
-  a rdf:Property ;
-  dcterms:description "This property relates a function data type with the type of its arg1." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "arg1Type" ;
-  rdfs:subPropertyOf qudt:argType .
-
-qudt:arg2Type
-  a rdf:Property ;
-  dcterms:description "This property relates a function data type with the type of its arg2." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "arg2Type" ;
-  rdfs:subPropertyOf qudt:argType .
-
-qudt:arg3Type
-  a rdf:Property ;
-  dcterms:description "This property relates a function data type with the type of its arg3." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "arg3Type" ;
-  rdfs:subPropertyOf qudt:argType .
-
-qudt:argType
-  a rdf:Property ;
-  dcterms:description "This property relates a function data type with the type of one of its arguments." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "argType" ;
-  rdfs:subPropertyOf qudt:elementDatatype .
 
 qudt:auralCue
   a rdf:Property ;
@@ -2323,12 +2297,6 @@ qudt:function
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "function" .
-
-qudt:functionArity
-  a rdf:Property ;
-  dcterms:description "This property is used to state the number of arguments for a function type." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "function arity" .
 
 qudt:hasQuantityKindsList
   a rdf:Property ;
@@ -2674,13 +2642,6 @@ qudt:realization
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "realization" .
-
-qudt:returnType
-  a rdf:Property ;
-  dcterms:description "This property is used to state the return type of a function type." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "return type" ;
-  rdfs:subPropertyOf qudt:elementDatatype .
 
 qudt:rgbCode
   a rdf:Property ;
@@ -3323,28 +3284,6 @@ qudt:FieldType-optional
   sh:maxCount 1 ;
   sh:minCount 0 ;
   sh:path qudt:optional .
-
-qudt:FunctionDatatype-argType
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:Datatype ;
-  sh:path qudt:argType .
-
-qudt:FunctionDatatype-functionArity
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
-  sh:maxCount 1 ;
-  sh:minCount 1 ;
-  sh:path qudt:functionArity .
-
-qudt:FunctionDatatype-returnType
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:Datatype ;
-  sh:maxCount 1 ;
-  sh:minCount 0 ;
-  sh:path qudt:returnType .
 
 qudt:HeterogenousArray-datatype
   a sh:PropertyShape ;
@@ -4456,6 +4395,13 @@ qudt:Quantifiable-dataEncoding
   sh:maxCount 1 ;
   sh:path qudt:dataEncoding .
 
+qudt:QuantityKindsPropertyShape
+  a sh:PropertyShape ;
+  dcterms:description "Invalid quantity kinds list - TODO: SPARQL Query" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:node qudt:QuantityKindList ;
+  sh:path qudt:hasQuantityKindsList .
+
 qudt:RDFListShape
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -4786,19 +4732,6 @@ qudt:TupleMember-orderInStructure
   sh:maxCount 1 ;
   sh:minCount 1 ;
   sh:path qudt:orderInStructure .
-
-qudt:TwoTuple-elementType
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:minCount 0 ;
-  sh:path qudt:elementDatatype .
-
-qudt:TwoTuple-elementTypeCount
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:datatype xsd:integer ;
-  sh:hasValue 2 ;
-  sh:path qudt:elementTypeCount .
 
 qudt:TypeVector-datatype
   a sh:PropertyShape ;

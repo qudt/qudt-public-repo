@@ -721,3 +721,11 @@ longer `rdfs:subClassOf qudt:ArrayKind`; both kinds are `qudt:Concept`s, sharing
 See "`qudt:Vector` is a sibling of `qudt:Array`, not a subclass, and so is its kind" above. Making
 `qudt:Vector` a subclass of `qudt:Array` would have applied the array shapes to every vector,
 including the required `qudt:datatypeKind` and the rank and dimensions a vector does not need.
+H. **Pair a time-series value class with `qudt:TimeSeriesArrayType`** *(added 2026-10-23)*. The
+released `qudt:TimeSeriesArray` (a subclass of `qudt:Array`) was removed on this branch, but its
+blueprint `qudt:TimeSeriesArrayType` was kept, under `qudt:ArrayKind`. Every other array kind has a
+value class whose `qudt:datatypeKind` must be that kind; a time series has none, so no value can
+use the kind. To do: add a value class (a subclass of `qudt:Array`, with a `-datatypeKind` shape
+narrowing the kind to `qudt:TimeSeriesArrayType`), settle the `Type`/`Kind` suffix (see above), and
+decide whether the unattached `qudt:TimeSeriesArray-dimensions` and `qudt:TimeSeriesArray-vector`
+shapes belong on it or should be deleted.
