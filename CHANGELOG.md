@@ -9,6 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added `qudt:exactMatch` between `unit:PPTH` and `unit:PERMILLE`, which are the same unit (10⁻³, ‰), and gave `unit:PERMILLE` the Rec 20 code `NX` (part per thousand, ‰) that `unit:PPTH` carries. Added `quantitykind:MassFraction` to `unit:PPTH`, as in seawater salinity given in parts per thousand, and `quantitykind:Gradient` to `unit:PERMILLE`, as in gradients given in mm/m (‰) ([#1542](https://github.com/qudt/qudt-public-repo/issues/1542)).
 - Added `qudt:organizedUnder quantitykind:DimensionlessRatio` to `quantitykind:RefractiveIndex`, like `quantitykind:SpeedRatio`, and `unit:FRACTION` as one of its units ([#397](https://github.com/qudt/qudt-public-repo/issues/397)).
 - Added `quantitykind:MassFraction` to `unit:PERMILLE`, `unit:GM-PER-KiloGM`, and `unit:KiloGM-PER-KiloGM`, in which mass fractions such as sea-water salinity and specific humidity are commonly given ([#1562](https://github.com/qudt/qudt-public-repo/issues/1562)).
 - Added `qudt:specializationOf quantitykind:MassRatio` to `quantitykind:MassRatioOfWaterVapourToDryGas`, like `quantitykind:SpecificHumidity`, so that mass-ratio units such as g/kg and kg/kg apply to it, and `unit:FRACTION` as a unit for `quantitykind:PressureRatio`, inherited by `quantitykind:RelativePartialPressure` and `quantitykind:RelativeHumidity` ([#1569](https://github.com/qudt/qudt-public-repo/issues/1569)).
