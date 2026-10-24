@@ -9,7 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
-- Added `qudt:exactMatch quantitykind:MoleFraction` to `quantitykind:AmountOfSubstanceFraction`, which defines the same quantity (x_B = n_B/n), with the same `qudt:organizedUnder quantitykind:DimensionlessRatio` and numerator and denominator dimension vectors; the build now shares their units. Corrected a typo in its description.
+- Added `qudt:exactMatch quantitykind:MoleFraction` to `quantitykind:AmountOfSubstanceFraction`, which is the same quantity kind (x_B = n_B/n), with the same `qudt:organizedUnder quantitykind:DimensionlessRatio` and numerator and denominator dimension vectors; the build now shares their units. Corrected a typo in its description.
 - Added `unit:PERCENT` as a unit of `quantitykind:Gradient` (percent grade), and a description of `quantitykind:Gradient` following IEC 62720 (UAD058).
 - Added `qudt:organizedUnder quantitykind:DimensionlessRatio` to `quantitykind:RefractiveIndex`, like `quantitykind:SpeedRatio`, and `unit:FRACTION` as one of its units ([#397](https://github.com/qudt/qudt-public-repo/issues/397)).
 - Added `quantitykind:MassFraction` to `unit:PERMILLE`, `unit:GM-PER-KiloGM`, and `unit:KiloGM-PER-KiloGM`, in which mass fractions such as sea-water salinity and specific humidity are commonly given ([#1562](https://github.com/qudt/qudt-public-repo/issues/1562)).
