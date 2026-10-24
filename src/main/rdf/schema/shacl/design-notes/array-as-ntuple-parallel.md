@@ -36,8 +36,10 @@ withdrawn: the type-level description of an array is separated from the instance
    `sh:class qudt:ArrayKind`).
 3. **Why the reversal.** The 2026-07-27 rationale was that a blueprint pays off only when many
    instances share it, and an array's `dimensions` vary per instance. In practice they don't vary as
-   much as assumed — `ex:3DHomogeneousArray1` and `ex:3DHomogeneousArray2` share one
-   `ex:3DHomogeneousArrayKind`, and two temperature arrays share another. The split also removes the
+   much as assumed — the examples had two arrays sharing one homogeneous kind, and two temperature
+   arrays sharing another. (The second array of each pair was removed on 2026-10-24, so the examples
+   no longer show a shared kind; the kinds are now `ex:HomogeneousArrayKind_3D_Decimals` and
+   `ex:HomogeneousArrayKind_3D_Temperatures`.) The split also removes the
    accepted trade-off of the previous revision: heterogeneous arrays **can** now share a reusable
    positional-type blueprint, because the `qudt:conformsToTupleSpec` pointer lives on the kind.
 4. **Naming.** The blueprint is `ArrayKind`, not `ArraySpec`, and the link is the general
@@ -82,7 +84,7 @@ expressed on the kind side, with `qudt:VectorKind` `rdfs:subClassOf qudt:ArrayKi
 `rdfs:subClassOf qudt:Concept`, with its own shapes for the component count and types, and no rank,
 dimensions or data order. A vector may be homogeneous (one `qudt:elementType`) or heterogeneous (a
 `qudt:conformsToTupleSpec` with one type per component), so `qudt:Vector` carries the four `NTuple*`
-checks as well as the two `ValuesList*` checks. `ex:GeoPositionVector` and
+checks as well as the two `ValuesList*` checks. `ex:Vector_GeoPosition` and
 `ex:badExampleHeterogeneousVectorLength` exercise them. `qudt:Vector-datatypeKind` is still
 `sh:minCount 0`. The old-style vectors, which described themselves with `qudt:datatype`,
 `qudt:dimensions` and a singular `qudt:value`, were migrated on 2026-10-23. The three that hold
@@ -136,13 +138,14 @@ report it. The array's and vector's length errors were still caught by `ValuesLi
 several sub-SELECTs reach the same resource, write the same path in each.
 
 **Examples updated to the split.** Valid: each array now points at a kind
-(`ex:3DHomogeneousArrayKind` shared by two arrays, `ex:3DTemperatureArrayKind` shared by two more,
-`ex:HeterogeneousArrayKind_2X3`). Invalid: each bad array gained a companion kind, and
+(`ex:HomogeneousArrayKind_3D_Decimals`, `ex:HomogeneousArrayKind_3D_Temperatures`, each then shared
+by two arrays, and `ex:HeterogeneousArrayKind_2X3`). Invalid: each bad array gained a companion kind, and
 `ex:badExampleArrayRank` **is** the `ArrayKind` (rank is a blueprint-level property), with a
 well-formed companion array so the violation is attributable to the kind alone.
 
 Also fixed in passing: `EXAMPLES_QUDT-DATATYPES.ttl` did not parse — an unclosed `qudt:values` list
-in `ex:Tuple3_DatedTemperatureInDegreesC` (pre-existing) and an undeclared `x:` prefix on `ex:3DTemperatureArray2`.
+in `ex:Tuple3_DatedTemperatureInDegreesC` (pre-existing) and an undeclared `x:` prefix on the second
+temperature array (since removed).
 
 **Still open from this revision:**
 
@@ -154,13 +157,16 @@ in `ex:Tuple3_DatedTemperatureInDegreesC` (pre-existing) and an undeclared `x:` 
   `qudt:AssociativeArray`, which remain instance-side subclasses of `qudt:Array` with no
   corresponding kind. A `qudt:MatrixKind` under `qudt:ArrayKind` is the obvious parallel, but nothing
   currently requires it.
-- `qudt:TimeSeriesArrayType` was renamed with a `Type` suffix while the array blueprints use
-  `Kind`. `TimeSeriesArrayType` is `rdfs:subClassOf qudt:ArrayKind`, so it is a kind in all but
-  name; the suffix should be reconciled. (`qudt:TableType`, renamed the same way, and the other
-  table datatypes were removed on 2026-10-22.)
-- `qudt:TimeSeriesArray-*` property shapes still carry the pre-rename prefix.
-- `qudt:StructuredDatatype-nTuple` and `qudt:TimeSeriesArray-vector` are defined but no longer
-  referenced by any `sh:property` — deliberate detachment, pending a decision to delete them.
+- ~~`qudt:TimeSeriesArrayType` was renamed with a `Type` suffix while the array blueprints use
+  `Kind`.~~ **Resolved 2026-10-24:** `qudt:TimeSeriesArrayType` was folded back into
+  `qudt:TimeSeriesArray`, a value class under `qudt:Array` as released, and the fixed- and
+  variable-interval `…Type` classes into their value classes. There is no time-series kind: a time
+  series takes any `qudt:ArrayKind`. The `qudt:TimeSeriesArray-*` shapes now match their class name.
+  (`qudt:TableType`, renamed with the same suffix, and the other table datatypes were removed on
+  2026-10-22.)
+- `qudt:StructuredDatatype-nTuple`, `qudt:TimeSeriesArray-vector` and `qudt:TimeSeriesArray-dimensions`
+  are defined but not referenced by any `sh:property` — deliberate detachment, pending a decision to
+  delete them. (`qudt:TimeSeriesArray` attached `-vector` in the released schema.)
 - `qudt:ArrayKind`'s `dcterms:description` is still a near-verbatim copy of `qudt:Array`'s (it
   describes `qudt:values` as living on the kind), its `rdfs:label` is still `"Array"`, and whether
   `rdfs:subClassOf qudt:StructuredDatatype` is right for a blueprint node is unsettled.
@@ -693,8 +699,9 @@ constraint points at it). How to run the check: [validating-with-the-shacl-engin
 B. **Migrate or retire the legacy old-style array examples** *(vectors done 2026-10-23; see
 "`qudt:Vector` is a sibling of `qudt:Array`" above)* that still use `qudt:value` (singular)
 and `qudt:datatype`; the retired `DimensionalityShape` no longer covers them. The engine check
-(2026-10-19) lists them. Six valid arrays — `ex:Array1D_Integers`, `ex:Array_MassProperties_Rocket`
-and four `ex:StateSpaceMatrix-*` — fail the required `qudt:datatypeKind`. In the invalid examples,
+(2026-10-19) lists them. Five valid arrays — `ex:Array_MassProperties_Rocket` and four
+`ex:StateSpaceMatrix-*` — fail the required `qudt:datatypeKind`. (A sixth, the integer array, was
+migrated on 2026-10-24 and is now `ex:HomogeneousArray_1D_Integers`.) In the invalid examples,
 the two legacy arrays (`qudt:Array1D_Integers-INVALID`, `qudt:EX_Array1D_INVALID`) fail only that
 check, not their intended dimension error, and six more `qudt:`-named resources (three lists, a
 collection and two quantities) are tested by no current constraint.
@@ -727,11 +734,10 @@ longer `rdfs:subClassOf qudt:ArrayKind`; both kinds are `qudt:Concept`s, sharing
 See "`qudt:Vector` is a sibling of `qudt:Array`, not a subclass, and so is its kind" above. Making
 `qudt:Vector` a subclass of `qudt:Array` would have applied the array shapes to every vector,
 including the required `qudt:datatypeKind` and the rank and dimensions a vector does not need.
-H. **Pair a time-series value class with `qudt:TimeSeriesArrayType`** *(added 2026-10-23)*. The
-released `qudt:TimeSeriesArray` (a subclass of `qudt:Array`) was removed on this branch, but its
-blueprint `qudt:TimeSeriesArrayType` was kept, under `qudt:ArrayKind`. Every other array kind has a
-value class whose `qudt:datatypeKind` must be that kind; a time series has none, so no value can
-use the kind. To do: add a value class (a subclass of `qudt:Array`, with a `-datatypeKind` shape
-narrowing the kind to `qudt:TimeSeriesArrayType`), settle the `Type`/`Kind` suffix (see above), and
-decide whether the unattached `qudt:TimeSeriesArray-dimensions` and `qudt:TimeSeriesArray-vector`
-shapes belong on it or should be deleted.
+H. ~~**Pair a time-series value class with `qudt:TimeSeriesArrayType`**~~ *(added 2026-10-23)*.
+**Resolved 2026-10-24, the other way round:** `qudt:TimeSeriesArrayType` was folded back into the
+released value class `qudt:TimeSeriesArray`, a subclass of `qudt:Array`, and the fixed- and
+variable-interval `…Type` classes into theirs. A time series now takes any `qudt:ArrayKind`; add a
+time-series kind only if one is needed. Still to decide: whether the unattached
+`qudt:TimeSeriesArray-dimensions` and `qudt:TimeSeriesArray-vector` shapes belong on the class or
+should be deleted.

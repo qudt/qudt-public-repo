@@ -41,7 +41,7 @@ of the open threads; the open-thread docs assume familiarity with it.
   note records four defects found in the shared tuple engine while doing so. Since 2026-10-22
   `qudt:Vector` and its kind are separate from `qudt:Array` and its kind, and a vector may be
   heterogeneous (item G, resolved). **Still open:** where `qudt:Matrix` / `Homogeneous` /
-  `Heterogenous` sit relative to the split, plus the "still to do" items B–E and H (a time-series value class, added 2026-10-23) in the note. F (added
+  `Heterogenous` sit relative to the split, plus the "still to do" items B–E in the note (H, a time-series value class, was resolved on 2026-10-24). F (added
   2026-10-21) is resolved: quantities point at structured values directly, and their elements need
   not be numeric.
 

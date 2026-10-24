@@ -167,7 +167,7 @@ awk -F'\t' 'NR==FNR {s[$1]=1; next} ($1 in s) {print $1 "\t" $3}' "$WORK/subject
 - Results on resources other than the examples — the stub's units, schema resources — are
   expected; step 5 filters them out. The full list is in `$WORK/results.tsv`.
 
-## Expected results (2026-10-22)
+## Expected results (2026-10-24)
 
 Every bad example fires exactly its intended check:
 
@@ -203,9 +203,9 @@ The valid and IFC examples are clean, apart from two open items:
 - `ex:ResourceLabelRatingTupleSpec` — position 2 uses only `sh:languageIn ( "en" )`, which is
   not one of the type facets `qudt:NTupleMemberTypeSpec-type` accepts, so the spec fails that
   shape and the position is never type-checked.
-- The legacy arrays lack `qudt:datatypeKind`: six valid ones (`ex:Array1D_Integers`,
-  `ex:Array_MassProperties_Rocket` and four `ex:StateSpaceMatrix-*`) and the two legacy invalid
-  ones (`qudt:Array1D_Integers-INVALID`, `qudt:EX_Array1D_INVALID`). See "Still to do" B in
+- The legacy arrays lack `qudt:datatypeKind`: five valid ones (`ex:Array_MassProperties_Rocket`
+  and four `ex:StateSpaceMatrix-*`) and the two legacy invalid ones
+  (`qudt:Array1D_Integers-INVALID`, `qudt:EX_Array1D_INVALID`). See "Still to do" B in
   [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md).
 
 `ex:Quantity_DroneVelocity3D`, whose value is a vector, failed `qudt:Quantifiable-value` from
