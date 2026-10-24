@@ -61,6 +61,26 @@ type-facet machinery. When a datatype's cells all share one type (homogeneous
 array, vector of scalars), reuse the facet without the `qudt:index` — one
 shared spec instead of one-per-position.
 
+## Quantity kinds and units
+
+The meaning of a value is stated where its type is, at the same level:
+
+- **Per position:** a member spec may also carry `qudt:hasQuantityKind` and `qudt:hasUnit`, at
+  most one of each (`qudt:NTupleMemberTypeSpec-hasQuantityKind`, `-hasUnit`). Because tuples,
+  heterogeneous arrays and heterogeneous vectors share `qudt:NTupleSpec`, this covers all three.
+  `ex:NTupleSpec_MassProperties` gives each of its six positions a quantity kind and unit, and
+  `ex:NTupleSpec_GeoPosition` gives latitude, longitude and altitude theirs.
+- **Shared:** an array or vector kind may carry one `qudt:hasQuantityKind` and one `qudt:hasUnit`
+  for every cell (`qudt:StructuredDataKind-hasQuantityKind`, `-hasUnit`), as
+  `ex:VectorKind_DroneVelocity` and `ex:HomogeneousArrayKind_3D_Temperatures` do.
+- A position's own quantity kind or unit takes precedence over the kind's shared one.
+- Cells that share a datatype but differ in quantity kind, such as mass properties, need a tuple
+  spec, one position each.
+
+This replaced `qudt:hasQuantityKindsList`, a list of quantity kinds kept on the value parallel to
+its values, on 2026-10-24. Nothing yet checks that a unit belongs to its quantity kind; that check
+is deferred.
+
 ## Optional positions — `Maybe`
 
 A tuple member can be optional in two different ways:

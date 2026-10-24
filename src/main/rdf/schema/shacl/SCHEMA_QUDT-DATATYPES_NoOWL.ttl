@@ -180,6 +180,8 @@ qudt:ArrayKind
   sh:property qudt:DimensionalityPropertyShape ;
   sh:property qudt:DimensionsPropertyShape ;
   sh:property qudt:StructuredDataKind-elementType ;
+  sh:property qudt:StructuredDataKind-hasQuantityKind ;
+  sh:property qudt:StructuredDataKind-hasUnit ;
   sh:property qudt:StructuredDataKind-isHeterogeneous ;
   sh:sparql qudt:ArrayRankCheck .
 
@@ -935,8 +937,7 @@ qudt:MassPropertiesArray
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Mass Properties Array" ;
-  rdfs:subClassOf qudt:HeterogenousArray ;
-  sh:property qudt:QuantityKindsPropertyShape .
+  rdfs:subClassOf qudt:HeterogenousArray .
 
 qudt:MathsFunctionType
   a rdfs:Class, sh:NodeShape ;
@@ -1069,6 +1070,8 @@ qudt:NTupleMemberTypeSpec
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "N-Tuple Member Type Specification" ;
   sh:node qudt:NTupleMemberTypeSpec-type ;
+  sh:property qudt:NTupleMemberTypeSpec-hasQuantityKind ;
+  sh:property qudt:NTupleMemberTypeSpec-hasUnit ;
   sh:property qudt:NTupleMemberTypeSpec-index .
 
 qudt:NTupleSpec
@@ -1255,29 +1258,6 @@ qudt:Quantifiable
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:property qudt:Quantifiable-dataEncoding ;
   vaem:isElaboratedIn <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> .
-
-qudt:QuantityKindList
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>A <em>Quantity Kind List</em> is a list of qudt:QuantityKind. 
-  They are used, for instance, to specify the quantity kind in a Mass Properties Array. 
-  </p>
-  """^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "Quantity kind List" ;
-  rdfs:subClassOf qudt:List ;
-  sh:property [
-    sh:class qudt:QuantityKind ;
-    sh:path rdf:first ;
-  ] ;
-  sh:property [
-    sh:or ( [
-      sh:hasValue ( ) ;
-    ] [
-      sh:node qudt:QuantityKindList ;
-    ] ) ;
-    sh:path rdf:rest ;
-  ] .
 
 qudt:RawValueTupleMember
   a rdfs:Class, sh:NodeShape ;
@@ -1919,7 +1899,6 @@ qudt:Vector
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Vector" ;
   rdfs:subClassOf qudt:StructuredDatatype ;
-  sh:property qudt:QuantityKindsPropertyShape ;
   sh:property qudt:ValuesList ;
   sh:property qudt:Vector-datatypeKind ;
   sh:sparql qudt:NTupleExtraValueCheck ;
@@ -1950,6 +1929,8 @@ qudt:VectorKind
   rdfs:label "Vector Kind" ;
   rdfs:subClassOf qudt:Concept ;
   sh:property qudt:StructuredDataKind-elementType ;
+  sh:property qudt:StructuredDataKind-hasQuantityKind ;
+  sh:property qudt:StructuredDataKind-hasUnit ;
   sh:property qudt:StructuredDataKind-isHeterogeneous ;
   sh:property qudt:VectorKind-conformsToTupleSpec ;
   sh:property qudt:VectorKind-elementCount .
@@ -2280,12 +2261,6 @@ qudt:function
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "function" .
-
-qudt:hasQuantityKindsList
-  a rdf:Property ;
-  dcterms:description "This property is used to specify a list of quantity kinds." ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "quantity kinds" .
 
 qudt:iconicCue
   a rdf:Property ;
@@ -4115,6 +4090,26 @@ WHERE {
 }
     """ .
 
+qudt:NTupleMemberTypeSpec-hasQuantityKind
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:class qudt:QuantityKind ;
+  sh:description """
+  The quantity kind of the value at this position of a tuple, or of a heterogeneous array or vector.
+  """ ;
+  sh:maxCount 1 ;
+  sh:path qudt:hasQuantityKind .
+
+qudt:NTupleMemberTypeSpec-hasUnit
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:class qudt:Unit ;
+  sh:description """
+  The unit of the value at this position of a tuple, or of a heterogeneous array or vector.
+  """ ;
+  sh:maxCount 1 ;
+  sh:path qudt:hasUnit .
+
 qudt:NTupleMemberTypeSpec-index
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -4378,15 +4373,6 @@ qudt:Quantifiable-dataEncoding
   sh:maxCount 1 ;
   sh:path qudt:dataEncoding .
 
-qudt:QuantityKindsPropertyShape
-  a sh:PropertyShape ;
-  dcterms:description "Invalid quantity kinds list - TODO: SPARQL Query" ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:maxCount 1 ;
-  sh:minCount 0 ;
-  sh:node qudt:QuantityKindList ;
-  sh:path qudt:hasQuantityKindsList .
-
 qudt:RDFListShape
   a sh:NodeShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -4634,6 +4620,30 @@ qudt:StructuredDataKind-elementType
   sh:nodeKind sh:IRI ;
   sh:path qudt:elementType .
 
+qudt:StructuredDataKind-hasQuantityKind
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:class qudt:QuantityKind ;
+  sh:description """
+  The quantity kind shared by every cell of an array or vector of this kind. Where the cells differ,
+  give each position its own quantity kind in the kind's tuple specification instead; a position's
+  own quantity kind takes precedence over this one.
+  """ ;
+  sh:maxCount 1 ;
+  sh:path qudt:hasQuantityKind .
+
+qudt:StructuredDataKind-hasUnit
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:class qudt:Unit ;
+  sh:description """
+  The unit shared by every cell of an array or vector of this kind. Where the cells differ, give
+  each position its own unit in the kind's tuple specification instead; a position's own unit takes
+  precedence over this one.
+  """ ;
+  sh:maxCount 1 ;
+  sh:path qudt:hasUnit .
+
 qudt:StructuredDataKind-isHeterogeneous
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -4880,13 +4890,8 @@ qudt:Vector-datatypeKind
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:class qudt:VectorKind ;
-  sh:description """
-  Optional rather than required, to bridge the legacy vector instances that still describe
-  themselves with qudt:datatype / qudt:dimensions / qudt:value (singular). Tighten to
-  sh:minCount 1 once those have been migrated to a qudt:VectorKind.
-  """ ;
   sh:maxCount 1 ;
-  sh:minCount 0 ;
+  sh:minCount 1 ;
   sh:path qudt:datatypeKind .
 
 qudt:VectorKind-conformsToTupleSpec

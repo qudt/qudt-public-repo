@@ -93,6 +93,7 @@ Every bad example fires exactly its intended check:
 | `ex:badExampleHeterogeneousVectorLength`      | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck`, `qudt:ValuesListLengthCheck` |
 | `ex:badExampleHomogeneousArrayLength`         | `qudt:ValuesListLengthCheck`                                                                   |
 | `ex:badExampleHomogeneousArrayType`           | `qudt:ValuesListElementTypeCheck`                                                              |
+| `ex:badExampleMemberSpecQuantityKind`         | `sh:ClassConstraintComponent` (from `qudt:NTupleMemberTypeSpec-hasQuantityKind`)               |
 | `ex:badExampleQuantityValueTuple`             | `qudt:NTupleTypeCheck`                                                                         |
 | `ex:badExampleTuple2a`                        | `qudt:NTupleTypeCheck`                                                                         |
 | `ex:badExampleTuple2b`                        | `qudt:NTupleExtraValueCheck`, `qudt:NTupleLengthCheck`                                         |
@@ -117,8 +118,8 @@ The valid and IFC examples are clean, apart from two open items:
 - `ex:ResourceLabelRatingTupleSpec` — position 2 uses only `sh:languageIn ( "en" )`, which is
   not one of the type facets `qudt:NTupleMemberTypeSpec-type` accepts, so the spec fails that
   shape and the position is never type-checked.
-- The legacy arrays lack `qudt:datatypeKind`: five valid ones (`ex:Array_MassProperties_Rocket`
-  and four `ex:StateSpaceMatrix-*`) and the two legacy invalid ones
+- The legacy arrays lack `qudt:datatypeKind`: four valid ones (the `ex:StateSpaceMatrix-*`) and
+  the two legacy invalid ones
   (`qudt:Array1D_Integers-INVALID`, `qudt:EX_Array1D_INVALID`). See "Still to do" B in
   [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md).
 

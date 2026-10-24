@@ -53,20 +53,6 @@ dcterms:title
   rdfs:label "title" ;
   rdfs:range xsd:string .
 
-ex:Array_MassProperties_Rocket
-  a qudt:MassPropertiesArray ;
-  qudt:datatype datatype:FLOAT-DP ;
-  qudt:dimensionality 1 ;
-  qudt:dimensions ( 6 ) ;
-  qudt:hasQuantityKindsList ( quantitykind:CenterOfGravity_X quantitykind:CenterOfGravity_Y
-    quantitykind:CenterOfGravity_Z quantitykind:Mass quantitykind:MomentOfInertia
-    quantitykind:PRODUCT-OF-INERTIA ) ;
-  qudt:isHeterogeneous true ;
-  qudt:value ( 0.1 0.5 1.0 2.0 3.0 4.0 ) ;
-  rdfs:comment "TODO: qudt:datatype ( datatype:FLOAT-DP datatype:FLOAT-DP datatype:FLOAT-DP datatype:FLOAT-DP datatype:FLOAT-DP datatype:FLOAT-DP )" ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
-  rdfs:label "Mass Properties Array Example" .
-
 ex:DateCountTupleSpec
   a qudt:NTupleSpec ;
   qudt:tupleMemberSpecs ( [
@@ -195,8 +181,8 @@ ex:HomogeneousArrayKind_3D_Temperatures
   qudt:elementCount 8 ;
   qudt:elementType xsd:decimal ;
   qudt:hasQuantityKind quantitykind:Temperature ;
+  qudt:hasUnit unit:DEG_C ;
   qudt:isHeterogeneous false ;
-  qudt:unit unit:DEG_C ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Homogeneous 2x2x2 array kind of temperatures" .
 
@@ -309,19 +295,67 @@ ex:NTupleSpec_GeoPosition
   a qudt:NTupleSpec ;
   qudt:tupleMemberSpecs ( [
     a qudt:NTupleMemberTypeSpec ;
+    qudt:hasQuantityKind quantitykind:Angle ;
+    qudt:hasUnit unit:DEG ;
     qudt:index 1 ;
     sh:datatype xsd:decimal ;
   ] [
     a qudt:NTupleMemberTypeSpec ;
+    qudt:hasQuantityKind quantitykind:Angle ;
+    qudt:hasUnit unit:DEG ;
     qudt:index 2 ;
     sh:datatype xsd:decimal ;
   ] [
     a qudt:NTupleMemberTypeSpec ;
+    qudt:hasQuantityKind quantitykind:Altitude ;
+    qudt:hasUnit unit:M ;
     qudt:index 3 ;
     sh:datatype xsd:integer ;
   ] ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Vector spec for the geographic position vector" .
+
+ex:NTupleSpec_MassProperties
+  a qudt:NTupleSpec ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:hasQuantityKind quantitykind:CenterOfGravity_X ;
+    qudt:hasUnit unit:M ;
+    qudt:index 1 ;
+    sh:datatype xsd:float ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:hasQuantityKind quantitykind:CenterOfGravity_Y ;
+    qudt:hasUnit unit:M ;
+    qudt:index 2 ;
+    sh:datatype xsd:float ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:hasQuantityKind quantitykind:CenterOfGravity_Z ;
+    qudt:hasUnit unit:M ;
+    qudt:index 3 ;
+    sh:datatype xsd:float ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:hasQuantityKind quantitykind:Mass ;
+    qudt:hasUnit unit:KiloGM ;
+    qudt:index 4 ;
+    sh:datatype xsd:float ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:hasQuantityKind quantitykind:MomentOfInertia ;
+    qudt:hasUnit unit:KiloGM-M2 ;
+    qudt:index 5 ;
+    sh:datatype xsd:float ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:hasQuantityKind quantitykind:PRODUCT-OF-INERTIA ;
+    qudt:hasUnit unit:KiloGM-M2 ;
+    qudt:index 6 ;
+    sh:datatype xsd:float ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Vector spec for mass properties" .
 
 ex:NoAlarm
   a qudt:EnumeratedValue ;
@@ -776,6 +810,8 @@ ex:VectorKind_DroneVelocity
   a qudt:VectorKind ;
   qudt:elementCount 3 ;
   qudt:elementType xsd:decimal ;
+  qudt:hasQuantityKind quantitykind:LinearVelocity ;
+  qudt:hasUnit unit:M-PER-SEC ;
   qudt:isHeterogeneous false ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Vector kind - Drone Velocity" .
@@ -791,14 +827,24 @@ ex:VectorKind_GeoPosition
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Geographic position vector kind" .
 
+ex:VectorKind_MassProperties
+  a qudt:VectorKind ;
+  dcterms:description """
+  <p>A heterogeneous vector kind with six components; the per-component types are given by the
+  referenced <code>qudt:NTupleSpec</code>, ex:NTupleSpec_MassProperties.
+  </p>"""^^rdf:HTML ;
+  qudt:conformsToTupleSpec ex:NTupleSpec_MassProperties ;
+  qudt:elementCount 6 ;
+  qudt:isHeterogeneous true ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Mass properties vector kind" .
+
 ex:Vector_DroneVelocities_3D
   a qudt:Vector ;
   dcterms:description """
   <p>A 3D velocity vector has values for x, y and z directionality"
   </p>"""^^rdf:HTML ;
   qudt:datatypeKind ex:VectorKind_DroneVelocity ;
-  qudt:hasQuantityKindsList ( quantitykind:LinearVelocity quantitykind:LinearVelocity
-    quantitykind:LinearVelocity ) ;
   qudt:values ( 12.5 -3.2 0.8 ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Drone vector of 3D velocity values" .
@@ -813,6 +859,14 @@ ex:Vector_GeoPosition
   qudt:values ( 51.4779 -0.0015 46 ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Geographic position vector" .
+
+ex:Vector_MassProperties
+  a qudt:Vector ;
+  qudt:datatypeKind ex:VectorKind_MassProperties ;
+  qudt:values ( "0.1"^^xsd:float "0.5"^^xsd:float "1.0"^^xsd:float "2.0"^^xsd:float "3.0"^^xsd:float
+    "4.0"^^xsd:float ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Mass Properties Vector Example" .
 
 ex:exampleTupleOptionalAnyDateJust
   a qudt:NTuple ;
