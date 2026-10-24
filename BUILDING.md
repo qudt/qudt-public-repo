@@ -28,12 +28,13 @@ mvn install
 
 ### Datatype SHACL schema changed
 
-See [SHACL Datatypes to OWL Datatypes Schema Derivation](#shacl-datatypes-to-owl-datatypes-schema-derivation) and [Recommended Workflows](#recommended-workflows-what-to-run).
+See [SHACL Datatypes to OWL Datatypes Schema Derivation](#shacl-datatypes-to-owl-datatypes-schema-derivation), [SHACL Engine Check of the Datatype Examples](#shacl-engine-check-of-the-datatype-examples) and [Recommended Workflows](#recommended-workflows-what-to-run).
 
 ```bash
 mvn -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
 mvn -Powl-datatypes-inspect rdfio:pipeline@inspect-owl-datatypes-schema-diff
 mvn install
+src/build/engine-check/engine-check.sh
 ```
 
 ### Coordinates SHACL schema changed
@@ -261,6 +262,16 @@ Outputs are written to:
 - `target/inspection/coordinates-schema-diff/unexpected-removed.txt`
 
 This inspection is gated: by default, any unexpected named additions or removals fail the command (`coordinates.schema.diff.max.unexpected.added=0` and `coordinates.schema.diff.max.unexpected.removed=0`).
+
+## SHACL Engine Check of the Datatype Examples
+
+The build never runs the tuple, array and vector constraints of the SHACL datatype schema against the datatype examples. After changing those constraints, a datatype union or the examples, run them in the build's own SHACL engine:
+
+```bash
+src/build/engine-check/engine-check.sh
+```
+
+It works from any directory, needs the build's dependencies already in `~/.m2` (Maven runs offline), and writes its results to `target/engine-check/`. Compare them with the expected results, and see the options for comparing with an earlier run, in [validating-with-the-shacl-engine.md](src/main/rdf/schema/shacl/design-notes/validating-with-the-shacl-engine.md).
 
 ## Recommended Workflows (What To Run)
 

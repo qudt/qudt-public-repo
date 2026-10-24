@@ -2,8 +2,9 @@
 
 **Written:** 2026-10-19 (branch `rh-arrays-cusp2`)
 **Status:** current — keep the expected results below in step with the examples
-**Related files:** the datatype and main SHACL schemas in `src/main/rdf/schema/shacl/` and the three
-`EXAMPLES_QUDT-*DATATYPES.ttl` files in `src/main/rdf/examples/`
+**Related files:** the checker in `src/build/engine-check/`, the datatype and main SHACL schemas in
+`src/main/rdf/schema/shacl/`, and the three `EXAMPLES_QUDT-*DATATYPES.ttl` files in
+`src/main/rdf/examples/`
 
 ## Why this is needed
 
@@ -26,128 +27,39 @@ The plugin hard-codes `setReportDetails(true)` (and `setValidateShapes(false)`);
 settings are `validations`, `failOnSeverity` and `logSeverity`. With the schemas as the
 shapes graph, TopBraid's detailed report contains more than one `sh:ValidationReport`, and
 the plugin's call to Jena's `ValidationReport.fromModel` fails with *Multiple reports found in
-graph*. The checker below calls TopBraid directly, with report details off.
+graph*. The checker in `src/build/engine-check/` calls TopBraid directly, with report details off.
 
 ## Running the check
 
+The checker and its script are in the repository, in `src/build/engine-check/`:
+
+- `EngineCheck.java` calls TopBraid directly, with report details off, and prints one
+  tab-separated line per result: focus node, severity, source constraint, message, value and path.
+- `engine-check.sh` builds the two graphs, reads the plugin's exact classpath from Maven, runs the
+  checker and summarises the results.
+
 You need Maven, a JDK 11 or newer (for single-file `java EngineCheck.java` launches; tested
-with JDK 25), and the plugin's jars in `~/.m2`, which any normal build puts there. Everything
-runs offline.
-
-Save the checker as `EngineCheck.java` in a work directory, save the script as
-`engine-check.sh`, and run the script from the repository root:
+with JDK 25), and the plugin's jars in `~/.m2`, which any normal build puts there. Maven runs
+offline, only to resolve the classpath. Run the script from any directory:
 
 ```bash
-WORK=/tmp/qudt-engine-check bash engine-check.sh
+src/build/engine-check/engine-check.sh
 ```
 
-### `EngineCheck.java`
+It prints one line per (example, check) with a count, then the total. The graphs, Maven's debug
+output and the full `results.tsv` go to `target/engine-check/`, which `mvn clean` removes.
+The script reads the `shacl-maven-plugin` version from `pom.xml`, so it always runs the build's
+engine. Options, as environment variables:
 
-```java
-import org.apache.jena.rdf.model.*;
-import org.apache.jena.riot.RDFDataMgr;
-import org.topbraid.shacl.validation.ValidationEngineConfiguration;
-import org.topbraid.shacl.validation.ValidationUtil;
+|         Variable         |                                  Effect                                  |
+|--------------------------|--------------------------------------------------------------------------|
+| `WORK=<dir>`             | write to this directory instead of `target/engine-check/`                |
+| `COORDINATES=1`          | also load the coordinates schema and vocabulary, which the default omits |
+| `DATATYPE_SCHEMA=<file>` | use this file in place of `SCHEMA_QUDT-DATATYPES_NoOWL.ttl`              |
+| `BASELINE=<results.tsv>` | compare the results with an earlier run's, ignoring blank-node labels    |
 
-/**
- * Runs the build's SHACL engine (TopBraid, via the same jars as shacl-maven-plugin) with report
- * details off — the plugin hard-codes them on, which breaks on the schema shapes.
- * Prints one TSV line per result: focus node, severity, source constraint, message, value, path.
- */
-public class EngineCheck {
-    static final String SH = "http://www.w3.org/ns/shacl#";
-
-    public static void main(String[] args) {
-        Model shapes = RDFDataMgr.loadModel(args[0]);
-        Model data = RDFDataMgr.loadModel(args[1]);
-        ValidationEngineConfiguration conf =
-                new ValidationEngineConfiguration().setReportDetails(false).setValidateShapes(false);
-        Resource report = ValidationUtil.validateModel(data, shapes, conf);
-        Property result = report.getModel().createProperty(SH + "result");
-        int n = 0;
-        for (StmtIterator it = report.listProperties(result); it.hasNext(); n++) {
-            Resource r = it.next().getResource();
-            String source = text(data, r, "sourceConstraint");
-            if (source.isEmpty() || source.equals("_:blank")) source = text(data, r, "sourceConstraintComponent");
-            System.out.println(String.join("\t", text(data, r, "focusNode"), text(data, r, "resultSeverity"),
-                    source, text(data, r, "resultMessage").replace('\n', ' '), text(data, r, "value"),
-                    text(data, r, "resultPath")));
-        }
-        System.err.println("results: " + n);
-    }
-
-    static String text(Model prefixes, Resource r, String localName) {
-        Statement s = r.getProperty(r.getModel().createProperty(SH + localName));
-        if (s == null) return "";
-        RDFNode o = s.getObject();
-        if (o.isURIResource()) return prefixes.shortForm(o.asResource().getURI());
-        if (o.isLiteral()) return o.asLiteral().getLexicalForm();
-        return "_:blank";
-    }
-}
-```
-
-### `engine-check.sh`
-
-```bash
-#!/usr/bin/env bash
-# Run from the repository root:  WORK=/tmp/qudt-engine-check bash engine-check.sh
-set -euo pipefail
-WORK=${WORK:-/tmp/qudt-engine-check}
-mkdir -p "$WORK"
-SH=src/main/rdf/schema/shacl
-EX=src/main/rdf/examples
-SCHEMAS=("$SH/SCHEMA_QUDT-DATATYPES_NoOWL.ttl" "$SH/SCHEMA_QUDT_NoOWL.ttl")
-EXAMPLES=("$EX/EXAMPLES_QUDT-DATATYPES.ttl" "$EX/EXAMPLES_QUDT-INVALID-DATATYPES.ttl"
-          "$EX/EXAMPLES_QUDT-IFC-DATATYPES.ttl")
-
-# 1. Give the units and quantity kinds the examples use a type, so sh:class facets can resolve
-{ echo '@prefix qudt: <http://qudt.org/schema/qudt/> .'
-  echo '@prefix unit: <http://qudt.org/vocab/unit/> .'
-  echo '@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .'
-  grep -hoE 'unit:[A-Za-z0-9_-]+' "${EXAMPLES[@]}" | sort -u | sed 's/$/ a qudt:Unit ./'
-  grep -hoE 'quantitykind:[A-Za-z0-9_-]+' "${EXAMPLES[@]}" | sort -u | sed 's/$/ a qudt:QuantityKind ./'
-} > "$WORK/stub.ttl"
-
-# 2. Shapes graph = schemas + examples; data graph = shapes graph + stub + datatype vocabulary
-cat "${SCHEMAS[@]}" "${EXAMPLES[@]}" > "$WORK/shapes.ttl"
-cat "$WORK/shapes.ttl" "$WORK/stub.ttl" src/main/rdf/vocab/types/VOCAB_QUDT-DATATYPES.ttl > "$WORK/data.ttl"
-
-# 3. The plugin's exact runtime classpath, read from Maven's debug output (offline: jars are in ~/.m2)
-cat > "$WORK/pom.xml" <<'EOF'
-<project xmlns="http://maven.apache.org/POM/4.0.0">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>local</groupId><artifactId>engine-check</artifactId><version>1</version>
-  <packaging>pom</packaging>
-  <build><plugins><plugin>
-    <groupId>io.github.qudtlib</groupId><artifactId>shacl-maven-plugin</artifactId><version>1.0.5</version>
-    <executions><execution><phase>validate</phase><goals><goal>validate</goal></goals>
-      <configuration><validations><validation>
-        <shapes><include>shapes.ttl</include></shapes><data><include>data.ttl</include></data>
-      </validation></validations></configuration>
-    </execution></executions>
-  </plugin></plugins></build>
-</project>
-EOF
-# The plugin's own validation fails here ("Multiple reports found in graph"); only the classpath is wanted.
-( cd "$WORK" && mvn -o -B -X validate > debug.log 2>&1 || true )
-CP=$(awk '/Populating class realm plugin>io.github.qudtlib:shacl-maven-plugin/{p=1; next}
-          p && /Included:/ {print $NF}
-          p && /Populating class realm/ {exit}' "$WORK/debug.log" |
-     awk -F: -v m2="$HOME/.m2/repository" \
-         '$3=="jar" {g=$1; gsub(/\./, "/", g); printf "%s/%s/%s/%s/%s-%s.jar:", m2, g, $2, $4, $2, $4}')
-# slf4j-api is supplied to plugins by Maven core, so it is not in the plugin realm; take Maven's own copy
-MAVEN_HOME=$(mvn -v | awk -F': ' '/^Maven home/ {print $2}')
-CP="$CP$(ls "$MAVEN_HOME"/lib/slf4j-api-*.jar | head -1)"
-
-# 4. Validate (EngineCheck.java must be saved in $WORK)
-java -cp "$CP" "$WORK/EngineCheck.java" "$WORK/shapes.ttl" "$WORK/data.ttl" > "$WORK/results.tsv"
-
-# 5. Results on the example subjects, one line per (focus node, check) with a count
-grep -hoE '^(ex|qudt):[A-Za-z0-9_-]+$' "${EXAMPLES[@]}" | sort -u > "$WORK/subjects.txt"
-awk -F'\t' 'NR==FNR {s[$1]=1; next} ($1 in s) {print $1 "\t" $3}' "$WORK/subjects.txt" "$WORK/results.tsv" |
-  sort | uniq -c
-```
+Until 2026-10-24 this note embedded both files, to be copied into a scratch directory; a copy
+there was lost once, which is why they now live in the repository.
 
 ### What goes into each graph, and why
 
@@ -155,7 +67,9 @@ awk -F'\t' 'NR==FNR {s[$1]=1; next} ($1 in s) {print $1 "\t" $3}' "$WORK/subject
   shapes too, because some constraints are defined in them
   (`ex:IfcCompoundPlaneAngleConsistentSign`); leave them out and those constraints silently
   don't run.
-- **Data graph:** the same files, plus `VOCAB_QUDT-DATATYPES.ttl` and the stub.
+- **Data graph:** the same files, plus `VOCAB_QUDT-DATATYPES.ttl` and the stub. With
+  `COORDINATES=1`, both graphs also get the coordinates schema and `VOCAB_QUDT-COORDINATES.ttl`,
+  which the state-space vector types need.
   - SPARQL constraints are evaluated against the data graph, so the union lists they walk
     (`qudt:NumericUnionType`, the `qudt:Maybe…UnionType` family) must be in it.
   - The datatype vocabulary supplies the `qudt:Datatype` instances the examples refer to.
@@ -165,7 +79,7 @@ awk -F'\t' 'NR==FNR {s[$1]=1; next} ($1 in s) {print $1 "\t" $3}' "$WORK/subject
 - Concatenating the Turtle files is safe: repeated `@prefix` lines are allowed, and the files
   use anonymous blank nodes, so blank-node labels can't collide.
 - Results on resources other than the examples — the stub's units, schema resources — are
-  expected; step 5 filters them out. The full list is in `$WORK/results.tsv`.
+  expected; the script's summary leaves them out. The full list is in `results.tsv`.
 
 ## Expected results (2026-10-24)
 
@@ -217,15 +131,17 @@ Any other result on an example subject is a regression.
 
 ## Comparing against an earlier version
 
-To see what a constraint change does, run the check once against the current files and once
-against an earlier copy of the changed file, then diff the two summaries:
+To see what a constraint change does, run the check once against an earlier copy of the datatype
+schema and once against the current files, comparing the second run with the first:
 
 ```bash
-git show <rev>:src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl > /tmp/datatypes-old.ttl
-# point the datatype entry of SCHEMAS in engine-check.sh at /tmp/datatypes-old.ttl,
-# rerun with a different WORK directory, and diff the two outputs
-# (for a revision between 2026-08-24 and 2026-10-23, take the three split files instead)
+git show <rev>:src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl > target/datatypes-old.ttl
+DATATYPE_SCHEMA=target/datatypes-old.ttl WORK=target/engine-check-old src/build/engine-check/engine-check.sh
+BASELINE=target/engine-check-old/results.tsv src/build/engine-check/engine-check.sh
 ```
+
+For a revision between 2026-08-24 and 2026-10-23, when the schema was split, concatenate the
+three split files into the old copy instead.
 
 This is how the `qudt:Maybe…UnionType` change to `NTupleTypeCheck` was confirmed: with the
 check as it was before `73ed45d2`, every `( )` cell in the Maybe examples is flagged, and so is

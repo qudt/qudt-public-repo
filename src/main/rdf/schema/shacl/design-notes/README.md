@@ -23,9 +23,10 @@ of the open threads; the open-thread docs assume familiarity with it.
 
 - **[validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md)** *(written 2026-10-19)* —
   how to run the tuple and array constraints against the examples in the build's own SHACL
-  engine (TopBraid SHACL 1.4.3), which the build itself never does. Includes the checker and
-  script, the expected result for every bad example, and how to compare a change against an
-  earlier version. Run it after changing any `sh:sparql` constraint, type union or example.
+  engine (TopBraid SHACL 1.4.3), which the build itself never does, using the checker in
+  `src/build/engine-check/`. Gives the expected result for every bad example and how to compare a
+  change against an earlier version. Run `src/build/engine-check/engine-check.sh` after changing
+  any `sh:sparql` constraint, type union or example.
 
 ## Open threads
 
