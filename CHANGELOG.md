@@ -19,6 +19,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Corrected `qudt:uneceCommonCode` values that contradicted the unit names in UN/CEFACT Recommendation 20 (Rev. 17), so that each of these codes now identifies a single unit: `unit:TON` `TNE` → `STN` (short ton, like its synonyms `unit:TON_SHORT` and `unit:TON_US`); `unit:HP_Brake` `K42` → `BHP`; `unit:BBL_US_PET-PER-SEC` `J62` → `J63`; `unit:MegaHZ-M` `H39` → `M27`; `unit:MilliL-PER-CentiM2-MIN` `35` → `M22`; and removed the codes, which have no Rec 20 counterpart, from `unit:DeciSEC` (`C26`), `unit:HP` (`K43`), `unit:PPT` (`NX`), `unit:MegaJ-PER-HR` and `unit:GigaJ-PER-HR` (`P16`), `unit:PERMILLE` (`J13`) and `unit:M3-PER-M2` (`H60`) ([#1542](https://github.com/qudt/qudt-public-repo/issues/1542)).
 - Corrected the Wikidata and OM links of `unit:PERMILLE`, which were those of `unit:PERCENT`: `qudt:wikidataMatch` is now Q181011 (per mille) instead of Q11229 (percent), and `qudt:omUnit om-2/percent` is removed, since OM 2.0 defines no per mille unit ([#1566](https://github.com/qudt/qudt-public-repo/issues/1566)).
 
 ## [3.5.3] - 2026-10-20
