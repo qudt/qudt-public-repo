@@ -83,11 +83,16 @@ expressed on the kind side, with `qudt:VectorKind` `rdfs:subClassOf qudt:ArrayKi
 dimensions or data order. A vector may be homogeneous (one `qudt:elementType`) or heterogeneous (a
 `qudt:conformsToTupleSpec` with one type per component), so `qudt:Vector` carries the four `NTuple*`
 checks as well as the two `ValuesList*` checks. `ex:GeoPositionVector` and
-`ex:badExampleHeterogeneousVectorLength` exercise them. `qudt:Vector-datatypeKind` is deliberately `sh:minCount 0`
-for now: the four existing vector instances (`ex:Vector3D_FLOAT-DP`, `-SP`,
-`ex:Vector_DroneVelocities_3D`, `datatype:QuaternionVector-DP`) still describe themselves in the
-legacy `qudt:datatype` / `qudt:dimensions` / `qudt:value` (singular) style and have no kind.
-Tighten to `sh:minCount 1` once they are migrated.
+`ex:badExampleHeterogeneousVectorLength` exercise them. `qudt:Vector-datatypeKind` is still
+`sh:minCount 0`. The old-style vectors, which described themselves with `qudt:datatype`,
+`qudt:dimensions` and a singular `qudt:value`, were migrated on 2026-10-23. The three that hold
+values (`ex:Vector3D_FLOAT-DP`, `-SP` and `ex:Vector_DroneVelocities_3D`) now point at kinds and
+hold `qudt:values`. The four that were really types became kinds: `datatype:QuaternionVector-DP` is
+a `qudt:VectorKind`, and `qudt:StateSpaceVector` (labelled "State Space Vector Type") is now
+`rdfs:subClassOf qudt:VectorKind`, so `ex:StateSpaceVector-DP`, `-SP` and
+`coords:GlobalPositionVector-DP` are kinds. Every vector in the repository now has a kind;
+tightening to `sh:minCount 1` was deferred, because it would reject other people's vectors that
+have none.
 
 **Validation — no longer deferred.** Item A of the old "Still to do" list is closed. All three array
 constraints plus the five tuple constraints were exercised against both example files (with the unit
@@ -132,12 +137,12 @@ several sub-SELECTs reach the same resource, write the same path in each.
 
 **Examples updated to the split.** Valid: each array now points at a kind
 (`ex:3DHomogeneousArrayKind` shared by two arrays, `ex:3DTemperatureArrayKind` shared by two more,
-`ex:2by3HeterogeneousArrayKind`). Invalid: each bad array gained a companion kind, and
+`ex:HeterogeneousArrayKind_2X3`). Invalid: each bad array gained a companion kind, and
 `ex:badExampleArrayRank` **is** the `ArrayKind` (rank is a blueprint-level property), with a
 well-formed companion array so the violation is attributable to the kind alone.
 
 Also fixed in passing: `EXAMPLES_QUDT-DATATYPES.ttl` did not parse — an unclosed `qudt:values` list
-in `ex:exampleTuple3` (pre-existing) and an undeclared `x:` prefix on `ex:3DTemperatureArray2`.
+in `ex:Tuple3_DatedTemperatureInDegreesC` (pre-existing) and an undeclared `x:` prefix on `ex:3DTemperatureArray2`.
 
 **Still open from this revision:**
 
@@ -685,7 +690,8 @@ IFC `ConsistentSign` constraint's `sh:prefixes` still named the pre-split
 `<…/schema/shacl/datatype>`, so it could not run and `ex:cpaBadSign` was never reported (fixed in
 `9bbeffad`; since the merge of 2026-10-23 that IRI is the datatype schema's again, and the
 constraint points at it). How to run the check: [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md).
-B. **Migrate or retire the legacy old-style array examples** that still use `qudt:value` (singular)
+B. **Migrate or retire the legacy old-style array examples** *(vectors done 2026-10-23; see
+"`qudt:Vector` is a sibling of `qudt:Array`" above)* that still use `qudt:value` (singular)
 and `qudt:datatype`; the retired `DimensionalityShape` no longer covers them. The engine check
 (2026-10-19) lists them. Six valid arrays — `ex:Array1D_Integers`, `ex:Array_MassProperties_Rocket`
 and four `ex:StateSpaceMatrix-*` — fail the required `qudt:datatypeKind`. In the invalid examples,

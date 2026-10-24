@@ -53,34 +53,6 @@ dcterms:title
   rdfs:label "title" ;
   rdfs:range xsd:string .
 
-ex:2by3HeterogeneousArray
-  a qudt:HeterogenousArray ;
-  dcterms:description """
-  <p>A two-dimensional heterogeneous array, effectively an N-Tuple laid
-  out in a grid. 
-  The values are organized as follows: <code>row 0 = ("Temp", 23.7, DEG_C), row 1 = ("Pressure", 101.3, PA)</code>
-  </p>"""^^rdf:HTML ;
-  qudt:datatypeKind ex:2by3HeterogeneousArrayKind ;
-  qudt:values ( "Temp" 23.7 unit:DEG_C "Pressure" 101.3 unit:PA ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
-  rdfs:label "Heterogeneous 2x3 array (row-major)" .
-
-ex:2by3HeterogeneousArrayKind
-  a qudt:HeterogenousArrayKind ;
-  dcterms:description """
-  <p>A two-dimensional heterogeneous array kind, effectively an N-Tuple laid
-  out in a grid. The six cells will be held in a single flat <code>qudt:values</code> list
-  in row-major order (innermost index fastest); the per-position types are given by
-  the referenced <code>qudt:NTupleSpec</code>.</p>"""^^rdf:HTML ;
-  qudt:conformsToTupleSpec ex:TempPressureArraySpec ;
-  qudt:dataOrder qudt:InnermostIndexFastest ;
-  qudt:dimensionality 2 ;
-  qudt:dimensions ( 2 3 ) ;
-  qudt:elementCount 6 ;
-  qudt:isHeterogeneous true ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
-  rdfs:label "Heterogeneous 2x3 array kind (row-major)" .
-
 ex:3DHomogeneousArray1
   a qudt:HomogeneousArray ;
   dcterms:description """
@@ -222,6 +194,14 @@ ex:DateCountTupleSpec
   ] ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> .
 
+ex:DroneVelocityVectorKind
+  a qudt:VectorKind ;
+  qudt:elementCount 3 ;
+  qudt:elementType xsd:decimal ;
+  qudt:isHeterogeneous false ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "3D velocity vector kind" .
+
 ex:GMD_EXAMPLE-DATATYPES
   a vaem:GraphMetaData ;
   dcterms:description """
@@ -287,6 +267,34 @@ ex:GeoPositionVectorSpec
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Component-type spec for the geographic position vector" .
 
+ex:HeterogeneousArrayKind_2X3
+  a qudt:HeterogenousArrayKind ;
+  dcterms:description """
+  <p>A two-dimensional heterogeneous array kind, effectively an N-Tuple laid
+  out in a grid. The six cells will be held in a single flat <code>qudt:values</code> list
+  in row-major order (innermost index fastest); the per-position types are given by
+  the referenced <code>qudt:NTupleSpec</code>.</p>"""^^rdf:HTML ;
+  qudt:conformsToTupleSpec ex:TempPressureArraySpec ;
+  qudt:dataOrder qudt:InnermostIndexFastest ;
+  qudt:dimensionality 2 ;
+  qudt:dimensions ( 2 3 ) ;
+  qudt:elementCount 6 ;
+  qudt:isHeterogeneous true ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Heterogeneous 2x3 Array kind" .
+
+ex:HeterogeneousArray_2X3
+  a qudt:HeterogenousArray ;
+  dcterms:description """
+  <p>A two-dimensional heterogeneous array, effectively an N-Tuple laid
+  out in a grid. 
+  The values are organized as follows: <code>row 0 = ("Temp", 23.7, DEG_C), row 1 = ("Pressure", 101.3, PA)</code>
+  </p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:HeterogeneousArrayKind_2X3 ;
+  qudt:values ( "Temp" 23.7 unit:DEG_C "Pressure" 101.3 unit:PA ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Heterogeneous 2x3 Array" .
+
 ex:HighAlarm
   a qudt:EnumeratedValue ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
@@ -304,9 +312,7 @@ ex:List_3_Strings
 
 ex:List_Decimal_Values
   a qudt:List ;
-  dcterms:description """
-  <p>Example of a list of 3 decimal values.
-  </p>"""^^rdf:HTML ;
+  dcterms:description "Example of a list of 3 decimal values." ;
   qudt:datatype datatype:DECIMAL ;
   qudt:value ( 54.0 55.6 56.9 61.2 ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
@@ -316,6 +322,20 @@ ex:LowAlarm
   a qudt:EnumeratedValue ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Low Alarm" .
+
+ex:MaybeTuple2_JustValues
+  a qudt:NTuple ;
+  qudt:conformsToTupleSpec ex:OptionalReadingTupleSpec ;
+  qudt:values ( "2026-05-12"^^xsd:date 23.7 unit:DEG_C ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Temperature in Degrees C Maybe Example" .
+
+ex:MaybeTuple2_NilValue
+  a qudt:NTuple ;
+  qudt:conformsToTupleSpec ex:OptionalReadingTupleSpec ;
+  qudt:values ( "2026-05-12"^^xsd:date ( ) unit:DEG_C ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Temperature in Degrees C Maybe Example - no value" .
 
 ex:MeasurementTupleSpec
   a qudt:NTupleSpec ;
@@ -651,17 +671,17 @@ ex:StateSpaceMatrix-4by2-DP
 
 ex:StateSpaceVector-DP
   a qudt:StateSpaceVector ;
-  qudt:datatype datatype:FLOAT-DP ;
-  qudt:dimensionality 1 ;
-  qudt:dimensions ( 3 ) ;
+  qudt:elementCount 3 ;
+  qudt:elementType xsd:double ;
+  qudt:isHeterogeneous false ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Example of a State Vector Double Precision" .
 
 ex:StateSpaceVector-SP
   a qudt:StateSpaceVector ;
-  qudt:datatype datatype:FLOAT-SP ;
-  qudt:dimensionality 1 ;
-  qudt:dimensions ( 3 ) ;
+  qudt:elementCount 3 ;
+  qudt:elementType xsd:float ;
+  qudt:isHeterogeneous false ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Example of a State Vector Single Precision" .
 
@@ -709,21 +729,69 @@ ex:TempPressureArraySpec
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Element-type spec for the 2x3 heterogeneous array" .
 
+ex:Tuple1_Date
+  a qudt:NTuple ;
+  qudt:conformsToTupleSpec ex:DateCountTupleSpec ;
+  qudt:values ( "2026-05-12"^^xsd:date 42 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Date Tuple Example" .
+
+ex:Tuple2_ApprovedTrue
+  a qudt:NTuple ;
+  qudt:conformsToTupleSpec ex:StatusFlagTupleSpec ;
+  qudt:values ( "Approved" true ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Approved True 2-Tuple Example" .
+
+ex:Tuple2_TemperatureInDegreesC
+  a qudt:NTuple ;
+  qudt:conformsToTupleSpec ex:QuantityValueUnitTupleSpec ;
+  qudt:values ( quantitykind:Temperature 23.7 unit:DEG_C ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Temperature in Degrees C Example" .
+
+ex:Tuple3_DatedTemperatureInDegreesC
+  a qudt:NTuple ;
+  qudt:conformsToTupleSpec ex:MeasurementTupleSpec ;
+  qudt:values ( "2026-05-12"^^xsd:date 23.7 unit:DEG_C ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Dated Temperature in Degrees C Example" .
+
+ex:Tuple5_DatedAndLabelledTemperatureInDegreesC
+  a qudt:NTuple ;
+  qudt:conformsToTupleSpec ex:ResourceLabelRatingTupleSpec ;
+  qudt:values ( quantitykind:Temperature "Ambient temperature"@en 5 unit:DEG_C
+    "2026-05-12"^^xsd:date ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "Dated and Labelled Temperature in Degrees C Example" .
+
+ex:Vector3DDoubleKind
+  a qudt:VectorKind ;
+  qudt:elementCount 3 ;
+  qudt:elementType xsd:double ;
+  qudt:isHeterogeneous false ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "3D vector kind - double precision" .
+
+ex:Vector3DFloatKind
+  a qudt:VectorKind ;
+  qudt:elementCount 3 ;
+  qudt:elementType xsd:float ;
+  qudt:isHeterogeneous false ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
+  rdfs:label "3D vector kind - single precision" .
+
 ex:Vector3D_FLOAT-DP
   a qudt:Vector ;
-  qudt:datatype datatype:FLOAT-DP ;
-  qudt:dimensionality 1 ;
-  qudt:dimensions ( 3 ) ;
-  qudt:value ( 1.1 2.2 3.3 ) ;
+  qudt:datatypeKind ex:Vector3DDoubleKind ;
+  qudt:values ( 1.1E0 2.2E0 3.3E0 ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Example of a 3D Vector - double precision" .
 
 ex:Vector3D_FLOAT-SP
   a qudt:Vector ;
-  qudt:datatype datatype:FLOAT-SP ;
-  qudt:dimensionality 1 ;
-  qudt:dimensions ( 3 ) ;
-  qudt:value ( 1.1 2.2 3.3 ) ;
+  qudt:datatypeKind ex:Vector3DFloatKind ;
+  qudt:values ( "1.1"^^xsd:float "2.2"^^xsd:float "3.3"^^xsd:float ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Example of a 3D vector - single precision" .
 
@@ -732,56 +800,12 @@ ex:Vector_DroneVelocities_3D
   dcterms:description """
   <p>A 3D velocity vector has values for x, y and z directionality"
   </p>"""^^rdf:HTML ;
-  qudt:datatype datatype:DECIMAL ;
-  qudt:dimensionality 1 ;
-  qudt:dimensions ( 3 ) ;
+  qudt:datatypeKind ex:DroneVelocityVectorKind ;
   qudt:hasQuantityKindsList ( quantitykind:LinearVelocity quantitykind:LinearVelocity
     quantitykind:LinearVelocity ) ;
+  qudt:values ( 12.5 -3.2 0.8 ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   rdfs:label "Drone vector of 3D velocity values" .
-
-ex:exampleQuantityValueTuple
-  a qudt:NTuple ;
-  qudt:conformsToTupleSpec ex:QuantityValueUnitTupleSpec ;
-  qudt:values ( quantitykind:Temperature 23.7 unit:DEG_C ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> .
-
-ex:exampleTuple1
-  a qudt:NTuple ;
-  qudt:conformsToTupleSpec ex:DateCountTupleSpec ;
-  qudt:values ( "2026-05-12"^^xsd:date 42 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> .
-
-ex:exampleTuple2
-  a qudt:NTuple ;
-  qudt:conformsToTupleSpec ex:StatusFlagTupleSpec ;
-  qudt:values ( "Approved" true ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> .
-
-ex:exampleTuple3
-  a qudt:NTuple ;
-  qudt:conformsToTupleSpec ex:MeasurementTupleSpec ;
-  qudt:values ( "2026-05-12"^^xsd:date 23.7 unit:DEG_C ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> .
-
-ex:exampleTuple5
-  a qudt:NTuple ;
-  qudt:conformsToTupleSpec ex:ResourceLabelRatingTupleSpec ;
-  qudt:values ( quantitykind:Temperature "Ambient temperature"@en 5 unit:DEG_C
-    "2026-05-12"^^xsd:date ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> .
-
-ex:exampleTupleMaybeJust
-  a qudt:NTuple ;
-  qudt:conformsToTupleSpec ex:OptionalReadingTupleSpec ;
-  qudt:values ( "2026-05-12"^^xsd:date 23.7 unit:DEG_C ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> .
-
-ex:exampleTupleMaybeNothing
-  a qudt:NTuple ;
-  qudt:conformsToTupleSpec ex:OptionalReadingTupleSpec ;
-  qudt:values ( "2026-05-12"^^xsd:date ( ) unit:DEG_C ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> .
 
 ex:exampleTupleOptionalAnyDateJust
   a qudt:NTuple ;

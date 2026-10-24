@@ -170,8 +170,8 @@ ex:OptionalReadingTupleSpec  qudt:tupleMemberSpecs (
     [ qudt:index 2 ; sh:or qudt:MaybeNumericUnionType ]
     [ qudt:index 3 ; sh:class qudt:Unit ] ) .
 
-ex:exampleTupleMaybeJust     qudt:values ( "2026-05-12"^^xsd:date 23.7 unit:DEG_C ) .
-ex:exampleTupleMaybeNothing  qudt:values ( "2026-05-12"^^xsd:date ( ) unit:DEG_C ) .
+ex:MaybeTuple2_JustValues  qudt:values ( "2026-05-12"^^xsd:date 23.7 unit:DEG_C ) .
+ex:MaybeTuple2_NilValue    qudt:values ( "2026-05-12"^^xsd:date ( ) unit:DEG_C ) .
 ```
 
 How a Nothing cell behaves in each check:
