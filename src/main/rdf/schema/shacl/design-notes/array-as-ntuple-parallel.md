@@ -730,7 +730,7 @@ IFC `ConsistentSign` constraint's `sh:prefixes` still named the pre-split
 `9bbeffad`; since the merge of 2026-10-23 that IRI is the datatype schema's again, and the
 constraint points at it). How to run the check: [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md).
 B. **Migrate or retire the legacy old-style array examples** *(vectors done 2026-10-23; see
-"`qudt:Vector` is a sibling of `qudt:Array`" above)* that still use `qudt:value` (singular)
+"`qudt:Vector` is a sibling of `qudt:Array`" above; arrays done 2026-10-25)* that still use `qudt:value` (singular)
 and `qudt:datatype`; the retired `DimensionalityShape` no longer covers them. The engine check
 (2026-10-19) lists them. Four valid arrays — the `ex:StateSpaceMatrix-*` — failed the required
 `qudt:datatypeKind` until 2026-10-25. They held no values, only an element type and extents, so they
@@ -738,11 +738,15 @@ were descriptions of structure: `qudt:StateSpaceMatrix` became a `qudt:Homogeneo
 `qudt:StateSpaceVector` had become a `qudt:VectorKind`, and the four examples became kinds stating
 `qudt:elementType xsd:double` and `qudt:elementCount` in place of `qudt:datatype`. (On 2026-10-24 the integer array was migrated, as
 `ex:HomogeneousArray_1D_Integers`, and the mass-properties array was replaced by the heterogeneous
-vector `ex:Vector_MassProperties`.) In the invalid examples,
-the two legacy arrays (`ex:Array1D_Integers-INVALID`, `ex:EX_Array1D_INVALID`) fail only that
-check, not their intended dimension error, and six more legacy resources (three lists, a
-collection and two quantities) are tested by no current constraint. All eight were named `qudt:`
-until 2026-10-25, when the invalid examples were split into one file per valid graph.
+vector `ex:Vector_MassProperties`.) In the invalid examples, the two legacy arrays
+(`ex:Array1D_Integers-INVALID`, `ex:EX_Array1D_INVALID`) failed only that check, not their
+intended length error, until 2026-10-25. They were identical, so `ex:EX_Array1D_INVALID` was removed,
+and `ex:Array1D_Integers-INVALID` became a `qudt:HomogeneousArray` with `qudt:values ( 1 2 3 )`
+pointing at `ex:BadLength1DArrayKind`, a kind of two integer cells, so it fails
+`qudt:ValuesListLengthCheck` as intended. **Still open:** six more legacy resources (three lists, a
+collection and two quantities) are tested by no current constraint. All eight legacy invalid
+examples were named `qudt:` until 2026-10-25, when the invalid examples were split into one file
+per valid graph.
 C. **Finish deprecating `qudt:HeterogenousArray-datatype`** in favour of the kind's `qudt:tupleMemberSpecs`.
 D. Rewrite the nested-list prose on `qudt:HomogeneousArray`, `qudt:HeterogenousArray`, and
 `qudt:MultiDimensionalArray` to match the flat representation.

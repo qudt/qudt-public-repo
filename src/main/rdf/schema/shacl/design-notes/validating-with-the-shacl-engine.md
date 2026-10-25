@@ -88,6 +88,7 @@ Every bad example fires exactly its intended check. All of them are in
 
 |                     Example                      |                    File                     |                                                  Check(s)                                                   |
 |--------------------------------------------------|---------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| `ex:Array1D_Integers-INVALID`                    | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `qudt:ValuesListLengthCheck`                                                                                |
 | `ex:badExampleArrayRank`                         | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `qudt:ArrayRankCheck`                                                                                       |
 | `ex:badExampleHeterogeneousArrayKindElementType` | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `sh:NodeConstraintComponent` (from `qudt:HeterogenousArrayKind`: not a `qudt:HeterogeneousCellsShape`)      |
 | `ex:badExampleHeterogeneousArrayLength`          | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `qudt:NTupleExtraValueCheck`, `qudt:NTupleLengthCheck`, `qudt:ValuesListLengthCheck`                        |
@@ -131,10 +132,11 @@ The valid examples, including the tuple examples, are clean, apart from one open
   not one of the type facets `qudt:NTupleMemberTypeSpec-type` accepts, so the kind fails that
   shape and the position is never type-checked.
 
-The two legacy invalid arrays (`ex:Array1D_Integers-INVALID`, `ex:EX_Array1D_INVALID`, named `qudt:`
-until 2026-10-25) lack `qudt:datatypeKind` and are reported only for that, not for their intended
-fault. The four `ex:StateSpaceMatrix-*` were reported the same way until 2026-10-25, when they
-became array kinds (`qudt:StateSpaceMatrix` is now a `qudt:HomogeneousArrayKind`). See "Still to
+No legacy arrays remain (resolved 2026-10-25). The four `ex:StateSpaceMatrix-*` and the two legacy
+invalid arrays used to lack `qudt:datatypeKind` and were reported only for that. The matrices became
+array kinds (`qudt:StateSpaceMatrix` is now a `qudt:HomogeneousArrayKind`). The two invalid arrays
+were identical, so `ex:EX_Array1D_INVALID` was removed and `ex:Array1D_Integers-INVALID` now points at
+a kind of two integer cells, so it is reported for its intended fault, three values. See "Still to
 do" B in [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md).
 
 `ex:Quantity_DroneVelocity3D`, whose value is a vector, failed `qudt:Quantifiable-value` from
