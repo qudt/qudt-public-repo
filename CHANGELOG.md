@@ -21,6 +21,9 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Fixed
 
 - Hardened the CI Build workflow (`maven.yml`) against script injection: pull-request branch names and the changelog text are now passed to its shell steps through environment variables instead of being written into the scripts, and the `pull_request_target` run now happens only for merged pull requests, which are the only ones that need it.
+- Corrected seven quantity-kind labels that were copied from other quantity kinds: `quantitykind:GeneralizedMomentum` (was "Generalized Force"), `quantitykind:LuminousIntensityDistribution` (was "Ion Concentration"), `quantitykind:LinearStiffness` (was "Linear Force"; its German label "Streckenlast", which means distributed load, is removed), `quantitykind:CyclotronAngularFrequency` (was "Larmor Angular Frequency"), `quantitykind:NonNegativeLength` (was "Positive Length"), `quantitykind:NormalizedDimensionlessRatio` (was "Positive Dimensionless Ratio") and `quantitykind:RotationalVelocity` (was "Rotational Frequency").
+- Removed the `qudt:exactMatch` between `unit:AC-FT` and `unit:AC-FT_US`: they are different units (based on the international foot and the US survey foot), with conversion multipliers 1233.48183754752 and 1233.48426566137344.
+- Added `qkdv:A-1E0L0I0M1H-1T0D0`, the dimension vector of `quantitykind:TemperatureRelatedMolarMass`, which referred to it but it was not defined.
 - Corrected the Wikidata and OM links of `unit:PERMILLE`, which were those of `unit:PERCENT`: `qudt:wikidataMatch` is now Q181011 (per mille) instead of Q11229 (percent), and `qudt:omUnit om-2/percent` is removed, since OM 2.0 defines no per mille unit ([#1566](https://github.com/qudt/qudt-public-repo/issues/1566)).
 
 ## [3.5.3] - 2026-10-20
