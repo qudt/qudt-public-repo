@@ -124,7 +124,7 @@ generic message for `sh:or` or `sh:node`. A kind with both an element type and m
 with neither, fails `qudt:CellDescriptionUnionType`; a kind that picks the wrong alternative for its
 class passes the union but fails the class's own `sh:node`.
 
-The valid and IFC examples are clean, apart from two open items:
+The valid examples, including the tuple examples, are clean, apart from two open items:
 
 - `ex:NTupleKind_ResourceLabelRating` — position 2 uses only `sh:languageIn ( "en" )`, which is
   not one of the type facets `qudt:NTupleMemberTypeSpec-type` accepts, so the kind fails that
