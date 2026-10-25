@@ -5,40 +5,41 @@ which holds the scalar and structured datatypes and the terms they share. (From 
 2026-10-23 it was split into core, scalar and structured files.)
 
 Every structured datatype in this schema — tuples, arrays, matrices, vectors,
-and whatever comes next — should follow the same three-shape pattern. This
-document describes what the pattern is, why the SPARQL constraint idioms look
-the way they do, and how to apply the pattern to a new datatype.
+and whatever comes next — should follow the same three-shape pattern: a value, the kind it
+points at, and the kind's member specs. This document describes what the pattern is, why the
+SPARQL constraint idioms look the way they do, and how to apply the pattern to a new datatype.
+(Until 2026-10-24 the blueprint of a tuple was a separate `qudt:NTupleSpec`, reached with
+`qudt:conformsToTupleSpec`, hence the name "spec plus values". It is now folded into the kinds.)
 
 ## The three cooperating shapes
 
 ```
 ┌─────────────────────┐                    ┌───────────────────────┐
-│  <InstanceShape>    │───conformsToXSpec──▶│   <SpecShape>         │
-│  (the value)        │                    │  (the blueprint)      │
+│  <Value>            │───datatypeKind────▶│   <Kind>              │
+│  (e.g. qudt:NTuple) │                    │  (the blueprint)      │
 │                     │                    │                       │
-│  qudt:values ───┐   │                    │  ordered list of      │
-└─────────────────┼───┘                    │   <MemberTypeSpec>s   │
-                  ▼                        └───────────────────────┘
-             rdf:List of
+│  qudt:values ───┐   │                    │  qudt:tupleMemberSpecs│
+└─────────────────┼───┘                    │   ordered list of     │
+                  ▼                        │   <MemberTypeSpec>s   │
+             rdf:List of                   └───────────────────────┘
            actual values
 ```
 
-1. **Instance shape** (e.g. `qudt:NTuple`) — what a *value* of the datatype
-   looks like. Two property shapes are always present:
+1. **Value shape** (`qudt:NTuple`, `qudt:Array` and its subclasses, `qudt:Vector`) — what a
+   *value* of the datatype looks like. Two property shapes are always present:
    - `qudt:values` — the ordered list of values, constrained by
      `sh:node qudt:RDFListShape`.
-   - `qudt:conformsToXSpec` (e.g. `qudt:conformsToTupleSpec`) — points at the
-     spec instance. `qudt:Array` is the one variant that names the link
-     differently: it uses the general `qudt:datatypeKind` to reach its
-     `qudt:ArrayKind`, leaving room for other datatypes to acquire a kind
-     without a new property each time.
-2. **Spec shape** (e.g. `qudt:NTupleSpec`) — the *blueprint*. Holds an
-   ordered list of per-position or per-element specs, walked via
-   `sh:zeroOrMorePath rdf:rest / rdf:first`.
-3. **Member-type spec shape** (e.g. `qudt:NTupleMemberTypeSpec`) — one entry
-   per position (for tuples) or one shared entry (for homogeneous arrays).
-   Carries `qudt:index` for positional variants, and a **type facet** that
-   must be one of the four alternatives below.
+   - `qudt:datatypeKind` — points at the value's kind, the same property for every
+     structured datatype.
+2. **Kind shape** (`qudt:NTupleKind`, `qudt:ArrayKind` and its subclasses, `qudt:VectorKind`) —
+   the *blueprint*, a `qudt:Concept` that many values can share. A tuple kind, and a
+   heterogeneous array or vector kind, holds an ordered list of per-position member specs in
+   `qudt:tupleMemberSpecs`, walked via `sh:zeroOrMorePath rdf:rest / rdf:first`; a tuple kind must
+   have one. A homogeneous kind instead gives one shared `qudt:elementType`. Array and vector kinds
+   also give sizes: rank, extents, element count, data order.
+3. **Member-type spec shape** (`qudt:NTupleMemberTypeSpec`) — one entry per position.
+   Carries `qudt:index`, a **type facet** that must be one of the four alternatives below,
+   and optionally a quantity kind and unit.
 
 The canonical worked example is `qudt:NTuple`, defined in
 `SCHEMA_QUDT-DATATYPES_NoOWL.ttl` (search for `qudt:NTuple`). When designing a
@@ -66,10 +67,10 @@ shared spec instead of one-per-position.
 The meaning of a value is stated where its type is, at the same level:
 
 - **Per position:** a member spec may also carry `qudt:hasQuantityKind` and `qudt:hasUnit`, at
-  most one of each (`qudt:NTupleMemberTypeSpec-hasQuantityKind`, `-hasUnit`). Because tuples,
-  heterogeneous arrays and heterogeneous vectors share `qudt:NTupleSpec`, this covers all three.
-  `ex:NTupleSpec_MassProperties` gives each of its six positions a quantity kind and unit, and
-  `ex:NTupleSpec_GeoPosition` gives latitude, longitude and altitude theirs.
+  most one of each (`qudt:NTupleMemberTypeSpec-hasQuantityKind`, `-hasUnit`). Because tuple kinds and
+  heterogeneous array and vector kinds all hold member specs, this covers all three.
+  `ex:VectorKind_MassProperties` gives each of its six positions a quantity kind and unit, and
+  `ex:VectorKind_GeoPosition` gives latitude, longitude and altitude theirs.
 - **Shared:** an array or vector kind may carry one `qudt:hasQuantityKind` and one `qudt:hasUnit`
   for every cell (`qudt:StructuredDataKind-hasQuantityKind`, `-hasUnit`), as
   `ex:VectorKind_DroneVelocity` and `ex:HomogeneousArrayKind_3D_Temperatures` do.
@@ -170,9 +171,9 @@ union for the exact datatype the literals will carry — or, where a position sh
 any of several date types, `qudt:MaybeAnyDateUnionType`. Even that union is exact about
 its own members: an `xsd:time` fails it (`ex:badExampleTupleTimeInAnyDatePosition`).
 
-The EXAMPLES file has one spec per family — `ex:OptionalNumbersTupleSpec`,
-`ex:OptionalIntegersTupleSpec`, `ex:OptionalTemporalTupleSpec` and
-`ex:OptionalBinaryTupleSpec` — plus `ex:OptionalAnyDateTupleSpec`, each with a tuple
+The EXAMPLES file has one tuple kind per family — `ex:NTupleKind_OptionalNumbers`,
+`ex:NTupleKind_OptionalIntegers`, `ex:NTupleKind_OptionalTemporal` and
+`ex:NTupleKind_OptionalBinary` — plus `ex:NTupleKind_OptionalAnyDate`, each with a tuple
 holding a value at every position (`…Just`) and one alternating values and `( )`
 (`…Mixed`).
 
@@ -181,11 +182,11 @@ same treatment `qudt:DateUnionType` gets.
 
 ### Using a Maybe union
 
-A spec position declared with one accepts any value its Just member accepts, or
+A position declared with one accepts any value its Just member accepts, or
 `rdf:nil`, and nothing else:
 
 ```turtle
-ex:OptionalReadingTupleSpec  qudt:tupleMemberSpecs (
+ex:NTupleKind_OptionalReading  qudt:tupleMemberSpecs (
     [ qudt:index 1 ; sh:datatype xsd:date ]
     [ qudt:index 2 ; sh:or qudt:MaybeNumericUnionType ]
     [ qudt:index 3 ; sh:class qudt:Unit ] ) .
@@ -294,7 +295,7 @@ violations on unrelated focus nodes), depending on the SHACL engine.
 
 ### Idiom 3: Four-alternative type validation — `OPTIONAL` probes, not `UNION`
 
-"Does this cell match its spec" means "does it match **any** of the four type-facet
+"Does this cell match its member spec" means "does it match **any** of the four type-facet
 alternatives", and the obvious way to write that is a `FILTER NOT EXISTS` whose
 body UNIONs one branch per alternative. **Do not.** `NTupleTypeCheck` and
 `ArrayElementTypeCheck` both did, and both flagged every position of every valid
@@ -400,9 +401,9 @@ prefer it whenever the check can be expressed that way.
 When adding a new structured-datatype variant (e.g. `qudt:Table`, `qudt:Tensor`,
 some future `qudt:Foo`), work through this checklist:
 
-1. **Instance vs blueprint.** Does the datatype need its own spec/blueprint, or
+1. **Instance vs blueprint.** Does the datatype need its own kind, or
    does it reuse an existing one? Rule of thumb: if the number/kind of
-   positions can vary across instances, you need a spec. **Arrays use a
+   positions can vary across instances, you need a kind. **Arrays use a
    blueprint** (see [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md)):
    a `qudt:Array` carries only `qudt:values` plus a mandatory `qudt:datatypeKind`
    pointer to a `qudt:ArrayKind`, which holds rank, extents, `qudt:elementCount`,
@@ -411,8 +412,8 @@ some future `qudt:Foo`), work through this checklist:
    reversed on 2026-08-22 once it became clear instances do share shapes in
    practice. Each array-shaped variant comes as an **instance/kind pair** —
    `HomogeneousArray`/`HomogeneousArrayKind`, `HeterogenousArray`/`HeterogenousArrayKind`,
-   `Vector`/`VectorKind`. Heterogeneous arrays reuse the tuple engine via the kind's
-   `qudt:conformsToTupleSpec` → `qudt:NTupleSpec`, but the tuple constraints
+   `Vector`/`VectorKind`. Heterogeneous arrays reuse the tuple engine through the member specs on their
+   kind, but the tuple constraints
    themselves hang off the **instance** class: they read `qudt:values`, which a
    blueprint never carries.
 2. **List representation.** Are values a flat list, a nested list, or something
@@ -507,8 +508,8 @@ some future `qudt:Foo`), work through this checklist:
 - **Not reusing `qudt:RDFListShape`** — new list-shaped values should point
   at `qudt:RDFListShape` via `sh:node`, not redefine list well-formedness
   inline.
-- **Adding a new "kind of thing" without a spec/blueprint** — if the class is
-  a structured datatype at all, it should carry the spec/values split. Don't
+- **Adding a new "kind of thing" without a kind** — if the class is
+  a structured datatype at all, it should carry the kind/values split. Don't
   stuff constraints directly on the instance shape.
 
 ## Scope of this pattern

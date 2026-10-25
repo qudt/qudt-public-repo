@@ -36,7 +36,8 @@ of the open threads; the open-thread docs assume familiarity with it.
   `qudt:values` plus a mandatory `qudt:datatypeKind` pointer; the reusable
   `qudt:ArrayKind` blueprint holds rank, extents, `qudt:elementCount`,
   `qudt:dataOrder` and the element type(s) (flat `qudt:elementType` for
-  homogeneous, `qudt:conformsToTupleSpec` → `qudt:NTupleSpec` for heterogeneous).
+  homogeneous, member specs in `qudt:tupleMemberSpecs` for heterogeneous; since 2026-10-24 a
+  tuple's kind is a `qudt:NTupleKind`, and `qudt:NTupleSpec` is gone).
   This reverses the brief 2026-07-27 "self-describing array" revision. Array and
   tuple constraints are now **validated**, and confirmed in TopBraid on 2026-10-19 — the
   note records four defects found in the shared tuple engine while doing so. Since 2026-10-22

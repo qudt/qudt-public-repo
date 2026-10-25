@@ -8,7 +8,8 @@ constraints are **validated** (valid examples clean, every invalid example flagg
 portability defects in the shared tuple engine were found and fixed in the process. Confirmed on
 2026-10-19 in the build's own SHACL engine, TopBraid SHACL 1.4.3 — see
 [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md).
-Read the revisions newest-first: "Design revision (2026-08-22)" supersedes
+Read the revisions newest-first: "Design revision (2026-10-24)" folds the tuple spec into the
+kinds, "Design revision (2026-08-22)" supersedes
 "Design revision (2026-07-27)", which in turn supersedes the `qudt:ArraySpec` sketch further down.
 **Related file:** `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl`
 (split into core, scalar and structured files on 2026-08-24, merged back on 2026-10-23)
@@ -18,6 +19,19 @@ Read the revisions newest-first: "Design revision (2026-08-22)" supersedes
 Give `qudt:Array` the same spec-plus-values treatment as `qudt:NTuple`, so that the two structured
 datatypes share a single modelling story. Stay entirely within the SHACL datatype schema; do not
 touch the parallel OWL side (`SCHEMA_QUDT-DATATYPE.ttl`) as part of this work.
+
+## Design revision (2026-10-24) — the tuple spec folded into the kinds
+
+`qudt:NTupleSpec` and the link `qudt:conformsToTupleSpec` are gone. A heterogeneous array or
+vector kind now lists its member specs itself, in `qudt:tupleMemberSpecs`, and a tuple points with
+`qudt:datatypeKind` at a new `qudt:NTupleKind`, which must list its member specs. Every structured
+value therefore reaches its blueprint the same way, and the five tuple checks follow one path,
+`$this qudt:datatypeKind ?kind . ?kind qudt:tupleMemberSpecs …`, instead of two alternatives.
+The extra-value check also requires the kind to have member specs: a homogeneous vector's kind has
+none, and without that every value of such a vector was reported as undeclared. The array and
+vector specs of the examples were merged into their kinds, and the tuple specs became tuple kinds
+(`ex:MeasurementTupleSpec` → `ex:NTupleKind_Measurement` and so on). Sections below that
+mention `qudt:NTupleSpec` or `qudt:conformsToTupleSpec` describe the design as it was then.
 
 ## Design revision (2026-08-22) — the `Array` / `ArrayKind` split
 
@@ -54,12 +68,12 @@ withdrawn: the type-level description of an array is separated from the instance
 Every array-shaped datatype now comes as an **instance/kind pair**: the instance carries the values,
 the kind carries the description.
 
-|                       Instance shape                        |                                                                                                                      Kind shape                                                                                                                      |                               Instance-side constraints                               |
-|-------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| `qudt:Array` (`qudt:ValuesList`, `qudt:Array-datatypeKind`) | `qudt:ArrayKind` (`qudt:ArrayKind-dataOrder`, `-elementCount`, `-conformsToTupleSpec`, `qudt:StructuredDataKind-elementType` / `-isHeterogeneous` / `-hasQuantityKind` / `-hasUnit`, plus `DimensionalityPropertyShape` / `DimensionsPropertyShape`) | `ValuesListLengthCheck`, `ValuesListElementTypeCheck`                                 |
-| `qudt:HomogeneousArray`                                     | `qudt:HomogeneousArrayKind`                                                                                                                                                                                                                          | inherited                                                                             |
-| `qudt:HeterogenousArray`                                    | `qudt:HeterogenousArrayKind`                                                                                                                                                                                                                         | inherited, plus the four `NTuple*` checks                                             |
-| `qudt:Vector`                                               | `qudt:VectorKind` (`qudt:VectorKind-elementCount`, `-conformsToTupleSpec`, `qudt:StructuredDataKind-elementType` / `-isHeterogeneous` / `-hasQuantityKind` / `-hasUnit`)                                                                             | `ValuesListLengthCheck`, `ValuesListElementTypeCheck`, plus the four `NTuple*` checks |
+|                       Instance shape                        |                                                                                                                              Kind shape                                                                                                                              |                               Instance-side constraints                               |
+|-------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| `qudt:Array` (`qudt:ValuesList`, `qudt:Array-datatypeKind`) | `qudt:ArrayKind` (`qudt:ArrayKind-dataOrder`, `-elementCount`, `qudt:StructuredDataKind-tupleMemberSpecs` / `-tupleMembers` / `-elementType` / `-isHeterogeneous` / `-hasQuantityKind` / `-hasUnit`, plus `DimensionalityPropertyShape` / `DimensionsPropertyShape`) | `ValuesListLengthCheck`, `ValuesListElementTypeCheck`                                 |
+| `qudt:HomogeneousArray`                                     | `qudt:HomogeneousArrayKind`                                                                                                                                                                                                                                          | inherited                                                                             |
+| `qudt:HeterogenousArray`                                    | `qudt:HeterogenousArrayKind`                                                                                                                                                                                                                                         | inherited, plus the four `NTuple*` checks                                             |
+| `qudt:Vector`                                               | `qudt:VectorKind` (`qudt:VectorKind-elementCount`, `qudt:StructuredDataKind-tupleMemberSpecs` / `-tupleMembers` / `-elementType` / `-isHeterogeneous` / `-hasQuantityKind` / `-hasUnit`)                                                                             | `ValuesListLengthCheck`, `ValuesListElementTypeCheck`, plus the four `NTuple*` checks |
 
 `ArrayRankCheck` is the one kind-side constraint (rank is a blueprint property). The value-list shape
 and its two checks are named `qudt:ValuesList` / `ValuesListLengthCheck` / `ValuesListElementTypeCheck`
@@ -82,8 +96,8 @@ is `rdfs:subClassOf qudt:StructuredDatatype` and carries its own `qudt:ValuesLis
 `qudt:Vector-datatypeKind`. Until 2026-10-22 the "a vector is a rank-1 array" relationship was
 expressed on the kind side, with `qudt:VectorKind` `rdfs:subClassOf qudt:ArrayKind`; it is now
 `rdfs:subClassOf qudt:Concept`, with its own shapes for the component count and types, and no rank,
-dimensions or data order. A vector may be homogeneous (one `qudt:elementType`) or heterogeneous (a
-`qudt:conformsToTupleSpec` with one type per component), so `qudt:Vector` carries the four `NTuple*`
+dimensions or data order. A vector may be homogeneous (one `qudt:elementType`) or heterogeneous (member specs in
+`qudt:tupleMemberSpecs`, one type per component), so `qudt:Vector` carries the four `NTuple*`
 checks as well as the two `ValuesList*` checks. `ex:Vector_GeoPosition` and
 `ex:badExampleHeterogeneousVectorLength` exercise them. Since 2026-10-24 `qudt:Vector-datatypeKind`
 is `sh:minCount 1`: every vector must have a kind. The old-style vectors, which described themselves with `qudt:datatype`,
@@ -705,7 +719,7 @@ vector `ex:Vector_MassProperties`.) In the invalid examples,
 the two legacy arrays (`qudt:Array1D_Integers-INVALID`, `qudt:EX_Array1D_INVALID`) fail only that
 check, not their intended dimension error, and six more `qudt:`-named resources (three lists, a
 collection and two quantities) are tested by no current constraint.
-C. **Finish deprecating `qudt:HeterogenousArray-datatype`** in favour of `qudt:conformsToTupleSpec`.
+C. **Finish deprecating `qudt:HeterogenousArray-datatype`** in favour of the kind's `qudt:tupleMemberSpecs`.
 D. Rewrite the nested-list prose on `qudt:HomogeneousArray`, `qudt:HeterogenousArray`, and
 `qudt:MultiDimensionalArray` to match the flat representation.
 E. Hold the "specifying the types of an array's values" discussion (see "Open discussion" above), now

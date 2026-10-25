@@ -115,8 +115,8 @@ one.
 
 The valid and IFC examples are clean, apart from two open items:
 
-- `ex:ResourceLabelRatingTupleSpec` — position 2 uses only `sh:languageIn ( "en" )`, which is
-  not one of the type facets `qudt:NTupleMemberTypeSpec-type` accepts, so the spec fails that
+- `ex:NTupleKind_ResourceLabelRating` — position 2 uses only `sh:languageIn ( "en" )`, which is
+  not one of the type facets `qudt:NTupleMemberTypeSpec-type` accepts, so the kind fails that
   shape and the position is never type-checked.
 - The legacy arrays lack `qudt:datatypeKind`: four valid ones (the `ex:StateSpaceMatrix-*`) and
   the two legacy invalid ones
