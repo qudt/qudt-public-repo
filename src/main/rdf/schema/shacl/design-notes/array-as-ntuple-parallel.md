@@ -35,6 +35,22 @@ time: a kind is heterogeneous exactly when it has member specs. Sections below t
 `qudt:NTupleSpec`, `qudt:conformsToTupleSpec` or `qudt:isHeterogeneous` describe the design as it
 was then.
 
+**Enforced the same day: one way to describe the cells.** Nothing stopped a kind from giving both
+an element type and member specs, or neither, or a heterogeneous array kind from giving only an
+element type. `qudt:CellDescriptionUnionType` now lists the two ways as node shapes:
+`qudt:HeterogeneousCellsShape` requires member specs and forbids a kind-level `qudt:elementType`,
+`qudt:hasQuantityKind` and `qudt:hasUnit`; `qudt:HomogeneousCellsShape` requires an element type,
+allows a shared quantity kind and unit, and forbids member specs. `qudt:ArrayKind` and
+`qudt:VectorKind` apply the union with `sh:or`. Because each alternative requires what the other
+forbids, `sh:or` already means exactly one, as with the other union types; `sh:xone` was not
+needed. The classes that fix their alternative require it with `sh:node`:
+`qudt:HeterogenousArrayKind` and `qudt:NTupleKind` (which replaces its own minimum-count shape,
+`qudt:NTupleKind-tupleMemberSpecs`) the heterogeneous one, and `qudt:HomogeneousArrayKind` the
+homogeneous one. Vector kinds have no such subclasses, so the union is their only rule. Forbidding a
+kind-level quantity kind or unit beside member specs also removes the earlier rule that a position's
+own one takes precedence over the kind's. Every existing kind already fitted one alternative; six
+invalid kinds in the examples show each rule firing.
+
 ## Design revision (2026-08-22) — the `Array` / `ArrayKind` split
 
 **This section supersedes "Design revision (2026-07-27)" below.** The self-describing array is

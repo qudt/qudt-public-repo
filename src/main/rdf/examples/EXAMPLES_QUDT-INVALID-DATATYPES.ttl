@@ -90,6 +90,19 @@ ex:badExampleArrayRank
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
   rdfs:label "Invalid array kind - dimensionality does not match number of dimensions" .
 
+ex:badExampleHeterogeneousArrayKindElementType
+  a qudt:HeterogenousArrayKind ;
+  dcterms:description """
+  <p>A heterogeneous array kind that gives one shared qudt:elementType instead of member specs. That
+  satisfies qudt:CellDescriptionUnionType, but a heterogeneous array kind must describe its cells
+  position by position (qudt:HeterogeneousCellsShape).</p>"""^^rdf:HTML ;
+  qudt:dimensionality 1 ;
+  qudt:dimensions ( 2 ) ;
+  qudt:elementCount 2 ;
+  qudt:elementType xsd:double ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Invalid heterogeneous array kind - a shared element type instead of member specs" .
+
 ex:badExampleHeterogeneousArrayLength
   a qudt:HeterogenousArray ;
   dcterms:description """
@@ -119,6 +132,27 @@ ex:badExampleHeterogeneousVectorLength
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
   rdfs:label "Invalid heterogeneous vector - fewer values than the kind requires" .
 
+ex:badExampleHomogeneousArrayKindMemberSpecs
+  a qudt:HomogeneousArrayKind ;
+  dcterms:description """
+  <p>A homogeneous array kind that gives member specs instead of one shared qudt:elementType. That
+  satisfies qudt:CellDescriptionUnionType, but a homogeneous array kind must give a shared element type
+  (qudt:HomogeneousCellsShape).</p>"""^^rdf:HTML ;
+  qudt:dimensionality 1 ;
+  qudt:dimensions ( 2 ) ;
+  qudt:elementCount 2 ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:double ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:double ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Invalid homogeneous array kind - member specs instead of a shared element type" .
+
 ex:badExampleHomogeneousArrayLength
   a qudt:HomogeneousArray ;
   dcterms:description """
@@ -138,6 +172,26 @@ ex:badExampleHomogeneousArrayType
   qudt:values ( 1.0 2.0 3.0 "four" ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
   rdfs:label "Invalid homogeneous array - a cell violates the shared element type" .
+
+ex:badExampleMemberSpecKindSharedUnit
+  a qudt:VectorKind ;
+  dcterms:description """
+  <p>A vector kind with member specs that also gives a kind-level qudt:hasUnit. A kind with member specs
+  gives each position its own unit, so it matches neither alternative of
+  qudt:CellDescriptionUnionType.</p>"""^^rdf:HTML ;
+  qudt:elementCount 2 ;
+  qudt:hasUnit unit:M ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:double ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:double ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Invalid vector kind - member specs and a kind-level unit" .
 
 ex:badExampleMemberSpecQuantityKind
   a qudt:NTupleMemberTypeSpec ;
@@ -186,6 +240,24 @@ ex:badExampleTupleIntegerInIntPosition
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
   rdfs:label "42 (xsd:integer) in position 6, which is xsd:int - a Maybe union matches its datatype exactly" .
 
+ex:badExampleTupleKindElementType
+  a qudt:NTupleKind ;
+  dcterms:description """
+  <p>A tuple kind with member specs that also gives a shared qudt:elementType. A tuple kind describes
+  its positions only through its member specs (qudt:HeterogeneousCellsShape).</p>"""^^rdf:HTML ;
+  qudt:elementType xsd:string ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:string ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:string ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Invalid tuple kind - member specs and a shared element type" .
+
 ex:badExampleTupleNothingInRequiredPosition
   a qudt:NTuple ;
   qudt:datatypeKind ex:NTupleKind_Measurement ;
@@ -199,6 +271,34 @@ ex:badExampleTupleTimeInAnyDatePosition
   qudt:values ( "2026-05-12"^^xsd:date "14:30:00"^^xsd:time "2026"^^xsd:gYear "--05"^^xsd:gMonth ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
   rdfs:label "xsd:time in position 2 - qudt:DateUnionType covers date, dateTime, gYear and gMonth only" .
+
+ex:badExampleVectorKindBothCellDescriptions
+  a qudt:VectorKind ;
+  dcterms:description """
+  <p>A vector kind that gives both a shared qudt:elementType and member specs, so it matches neither
+  alternative of qudt:CellDescriptionUnionType.</p>"""^^rdf:HTML ;
+  qudt:elementCount 2 ;
+  qudt:elementType xsd:double ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:double ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:double ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Invalid vector kind - both a shared element type and member specs" .
+
+ex:badExampleVectorKindNoCellDescription
+  a qudt:VectorKind ;
+  dcterms:description """
+  <p>A vector kind that gives neither a shared qudt:elementType nor member specs, so it matches neither
+  alternative of qudt:CellDescriptionUnionType.</p>"""^^rdf:HTML ;
+  qudt:elementCount 3 ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/invalid/datatype> ;
+  rdfs:label "Invalid vector kind - no element type and no member specs" .
 
 ex:cpaBadLengthShort
   a ex:IfcCompoundPlaneAngleMeasure ;

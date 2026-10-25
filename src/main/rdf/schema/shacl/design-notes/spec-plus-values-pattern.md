@@ -34,9 +34,15 @@ SPARQL constraint idioms look the way they do, and how to apply the pattern to a
 2. **Kind shape** (`qudt:NTupleKind`, `qudt:ArrayKind` and its subclasses, `qudt:VectorKind`) —
    the *blueprint*, a `qudt:Concept` that many values can share. A tuple kind, and a
    heterogeneous array or vector kind, holds an ordered list of per-position member specs in
-   `qudt:tupleMemberSpecs`, walked via `sh:zeroOrMorePath rdf:rest / rdf:first`; a tuple kind must
-   have one. A homogeneous kind instead gives one shared `qudt:elementType`. Array and vector kinds
-   also give sizes: rank, extents, element count, data order.
+   `qudt:tupleMemberSpecs`, walked via `sh:zeroOrMorePath rdf:rest / rdf:first`. A homogeneous kind
+   instead gives one shared `qudt:elementType`. Array and vector kinds must use exactly one of the
+   two, `sh:or qudt:CellDescriptionUnionType`, whose alternatives are `qudt:HeterogeneousCellsShape`
+   (member specs, and no kind-level element type, quantity kind or unit) and
+   `qudt:HomogeneousCellsShape` (an element type, an optional shared quantity kind and unit, and no
+   member specs). Each requires what the other forbids, so a kind matches one or neither, never
+   both. Tuple kinds and heterogeneous array kinds must match `qudt:HeterogeneousCellsShape`, and
+   homogeneous array kinds `qudt:HomogeneousCellsShape`, each through `sh:node`. Array and vector
+   kinds also give sizes: rank, extents, element count, data order.
 3. **Member-type spec shape** (`qudt:NTupleMemberTypeSpec`) — one entry per position.
    Carries `qudt:index`, a **type facet** that must be one of the four alternatives below,
    and optionally a quantity kind and unit.
@@ -71,12 +77,15 @@ The meaning of a value is stated where its type is, at the same level:
   heterogeneous array and vector kinds all hold member specs, this covers all three.
   `ex:VectorKind_MassProperties` gives each of its six positions a quantity kind and unit, and
   `ex:VectorKind_GeoPosition` gives latitude, longitude and altitude theirs.
-- **Shared:** an array or vector kind may carry one `qudt:hasQuantityKind` and one `qudt:hasUnit`
-  for every cell (`qudt:StructuredDataKind-hasQuantityKind`, `-hasUnit`), as
-  `ex:VectorKind_DroneVelocity` and `ex:HomogeneousArrayKind_3D_Temperatures` do.
-- A position's own quantity kind or unit takes precedence over the kind's shared one.
-- Cells that share a datatype but differ in quantity kind, such as mass properties, need a tuple
-  spec, one position each.
+- **Shared:** an array or vector kind with a shared `qudt:elementType` may carry one
+  `qudt:hasQuantityKind` and one `qudt:hasUnit` for every cell
+  (`qudt:StructuredDataKind-hasQuantityKind`, `-hasUnit`), as `ex:VectorKind_DroneVelocity` and
+  `ex:HomogeneousArrayKind_3D_Temperatures` do.
+- The two never mix: a kind with member specs gives no shared quantity kind or unit
+  (`qudt:HeterogeneousCellsShape` forbids them), so each position states its own, and there is no
+  precedence rule to apply.
+- Cells that share a datatype but differ in quantity kind, such as mass properties, need member
+  specs, one position each.
 
 This replaced `qudt:hasQuantityKindsList`, a list of quantity kinds kept on the value parallel to
 its values, on 2026-10-24. Nothing yet checks that a unit belongs to its quantity kind; that check
@@ -441,6 +450,9 @@ some future `qudt:Foo`), work through this checklist:
      enumeration)
    - `qudt:NumericUnionType` (numeric datatype disjunction)
    - `qudt:DateUnionType` (date, dateTime, gYear, gMonth)
+   - `qudt:CellDescriptionUnionType` (a kind's cells described by member specs or by one shared
+     element type, never both; its alternatives `qudt:HeterogeneousCellsShape` and
+     `qudt:HomogeneousCellsShape` can be required on their own with `sh:node`)
    - the `qudt:Maybe…UnionType` family (an optional position of one XSD
      datatype — a value or an `rdf:nil` placeholder; see
      [The Maybe unions](#the-maybe-unions))

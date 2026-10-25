@@ -169,10 +169,12 @@ qudt:ArrayKind
    <code>qudt:elementType</code>, together with any quantity kind or unit shared by every cell. 
   A heterogeneous array kind instead lists, in <code>qudt:tupleMemberSpecs</code>, one
   member spec per position, giving its type, addressed 1-based over the flat value list.
+  An array kind must use exactly one of the two (<code>qudt:CellDescriptionUnionType</code>).
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Array Kind" ;
   rdfs:subClassOf qudt:Concept ;
+  sh:or qudt:CellDescriptionUnionType ;
   sh:property qudt:ArrayKind-dataOrder ;
   sh:property qudt:ArrayKind-elementCount ;
   sh:property qudt:DimensionalityPropertyShape ;
@@ -755,6 +757,7 @@ qudt:HeterogenousArrayKind
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Heterogenous Array Kind" ;
   rdfs:subClassOf qudt:ArrayKind ;
+  sh:node qudt:HeterogeneousCellsShape ;
   sh:property qudt:HeterogenousArray-datatype .
 
 qudt:HexBinaryType
@@ -809,7 +812,8 @@ qudt:HomogeneousArrayKind
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Homogeneous Array Kind" ;
-  rdfs:subClassOf qudt:ArrayKind .
+  rdfs:subClassOf qudt:ArrayKind ;
+  sh:node qudt:HomogeneousCellsShape .
 
 qudt:IconicCue
   a rdfs:Class, sh:NodeShape ;
@@ -1064,12 +1068,13 @@ qudt:NTupleKind
   <p>An <em>N-Tuple Kind</em> is the blueprint for a <code>qudt:NTuple</code> value: an RDF list of member
   specifications (<code>qudt:tupleMemberSpecs</code>), one per position, each giving the position's 1-based
   index and type, and optionally its quantity kind and unit. Tuples point at their kind with
-  <code>qudt:datatypeKind</code>, so one kind can describe many tuples.
+  <code>qudt:datatypeKind</code>, so one kind can describe many tuples. A tuple kind always describes
+  its positions this way (<code>qudt:HeterogeneousCellsShape</code>).
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "N-Tuple Kind" ;
   rdfs:subClassOf qudt:Concept ;
-  sh:property qudt:NTupleKind-tupleMemberSpecs ;
+  sh:node qudt:HeterogeneousCellsShape ;
   sh:property qudt:StructuredDataKind-tupleMemberSpecs ;
   sh:property qudt:StructuredDataKind-tupleMembers .
 
@@ -1907,7 +1912,7 @@ qudt:VectorKind
   <p>Component types are given one of two ways. A homogeneous vector kind declares one shared
   <code>qudt:elementType</code>. A heterogeneous vector kind instead lists, in
   <code>qudt:tupleMemberSpecs</code>, one member spec per component, giving its type, addressed
-  1-based. Which applies follows from whether the kind has member specs.
+  1-based. A vector kind must use exactly one of the two (<code>qudt:CellDescriptionUnionType</code>).
   </p>
   <p>A vector in the mathematical sense, an element of a vector space, draws every component from a
   single field, so it is the homogeneous case. This schema describes representation: a heterogeneous
@@ -1917,6 +1922,7 @@ qudt:VectorKind
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Vector Kind" ;
   rdfs:subClassOf qudt:Concept ;
+  sh:or qudt:CellDescriptionUnionType ;
   sh:property qudt:StructuredDataKind-elementType ;
   sh:property qudt:StructuredDataKind-hasQuantityKind ;
   sh:property qudt:StructuredDataKind-hasUnit ;
@@ -2788,6 +2794,20 @@ qudt:CardinalityType-literal
   sh:maxCount 1 ;
   sh:path dtype:literal .
 
+qudt:CellDescriptionUnionType
+  a rdf:List ;
+  dcterms:description """
+  An rdf:List that can be used as the value of sh:or on an array or vector kind, giving the two ways the
+   kind can describe its cells: position by position, in member specs (qudt:HeterogeneousCellsShape),
+   or with one element type shared by every cell and an optional shared quantity kind and unit
+   (qudt:HomogeneousCellsShape). Each alternative requires what the other forbids, so a kind matches
+   exactly one.
+  """ ;
+  rdf:first qudt:HeterogeneousCellsShape ;
+  rdf:rest ( qudt:HomogeneousCellsShape ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Cell Description Union Type" .
+
 qudt:Collection-memberQuantity
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -3209,6 +3229,34 @@ qudt:FieldType-optional
   sh:minCount 0 ;
   sh:path qudt:optional .
 
+qudt:HeterogeneousCellsShape
+  a sh:NodeShape ;
+  dcterms:description """
+  Cells described position by position: the kind lists one qudt:NTupleMemberTypeSpec per position in
+   qudt:tupleMemberSpecs, each giving that position's type and, optionally, its quantity kind and unit.
+   The kind itself gives no qudt:elementType, qudt:hasQuantityKind or qudt:hasUnit. One of the two
+   alternatives in qudt:CellDescriptionUnionType, and required of every tuple kind and heterogeneous
+   array kind.
+  """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Heterogeneous Cells Shape" ;
+  sh:property [
+    sh:maxCount 0 ;
+    sh:path qudt:elementType ;
+  ] ;
+  sh:property [
+    sh:maxCount 0 ;
+    sh:path qudt:hasQuantityKind ;
+  ] ;
+  sh:property [
+    sh:maxCount 0 ;
+    sh:path qudt:hasUnit ;
+  ] ;
+  sh:property [
+    sh:minCount 1 ;
+    sh:path qudt:tupleMemberSpecs ;
+  ] .
+
 qudt:HeterogenousArray-datatype
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -3257,6 +3305,25 @@ qudt:HomogeneousArray-datatypeKind
   sh:class qudt:HomogeneousArrayKind ;
   sh:maxCount 1 ;
   sh:path qudt:datatypeKind .
+
+qudt:HomogeneousCellsShape
+  a sh:NodeShape ;
+  dcterms:description """
+  Cells that share one type: the kind gives a single qudt:elementType, and optionally the quantity kind
+   (qudt:hasQuantityKind) and unit (qudt:hasUnit) shared by every cell. The kind gives no
+   qudt:tupleMemberSpecs. One of the two alternatives in qudt:CellDescriptionUnionType, and required of
+   every homogeneous array kind.
+  """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Homogeneous Cells Shape" ;
+  sh:property [
+    sh:maxCount 0 ;
+    sh:path qudt:tupleMemberSpecs ;
+  ] ;
+  sh:property [
+    sh:minCount 1 ;
+    sh:path qudt:elementType ;
+  ] .
 
 qudt:IconicCue-image
   a sh:PropertyShape ;
@@ -4010,13 +4077,6 @@ WHERE {
 }
     """ .
 
-qudt:NTupleKind-tupleMemberSpecs
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:description "A tuple kind must list its positions." ;
-  sh:minCount 1 ;
-  sh:path qudt:tupleMemberSpecs .
-
 qudt:NTupleLengthCheck
   a sh:SPARQLConstraint ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -4601,9 +4661,9 @@ qudt:StructuredDataKind-hasQuantityKind
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:class qudt:QuantityKind ;
   sh:description """
-  The quantity kind shared by every cell of an array or vector of this kind. Where the cells differ,
-  give each position its own quantity kind in the kind's member specs instead; a position's
-  own quantity kind takes precedence over this one.
+  The quantity kind shared by every cell of an array or vector of this kind. Only a kind with a shared
+  qudt:elementType may give one (qudt:HomogeneousCellsShape); a kind with member specs gives each
+  position its own quantity kind in its member spec instead.
   """ ;
   sh:maxCount 1 ;
   sh:path qudt:hasQuantityKind .
@@ -4613,9 +4673,9 @@ qudt:StructuredDataKind-hasUnit
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:class qudt:Unit ;
   sh:description """
-  The unit shared by every cell of an array or vector of this kind. Where the cells differ, give
-  each position its own unit in the kind's member specs instead; a position's own unit takes
-  precedence over this one.
+  The unit shared by every cell of an array or vector of this kind. Only a kind with a shared
+  qudt:elementType may give one (qudt:HomogeneousCellsShape); a kind with member specs gives each
+  position its own unit in its member spec instead.
   """ ;
   sh:maxCount 1 ;
   sh:path qudt:hasUnit .

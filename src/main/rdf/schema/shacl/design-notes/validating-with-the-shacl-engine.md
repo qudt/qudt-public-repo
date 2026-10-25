@@ -85,33 +85,44 @@ there was lost once, which is why they now live in the repository.
 
 Every bad example fires exactly its intended check:
 
-|                    Example                    |                                            Check(s)                                            |
-|-----------------------------------------------|------------------------------------------------------------------------------------------------|
-| `ex:badExampleArrayRank`                      | `qudt:ArrayRankCheck`                                                                          |
-| `ex:badExampleHeterogeneousArrayLength`       | `qudt:NTupleExtraValueCheck`, `qudt:NTupleLengthCheck`, `qudt:ValuesListLengthCheck`           |
-| `ex:badExampleHeterogeneousArrayType`         | `qudt:NTupleTypeCheck`                                                                         |
-| `ex:badExampleHeterogeneousVectorLength`      | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck`, `qudt:ValuesListLengthCheck` |
-| `ex:badExampleHomogeneousArrayLength`         | `qudt:ValuesListLengthCheck`                                                                   |
-| `ex:badExampleHomogeneousArrayType`           | `qudt:ValuesListElementTypeCheck`                                                              |
-| `ex:badExampleMemberSpecQuantityKind`         | `sh:ClassConstraintComponent` (from `qudt:NTupleMemberTypeSpec-hasQuantityKind`)               |
-| `ex:badExampleQuantityValueTuple`             | `qudt:NTupleTypeCheck`                                                                         |
-| `ex:badExampleTuple2a`                        | `qudt:NTupleTypeCheck`                                                                         |
-| `ex:badExampleTuple2b`                        | `qudt:NTupleExtraValueCheck`, `qudt:NTupleLengthCheck`                                         |
-| `ex:badExampleTuple3`                         | `qudt:NTupleTypeCheck`                                                                         |
-| `ex:badExampleTupleDateInDateTimePosition`    | `qudt:NTupleTypeCheck`                                                                         |
-| `ex:badExampleTupleIntegerInIntPosition`      | `qudt:NTupleTypeCheck`                                                                         |
-| `ex:badExampleTupleNothingInRequiredPosition` | `qudt:NTupleTypeCheck`                                                                         |
-| `ex:badExampleTupleTimeInAnyDatePosition`     | `qudt:NTupleTypeCheck`                                                                         |
-| `ex:cpaBadLengthShort`                        | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck`                               |
-| `ex:cpaBadMicroseconds`                       | `qudt:NTupleRangeCheck`                                                                        |
-| `ex:cpaBadMinutes`                            | `qudt:NTupleRangeCheck`                                                                        |
-| `ex:cpaBadSeconds`                            | `qudt:NTupleRangeCheck`                                                                        |
-| `ex:cpaBadSign`                               | `ex:IfcCompoundPlaneAngleConsistentSign` (reported twice)                                      |
-| `ex:cpaBadType`                               | `qudt:NTupleTypeCheck`                                                                         |
+|                     Example                      |                                                  Check(s)                                                   |
+|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| `ex:badExampleArrayRank`                         | `qudt:ArrayRankCheck`                                                                                       |
+| `ex:badExampleHeterogeneousArrayKindElementType` | `sh:NodeConstraintComponent` (from `qudt:HeterogenousArrayKind`: not a `qudt:HeterogeneousCellsShape`)      |
+| `ex:badExampleHeterogeneousArrayLength`          | `qudt:NTupleExtraValueCheck`, `qudt:NTupleLengthCheck`, `qudt:ValuesListLengthCheck`                        |
+| `ex:badExampleHeterogeneousArrayType`            | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleHeterogeneousVectorLength`         | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck`, `qudt:ValuesListLengthCheck`              |
+| `ex:badExampleHomogeneousArrayKindMemberSpecs`   | `sh:NodeConstraintComponent` (from `qudt:HomogeneousArrayKind`: not a `qudt:HomogeneousCellsShape`)         |
+| `ex:badExampleHomogeneousArrayLength`            | `qudt:ValuesListLengthCheck`                                                                                |
+| `ex:badExampleHomogeneousArrayType`              | `qudt:ValuesListElementTypeCheck`                                                                           |
+| `ex:badExampleMemberSpecKindSharedUnit`          | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
+| `ex:badExampleMemberSpecQuantityKind`            | `sh:ClassConstraintComponent` (from `qudt:NTupleMemberTypeSpec-hasQuantityKind`)                            |
+| `ex:badExampleQuantityValueTuple`                | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleTuple2a`                           | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleTuple2b`                           | `qudt:NTupleExtraValueCheck`, `qudt:NTupleLengthCheck`                                                      |
+| `ex:badExampleTuple3`                            | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleTupleDateInDateTimePosition`       | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleTupleIntegerInIntPosition`         | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleTupleKindElementType`              | `sh:NodeConstraintComponent` (from `qudt:NTupleKind`: not a `qudt:HeterogeneousCellsShape`)                 |
+| `ex:badExampleTupleNothingInRequiredPosition`    | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleTupleTimeInAnyDatePosition`        | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleVectorKindBothCellDescriptions`    | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
+| `ex:badExampleVectorKindNoCellDescription`       | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
+| `ex:cpaBadLengthShort`                           | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck`                                            |
+| `ex:cpaBadMicroseconds`                          | `qudt:NTupleRangeCheck`                                                                                     |
+| `ex:cpaBadMinutes`                               | `qudt:NTupleRangeCheck`                                                                                     |
+| `ex:cpaBadSeconds`                               | `qudt:NTupleRangeCheck`                                                                                     |
+| `ex:cpaBadSign`                                  | `ex:IfcCompoundPlaneAngleConsistentSign` (reported twice)                                                   |
+| `ex:cpaBadType`                                  | `qudt:NTupleTypeCheck`                                                                                      |
 
 `ex:cpaBadSign` is reported once per positive/negative pair in `( 52 -31 12 )`, because a
 `SELECT` constraint yields one result per solution row; `SELECT DISTINCT $this` would make it
 one.
+
+The six malformed kinds, added on 2026-10-24, are reported against the kind itself, with the engine's
+generic message for `sh:or` or `sh:node`. A kind with both an element type and member specs, or
+with neither, fails `qudt:CellDescriptionUnionType`; a kind that picks the wrong alternative for its
+class passes the union but fails the class's own `sh:node`.
 
 The valid and IFC examples are clean, apart from two open items:
 
