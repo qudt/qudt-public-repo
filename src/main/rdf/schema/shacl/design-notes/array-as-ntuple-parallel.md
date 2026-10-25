@@ -187,7 +187,9 @@ temperature array (since removed).
   **Still open: `qudt:Matrix`**, along with `qudt:MultiDimensionalArray` and
   `qudt:AssociativeArray`, which remain instance-side subclasses of `qudt:Array` with no
   corresponding kind. A `qudt:MatrixKind` under `qudt:ArrayKind` is the obvious parallel, but nothing
-  currently requires it.
+  currently requires it. (Since 2026-10-25 the state-space matrices have a kind of their own,
+  `qudt:StateSpaceMatrix`, a `qudt:HomogeneousArrayKind`; a matrix value that uses it is a
+  `qudt:Matrix` or `qudt:HomogeneousArray` pointing at it with `qudt:datatypeKind`.)
 - ~~`qudt:TimeSeriesArrayType` was renamed with a `Type` suffix while the array blueprints use
   `Kind`.~~ **Resolved 2026-10-24:** `qudt:TimeSeriesArrayType` was folded back into
   `qudt:TimeSeriesArray`, a value class under `qudt:Array` as released, and the fixed- and
@@ -730,8 +732,11 @@ constraint points at it). How to run the check: [validating-with-the-shacl-engin
 B. **Migrate or retire the legacy old-style array examples** *(vectors done 2026-10-23; see
 "`qudt:Vector` is a sibling of `qudt:Array`" above)* that still use `qudt:value` (singular)
 and `qudt:datatype`; the retired `DimensionalityShape` no longer covers them. The engine check
-(2026-10-19) lists them. Four valid arrays — the `ex:StateSpaceMatrix-*` — fail the required
-`qudt:datatypeKind`. (On 2026-10-24 the integer array was migrated, as
+(2026-10-19) lists them. Four valid arrays — the `ex:StateSpaceMatrix-*` — failed the required
+`qudt:datatypeKind` until 2026-10-25. They held no values, only an element type and extents, so they
+were descriptions of structure: `qudt:StateSpaceMatrix` became a `qudt:HomogeneousArrayKind`, as
+`qudt:StateSpaceVector` had become a `qudt:VectorKind`, and the four examples became kinds stating
+`qudt:elementType xsd:double` and `qudt:elementCount` in place of `qudt:datatype`. (On 2026-10-24 the integer array was migrated, as
 `ex:HomogeneousArray_1D_Integers`, and the mass-properties array was replaced by the heterogeneous
 vector `ex:Vector_MassProperties`.) In the invalid examples,
 the two legacy arrays (`ex:Array1D_Integers-INVALID`, `ex:EX_Array1D_INVALID`) fail only that

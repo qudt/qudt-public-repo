@@ -81,7 +81,7 @@ there was lost once, which is why they now live in the repository.
 - Results on resources other than the examples — the stub's units, schema resources — are
   expected; the script's summary leaves them out. The full list is in `results.tsv`.
 
-## Expected results (2026-10-24)
+## Expected results (2026-10-25)
 
 Every bad example fires exactly its intended check. All of them are in
 `src/main/rdf/examples/invalid_examples/`:
@@ -125,15 +125,17 @@ generic message for `sh:or` or `sh:node`. A kind with both an element type and m
 with neither, fails `qudt:CellDescriptionUnionType`; a kind that picks the wrong alternative for its
 class passes the union but fails the class's own `sh:node`.
 
-The valid examples, including the tuple examples, are clean, apart from two open items:
+The valid examples, including the tuple examples, are clean, apart from one open item:
 
 - `ex:NTupleKind_ResourceLabelRating` — position 2 uses only `sh:languageIn ( "en" )`, which is
   not one of the type facets `qudt:NTupleMemberTypeSpec-type` accepts, so the kind fails that
   shape and the position is never type-checked.
-- The legacy arrays lack `qudt:datatypeKind`: four valid ones (the `ex:StateSpaceMatrix-*`) and
-  the two legacy invalid ones
-  (`ex:Array1D_Integers-INVALID`, `ex:EX_Array1D_INVALID`, named `qudt:` until 2026-10-25). See "Still to do" B in
-  [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md).
+
+The two legacy invalid arrays (`ex:Array1D_Integers-INVALID`, `ex:EX_Array1D_INVALID`, named `qudt:`
+until 2026-10-25) lack `qudt:datatypeKind` and are reported only for that, not for their intended
+fault. The four `ex:StateSpaceMatrix-*` were reported the same way until 2026-10-25, when they
+became array kinds (`qudt:StateSpaceMatrix` is now a `qudt:HomogeneousArrayKind`). See "Still to
+do" B in [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md).
 
 `ex:Quantity_DroneVelocity3D`, whose value is a vector, failed `qudt:Quantifiable-value` from
 2026-10-21, when the shape first checked anything, until 2026-10-22, when it began accepting any
