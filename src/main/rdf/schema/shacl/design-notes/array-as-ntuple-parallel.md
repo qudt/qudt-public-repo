@@ -729,8 +729,8 @@ IFC `ConsistentSign` constraint's `sh:prefixes` still named the pre-split
 `<…/schema/shacl/datatype>`, so it could not run and `ex:cpaBadSign` was never reported (fixed in
 `9bbeffad`; since the merge of 2026-10-23 that IRI is the datatype schema's again, and the
 constraint points at it). How to run the check: [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md).
-B. **Migrate or retire the legacy old-style array examples** *(vectors done 2026-10-23; see
-"`qudt:Vector` is a sibling of `qudt:Array`" above; arrays done 2026-10-25)* that still use `qudt:value` (singular)
+B. ~~**Migrate or retire the legacy old-style array examples**~~ **Done (2026-10-25).** *(vectors done 2026-10-23; see
+"`qudt:Vector` is a sibling of `qudt:Array`" above; arrays and the other legacy invalid examples done 2026-10-25)* The examples used `qudt:value` (singular)
 and `qudt:datatype`; the retired `DimensionalityShape` no longer covers them. The engine check
 (2026-10-19) lists them. Four valid arrays — the `ex:StateSpaceMatrix-*` — failed the required
 `qudt:datatypeKind` until 2026-10-25. They held no values, only an element type and extents, so they
@@ -743,10 +743,18 @@ vector `ex:Vector_MassProperties`.) In the invalid examples, the two legacy arra
 intended length error, until 2026-10-25. They were identical, so `ex:EX_Array1D_INVALID` was removed,
 and `ex:Array1D_Integers-INVALID` became a `qudt:HomogeneousArray` with `qudt:values ( 1 2 3 )`
 pointing at `ex:BadLength1DArrayKind`, a kind of two integer cells, so it fails
-`qudt:ValuesListLengthCheck` as intended. **Still open:** six more legacy resources (three lists, a
-collection and two quantities) are tested by no current constraint. All eight legacy invalid
-examples were named `qudt:` until 2026-10-25, when the invalid examples were split into one file
-per valid graph.
+`qudt:ValuesListLengthCheck` as intended. Six more legacy invalid resources (three lists, a
+collection and two quantities) were tested by no constraint. Lists have no kind model, so there
+was nothing to migrate them to; instead `qudt:ListElementTypeCheck` was added, which checks every
+element of a list's `qudt:value` against the `qudt:rdfsDatatype` of its `qudt:datatype`.
+`ex:List_3_Strings_INVALID` (an integer in a string list) and `ex:List_Decimal_Values_INVALID`
+(decimals in a string list) now fail it, and the duplicate `ex:EX_List_3_Strings_INVALID` was
+removed. `ex:Quantity_RoomTemperature-INVALID`, whose fault was only its invalid list, now has the
+string value `"seventy-two"`, which `qudt:Quantifiable-value` rejects. The collection
+`ex:EX_Collection_Temperature_Values_INVALID` stated no fault and nothing could test it, so it
+was removed with its quantity `ex:Room_Temperature` (see I). All eight legacy invalid examples
+were named `qudt:` until 2026-10-25, when the invalid examples were split into one file per valid
+graph.
 C. **Finish deprecating `qudt:HeterogenousArray-datatype`** in favour of the kind's `qudt:tupleMemberSpecs`.
 D. Rewrite the nested-list prose on `qudt:HomogeneousArray`, `qudt:HeterogenousArray`, and
 `qudt:MultiDimensionalArray` to match the flat representation.
@@ -783,3 +791,9 @@ variable-interval `…Type` classes into theirs. A time series now takes any `qu
 time-series kind only if one is needed. Still to decide: whether the unattached
 `qudt:TimeSeriesArray-dimensions` and `qudt:TimeSeriesArray-vector` shapes belong on the class or
 should be deleted.
+I. **Give `qudt:Collection` a model** *(added 2026-10-25)*. `qudt:Collection` has no constraints
+attached: its property shapes `qudt:Collection-memberQuantity` and `qudt:Collection-memberUnit` are
+defined but no `sh:property` uses them, and the first constrains `qudt:quantify`, not the
+`qudt:quantity` that lists and the removed collection example used. There is no valid collection
+example. Decide what a collection is, whether it is a list of quantities sharing a quantity kind
+and unit, and whether it needs a kind; then attach the shapes and add valid and invalid examples.

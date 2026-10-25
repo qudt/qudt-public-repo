@@ -897,7 +897,8 @@ qudt:List
   sh:property qudt:DatatypePropertyShape ;
   sh:property qudt:List-value ;
   sh:property qudt:MaybeQuantityPropertyShape ;
-  sh:property qudt:MaybeUnitPropertyShape .
+  sh:property qudt:MaybeUnitPropertyShape ;
+  sh:sparql qudt:ListElementTypeCheck .
 
 qudt:LongIntegerType
   a rdfs:Class, sh:NodeShape ;
@@ -3390,6 +3391,29 @@ qudt:List-value
   sh:maxCount 1 ;
   sh:node qudt:ScalarListShape ;
   sh:path qudt:value .
+
+qudt:ListElementTypeCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    Element-type check for lists: every element of the list's qudt:value must be a literal of the
+    XSD datatype of the list's qudt:datatype, its qudt:rdfsDatatype. A list whose qudt:datatype has
+    no qudt:rdfsDatatype is not checked. The list counterpart of qudt:ValuesListElementTypeCheck,
+    which checks the cells of a homogeneous array against the element type of its kind.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "List element {?value} is not of the list's datatype {?rdfsDatatype}." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+        SELECT $this ?value ?rdfsDatatype
+        WHERE {
+            $this qudt:datatype ?datatype .
+            ?datatype qudt:rdfsDatatype ?rdfsDatatype .
+            $this qudt:value ?values .
+            ?values rdf:rest* ?valueCell .
+            ?valueCell rdf:first ?value .
+            FILTER ( !isLiteral(?value) || datatype(?value) != ?rdfsDatatype )
+        }
+    """ .
 
 qudt:Matrix-2X4-FLOAT-SP
   a qudt:Matrix ;
