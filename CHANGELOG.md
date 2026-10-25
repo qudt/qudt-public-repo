@@ -20,6 +20,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Moved the OWL-schema baselines used by the derivation and inspection pipelines (`SCHEMA_QUDT.ttl.backup`, `SCHEMA_QUDT-DATATYPE.ttl.backup`, `SCHEMA_QUDT-COORDINATES.ttl.backup`) from `src/main/rdf/schema/` to `src/build/schema-derivation-config/baselines/`. They are build inputs, not published data, and they had been shipping in the release zip under `schema/`.
 - Hardened the CI Build workflow (`maven.yml`) against script injection: pull-request branch names and the changelog text are now passed to its shell steps through environment variables instead of being written into the scripts, and the `pull_request_target` run now happens only for merged pull requests, which are the only ones that need it.
 - Corrected the Wikidata and OM links of `unit:PERMILLE`, which were those of `unit:PERCENT`: `qudt:wikidataMatch` is now Q181011 (per mille) instead of Q11229 (percent), and `qudt:omUnit om-2/percent` is removed, since OM 2.0 defines no per mille unit ([#1566](https://github.com/qudt/qudt-public-repo/issues/1566)).
 
