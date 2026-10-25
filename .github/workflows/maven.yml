@@ -126,6 +126,18 @@ jobs:
     - name: Build with Maven
       run: mvn -Pzip install
 
+    # the OWL schemas are derived from the SHACL schemas by hand; a fresh derivation must reproduce the committed files
+    - name: Fail if the derived OWL schemas are out of date (unless PR was merged)
+      if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'false' }}
+      run: |
+        mvn -q -Powl-schema-derive antrun:run@derive-owl-schema
+        mvn -q -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
+        mvn -q -Powl-coordinates-derive antrun:run@derive-owl-coordinates-schema
+        if ! git diff --exit-code --stat -- src/main/rdf/schema/; then
+          echo "::error::The committed OWL schemas differ from a fresh derivation. Re-derive them (OWL SCHEMA DERIVATION in pom.xml) and commit the result."
+          exit 1
+        fi
+
     # delete the snapshot release (the release action does not update the
     # body, so we have to delete the whole thing)
     - name: Delete Snapshot Release
