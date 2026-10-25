@@ -13,6 +13,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `qudt:organizedUnder quantitykind:DimensionlessRatio` to `quantitykind:RefractiveIndex`, like `quantitykind:SpeedRatio`, and `unit:FRACTION` as one of its units ([#397](https://github.com/qudt/qudt-public-repo/issues/397)).
 - Added `quantitykind:MassFraction` to `unit:PERMILLE`, `unit:GM-PER-KiloGM`, and `unit:KiloGM-PER-KiloGM`, in which mass fractions such as sea-water salinity and specific humidity are commonly given ([#1562](https://github.com/qudt/qudt-public-repo/issues/1562)).
 - Added `qudt:specializationOf quantitykind:MassRatio` to `quantitykind:MassRatioOfWaterVapourToDryGas`, like `quantitykind:SpecificHumidity`, so that mass-ratio units such as g/kg and kg/kg apply to it, and `unit:FRACTION` as a unit for `quantitykind:PressureRatio`, inherited by `quantitykind:RelativePartialPressure` and `quantitykind:RelativeHumidity` ([#1569](https://github.com/qudt/qudt-public-repo/issues/1569)).
+- Added `quantitykind:SpecificLatentHeat`, the latent heat of a phase transition per unit mass, such as the specific latent heats of vaporization, sublimation and fusion, as a specialization of `quantitykind:SpecificEnergy`, with `qudt:wikidataMatch` Q104217205 ([#1577](https://github.com/qudt/qudt-public-repo/issues/1577)).
 
 ### Changed
 
@@ -22,6 +23,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Rewrote the descriptions of the parts-per units (`unit:PPTH`, `unit:PPM`, `unit:PPTM`, `unit:PPB`, `unit:PPT`, `unit:PPQ`, `unit:PPT_VOL`). They no longer recommend µg/L, which is a mass concentration rather than a fraction, and `unit:PPQ` now gives 10⁻¹⁵ instead of 10⁻¹⁶ ([#1574](https://github.com/qudt/qudt-public-repo/issues/1574)).
 - Corrected the symbols of `unit:PPM` and `unit:PPB` to `ppm` and `ppb`, and the UCUM codes of `unit:PPT` (`[ppt]` → `[pptr]`) and `unit:PPQ` (`[ppq]` → `10*-15{ppq}`), since `[ppt]` and `[ppq]` are not UCUM atoms; added `10*-7{pptm}` to `unit:PPTM` ([#1574](https://github.com/qudt/qudt-public-repo/issues/1574)).
+- Hardened the CI Build workflow (`maven.yml`) against script injection: pull-request branch names and the changelog text are now passed to its shell steps through environment variables instead of being written into the scripts, and the `pull_request_target` run now happens only for merged pull requests, which are the only ones that need it.
 - Corrected the Wikidata and OM links of `unit:PERMILLE`, which were those of `unit:PERCENT`: `qudt:wikidataMatch` is now Q181011 (per mille) instead of Q11229 (percent), and `qudt:omUnit om-2/percent` is removed, since OM 2.0 defines no per mille unit ([#1566](https://github.com/qudt/qudt-public-repo/issues/1566)).
 
 ## [3.5.3] - 2026-10-20
