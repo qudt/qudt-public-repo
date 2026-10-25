@@ -30,8 +30,10 @@ value therefore reaches its blueprint the same way, and the five tuple checks fo
 The extra-value check also requires the kind to have member specs: a homogeneous vector's kind has
 none, and without that every value of such a vector was reported as undeclared. The array and
 vector specs of the examples were merged into their kinds, and the tuple specs became tuple kinds
-(`ex:MeasurementTupleSpec` → `ex:NTupleKind_Measurement` and so on). Sections below that
-mention `qudt:NTupleSpec` or `qudt:conformsToTupleSpec` describe the design as it was then.
+(`ex:MeasurementTupleSpec` → `ex:NTupleKind_Measurement` and so on). The flag `qudt:isHeterogeneous` was dropped at the same
+time: a kind is heterogeneous exactly when it has member specs. Sections below that mention
+`qudt:NTupleSpec`, `qudt:conformsToTupleSpec` or `qudt:isHeterogeneous` describe the design as it
+was then.
 
 ## Design revision (2026-08-22) — the `Array` / `ArrayKind` split
 
@@ -68,12 +70,12 @@ withdrawn: the type-level description of an array is separated from the instance
 Every array-shaped datatype now comes as an **instance/kind pair**: the instance carries the values,
 the kind carries the description.
 
-|                       Instance shape                        |                                                                                                                              Kind shape                                                                                                                              |                               Instance-side constraints                               |
-|-------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| `qudt:Array` (`qudt:ValuesList`, `qudt:Array-datatypeKind`) | `qudt:ArrayKind` (`qudt:ArrayKind-dataOrder`, `-elementCount`, `qudt:StructuredDataKind-tupleMemberSpecs` / `-tupleMembers` / `-elementType` / `-isHeterogeneous` / `-hasQuantityKind` / `-hasUnit`, plus `DimensionalityPropertyShape` / `DimensionsPropertyShape`) | `ValuesListLengthCheck`, `ValuesListElementTypeCheck`                                 |
-| `qudt:HomogeneousArray`                                     | `qudt:HomogeneousArrayKind`                                                                                                                                                                                                                                          | inherited                                                                             |
-| `qudt:HeterogenousArray`                                    | `qudt:HeterogenousArrayKind`                                                                                                                                                                                                                                         | inherited, plus the four `NTuple*` checks                                             |
-| `qudt:Vector`                                               | `qudt:VectorKind` (`qudt:VectorKind-elementCount`, `qudt:StructuredDataKind-tupleMemberSpecs` / `-tupleMembers` / `-elementType` / `-isHeterogeneous` / `-hasQuantityKind` / `-hasUnit`)                                                                             | `ValuesListLengthCheck`, `ValuesListElementTypeCheck`, plus the four `NTuple*` checks |
+|                       Instance shape                        |                                                                                                                   Kind shape                                                                                                                    |                               Instance-side constraints                               |
+|-------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| `qudt:Array` (`qudt:ValuesList`, `qudt:Array-datatypeKind`) | `qudt:ArrayKind` (`qudt:ArrayKind-dataOrder`, `-elementCount`, `qudt:StructuredDataKind-tupleMemberSpecs` / `-tupleMembers` / `-elementType` / `-hasQuantityKind` / `-hasUnit`, plus `DimensionalityPropertyShape` / `DimensionsPropertyShape`) | `ValuesListLengthCheck`, `ValuesListElementTypeCheck`                                 |
+| `qudt:HomogeneousArray`                                     | `qudt:HomogeneousArrayKind`                                                                                                                                                                                                                     | inherited                                                                             |
+| `qudt:HeterogenousArray`                                    | `qudt:HeterogenousArrayKind`                                                                                                                                                                                                                    | inherited, plus the four `NTuple*` checks                                             |
+| `qudt:Vector`                                               | `qudt:VectorKind` (`qudt:VectorKind-elementCount`, `qudt:StructuredDataKind-tupleMemberSpecs` / `-tupleMembers` / `-elementType` / `-hasQuantityKind` / `-hasUnit`)                                                                             | `ValuesListLengthCheck`, `ValuesListElementTypeCheck`, plus the four `NTuple*` checks |
 
 `ArrayRankCheck` is the one kind-side constraint (rank is a blueprint property). The value-list shape
 and its two checks are named `qudt:ValuesList` / `ValuesListLengthCheck` / `ValuesListElementTypeCheck`
