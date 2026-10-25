@@ -12,6 +12,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `qudt:organizedUnder quantitykind:DimensionlessRatio` to `quantitykind:RefractiveIndex`, like `quantitykind:SpeedRatio`, and `unit:FRACTION` as one of its units ([#397](https://github.com/qudt/qudt-public-repo/issues/397)).
 - Added `quantitykind:MassFraction` to `unit:PERMILLE`, `unit:GM-PER-KiloGM`, and `unit:KiloGM-PER-KiloGM`, in which mass fractions such as sea-water salinity and specific humidity are commonly given ([#1562](https://github.com/qudt/qudt-public-repo/issues/1562)).
 - Added `qudt:specializationOf quantitykind:MassRatio` to `quantitykind:MassRatioOfWaterVapourToDryGas`, like `quantitykind:SpecificHumidity`, so that mass-ratio units such as g/kg and kg/kg apply to it, and `unit:FRACTION` as a unit for `quantitykind:PressureRatio`, inherited by `quantitykind:RelativePartialPressure` and `quantitykind:RelativeHumidity` ([#1569](https://github.com/qudt/qudt-public-repo/issues/1569)).
+- Added `quantitykind:SpecificLatentHeat`, the latent heat of a phase transition per unit mass, such as the specific latent heats of vaporization, sublimation and fusion, as a specialization of `quantitykind:SpecificEnergy`, with `qudt:wikidataMatch` Q104217205 ([#1577](https://github.com/qudt/qudt-public-repo/issues/1577)).
 
 ### Changed
 
@@ -21,6 +22,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 - Corrected the `qudt:symbol` of `unit:SolarMass` from `S`, its symbol in the superseded IAU (1976) System of Astronomical Constants, to `M☉`, and updated its description to match, of `unit:UNITLESS` from `一` (a CJK ideograph) to `1`, the symbol of the unit one, and of `unit:BIT` from `b` to `bit`, the symbol UN/CEFACT Recommendation 20 gives for `A99`, which the build carries into the prefixed and compound bit units (`kbit`, `Gbit/s`, `Kibit`, …); `Gb` had been the same symbol as `unit:GI` (gilbert) ([#305](https://github.com/qudt/qudt-public-repo/issues/305)).
 - Corrected the `qudt:uneceCommonCode` of `unit:BIT` from `J63`, which UN/CEFACT Recommendation 20 assigns to barrel (US petroleum) per second, to `A99` (bit) ([#215](https://github.com/qudt/qudt-public-repo/issues/215)).
+- Hardened the CI Build workflow (`maven.yml`) against script injection: pull-request branch names and the changelog text are now passed to its shell steps through environment variables instead of being written into the scripts, and the `pull_request_target` run now happens only for merged pull requests, which are the only ones that need it.
 - Corrected the Wikidata and OM links of `unit:PERMILLE`, which were those of `unit:PERCENT`: `qudt:wikidataMatch` is now Q181011 (per mille) instead of Q11229 (percent), and `qudt:omUnit om-2/percent` is removed, since OM 2.0 defines no per mille unit ([#1566](https://github.com/qudt/qudt-public-repo/issues/1566)).
 
 ## [3.5.3] - 2026-10-20
