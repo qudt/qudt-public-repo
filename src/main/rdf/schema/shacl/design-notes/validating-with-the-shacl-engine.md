@@ -3,8 +3,8 @@
 **Written:** 2026-10-19 (branch `rh-arrays-cusp2`)
 **Status:** current — keep the expected results below in step with the examples
 **Related files:** the checker in `src/build/engine-check/`, the datatype and main SHACL schemas in
-`src/main/rdf/schema/shacl/`, and the three `EXAMPLES_QUDT-*DATATYPES.ttl` files in
-`src/main/rdf/examples/`
+`src/main/rdf/schema/shacl/`, and the example files in `src/main/rdf/examples/valid_examples/` and
+`src/main/rdf/examples/invalid_examples/`
 
 ## Why this is needed
 
