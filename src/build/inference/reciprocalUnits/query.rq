@@ -64,4 +64,10 @@ WHERE {
     # exclude deprecated units from reciprocal-unit inference (either endpoint)
     FILTER NOT EXISTS { GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?this qudt:deprecated true } }
     FILTER NOT EXISTS { GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?reciprocalUnit qudt:deprecated true } }
+    # matching factor units is not enough: contextual units (GM_Carbon, GM_DRY, ...) and the dose units gray and
+    # sievert share factor units with plain units (1/g, J/kg) but measure something else, so they get no reciprocal
+    FILTER NOT EXISTS { GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?this a qudt:ContextualUnit } }
+    FILTER NOT EXISTS { GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?reciprocalUnit a qudt:ContextualUnit } }
+    FILTER(?this NOT IN (<http://qudt.org/vocab/unit/GRAY>, <http://qudt.org/vocab/unit/SV>))
+    FILTER(?reciprocalUnit NOT IN (<http://qudt.org/vocab/unit/GRAY>, <http://qudt.org/vocab/unit/SV>))
 } ORDER BY ?this
