@@ -359,10 +359,37 @@ qudt:Collection
   dcterms:description """
   <p>A collection is a grouping of some variable number of zero or more data items that need to be operated upon together in some controlled fashion. 
   Generally, the data items will all share the same data type or are derived from some common ancestor data type.
+  </p>
+  <p>A collection holds its members in <code>qudt:values</code>, an RDF list, and points with
+   <code>qudt:datatypeKind</code> at a <code>qudt:CollectionKind</code>, which gives the type shared by every
+   member and, optionally, their shared quantity kind and unit. The number of members is not fixed. The
+   order of the list is significant only for ordered collections, such as <code>qudt:Sequence</code> and
+   <code>qudt:OrderedCollection</code>. A <code>qudt:Map</code>, which also has keys, inherits this model
+   until it has one of its own.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Collection Type" ;
-  rdfs:subClassOf qudt:StructuredDatatype .
+  rdfs:subClassOf qudt:StructuredDatatype ;
+  sh:property qudt:Collection-datatypeKind ;
+  sh:property qudt:Collection-values ;
+  sh:sparql qudt:ValuesListElementTypeCheck .
+
+qudt:CollectionKind
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>A <em>Collection Kind</em> is the blueprint for a <code>qudt:Collection</code> value: it gives the single type
+   shared by every member (<code>qudt:elementType</code>) and, optionally, the quantity kind
+   (<code>qudt:hasQuantityKind</code>) and unit (<code>qudt:hasUnit</code>) they share. It gives no number of
+   members, since a collection holds a variable number of zero or more. A collection points at its kind with
+   <code>qudt:datatypeKind</code>, so one kind can describe many collections.
+  </p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Collection Kind" ;
+  rdfs:subClassOf qudt:Concept ;
+  sh:node qudt:HomogeneousCellsShape ;
+  sh:property qudt:StructuredDataKind-elementType ;
+  sh:property qudt:StructuredDataKind-hasQuantityKind ;
+  sh:property qudt:StructuredDataKind-hasUnit .
 
 qudt:ColorCue
   a rdfs:Class, sh:NodeShape ;
@@ -1041,7 +1068,7 @@ qudt:MultiModalType
 
 qudt:MultiSet
   a rdfs:Class, sh:NodeShape ;
-  dcterms:description "A bag is a set in which elements may be repeated." ;
+  dcterms:description "A bag is a set in which elements may be repeated. The order of its qudt:values list is not significant." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Bag" ;
   rdfs:subClassOf qudt:Collection .
@@ -1404,6 +1431,8 @@ qudt:Sequence
   <p>The position of an element in a sequence is its rank or index; it is the integer from which the element is the image. 
   It depends on the context or of a specific convention, if the first element has index 0 or 1. [Wikipedia]
   </p>
+  <p>The order of its <code>qudt:values</code> list is the order of the sequence.
+  </p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Sequence" ;
@@ -1416,10 +1445,14 @@ qudt:Set
   A set is a collection (container) of certain values, without any particular order, and no repeated values. 
   It corresponds with a finite set in mathematics.
   </p>
+  <p>The order of its <code>qudt:values</code> list is not significant, and
+   <code>qudt:SetDistinctValuesCheck</code> reports any member that appears more than once.
+  </p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Set Type" ;
-  rdfs:subClassOf qudt:Collection .
+  rdfs:subClassOf qudt:Collection ;
+  sh:sparql qudt:SetDistinctValuesCheck .
 
 qudt:ShortIntegerType
   a rdfs:Class, sh:NodeShape ;
@@ -2575,11 +2608,6 @@ qudt:pythonName
   rdfs:label "python name" ;
   rdfs:subPropertyOf qudt:id .
 
-qudt:quantify
-  a rdf:Property ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  rdfs:label "quantify" .
-
 qudt:rdfsDatatype
   a rdf:Property ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -2814,19 +2842,24 @@ qudt:CellDescriptionUnionType
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Cell Description Union Type" .
 
-qudt:Collection-memberQuantity
+qudt:Collection-datatypeKind
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:Quantity ;
+  sh:class qudt:CollectionKind ;
   sh:maxCount 1 ;
-  sh:path qudt:quantify .
+  sh:minCount 1 ;
+  sh:path qudt:datatypeKind .
 
-qudt:Collection-memberUnit
+qudt:Collection-values
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:Unit ;
+  sh:description """
+  The members of the collection, as an RDF list. Its order is significant only for ordered collections,
+  such as qudt:Sequence and qudt:OrderedCollection. The empty list ( ) is a collection with no members.
+  """ ;
   sh:maxCount 1 ;
-  sh:path qudt:hasUnit .
+  sh:node qudt:RDFListShape ;
+  sh:path qudt:values .
 
 qudt:ColorCue-rgbCode
   a sh:PropertyShape ;
@@ -3318,7 +3351,7 @@ qudt:HomogeneousCellsShape
   Cells that share one type: the kind gives a single qudt:elementType, and optionally the quantity kind
    (qudt:hasQuantityKind) and unit (qudt:hasUnit) shared by every cell. The kind gives no
    qudt:tupleMemberSpecs. One of the two alternatives in qudt:CellDescriptionUnionType, and required of
-   every homogeneous array kind.
+   every homogeneous array kind and every collection kind.
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Homogeneous Cells Shape" ;
@@ -4577,6 +4610,28 @@ qudt:ScalarDatatype-rdfsDatatype
   sh:maxCount 1 ;
   sh:path qudt:rdfsDatatype .
 
+qudt:SetDistinctValuesCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    Distinctness check for sets: no member of a qudt:Set's qudt:values list may appear more than once.
+    Members are compared by value with =, so 54.0 and 54.00 count as the same decimal. A
+    qudt:MultiSet may repeat members.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "Set member {?value} appears more than once." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+        SELECT DISTINCT $this ?value
+        WHERE {
+            $this qudt:values ?values .
+            ?values rdf:rest* ?cell .
+            ?cell rdf:first ?value .
+            ?values rdf:rest* ?otherCell .
+            ?otherCell rdf:first ?otherValue .
+            FILTER ( ?cell != ?otherCell && ?value = ?otherValue )
+        }
+    """ .
+
 qudt:SignedBigIntegerType-literal
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -4896,13 +4951,13 @@ qudt:ValuesList
 qudt:ValuesListElementTypeCheck
   a sh:SPARQLConstraint ;
   rdfs:comment """
-    Element-type check (homogeneous arrays): every cell in the array's flat value
-    list must satisfy the single qudt:elementType facet declared by its
+    Element-type check (homogeneous arrays and vectors, and collections): every value in the flat
+    qudt:values list must satisfy the single qudt:elementType facet declared by its
     qudt:datatypeKind, either as a literal datatype or as membership of a class. Heterogeneous arrays are checked per position by
     the reused NTuple constraints (see qudt:HeterogenousArray).
     """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:message "Array element {?value} does not satisfy the array's element type {?elementType}." ;
+  sh:message "Element {?value} does not satisfy the element type {?elementType} of its kind." ;
   sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:select """
         SELECT $this ?value ?elementType

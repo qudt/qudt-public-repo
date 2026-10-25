@@ -791,9 +791,19 @@ variable-interval `…Type` classes into theirs. A time series now takes any `qu
 time-series kind only if one is needed. Still to decide: whether the unattached
 `qudt:TimeSeriesArray-dimensions` and `qudt:TimeSeriesArray-vector` shapes belong on the class or
 should be deleted.
-I. **Give `qudt:Collection` a model** *(added 2026-10-25)*. `qudt:Collection` has no constraints
-attached: its property shapes `qudt:Collection-memberQuantity` and `qudt:Collection-memberUnit` are
-defined but no `sh:property` uses them, and the first constrains `qudt:quantify`, not the
-`qudt:quantity` that lists and the removed collection example used. There is no valid collection
-example. Decide what a collection is, whether it is a list of quantities sharing a quantity kind
-and unit, and whether it needs a kind; then attach the shapes and add valid and invalid examples.
+I. ~~**Give `qudt:Collection` a model**~~ *(added 2026-10-25)*. **Done the same day.**
+`qudt:Collection` had no constraints attached: its property shapes `qudt:Collection-memberQuantity`
+and `qudt:Collection-memberUnit` were defined but unused, the first on `qudt:quantify`, which
+nothing else used. Collections now follow kind plus values: a collection holds its members in
+`qudt:values` and points with `qudt:datatypeKind` at a new `qudt:CollectionKind`, which gives the
+shared element type (`sh:node qudt:HomogeneousCellsShape`) and, optionally, quantity kind and
+unit, but no size. `qudt:ValuesListElementTypeCheck`, whose message is now generic, checks the
+members as it does the cells of homogeneous arrays, and a new `qudt:SetDistinctValuesCheck` on
+`qudt:Set` rejects repeated members; a `qudt:MultiSet` may repeat them. The two unused shapes and
+`qudt:quantify` were removed. Examples: `EXAMPLES_QUDT-COLLECTION-DATATYPES.ttl` (a set and a
+multiset of temperatures) and its invalid counterpart (a repeated set member, a member of the
+wrong type, a collection with no kind).
+J. **Give `qudt:Map` a key/value model** *(added 2026-10-25)*. `qudt:Map` is a subclass of
+`qudt:Collection`, so it inherits the collection model, but a map also has keys. Decide how keys
+and values are held (two parallel lists, a list of pairs, or tuples) and whether the kind gives a
+key type as well as a value type.

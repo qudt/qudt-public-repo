@@ -63,7 +63,7 @@ there was lost once, which is why they now live in the repository.
 
 ### What goes into each graph, and why
 
-- **Shapes graph:** the datatype and main SHACL schemas and the eight example files. The examples must be
+- **Shapes graph:** the datatype and main SHACL schemas and the ten example files. The examples must be
   shapes too, because some constraints are defined in them
   (`ex:IfcCompoundPlaneAngleConsistentSign`); leave them out and those constraints silently
   don't run.
@@ -86,39 +86,42 @@ there was lost once, which is why they now live in the repository.
 Every bad example fires exactly its intended check. All of them are in
 `src/main/rdf/examples/invalid_examples/`:
 
-|                     Example                      |                    File                     |                                                  Check(s)                                                   |
-|--------------------------------------------------|---------------------------------------------|-------------------------------------------------------------------------------------------------------------|
-| `ex:Array1D_Integers-INVALID`                    | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `qudt:ValuesListLengthCheck`                                                                                |
-| `ex:List_3_Strings_INVALID`                      | `EXAMPLES_QUDT-INVALID-DATATYPES.ttl`       | `qudt:ListElementTypeCheck`                                                                                 |
-| `ex:List_Decimal_Values_INVALID`                 | `EXAMPLES_QUDT-INVALID-DATATYPES.ttl`       | `qudt:ListElementTypeCheck` (reported four times, once per element)                                         |
-| `ex:Quantity_RoomTemperature-INVALID`            | `EXAMPLES_QUDT-INVALID-QUANTITIES.ttl`      | `sh:OrConstraintComponent` (from `qudt:Quantifiable-value`)                                                 |
-| `ex:badExampleArrayRank`                         | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `qudt:ArrayRankCheck`                                                                                       |
-| `ex:badExampleHeterogeneousArrayKindElementType` | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `sh:NodeConstraintComponent` (from `qudt:HeterogenousArrayKind`: not a `qudt:HeterogeneousCellsShape`)      |
-| `ex:badExampleHeterogeneousArrayLength`          | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `qudt:NTupleExtraValueCheck`, `qudt:NTupleLengthCheck`, `qudt:ValuesListLengthCheck`                        |
-| `ex:badExampleHeterogeneousArrayType`            | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `qudt:NTupleTypeCheck`                                                                                      |
-| `ex:badExampleHeterogeneousVectorLength`         | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck`, `qudt:ValuesListLengthCheck`              |
-| `ex:badExampleHomogeneousArrayKindMemberSpecs`   | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `sh:NodeConstraintComponent` (from `qudt:HomogeneousArrayKind`: not a `qudt:HomogeneousCellsShape`)         |
-| `ex:badExampleHomogeneousArrayLength`            | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `qudt:ValuesListLengthCheck`                                                                                |
-| `ex:badExampleHomogeneousArrayType`              | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `qudt:ValuesListElementTypeCheck`                                                                           |
-| `ex:badExampleMemberSpecKindSharedUnit`          | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
-| `ex:badExampleMemberSpecQuantityKind`            | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `sh:ClassConstraintComponent` (from `qudt:NTupleMemberTypeSpec-hasQuantityKind`)                            |
-| `ex:badExampleQuantityValueTuple`                | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `qudt:NTupleTypeCheck`                                                                                      |
-| `ex:badExampleTuple2a`                           | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `qudt:NTupleTypeCheck`                                                                                      |
-| `ex:badExampleTuple2b`                           | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `qudt:NTupleExtraValueCheck`, `qudt:NTupleLengthCheck`                                                      |
-| `ex:badExampleTuple3`                            | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `qudt:NTupleTypeCheck`                                                                                      |
-| `ex:badExampleTupleDateInDateTimePosition`       | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `qudt:NTupleTypeCheck`                                                                                      |
-| `ex:badExampleTupleIntegerInIntPosition`         | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `qudt:NTupleTypeCheck`                                                                                      |
-| `ex:badExampleTupleKindElementType`              | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `sh:NodeConstraintComponent` (from `qudt:NTupleKind`: not a `qudt:HeterogeneousCellsShape`)                 |
-| `ex:badExampleTupleNothingInRequiredPosition`    | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `qudt:NTupleTypeCheck`                                                                                      |
-| `ex:badExampleTupleTimeInAnyDatePosition`        | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `qudt:NTupleTypeCheck`                                                                                      |
-| `ex:badExampleVectorKindBothCellDescriptions`    | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
-| `ex:badExampleVectorKindNoCellDescription`       | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl` | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
-| `ex:cpaBadLengthShort`                           | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck`                                            |
-| `ex:cpaBadMicroseconds`                          | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `qudt:NTupleRangeCheck`                                                                                     |
-| `ex:cpaBadMinutes`                               | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `qudt:NTupleRangeCheck`                                                                                     |
-| `ex:cpaBadSeconds`                               | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `qudt:NTupleRangeCheck`                                                                                     |
-| `ex:cpaBadSign`                                  | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `ex:IfcCompoundPlaneAngleConsistentSign` (reported twice)                                                   |
-| `ex:cpaBadType`                                  | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl` | `qudt:NTupleTypeCheck`                                                                                      |
+|                     Example                      |                       File                       |                                                  Check(s)                                                   |
+|--------------------------------------------------|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| `ex:Array1D_Integers-INVALID`                    | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `qudt:ValuesListLengthCheck`                                                                                |
+| `ex:List_3_Strings_INVALID`                      | `EXAMPLES_QUDT-INVALID-DATATYPES.ttl`            | `qudt:ListElementTypeCheck`                                                                                 |
+| `ex:List_Decimal_Values_INVALID`                 | `EXAMPLES_QUDT-INVALID-DATATYPES.ttl`            | `qudt:ListElementTypeCheck` (reported four times, once per element)                                         |
+| `ex:Quantity_RoomTemperature-INVALID`            | `EXAMPLES_QUDT-INVALID-QUANTITIES.ttl`           | `sh:OrConstraintComponent` (from `qudt:Quantifiable-value`)                                                 |
+| `ex:badExampleArrayRank`                         | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `qudt:ArrayRankCheck`                                                                                       |
+| `ex:badExampleCollectionElementType`             | `EXAMPLES_QUDT-INVALID-COLLECTION-DATATYPES.ttl` | `qudt:ValuesListElementTypeCheck`                                                                           |
+| `ex:badExampleCollectionNoKind`                  | `EXAMPLES_QUDT-INVALID-COLLECTION-DATATYPES.ttl` | `sh:MinCountConstraintComponent` (from `qudt:Collection-datatypeKind`)                                      |
+| `ex:badExampleHeterogeneousArrayKindElementType` | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:NodeConstraintComponent` (from `qudt:HeterogenousArrayKind`: not a `qudt:HeterogeneousCellsShape`)      |
+| `ex:badExampleHeterogeneousArrayLength`          | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `qudt:NTupleExtraValueCheck`, `qudt:NTupleLengthCheck`, `qudt:ValuesListLengthCheck`                        |
+| `ex:badExampleHeterogeneousArrayType`            | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleHeterogeneousVectorLength`         | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck`, `qudt:ValuesListLengthCheck`              |
+| `ex:badExampleHomogeneousArrayKindMemberSpecs`   | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:NodeConstraintComponent` (from `qudt:HomogeneousArrayKind`: not a `qudt:HomogeneousCellsShape`)         |
+| `ex:badExampleHomogeneousArrayLength`            | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `qudt:ValuesListLengthCheck`                                                                                |
+| `ex:badExampleHomogeneousArrayType`              | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `qudt:ValuesListElementTypeCheck`                                                                           |
+| `ex:badExampleMemberSpecKindSharedUnit`          | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
+| `ex:badExampleMemberSpecQuantityKind`            | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `sh:ClassConstraintComponent` (from `qudt:NTupleMemberTypeSpec-hasQuantityKind`)                            |
+| `ex:badExampleQuantityValueTuple`                | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleSetDuplicate`                      | `EXAMPLES_QUDT-INVALID-COLLECTION-DATATYPES.ttl` | `qudt:SetDistinctValuesCheck`                                                                               |
+| `ex:badExampleTuple2a`                           | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleTuple2b`                           | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleExtraValueCheck`, `qudt:NTupleLengthCheck`                                                      |
+| `ex:badExampleTuple3`                            | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleTupleDateInDateTimePosition`       | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleTupleIntegerInIntPosition`         | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleTupleKindElementType`              | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `sh:NodeConstraintComponent` (from `qudt:NTupleKind`: not a `qudt:HeterogeneousCellsShape`)                 |
+| `ex:badExampleTupleNothingInRequiredPosition`    | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleTupleTimeInAnyDatePosition`        | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
+| `ex:badExampleVectorKindBothCellDescriptions`    | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
+| `ex:badExampleVectorKindNoCellDescription`       | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
+| `ex:cpaBadLengthShort`                           | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck`                                            |
+| `ex:cpaBadMicroseconds`                          | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleRangeCheck`                                                                                     |
+| `ex:cpaBadMinutes`                               | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleRangeCheck`                                                                                     |
+| `ex:cpaBadSeconds`                               | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleRangeCheck`                                                                                     |
+| `ex:cpaBadSign`                                  | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `ex:IfcCompoundPlaneAngleConsistentSign` (reported twice)                                                   |
+| `ex:cpaBadType`                                  | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
 
 `ex:cpaBadSign` is reported once per positive/negative pair in `( 52 -31 12 )`, because a
 `SELECT` constraint yields one result per solution row; `SELECT DISTINCT $this` would make it

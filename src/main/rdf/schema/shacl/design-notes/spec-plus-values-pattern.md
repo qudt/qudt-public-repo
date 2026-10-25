@@ -25,13 +25,15 @@ SPARQL constraint idioms look the way they do, and how to apply the pattern to a
            actual values
 ```
 
-1. **Value shape** (`qudt:NTuple`, `qudt:Array` and its subclasses, `qudt:Vector`) — what a
+1. **Value shape** (`qudt:NTuple`, `qudt:Array` and its subclasses, `qudt:Vector`, `qudt:Collection`
+   and its subclasses) — what a
    *value* of the datatype looks like. Two property shapes are always present:
    - `qudt:values` — the ordered list of values, constrained by
      `sh:node qudt:RDFListShape`.
    - `qudt:datatypeKind` — points at the value's kind, the same property for every
      structured datatype.
-2. **Kind shape** (`qudt:NTupleKind`, `qudt:ArrayKind` and its subclasses, `qudt:VectorKind`) —
+2. **Kind shape** (`qudt:NTupleKind`, `qudt:ArrayKind` and its subclasses, `qudt:VectorKind`,
+   `qudt:CollectionKind`) —
    the *blueprint*, a `qudt:Concept` that many values can share. A tuple kind, and a
    heterogeneous array or vector kind, holds an ordered list of per-position member specs in
    `qudt:tupleMemberSpecs`, walked via `sh:zeroOrMorePath rdf:rest / rdf:first`. A homogeneous kind
@@ -41,8 +43,11 @@ SPARQL constraint idioms look the way they do, and how to apply the pattern to a
    `qudt:HomogeneousCellsShape` (an element type, an optional shared quantity kind and unit, and no
    member specs). Each requires what the other forbids, so a kind matches one or neither, never
    both. Tuple kinds and heterogeneous array kinds must match `qudt:HeterogeneousCellsShape`, and
-   homogeneous array kinds `qudt:HomogeneousCellsShape`, each through `sh:node`. Array and vector
-   kinds also give sizes: rank, extents, element count, data order.
+   homogeneous array kinds and collection kinds `qudt:HomogeneousCellsShape`, each through
+   `sh:node`. Array and vector kinds also give sizes: rank, extents, element count, data order. A
+   collection kind gives no size: a collection holds a variable number of members, which
+   `qudt:ValuesListElementTypeCheck` checks against the kind's element type, and a `qudt:Set` must
+   not repeat one (`qudt:SetDistinctValuesCheck`).
 3. **Member-type spec shape** (`qudt:NTupleMemberTypeSpec`) — one entry per position.
    Carries `qudt:index`, a **type facet** that must be one of the four alternatives below,
    and optionally a quantity kind and unit.
