@@ -63,7 +63,7 @@ there was lost once, which is why they now live in the repository.
 
 ### What goes into each graph, and why
 
-- **Shapes graph:** the datatype and main SHACL schemas and the five example files. The examples must be
+- **Shapes graph:** the datatype and main SHACL schemas and the eight example files. The examples must be
   shapes too, because some constraints are defined in them
   (`ex:IfcCompoundPlaneAngleConsistentSign`); leave them out and those constraints silently
   don't run.
@@ -131,7 +131,7 @@ The valid examples, including the tuple examples, are clean, apart from two open
   shape and the position is never type-checked.
 - The legacy arrays lack `qudt:datatypeKind`: four valid ones (the `ex:StateSpaceMatrix-*`) and
   the two legacy invalid ones
-  (`qudt:Array1D_Integers-INVALID`, `qudt:EX_Array1D_INVALID`). See "Still to do" B in
+  (`ex:Array1D_Integers-INVALID`, `ex:EX_Array1D_INVALID`, named `qudt:` until 2026-10-25). See "Still to do" B in
   [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md).
 
 `ex:Quantity_DroneVelocity3D`, whose value is a vector, failed `qudt:Quantifiable-value` from

@@ -5,16 +5,11 @@
 @prefix datatype: <http://qudt.org/vocab/datatype/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix ex: <http://example.org#> .
-@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
-@prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix unit: <http://qudt.org/vocab/unit/> .
 @prefix vaem: <http://www.linkedmodel.org/schema/vaem#> .
 
 <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid>
   a owl:Ontology ;
-  owl:imports <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array> ;
-  owl:imports <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/datatype> ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/quantitykind> ;
@@ -55,341 +50,7 @@ dcterms:title
   rdfs:label "title" ;
   rdfs:range xsd:string .
 
-ex:BadElementTypeArrayKind
-  a qudt:HomogeneousArrayKind ;
-  dcterms:description """
-  <p>Blueprint for the invalid array below: a 1-D homogeneous array of four
-  decimal cells. This kind is itself well-formed.</p>"""^^rdf:HTML ;
-  qudt:dimensionality 1 ;
-  qudt:dimensions ( 4 ) ;
-  qudt:elementCount 4 ;
-  qudt:elementType xsd:decimal ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Array kind for the invalid element type array" .
-
-ex:BadLengthArrayKind
-  a qudt:HomogeneousArrayKind ;
-  dcterms:description """
-  <p>Blueprint for the invalid array below: a 2&#215;2&#215;2 homogeneous array of
-  decimals, so eight cells are expected. This kind is itself well-formed.</p>"""^^rdf:HTML ;
-  qudt:dimensionality 3 ;
-  qudt:dimensions ( 2 2 2 ) ;
-  qudt:elementCount 8 ;
-  qudt:elementType xsd:decimal ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Array kind for the invalid short value list array" .
-
-ex:badExampleArrayRank
-  a qudt:HomogeneousArrayKind ;
-  dcterms:description """
-  <p>dimensionality is 3 but the dimensions list has only 2 entries.</p>"""^^rdf:HTML ;
-  qudt:dimensionality 3 ;
-  qudt:dimensions ( 2 3 ) ;
-  qudt:elementCount 6 ;
-  qudt:elementType xsd:decimal ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Invalid array kind - dimensionality does not match number of dimensions" .
-
-ex:badExampleHeterogeneousArrayKindElementType
-  a qudt:HeterogenousArrayKind ;
-  dcterms:description """
-  <p>A heterogeneous array kind that gives one shared qudt:elementType instead of member specs. That
-  satisfies qudt:CellDescriptionUnionType, but a heterogeneous array kind must describe its cells
-  position by position (qudt:HeterogeneousCellsShape).</p>"""^^rdf:HTML ;
-  qudt:dimensionality 1 ;
-  qudt:dimensions ( 2 ) ;
-  qudt:elementCount 2 ;
-  qudt:elementType xsd:double ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Invalid heterogeneous array kind - a shared element type instead of member specs" .
-
-ex:badExampleHeterogeneousArrayLength
-  a qudt:HeterogenousArray ;
-  dcterms:description """
-  <p>The kind's member specs have six positions but the qudt:values list holds seven cells.</p>"""^^rdf:HTML ;
-  qudt:datatypeKind ex:HeterogeneousArrayKind_2X3 ;
-  qudt:values ( "Temp" 23.7 unit:DEG_C "Pressure" 101.3 unit:PA "Humidity" ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Invalid heterogeneous array - more values than the kind has positions" .
-
-ex:badExampleHeterogeneousArrayType
-  a qudt:HeterogenousArray ;
-  dcterms:description """
-  <p>Position 3 requires sh:class qudt:Unit but the cell is the string
-  "DegC".</p>"""^^rdf:HTML ;
-  qudt:datatypeKind ex:HeterogeneousArrayKind_2X3 ;
-  qudt:values ( "Temp" 23.7 "DegC" "Pressure" 101.3 unit:PA ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Invalid heterogeneous array - value at position 3 is not a unit" .
-
-ex:badExampleHeterogeneousVectorLength
-  a qudt:Vector ;
-  dcterms:description """
-  <p>The kind's member specs have three required components but the qudt:values list holds only two:
-  the altitude is missing.</p>"""^^rdf:HTML ;
-  qudt:datatypeKind ex:VectorKind_GeoPosition ;
-  qudt:values ( 51.4779 -0.0015 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Invalid heterogeneous vector - fewer values than the kind requires" .
-
-ex:badExampleHomogeneousArrayKindMemberSpecs
-  a qudt:HomogeneousArrayKind ;
-  dcterms:description """
-  <p>A homogeneous array kind that gives member specs instead of one shared qudt:elementType. That
-  satisfies qudt:CellDescriptionUnionType, but a homogeneous array kind must give a shared element type
-  (qudt:HomogeneousCellsShape).</p>"""^^rdf:HTML ;
-  qudt:dimensionality 1 ;
-  qudt:dimensions ( 2 ) ;
-  qudt:elementCount 2 ;
-  qudt:tupleMemberSpecs ( [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 1 ;
-    sh:datatype xsd:double ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 2 ;
-    sh:datatype xsd:double ;
-  ] ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Invalid homogeneous array kind - member specs instead of a shared element type" .
-
-ex:badExampleHomogeneousArrayLength
-  a qudt:HomogeneousArray ;
-  dcterms:description """
-  <p>The kind declares elementCount 8 (2&#215;2&#215;2) but the qudt:values list
-  holds only 7 cells.</p>"""^^rdf:HTML ;
-  qudt:datatypeKind ex:BadLengthArrayKind ;
-  qudt:values ( 1.0 2.0 3.0 4.0 5.0 6.0 7.0 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Invalid homogeneous array - values list length does not match elementCount" .
-
-ex:badExampleHomogeneousArrayType
-  a qudt:HomogeneousArray ;
-  dcterms:description """
-  <p>The kind declares elementType xsd:decimal but the fourth cell is a
-  string.</p>"""^^rdf:HTML ;
-  qudt:datatypeKind ex:BadElementTypeArrayKind ;
-  qudt:values ( 1.0 2.0 3.0 "four" ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Invalid homogeneous array - a cell violates the shared element type" .
-
-ex:badExampleMemberSpecKindSharedUnit
-  a qudt:VectorKind ;
-  dcterms:description """
-  <p>A vector kind with member specs that also gives a kind-level qudt:hasUnit. A kind with member specs
-  gives each position its own unit, so it matches neither alternative of
-  qudt:CellDescriptionUnionType.</p>"""^^rdf:HTML ;
-  qudt:elementCount 2 ;
-  qudt:hasUnit unit:M ;
-  qudt:tupleMemberSpecs ( [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 1 ;
-    sh:datatype xsd:double ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 2 ;
-    sh:datatype xsd:double ;
-  ] ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Invalid vector kind - member specs and a kind-level unit" .
-
-ex:badExampleMemberSpecQuantityKind
-  a qudt:NTupleMemberTypeSpec ;
-  dcterms:description """
-  <p>The position's qudt:hasQuantityKind is unit:M, which is a unit, not a quantity kind.</p>"""^^rdf:HTML ;
-  qudt:hasQuantityKind unit:M ;
-  qudt:index 1 ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Invalid tuple member spec - its quantity kind is a unit" ;
-  sh:datatype xsd:decimal .
-
-ex:badExampleQuantityValueTuple
-  a qudt:NTuple ;
-  qudt:datatypeKind ex:NTupleKind_QuantityValueUnit ;
-  qudt:values ( quantitykind:Temperature 25.6 "DegC" ) .
-
-ex:badExampleTuple2a
-  a qudt:NTuple ;
-  qudt:datatypeKind ex:NTupleKind_StatusFlag ;
-  qudt:values ( "Approved" 42 ) .
-
-ex:badExampleTuple2b
-  a qudt:NTuple ;
-  qudt:datatypeKind ex:NTupleKind_StatusFlag ;
-  qudt:values ( "Approved" true 42 ) .
-
-ex:badExampleTuple3
-  a qudt:NTuple ;
-  qudt:datatypeKind ex:NTupleKind_Measurement ;
-  qudt:values ( "2026-05-12"^^xsd:date 23.7 42 ) .
-
-ex:badExampleTupleDateInDateTimePosition
-  a qudt:NTuple ;
-  qudt:datatypeKind ex:NTupleKind_OptionalTemporal ;
-  qudt:values ( "2026-05-12"^^xsd:date "14:30:00"^^xsd:time "2026-05-12"^^xsd:date
-    "2026-05-12T14:30:00Z"^^xsd:dateTimeStamp "2026"^^xsd:gYear "--05"^^xsd:gMonth "---12"^^xsd:gDay
-    "2026-05"^^xsd:gYearMonth "--05-12"^^xsd:gMonthDay "P1Y2M3DT4H"^^xsd:duration
-    "P3DT4H"^^xsd:dayTimeDuration "P1Y2M"^^xsd:yearMonthDuration ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "xsd:date in position 3, which is xsd:dateTime - a Maybe union matches its datatype exactly" .
-
-ex:badExampleTupleIntegerInIntPosition
-  a qudt:NTuple ;
-  qudt:datatypeKind ex:NTupleKind_OptionalNumbers ;
-  qudt:values ( true 23.7 2.37e1 "23.7"^^xsd:float 42 42 "42"^^xsd:long "42"^^xsd:nonNegativeInteger ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "42 (xsd:integer) in position 6, which is xsd:int - a Maybe union matches its datatype exactly" .
-
-ex:badExampleTupleKindElementType
-  a qudt:NTupleKind ;
-  dcterms:description """
-  <p>A tuple kind with member specs that also gives a shared qudt:elementType. A tuple kind describes
-  its positions only through its member specs (qudt:HeterogeneousCellsShape).</p>"""^^rdf:HTML ;
-  qudt:elementType xsd:string ;
-  qudt:tupleMemberSpecs ( [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 1 ;
-    sh:datatype xsd:string ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 2 ;
-    sh:datatype xsd:string ;
-  ] ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Invalid tuple kind - member specs and a shared element type" .
-
-ex:badExampleTupleNothingInRequiredPosition
-  a qudt:NTuple ;
-  qudt:datatypeKind ex:NTupleKind_Measurement ;
-  qudt:values ( "2026-05-12"^^xsd:date ( ) unit:DEG_C ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "rdf:nil in position 2, which requires xsd:decimal - only a Maybe union admits Nothing" .
-
-ex:badExampleTupleTimeInAnyDatePosition
-  a qudt:NTuple ;
-  qudt:datatypeKind ex:NTupleKind_OptionalAnyDate ;
-  qudt:values ( "2026-05-12"^^xsd:date "14:30:00"^^xsd:time "2026"^^xsd:gYear "--05"^^xsd:gMonth ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "xsd:time in position 2 - qudt:DateUnionType covers date, dateTime, gYear and gMonth only" .
-
-ex:badExampleVectorKindBothCellDescriptions
-  a qudt:VectorKind ;
-  dcterms:description """
-  <p>A vector kind that gives both a shared qudt:elementType and member specs, so it matches neither
-  alternative of qudt:CellDescriptionUnionType.</p>"""^^rdf:HTML ;
-  qudt:elementCount 2 ;
-  qudt:elementType xsd:double ;
-  qudt:tupleMemberSpecs ( [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 1 ;
-    sh:datatype xsd:double ;
-  ] [
-    a qudt:NTupleMemberTypeSpec ;
-    qudt:index 2 ;
-    sh:datatype xsd:double ;
-  ] ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Invalid vector kind - both a shared element type and member specs" .
-
-ex:badExampleVectorKindNoCellDescription
-  a qudt:VectorKind ;
-  dcterms:description """
-  <p>A vector kind that gives neither a shared qudt:elementType nor member specs, so it matches neither
-  alternative of qudt:CellDescriptionUnionType.</p>"""^^rdf:HTML ;
-  qudt:elementCount 3 ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Invalid vector kind - no element type and no member specs" .
-
-ex:cpaBadLengthShort
-  a ex:IfcCompoundPlaneAngleMeasure ;
-  qudt:datatypeKind ex:NTupleKind_IfcCompoundPlaneAngleMeasure ;
-  qudt:values ( 52 31 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "only 2 members - violates LIST [3:4] (too short)" .
-
-ex:cpaBadMicroseconds
-  a ex:IfcCompoundPlaneAngleMeasure ;
-  qudt:datatypeKind ex:NTupleKind_IfcCompoundPlaneAngleMeasure ;
-  qudt:values ( 52 31 12 1000000 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "millionth-seconds = 1000000 - violates MicrosecondsInRange" .
-
-ex:cpaBadMinutes
-  a ex:IfcCompoundPlaneAngleMeasure ;
-  qudt:datatypeKind ex:NTupleKind_IfcCompoundPlaneAngleMeasure ;
-  qudt:values ( 52 60 0 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "minutes = 60 - violates MinutesInRange" .
-
-ex:cpaBadSeconds
-  a ex:IfcCompoundPlaneAngleMeasure ;
-  qudt:datatypeKind ex:NTupleKind_IfcCompoundPlaneAngleMeasure ;
-  qudt:values ( 52 31 75 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "seconds = 75 - violates SecondsInRange" .
-
-ex:cpaBadSign
-  a ex:IfcCompoundPlaneAngleMeasure ;
-  qudt:datatypeKind ex:NTupleKind_IfcCompoundPlaneAngleMeasure ;
-  qudt:values ( 52 -31 12 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "mixed signs - violates ConsistentSign" .
-
-ex:cpaBadType
-  a ex:IfcCompoundPlaneAngleMeasure ;
-  qudt:datatypeKind ex:NTupleKind_IfcCompoundPlaneAngleMeasure ;
-  qudt:values ( 52 31 "12" ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "seconds is a string - violates the integer member type" .
-
-ex:exampleArrayWithBadRankKind
-  a qudt:HomogeneousArray ;
-  dcterms:description """
-  <p>A well-formed array instance -- six values matching the kind's
-  elementCount -- whose kind carries the rank fault. Present so that the
-  rank violation is reported only against
-  <code>ex:badExampleArrayRank</code>.</p>"""^^rdf:HTML ;
-  qudt:datatypeKind ex:badExampleArrayRank ;
-  qudt:values ( 1.0 2.0 3.0 4.0 5.0 6.0 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Array whose array kind has an invalid rank" .
-
-qudt:Array1D_Integers-INVALID
-  a qudt:Array ;
-  dcterms:description """
-  <p>TBD
-  </p>"""^^rdf:HTML ;
-  qudt:datatype datatype:INTEGER ;
-  qudt:dimensionality 1 ;
-  qudt:dimensions ( 2 ) ;
-  qudt:value ( 1 2 3 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Example of an invalid 1D Array" .
-
-qudt:EX_Array1D_INVALID
-  a qudt:Array ;
-  dcterms:description """
-  <p>TBD
-  </p>"""^^rdf:HTML ;
-  qudt:datatype datatype:INTEGER ;
-  qudt:dimensionality 1 ;
-  qudt:dimensions ( 2 ) ;
-  qudt:value ( 1 2 3 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Example of an invalid 1D Array" .
-
-qudt:EX_Collection_Temperature_Values_INVALID
-  a qudt:Collection ;
-  dcterms:description """
-  <p>TBD
-  </p>"""^^rdf:HTML ;
-  qudt:datatype datatype:DECIMAL ;
-  qudt:quantity qudt:Room_Temperature ;
-  qudt:value ( 54.0 55.6 56.9 61.2 ) ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Example of a invalid collection of temperature values" .
-
-qudt:EX_List_3_Strings_INVALID
+ex:EX_List_3_Strings_INVALID
   a qudt:List ;
   dcterms:description """
   <p>TBD
@@ -399,7 +60,7 @@ qudt:EX_List_3_Strings_INVALID
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
   rdfs:label "Example of an invalid list of 3 strings" .
 
-qudt:List_3_Strings_INVALID
+ex:List_3_Strings_INVALID
   a qudt:List ;
   dcterms:description """
   <p>TBD
@@ -409,7 +70,7 @@ qudt:List_3_Strings_INVALID
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
   rdfs:label "Example of an invalid list of 3 strings" .
 
-qudt:List_Decimal_Values_INVALID
+ex:List_Decimal_Values_INVALID
   a qudt:List ;
   dcterms:description """
   <p>A list with values of the wrong datatype.
@@ -419,23 +80,14 @@ qudt:List_Decimal_Values_INVALID
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
   rdfs:label "Example of a invalid list - values have the wrong datatype" .
 
-qudt:Quantity_RoomTemperature-INVALID
-  a qudt:Quantity ;
-  qudt:hasQuantityKind quantitykind:Temperature ;
-  qudt:hasUnit unit:DEG_F ;
-  qudt:value qudt:List_Decimal_Values_INVALID ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Room Temperature" .
-
-qudt:Room_Temperature
-  a qudt:Quantity ;
-  qudt:hasQuantityKind quantitykind:Temperature ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/invalid> ;
-  rdfs:label "Room Temperature" .
-
 vaem:GMD_INVALID-DATATYPES
   a vaem:GraphMetaData ;
-  dcterms:description "The QUDT 'Datatype' vocabulary is a specification of scalar and structured data types. Scalar data types are defined for all the commonly encountered forms of numbers, characters and booleans, with their representations in a number of vendor and industry specific technologies. Structured data types cover arrays, lists, trees and many other forms of composite data elements. Specification of coordinate systems is also covered."^^rdf:HTML ;
+  dcterms:description """
+  Invalid examples of scalar datatypes and lists. The invalid tuple, array and quantity examples are in
+  <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple/invalid>,
+  <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> and
+  <http://qudt.org/$$QUDT_VERSION$$/examples/quantities/invalid>.
+  """^^rdf:HTML ;
   dcterms:modified "1234-12-12T12:34:56Z"^^xsd:dateTime ;
   dcterms:subject "Datatypes" ;
   rdfs:label "QUDT Examples of Invalid Datatypes - Version $$QUDT_VERSION$$" ;

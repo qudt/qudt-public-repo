@@ -734,9 +734,10 @@ and `qudt:datatype`; the retired `DimensionalityShape` no longer covers them. Th
 `qudt:datatypeKind`. (On 2026-10-24 the integer array was migrated, as
 `ex:HomogeneousArray_1D_Integers`, and the mass-properties array was replaced by the heterogeneous
 vector `ex:Vector_MassProperties`.) In the invalid examples,
-the two legacy arrays (`qudt:Array1D_Integers-INVALID`, `qudt:EX_Array1D_INVALID`) fail only that
-check, not their intended dimension error, and six more `qudt:`-named resources (three lists, a
-collection and two quantities) are tested by no current constraint.
+the two legacy arrays (`ex:Array1D_Integers-INVALID`, `ex:EX_Array1D_INVALID`) fail only that
+check, not their intended dimension error, and six more legacy resources (three lists, a
+collection and two quantities) are tested by no current constraint. All eight were named `qudt:`
+until 2026-10-25, when the invalid examples were split into one file per valid graph.
 C. **Finish deprecating `qudt:HeterogenousArray-datatype`** in favour of the kind's `qudt:tupleMemberSpecs`.
 D. Rewrite the nested-list prose on `qudt:HomogeneousArray`, `qudt:HeterogenousArray`, and
 `qudt:MultiDimensionalArray` to match the flat representation.
