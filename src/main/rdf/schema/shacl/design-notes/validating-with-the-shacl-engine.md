@@ -63,7 +63,7 @@ there was lost once, which is why they now live in the repository.
 
 ### What goes into each graph, and why
 
-- **Shapes graph:** the datatype and main SHACL schemas and the three example files. The examples must be
+- **Shapes graph:** the datatype and main SHACL schemas and the four example files. The examples must be
   shapes too, because some constraints are defined in them
   (`ex:IfcCompoundPlaneAngleConsistentSign`); leave them out and those constraints silently
   don't run.
