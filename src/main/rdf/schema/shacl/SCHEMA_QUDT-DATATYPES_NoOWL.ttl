@@ -134,8 +134,11 @@ qudt:Array
   rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:Array-datatypeKind ;
   sh:property qudt:ValuesList ;
+  sh:sparql qudt:ValuesListElementSpecCheck ;
   sh:sparql qudt:ValuesListElementTypeCheck ;
-  sh:sparql qudt:ValuesListLengthCheck .
+  sh:sparql qudt:ValuesListLanguageCheck ;
+  sh:sparql qudt:ValuesListLengthCheck ;
+  sh:sparql qudt:ValuesListRangeCheck .
 
 qudt:ArrayDataOrder
   a rdfs:Class, sh:NodeShape ;
@@ -181,6 +184,7 @@ qudt:ArrayKind
   sh:property qudt:DimensionalityPropertyShape ;
   sh:property qudt:DimensionsPropertyShape ;
   sh:property qudt:StructuredDataKind-datatype ;
+  sh:property qudt:StructuredDataKind-elementSpec ;
   sh:property qudt:StructuredDataKind-elementType ;
   sh:property qudt:StructuredDataKind-hasQuantityKind ;
   sh:property qudt:StructuredDataKind-hasUnit ;
@@ -360,7 +364,10 @@ qudt:Collection
   rdfs:subClassOf qudt:StructuredDatatype ;
   sh:property qudt:Collection-datatypeKind ;
   sh:property qudt:Collection-values ;
-  sh:sparql qudt:ValuesListElementTypeCheck .
+  sh:sparql qudt:ValuesListElementSpecCheck ;
+  sh:sparql qudt:ValuesListElementTypeCheck ;
+  sh:sparql qudt:ValuesListLanguageCheck ;
+  sh:sparql qudt:ValuesListRangeCheck .
 
 qudt:CollectionKind
   a rdfs:Class, sh:NodeShape ;
@@ -375,6 +382,7 @@ qudt:CollectionKind
   rdfs:label "Collection Kind" ;
   rdfs:subClassOf qudt:Concept ;
   sh:node qudt:HomogeneousCellsShape ;
+  sh:property qudt:StructuredDataKind-elementSpec ;
   sh:property qudt:StructuredDataKind-elementType ;
   sh:property qudt:StructuredDataKind-hasQuantityKind ;
   sh:property qudt:StructuredDataKind-hasUnit .
@@ -934,6 +942,7 @@ qudt:Map
   sh:property qudt:Map-datatypeKind ;
   sh:property qudt:Map-keys ;
   sh:sparql qudt:MapDistinctKeysCheck ;
+  sh:sparql qudt:MapKeySpecCheck ;
   sh:sparql qudt:MapKeyTypeCheck ;
   sh:sparql qudt:MapKeysLengthCheck .
 
@@ -942,12 +951,26 @@ qudt:MapKind
   dcterms:description """
   <p>A <em>Map Kind</em> is the blueprint for a <code>qudt:Map</code>. As a collection kind it gives the type
    shared by every value (<code>qudt:elementType</code>) and, optionally, their quantity kind and unit. It
-   also gives the type shared by every key (<code>qudt:keyType</code>), a datatype or a class.
+   also gives the type shared by every key: a datatype or a class IRI (<code>qudt:keyType</code>), or a
+   type-facet node for a type a single IRI cannot express (<code>qudt:keySpec</code>), exactly one of the
+   two. The values' type may likewise be given with <code>qudt:elementSpec</code>.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Map Kind" ;
   rdfs:subClassOf qudt:CollectionKind ;
-  sh:property qudt:MapKind-keyType .
+  sh:property qudt:MapKind-keySpec ;
+  sh:property qudt:MapKind-keyType ;
+  sh:xone ( [
+    sh:property [
+      sh:minCount 1 ;
+      sh:path qudt:keyType ;
+    ] ;
+  ] [
+    sh:property [
+      sh:minCount 1 ;
+      sh:path qudt:keySpec ;
+    ] ;
+  ] ) .
 
 qudt:MassPropertiesArray
   a rdfs:Class, sh:NodeShape ;
@@ -1938,8 +1961,11 @@ qudt:Vector
   sh:sparql qudt:NTupleMissingRequiredValueCheck ;
   sh:sparql qudt:NTupleRangeCheck ;
   sh:sparql qudt:NTupleTypeCheck ;
+  sh:sparql qudt:ValuesListElementSpecCheck ;
   sh:sparql qudt:ValuesListElementTypeCheck ;
-  sh:sparql qudt:ValuesListLengthCheck .
+  sh:sparql qudt:ValuesListLanguageCheck ;
+  sh:sparql qudt:ValuesListLengthCheck ;
+  sh:sparql qudt:ValuesListRangeCheck .
 
 qudt:VectorKind
   a rdfs:Class, sh:NodeShape ;
@@ -1963,6 +1989,7 @@ qudt:VectorKind
   rdfs:subClassOf qudt:Concept ;
   sh:or qudt:CellDescriptionUnionType ;
   sh:property qudt:StructuredDataKind-datatype ;
+  sh:property qudt:StructuredDataKind-elementSpec ;
   sh:property qudt:StructuredDataKind-elementType ;
   sh:property qudt:StructuredDataKind-hasQuantityKind ;
   sh:property qudt:StructuredDataKind-hasUnit ;
@@ -2213,6 +2240,12 @@ qudt:elementName
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "element name" .
 
+qudt:elementSpec
+  a rdf:Property ;
+  dcterms:description "The type shared by every value of a homogeneous array, vector or collection, given as a type-facet node rather than an IRI: any of the four facets a tuple member spec takes (a datatype or a union of datatypes, a class, enumerated values, or any IRI), with optional numeric bounds or sh:languageIn. An alternative to qudt:elementType, which takes a single datatype or class IRI." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "element spec" .
+
 qudt:elementType
   a rdf:Property ;
   dcterms:description "The single shared element type of a homogeneous array, given as a datatype IRI (matched against each cell's literal datatype) or a class IRI (matched against each cell's rdf:type). Heterogeneous arrays instead give per-position types in their kind's qudt:tupleMemberSpecs." ;
@@ -2335,6 +2368,12 @@ qudt:jsName
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Javascript name" ;
   rdfs:subPropertyOf qudt:id .
+
+qudt:keySpec
+  a rdf:Property ;
+  dcterms:description "The type shared by every key of a map, given as a type-facet node rather than an IRI: any of the four facets a tuple member spec takes, with optional numeric bounds or sh:languageIn. An alternative to qudt:keyType, which takes a single datatype or class IRI." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "key spec" .
 
 qudt:keyType
   a rdf:Property ;
@@ -3287,12 +3326,16 @@ qudt:HeterogeneousCellsShape
   dcterms:description """
   Cells described position by position: the kind lists one qudt:NTupleMemberTypeSpec per position in
    qudt:tupleMemberSpecs, each giving that position's type and, optionally, its quantity kind and unit.
-   The kind itself gives no qudt:elementType, qudt:hasQuantityKind or qudt:hasUnit. One of the two
+   The kind itself gives no qudt:elementType, qudt:elementSpec, qudt:hasQuantityKind or qudt:hasUnit. One of the two
    alternatives in qudt:CellDescriptionUnionType, and required of every tuple kind and heterogeneous
    array kind.
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Heterogeneous Cells Shape" ;
+  sh:property [
+    sh:maxCount 0 ;
+    sh:path qudt:elementSpec ;
+  ] ;
   sh:property [
     sh:maxCount 0 ;
     sh:path qudt:elementType ;
@@ -3355,7 +3398,8 @@ qudt:HomogeneousArray-datatypeKind
 qudt:HomogeneousCellsShape
   a sh:NodeShape ;
   dcterms:description """
-  Cells that share one type: the kind gives a single qudt:elementType, and optionally the quantity kind
+  Cells that share one type: the kind gives it once, as a datatype or class IRI (qudt:elementType) or as a
+   type-facet node (qudt:elementSpec), exactly one of the two, and optionally the quantity kind
    (qudt:hasQuantityKind) and unit (qudt:hasUnit) shared by every cell. The kind gives no
    qudt:tupleMemberSpecs. One of the two alternatives in qudt:CellDescriptionUnionType, and required of
    every homogeneous array kind and every collection kind.
@@ -3366,10 +3410,17 @@ qudt:HomogeneousCellsShape
     sh:maxCount 0 ;
     sh:path qudt:tupleMemberSpecs ;
   ] ;
-  sh:property [
-    sh:minCount 1 ;
-    sh:path qudt:elementType ;
-  ] .
+  sh:xone ( [
+    sh:property [
+      sh:minCount 1 ;
+      sh:path qudt:elementType ;
+    ] ;
+  ] [
+    sh:property [
+      sh:minCount 1 ;
+      sh:path qudt:elementSpec ;
+    ] ;
+  ] ) .
 
 qudt:IconicCue-image
   a sh:PropertyShape ;
@@ -3491,6 +3542,60 @@ qudt:MapDistinctKeysCheck
         }
     """ .
 
+qudt:MapKeySpecCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    Key-spec check for maps: where a qudt:MapKind gives the key type as a type-facet node
+    (qudt:keySpec), every key in the map's qudt:keys must satisfy one of the node's facets, probed as
+    qudt:NTupleTypeCheck probes a member spec. The counterpart of qudt:MapKeyTypeCheck, which checks a
+    qudt:keyType IRI.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "Map key {?value} does not satisfy the key spec of its kind." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+        SELECT DISTINCT $this ?value
+        WHERE {
+            $this qudt:datatypeKind ?kind .
+            ?kind qudt:keySpec ?spec .
+            $this qudt:keys ?keys .
+            ?keys rdf:rest* ?keyCell .
+            ?keyCell rdf:first ?value .
+            # The four type facets, probed as qudt:NTupleTypeCheck probes a member spec.
+            # (1) A datatype, direct or inside sh:or unions, nested to any depth
+            OPTIONAL {
+                ?spec ( sh:datatype | (sh:or/rdf:rest*/rdf:first)+/sh:datatype ) ?allowedDatatype .
+                FILTER ( datatype(?value) = ?allowedDatatype )
+                BIND ( true AS ?datatypeMatch )
+            }
+            # (1b) A specific value inside an sh:or union (sh:hasValue)
+            OPTIONAL {
+                ?spec (sh:or/rdf:rest*/rdf:first)+/sh:hasValue ?allowedValue .
+                FILTER ( sameTerm(?value, ?allowedValue) )
+                BIND ( true AS ?hasValueMatch )
+            }
+            # (2) Class membership
+            OPTIONAL {
+                ?spec sh:class ?targetClass .
+                ?value rdf:type/rdfs:subClassOf* ?targetClass .
+                BIND ( true AS ?classMatch )
+            }
+            # (3) An enumerated value
+            OPTIONAL {
+                ?spec qudt:value ?value .
+                BIND ( true AS ?enumeratedMatch )
+            }
+            # (4) Any IRI
+            OPTIONAL {
+                ?spec sh:nodeKind sh:IRI .
+                FILTER ( isIRI(?value) )
+                BIND ( true AS ?iriMatch )
+            }
+            FILTER ( !BOUND(?datatypeMatch) && !BOUND(?hasValueMatch) && !BOUND(?classMatch)
+                && !BOUND(?enumeratedMatch) && !BOUND(?iriMatch) )
+        }
+    """ .
+
 qudt:MapKeyTypeCheck
   a sh:SPARQLConstraint ;
   rdfs:comment """
@@ -3560,12 +3665,20 @@ qudt:MapKeysLengthCheck
         }
     """ .
 
+qudt:MapKind-keySpec
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:description "The type shared by every key of a map of this kind, as a type-facet node: an alternative to qudt:keyType for types a single IRI cannot express. It must give at least one of the type facets, and may refine it with numeric bounds or sh:languageIn." ;
+  sh:maxCount 1 ;
+  sh:node qudt:NTupleMemberTypeSpec-type ;
+  sh:nodeKind sh:BlankNodeOrIRI ;
+  sh:path qudt:keySpec .
+
 qudt:MapKind-keyType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:description "The type shared by every key of a map of this kind: a datatype IRI, matched against each key's literal datatype, or a class IRI, matched against each key's rdf:type." ;
+  sh:description "The type shared by every key of a map of this kind: a datatype IRI, matched against each key's literal datatype, or a class IRI, matched against each key's rdf:type. A map kind gives exactly one of qudt:keyType and qudt:keySpec." ;
   sh:maxCount 1 ;
-  sh:minCount 1 ;
   sh:nodeKind sh:IRI ;
   sh:path qudt:keyType .
 
@@ -4923,12 +5036,28 @@ qudt:StructuredDataKind-datatype
   sh:message "An array or vector kind types its cells with qudt:elementType or qudt:tupleMemberSpecs, not qudt:datatype." ;
   sh:path qudt:datatype .
 
+qudt:StructuredDataKind-elementSpec
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:description """
+  For homogeneous arrays, vectors and collections, the shared type as a type-facet node, an alternative to
+  qudt:elementType for types a single IRI cannot express: "any number" ([ sh:or qudt:NumericUnionType ]),
+  "one of these values" ([ qudt:value ... ]), a class, or "any IRI" ([ sh:nodeKind sh:IRI ]). It must give
+  at least one of the type facets (qudt:NTupleMemberTypeSpec-type), and may refine it with numeric bounds
+  or sh:languageIn.
+  """ ;
+  sh:maxCount 1 ;
+  sh:node qudt:NTupleMemberTypeSpec-type ;
+  sh:nodeKind sh:BlankNodeOrIRI ;
+  sh:path qudt:elementSpec .
+
 qudt:StructuredDataKind-elementType
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:description """
-  For Homogeneous arrays and vectors, the single shared element-type facet (a datatype or a class IRI). 
-  Heterogeneous structures instead give per-position types in qudt:tupleMemberSpecs.
+  For homogeneous arrays, vectors and collections, the single shared element type, a datatype or a class
+  IRI. A type a single IRI cannot express is given with qudt:elementSpec instead; heterogeneous structures
+  give per-position types in qudt:tupleMemberSpecs.
   """ ;
   sh:maxCount 1 ;
   sh:nodeKind sh:IRI ;
@@ -5166,6 +5295,60 @@ qudt:ValuesList
   sh:node qudt:RDFListShape ;
   sh:path qudt:values .
 
+qudt:ValuesListElementSpecCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    Element-spec check: where the kind of an array, vector or collection gives its shared type as a
+    type-facet node (qudt:elementSpec), every value in qudt:values must satisfy one of the node's
+    facets, probed as qudt:NTupleTypeCheck probes a member spec. The counterpart of
+    qudt:ValuesListElementTypeCheck, which checks a qudt:elementType IRI.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "Element {?value} does not satisfy the element spec of its kind." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+        SELECT DISTINCT $this ?value
+        WHERE {
+            $this qudt:datatypeKind ?kind .
+            ?kind qudt:elementSpec ?spec .
+            $this qudt:values ?values .
+            ?values rdf:rest* ?valueCell .
+            ?valueCell rdf:first ?value .
+            # The four type facets, probed as qudt:NTupleTypeCheck probes a member spec.
+            # (1) A datatype, direct or inside sh:or unions, nested to any depth
+            OPTIONAL {
+                ?spec ( sh:datatype | (sh:or/rdf:rest*/rdf:first)+/sh:datatype ) ?allowedDatatype .
+                FILTER ( datatype(?value) = ?allowedDatatype )
+                BIND ( true AS ?datatypeMatch )
+            }
+            # (1b) A specific value inside an sh:or union (sh:hasValue)
+            OPTIONAL {
+                ?spec (sh:or/rdf:rest*/rdf:first)+/sh:hasValue ?allowedValue .
+                FILTER ( sameTerm(?value, ?allowedValue) )
+                BIND ( true AS ?hasValueMatch )
+            }
+            # (2) Class membership
+            OPTIONAL {
+                ?spec sh:class ?targetClass .
+                ?value rdf:type/rdfs:subClassOf* ?targetClass .
+                BIND ( true AS ?classMatch )
+            }
+            # (3) An enumerated value
+            OPTIONAL {
+                ?spec qudt:value ?value .
+                BIND ( true AS ?enumeratedMatch )
+            }
+            # (4) Any IRI
+            OPTIONAL {
+                ?spec sh:nodeKind sh:IRI .
+                FILTER ( isIRI(?value) )
+                BIND ( true AS ?iriMatch )
+            }
+            FILTER ( !BOUND(?datatypeMatch) && !BOUND(?hasValueMatch) && !BOUND(?classMatch)
+                && !BOUND(?enumeratedMatch) && !BOUND(?iriMatch) )
+        }
+    """ .
+
 qudt:ValuesListElementTypeCheck
   a sh:SPARQLConstraint ;
   rdfs:comment """
@@ -5195,6 +5378,41 @@ qudt:ValuesListElementTypeCheck
         }
     """ .
 
+qudt:ValuesListLanguageCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    Language check for shared types: where a kind's qudt:elementSpec, or a map kind's qudt:keySpec,
+    gives sh:languageIn, every value, or every key, must be a literal whose language tag matches one
+    of the listed tags (langMatches, as SHACL's own sh:languageIn). rdf:nil is skipped. The shared-type
+    counterpart of qudt:NTupleLanguageCheck.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "{?role} {?value} has a language tag that the spec of its kind does not allow." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+        SELECT DISTINCT $this ?role ?value
+        WHERE {
+            $this qudt:datatypeKind ?kind .
+            {
+                ?kind qudt:elementSpec ?spec .
+                $this qudt:values ?list .
+                BIND ( "Element" AS ?role )
+            } UNION {
+                ?kind qudt:keySpec ?spec .
+                $this qudt:keys ?list .
+                BIND ( "Key" AS ?role )
+            }
+            ?list rdf:rest* ?cell .
+            ?cell rdf:first ?value .
+            ?spec sh:languageIn ?languages .
+            FILTER ( !sameTerm(?value, rdf:nil) )
+            FILTER NOT EXISTS {
+                ?languages rdf:rest*/rdf:first ?language .
+                FILTER ( isLiteral(?value) && langMatches(lang(?value), ?language) )
+            }
+        }
+    """ .
+
 qudt:ValuesListLengthCheck
   a sh:SPARQLConstraint ;
   rdfs:comment """
@@ -5220,6 +5438,47 @@ qudt:ValuesListLengthCheck
                 GROUP BY $this
             }
             FILTER ( ?valueCount != ?elementCount )
+        }
+    """ .
+
+qudt:ValuesListRangeCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    Range check for shared types: where a kind's qudt:elementSpec, or a map kind's qudt:keySpec, gives
+    numeric bounds (sh:minInclusive, sh:maxInclusive, sh:minExclusive, sh:maxExclusive), every value,
+    or every key, must lie within them. The shared-type counterpart of qudt:NTupleRangeCheck.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "{?role} {?value} is outside the range declared by the spec of its kind." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+        SELECT DISTINCT $this ?role ?value
+        WHERE {
+            $this qudt:datatypeKind ?kind .
+            {
+                ?kind qudt:elementSpec ?spec .
+                $this qudt:values ?list .
+                BIND ( "Element" AS ?role )
+            } UNION {
+                ?kind qudt:keySpec ?spec .
+                $this qudt:keys ?list .
+                BIND ( "Key" AS ?role )
+            }
+            ?list rdf:rest* ?cell .
+            ?cell rdf:first ?value .
+            FILTER EXISTS {
+                ?spec ( sh:minInclusive | sh:maxInclusive | sh:minExclusive | sh:maxExclusive ) ?anyBound .
+            }
+            OPTIONAL { ?spec sh:minInclusive ?minInclusive . }
+            OPTIONAL { ?spec sh:maxInclusive ?maxInclusive . }
+            OPTIONAL { ?spec sh:minExclusive ?minExclusive . }
+            OPTIONAL { ?spec sh:maxExclusive ?maxExclusive . }
+            FILTER (
+                   ( BOUND(?minInclusive) && ?value <  ?minInclusive )
+                || ( BOUND(?maxInclusive) && ?value >  ?maxInclusive )
+                || ( BOUND(?minExclusive) && ?value <= ?minExclusive )
+                || ( BOUND(?maxExclusive) && ?value >= ?maxExclusive )
+            )
         }
     """ .
 

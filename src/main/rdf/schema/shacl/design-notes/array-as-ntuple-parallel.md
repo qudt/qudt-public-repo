@@ -851,22 +851,15 @@ of which fits keys and values. `qudt:Map` now models the concept, so `qudt:Assoc
 `qudt:Map`'s `rdfs:seeAlso` link to it were removed; nothing used either. `qudt:Map`'s description
 still names "Associative Array" as a synonym. The derived OWL datatype schema keeps the class until
 it is regenerated.
-L. **Let a shared element type use the full type facet** *(added 2026-10-25)*. `qudt:elementType` is a
-single IRI, a datatype or a class, and `qudt:ValuesListElementTypeCheck` matches only those two. A
-per-position member spec accepts any of four facets — a datatype union (`sh:or
-qudt:NumericUnionType`), a class, enumerated values (`qudt:value …`) or any IRI (`sh:nodeKind
-sh:IRI`) — so a shared type cannot say "any number", "one of these values" or "any IRI", although a
-tuple or heterogeneous array position can. The gap applies to homogeneous arrays and vectors, to
-collections, and to map keys (`qudt:keyType`, checked by `qudt:MapKeyTypeCheck`). Two designs, not
-yet chosen:
-- *(a)* Let `qudt:elementType` also take a type-facet node, in effect a member spec without
-`qudt:index`, such as `[ sh:or qudt:NumericUnionType ]`. That relaxes `sh:nodeKind sh:IRI` on
-`qudt:StructuredDataKind-elementType`, and teaches the element-type and key-type checks the four
-facet probes that `qudt:NTupleTypeCheck` uses.
-- *(b)* Keep `qudt:elementType` a simple IRI and add a separate property for the richer form, such
-as `qudt:elementSpec`, with the homogeneous alternative (`qudt:HomogeneousCellsShape`) requiring
-exactly one of the two. Existing data keeps its meaning.
-
-Either way, decide whether the refinements — numeric bounds and `sh:languageIn` — should then apply
-to shared types too, which would need range and language checks for homogeneous cells, and whether
-`qudt:keyType` gets the same treatment.
+L. ~~**Let a shared element type use the full type facet**~~ *(added 2026-10-25)*. **Done 2026-10-26,
+design (b).** `qudt:elementType` and `qudt:keyType` stay single IRIs, a datatype or a class, so existing
+data and consumers keep their meaning. A new `qudt:elementSpec`, on array, vector and collection kinds,
+and `qudt:keySpec`, on map kinds, take a type-facet node instead: any of the four facets of a member
+spec, without `qudt:index`, checked by `qudt:NTupleMemberTypeSpec-type`. `qudt:HomogeneousCellsShape`
+requires exactly one of `qudt:elementType` and `qudt:elementSpec` (`sh:xone`), and a map kind exactly
+one of `qudt:keyType` and `qudt:keySpec`; `qudt:HeterogeneousCellsShape` forbids `qudt:elementSpec`.
+`qudt:ValuesListElementSpecCheck` and `qudt:MapKeySpecCheck` probe the facets as `qudt:NTupleTypeCheck`
+does. Refinements in a spec are checked too, for values and keys alike: `qudt:ValuesListRangeCheck`
+(numeric bounds) and `qudt:ValuesListLanguageCheck` (`sh:languageIn`), so a bound written in a spec is
+not silently ignored. Design (a), a facet node in `qudt:elementType` itself, was set aside because code
+that assumes `qudt:elementType` is an IRI would break.

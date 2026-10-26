@@ -12,6 +12,7 @@
 
 <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array>
   a owl:Ontology ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/examples/datatype> ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/datatype> ;
   owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/quantitykind> ;
@@ -153,6 +154,38 @@ ex:HomogeneousArrayKind_3D_Temperatures
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array> ;
   rdfs:label "Homogeneous 2x2x2 array kind of temperatures" .
 
+ex:HomogeneousArrayKind_AlarmStates
+  a qudt:HomogeneousArrayKind ;
+  dcterms:description """
+  <p>A 1-D array kind of four alarm states. Every cell must be one of the enumerated values of
+  ex:Enumeration_RoomTemperatureAlarm, given as an element spec with qudt:value.</p>"""^^rdf:HTML ;
+  qudt:dimensionality 1 ;
+  qudt:dimensions ( 4 ) ;
+  qudt:elementCount 4 ;
+  qudt:elementSpec [
+    qudt:value ex:HighAlarm ;
+    qudt:value ex:LowAlarm ;
+    qudt:value ex:NoAlarm ;
+  ] ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array> ;
+  rdfs:label "Homogeneous array kind of four alarm states" .
+
+ex:HomogeneousArrayKind_Ratings
+  a qudt:HomogeneousArrayKind ;
+  dcterms:description """
+  <p>A 1-D array kind of three ratings, each an integer from 1 to 5. The element spec refines its
+  datatype with numeric bounds, as a member spec can.</p>"""^^rdf:HTML ;
+  qudt:dimensionality 1 ;
+  qudt:dimensions ( 3 ) ;
+  qudt:elementCount 3 ;
+  qudt:elementSpec [
+    sh:datatype xsd:integer ;
+    sh:maxInclusive 5 ;
+    sh:minInclusive 1 ;
+  ] ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array> ;
+  rdfs:label "Homogeneous array kind of three ratings from 1 to 5" .
+
 ex:HomogeneousArray_1D_Integers
   a qudt:HomogeneousArray ;
   dcterms:description """
@@ -192,6 +225,20 @@ ex:HomogeneousArray_3D_Temperatures
   qudt:values ( 20.1 20.4 21.0 19.8 22.3 21.7 20.9 20.2 ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array> ;
   rdfs:label "Homogeneous 2x2x2 array of temperatures" .
+
+ex:HomogeneousArray_AlarmStates
+  a qudt:HomogeneousArray ;
+  qudt:datatypeKind ex:HomogeneousArrayKind_AlarmStates ;
+  qudt:values ( ex:NoAlarm ex:LowAlarm ex:NoAlarm ex:HighAlarm ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array> ;
+  rdfs:label "Alarm states of four rooms" .
+
+ex:HomogeneousArray_Ratings
+  a qudt:HomogeneousArray ;
+  qudt:datatypeKind ex:HomogeneousArrayKind_Ratings ;
+  qudt:values ( 4 5 3 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array> ;
+  rdfs:label "Three ratings" .
 
 ex:HomogeneousVector_3_Integers
   a qudt:Vector ;
@@ -267,6 +314,18 @@ ex:Vector3D_FLOAT-SP
   qudt:values ( "1.1"^^xsd:float "2.2"^^xsd:float "3.3"^^xsd:float ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array> ;
   rdfs:label "Example of a 3D vector - single precision" .
+
+ex:VectorKind_3_AnyNumber
+  a qudt:VectorKind ;
+  dcterms:description """
+  <p>A vector kind whose three components may each be any number, of any numeric datatype. A single IRI
+  cannot say "any number", so the shared type is given as a type-facet node with qudt:elementSpec.</p>"""^^rdf:HTML ;
+  qudt:elementCount 3 ;
+  qudt:elementSpec [
+    sh:or qudt:NumericUnionType ;
+  ] ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array> ;
+  rdfs:label "Vector kind of three numbers of any numeric datatype" .
 
 ex:VectorKind_3_Double
   a qudt:VectorKind ;
@@ -404,6 +463,15 @@ ex:Vector_MassProperties
   qudt:values ( 0.1E0 0.5E0 1.0E0 2.0E0 3.0E0 4.0E0 ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array> ;
   rdfs:label "Mass Properties Vector Example" .
+
+ex:Vector_MixedNumbers
+  a qudt:Vector ;
+  dcterms:description """
+  <p>An integer, a decimal and a double, all accepted by the kind's element spec.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:VectorKind_3_AnyNumber ;
+  qudt:values ( 1 2.5 3.0E0 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array> ;
+  rdfs:label "Vector of mixed numbers" .
 
 vaem:GMD_ARRAY-DATATYPES
   a vaem:GraphMetaData ;

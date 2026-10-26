@@ -6,6 +6,7 @@
 @prefix ex: <http://example.org#> .
 @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix unit: <http://qudt.org/vocab/unit/> .
 @prefix vaem: <http://www.linkedmodel.org/schema/vaem#> .
 
@@ -51,6 +52,28 @@ dcterms:title
   rdfs:label "title" ;
   rdfs:range xsd:string .
 
+ex:CollectionKind_AnyIRI
+  a qudt:CollectionKind ;
+  dcterms:description """
+  <p>A collection kind whose members may be any IRI, given as an element spec with sh:nodeKind sh:IRI.</p>"""^^rdf:HTML ;
+  qudt:elementSpec [
+    sh:nodeKind sh:IRI ;
+  ] ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection> ;
+  rdfs:label "Collection kind of IRIs" .
+
+ex:CollectionKind_EnglishLabels
+  a qudt:CollectionKind ;
+  dcterms:description """
+  <p>A collection kind of English labels: language-tagged strings, refined with sh:languageIn ( "en" ),
+  which also accepts regional tags such as en-GB.</p>"""^^rdf:HTML ;
+  qudt:elementSpec [
+    sh:datatype rdf:langString ;
+    sh:languageIn ( "en" ) ;
+  ] ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection> ;
+  rdfs:label "Collection kind of English labels" .
+
 ex:CollectionKind_Temperatures
   a qudt:CollectionKind ;
   dcterms:description """
@@ -61,6 +84,20 @@ ex:CollectionKind_Temperatures
   qudt:hasUnit unit:DEG_F ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection> ;
   rdfs:label "Collection kind of temperatures in degrees Fahrenheit" .
+
+ex:MapKind_FloorTemperatures
+  a qudt:MapKind ;
+  dcterms:description """
+  <p>Blueprint for maps from floor numbers to temperatures. A floor number may be of any numeric
+  datatype, which a single IRI cannot say, so the key type is given with qudt:keySpec.</p>"""^^rdf:HTML ;
+  qudt:elementType xsd:decimal ;
+  qudt:hasQuantityKind quantitykind:Temperature ;
+  qudt:hasUnit unit:DEG_C ;
+  qudt:keySpec [
+    sh:or qudt:NumericUnionType ;
+  ] ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection> ;
+  rdfs:label "Map kind from floor numbers to temperatures in degrees Celsius" .
 
 ex:MapKind_RoomTemperatures
   a qudt:MapKind ;
@@ -73,6 +110,14 @@ ex:MapKind_RoomTemperatures
   qudt:keyType xsd:string ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection> ;
   rdfs:label "Map kind from room names to temperatures in degrees Fahrenheit" .
+
+ex:Map_FloorTemperatures
+  a qudt:Map ;
+  qudt:datatypeKind ex:MapKind_FloorTemperatures ;
+  qudt:keys ( 0 1 2.5 3.0E0 ) ;
+  qudt:values ( 19.5 20.0 21.0 21.5 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection> ;
+  rdfs:label "Temperatures by floor" .
 
 ex:Map_RoomTemperatures
   a qudt:Map ;
@@ -93,6 +138,20 @@ ex:MultiSet_DailyHighs
   qudt:values ( 61.2 63.5 61.2 59.0 ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection> ;
   rdfs:label "Daily high temperatures" .
+
+ex:Set_RelatedResources
+  a qudt:Set ;
+  qudt:datatypeKind ex:CollectionKind_AnyIRI ;
+  qudt:values ( ex:Set_RoomTemperatures ex:MultiSet_DailyHighs ex:Map_RoomTemperatures ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection> ;
+  rdfs:label "Related temperature collections" .
+
+ex:Set_RoomLabels
+  a qudt:Set ;
+  qudt:datatypeKind ex:CollectionKind_EnglishLabels ;
+  qudt:values ( "Kitchen"@en "Lounge"@en-GB "Study"@en ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection> ;
+  rdfs:label "Room labels" .
 
 ex:Set_RoomTemperatures
   a qudt:Set ;

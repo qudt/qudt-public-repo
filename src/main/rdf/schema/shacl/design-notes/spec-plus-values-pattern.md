@@ -38,7 +38,8 @@ SPARQL constraint idioms look the way they do, and how to apply the pattern to a
    heterogeneous array or vector kind, holds an ordered list of per-position member specs in
    `qudt:tupleMemberSpecs`, walked via `sh:zeroOrMorePath rdf:rest / rdf:first`. The list must be
    well formed (`qudt:RDFListShape`) and not empty (`qudt:StructuredDataKind-nonEmptyTupleMemberSpecs`). A homogeneous kind
-   instead gives one shared `qudt:elementType`. Array and vector kinds must use exactly one of the
+   instead gives one shared type: a datatype or class IRI (`qudt:elementType`), or, for a type a single
+   IRI cannot express, a type-facet node (`qudt:elementSpec`), exactly one of the two. Array and vector kinds must use exactly one of the
    two, `sh:or qudt:CellDescriptionUnionType`, whose alternatives are `qudt:HeterogeneousCellsShape`
    (member specs, and no kind-level element type, quantity kind or unit) and
    `qudt:HomogeneousCellsShape` (an element type, an optional shared quantity kind and unit, and no
@@ -78,6 +79,15 @@ A member spec may refine its type facet. Numeric bounds (`sh:minInclusive`, `sh:
 `NTupleRangeCheck`; `sh:languageIn ( "en" … )` refines `sh:datatype rdf:langString` and is checked by
 `NTupleLanguageCheck`. A refinement alone is not a type facet: a position with only `sh:languageIn`
 fails `qudt:NTupleMemberTypeSpec-type`, and `NTupleTypeCheck` skips it.
+
+The same facets, and the same refinements, also serve a type shared by every cell. `qudt:elementSpec`
+on a homogeneous array, vector or collection kind, and `qudt:keySpec` on a map kind, take a type-facet
+node, in effect a member spec without `qudt:index`: `[ sh:or qudt:NumericUnionType ]` for any number,
+`[ qudt:value … ]` for one of these values, `[ sh:nodeKind sh:IRI ]` for any IRI, or `[ sh:datatype
+xsd:integer ; sh:minInclusive 1 ; sh:maxInclusive 5 ]` with bounds. `qudt:ValuesListElementSpecCheck`
+and `qudt:MapKeySpecCheck` probe the facets as `NTupleTypeCheck` does, and `qudt:ValuesListRangeCheck`
+and `qudt:ValuesListLanguageCheck` check the refinements, for values and keys alike. The simple forms,
+`qudt:elementType` and `qudt:keyType`, stay single IRIs, so existing data keeps its meaning.
 
 New structured datatypes should reuse this pattern rather than invent parallel
 type-facet machinery. When a datatype's cells all share one type (homogeneous
