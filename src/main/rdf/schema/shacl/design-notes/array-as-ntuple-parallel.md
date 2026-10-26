@@ -184,9 +184,9 @@ temperature array (since removed).
   split.~~ **Resolved for three of the four (2026-08-24)** — `Homogeneous`/`HeterogenousArray` and
   `Vector` now each have an instance/kind pair, as tabulated above. A heterogeneous array must be
   typed `qudt:HeterogenousArray` (not bare `qudt:Array`) for its per-position types to be checked.
-  **Still open: `qudt:Matrix`**, along with `qudt:MultiDimensionalArray` and
-  `qudt:AssociativeArray`, which remain instance-side subclasses of `qudt:Array` with no
-  corresponding kind. A `qudt:MatrixKind` under `qudt:ArrayKind` is the obvious parallel, but nothing
+  **Still open: `qudt:Matrix`**, along with `qudt:MultiDimensionalArray`, which remain
+  instance-side subclasses of `qudt:Array` with no corresponding kind (`qudt:AssociativeArray`, the
+  third, was removed on 2026-10-25 in favour of `qudt:Map`; see K). A `qudt:MatrixKind` under `qudt:ArrayKind` is the obvious parallel, but nothing
   currently requires it. (Since 2026-10-25 the state-space matrices have a kind of their own,
   `qudt:StateSpaceMatrix`, a `qudt:HomogeneousArrayKind`; a matrix value that uses it is a
   `qudt:Matrix` or `qudt:HomogeneousArray` pointing at it with `qudt:datatypeKind`.)
@@ -827,8 +827,11 @@ to the value at the same position. Parallel lists were chosen over a list of ent
 inherited `qudt:ValuesListElementTypeCheck` types, and entry nodes in `qudt:values` would fail that
 check. A new `qudt:MapKind`, a `qudt:CollectionKind`, adds `qudt:keyType`; keys have a type only.
 `qudt:MapKeysLengthCheck`, `qudt:MapDistinctKeysCheck` and `qudt:MapKeyTypeCheck` check a map.
-K. **Reconcile `qudt:AssociativeArray` with `qudt:Map`** *(added 2026-10-25)*. Its description calls an
-associative array "(or Map)", and the two classes point at each other with `rdfs:seeAlso`, but
-`qudt:AssociativeArray` is a `qudt:Array` subclass with no kind and no key model, while `qudt:Map`
-now has both. Decide whether it should become a subclass of `qudt:Map`, be deprecated in its favour,
-or stay as an array-shaped alternative.
+K. ~~**Reconcile `qudt:AssociativeArray` with `qudt:Map`**~~ *(added 2026-10-25)*. **Done the same day:
+removed.** Its description called an associative array "(or Map)", and the two classes pointed at
+each other with `rdfs:seeAlso`, but `qudt:AssociativeArray` was a `qudt:Array` subclass with no kind
+and no key model, so as an array it would have needed an array kind and an element count, neither
+of which fits keys and values. `qudt:Map` now models the concept, so `qudt:AssociativeArray` and
+`qudt:Map`'s `rdfs:seeAlso` link to it were removed; nothing used either. `qudt:Map`'s description
+still names "Associative Array" as a synonym. The derived OWL datatype schema keeps the class until
+it is regenerated.
