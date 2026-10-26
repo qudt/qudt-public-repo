@@ -678,6 +678,8 @@ the `qudt:elementCount` question below, and is far cheaper than per-rank nested 
 
 ## Open discussion (next session) — specifying the types of an array's values
 
+**Resolved 2026-10-25 — see E.** The text below records the question as it was posed.
+
 **To be discussed, not yet decided.** Just as the *values* of an array are held in a specified
 construct (the flat `qudt:values` list, ordered by `qudt:dataOrder`), the **types** of those values
 should be given by a **parallel specified construct** rather than ad-hoc properties. In other words,
@@ -775,8 +777,22 @@ member of the list is a list"). `qudt:MultiDimensionalArray` no longer says its 
 N-tuples given with `qudt:element`. `qudt:Array` no longer places `qudt:dimensionality` and
 `qudt:dataOrder` on the value, and `qudt:Matrix` is described as two-dimensional, not
 N-dimensional.
-E. Hold the "specifying the types of an array's values" discussion (see "Open discussion" above), now
-in light of the Option-B hybrid decision.
+E. ~~Hold the "specifying the types of an array's values" discussion (see "Open discussion" above), now
+in light of the Option-B hybrid decision.~~ **Answered (2026-10-25)** by the kind model, which is the
+parallel type-specification construct the discussion asked for:
+1. *Which case collapses to one specification?* The homogeneous one: a homogeneous kind gives one
+shared `qudt:elementType`, with an optional shared quantity kind and unit, and a heterogeneous
+kind gives one member spec per position; `qudt:CellDescriptionUnionType` requires exactly one of
+the two. The session note that said the reverse was an inversion.
+2. *How do the types align with the values?* By position: each member spec's `qudt:index` counts
+from 1 over the flat `qudt:values` list, in the kind's `qudt:dataOrder`. The heterogeneous case
+reuses the tuple machinery (`qudt:tupleMemberSpecs`, `qudt:NTupleMemberTypeSpec`), not the
+sketched `qudt:arrayElementTypeSpecs`.
+3. *Is it the `qudt:ArraySpec` machinery?* No: that sketch was dropped on 2026-07-27 and
+`qudt:ArrayElementTypeSpec` was never built. The kind (`qudt:ArrayKind`, 2026-08-22) is the
+construct.
+
+One narrower gap remains: see L.
 F. ~~**Consider how to allow structured datatypes for numeric values**~~ *(added 2026-10-21)*.
 **Resolved 2026-10-23.**
 `qudt:Quantifiable-value` accepts a number, a `qudt:DataItem` or a `qudt:EnumeratedValue`, so a
@@ -835,3 +851,22 @@ of which fits keys and values. `qudt:Map` now models the concept, so `qudt:Assoc
 `qudt:Map`'s `rdfs:seeAlso` link to it were removed; nothing used either. `qudt:Map`'s description
 still names "Associative Array" as a synonym. The derived OWL datatype schema keeps the class until
 it is regenerated.
+L. **Let a shared element type use the full type facet** *(added 2026-10-25)*. `qudt:elementType` is a
+single IRI, a datatype or a class, and `qudt:ValuesListElementTypeCheck` matches only those two. A
+per-position member spec accepts any of four facets — a datatype union (`sh:or
+qudt:NumericUnionType`), a class, enumerated values (`qudt:value …`) or any IRI (`sh:nodeKind
+sh:IRI`) — so a shared type cannot say "any number", "one of these values" or "any IRI", although a
+tuple or heterogeneous array position can. The gap applies to homogeneous arrays and vectors, to
+collections, and to map keys (`qudt:keyType`, checked by `qudt:MapKeyTypeCheck`). Two designs, not
+yet chosen:
+- *(a)* Let `qudt:elementType` also take a type-facet node, in effect a member spec without
+`qudt:index`, such as `[ sh:or qudt:NumericUnionType ]`. That relaxes `sh:nodeKind sh:IRI` on
+`qudt:StructuredDataKind-elementType`, and teaches the element-type and key-type checks the four
+facet probes that `qudt:NTupleTypeCheck` uses.
+- *(b)* Keep `qudt:elementType` a simple IRI and add a separate property for the richer form, such
+as `qudt:elementSpec`, with the homogeneous alternative (`qudt:HomogeneousCellsShape`) requiring
+exactly one of the two. Existing data keeps its meaning.
+
+Either way, decide whether the refinements — numeric bounds and `sh:languageIn` — should then apply
+to shared types too, which would need range and language checks for homogeneous cells, and whether
+`qudt:keyType` gets the same treatment.
