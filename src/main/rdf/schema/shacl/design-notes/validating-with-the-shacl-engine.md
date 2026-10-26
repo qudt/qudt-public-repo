@@ -112,11 +112,13 @@ Every bad example fires exactly its intended check. All of them are in
 | `ex:badExampleTupleDateInDateTimePosition`       | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
 | `ex:badExampleTupleIntegerInIntPosition`         | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
 | `ex:badExampleTupleKindElementType`              | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `sh:NodeConstraintComponent` (from `qudt:NTupleKind`: not a `qudt:HeterogeneousCellsShape`)                 |
+| `ex:badExampleTupleLabelLanguage`                | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleLanguageCheck`                                                                                  |
 | `ex:badExampleTupleNothingInRequiredPosition`    | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
 | `ex:badExampleTupleTimeInAnyDatePosition`        | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
 | `ex:badExampleVectorKindBothCellDescriptions`    | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
 | `ex:badExampleVectorKindDatatype`                | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:MaxCountConstraintComponent` (from `qudt:StructuredDataKind-datatype`)                                  |
 | `ex:badExampleVectorKindNoCellDescription`       | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
+| `ex:badExampleVectorLatitudeRange`               | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `qudt:NTupleRangeCheck`                                                                                     |
 | `ex:cpaBadLengthShort`                           | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck`                                            |
 | `ex:cpaBadMicroseconds`                          | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleRangeCheck`                                                                                     |
 | `ex:cpaBadMinutes`                               | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleRangeCheck`                                                                                     |
@@ -133,11 +135,11 @@ generic message for `sh:or` or `sh:node`. A kind with both an element type and m
 with neither, fails `qudt:CellDescriptionUnionType`; a kind that picks the wrong alternative for its
 class passes the union but fails the class's own `sh:node`.
 
-The valid examples, including the tuple examples, are clean, apart from one open item:
-
-- `ex:NTupleKind_ResourceLabelRating` — position 2 uses only `sh:languageIn ( "en" )`, which is
-  not one of the type facets `qudt:NTupleMemberTypeSpec-type` accepts, so the kind fails that
-  shape and the position is never type-checked.
+The valid examples are clean. Until 2026-10-25 `ex:NTupleKind_ResourceLabelRating` was not: its
+position 2 gave only `sh:languageIn ( "en" )`, which is not a type facet, so the kind failed
+`qudt:NTupleMemberTypeSpec-type`, reported both on the kind and on the member spec, and the position
+was never type-checked. It now gives `sh:datatype rdf:langString` as well, and the new
+`qudt:NTupleLanguageCheck` checks the language tag.
 
 No legacy examples remain (resolved 2026-10-25). The four `ex:StateSpaceMatrix-*` and the two legacy
 invalid arrays used to lack `qudt:datatypeKind` and were reported only for that. The matrices became

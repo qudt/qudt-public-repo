@@ -69,6 +69,12 @@ must satisfy exactly one of four kinds of type expectation:
 3. **Enumerated value** — `qudt:value <e1>, <e2>, …`.
 4. **Any IRI** — `sh:nodeKind sh:IRI`.
 
+A member spec may refine its type facet. Numeric bounds (`sh:minInclusive`, `sh:maxInclusive`,
+`sh:minExclusive`, `sh:maxExclusive`) refine a numeric datatype and are checked by
+`NTupleRangeCheck`; `sh:languageIn ( "en" … )` refines `sh:datatype rdf:langString` and is checked by
+`NTupleLanguageCheck`. A refinement alone is not a type facet: a position with only `sh:languageIn`
+fails `qudt:NTupleMemberTypeSpec-type`, and `NTupleTypeCheck` skips it.
+
 New structured datatypes should reuse this pattern rather than invent parallel
 type-facet machinery. When a datatype's cells all share one type (homogeneous
 array, vector of scalars), reuse the facet without the `qudt:index` — one
@@ -249,6 +255,7 @@ constraints off itself. `qudt:NTuple` uses five:
 |-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `NTupleTypeCheck`                 | Value at position `?index` satisfies the position's type facet                                                                                                                                                                         |
 | `NTupleRangeCheck`                | Value at position `?index` satisfies any numeric bounds on its member spec (`sh:minInclusive` / `sh:maxInclusive` / `sh:minExclusive` / `sh:maxExclusive`)                                                                             |
+| `NTupleLanguageCheck`             | Value at position `?index` has a language tag matching one of its member spec's `sh:languageIn` tags (`langMatches`), skipping `rdf:nil`                                                                                               |
 | `NTupleExtraValueCheck`           | No value sits at a position with no matching spec                                                                                                                                                                                      |
 | `NTupleMissingRequiredValueCheck` | Every required spec position is filled — tested as `?index > ?valueCount`, since values occupy positions 1..N contiguously (see idiom 4)                                                                                               |
 | `NTupleLengthCheck`               | Length of the values list lies within the range allowed by the spec — `[requiredCount, totalCount]`, where a member spec is optional (not counted as required) iff it declares `sh:minCount 0`. Assumes optional members are trailing. |
