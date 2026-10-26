@@ -9,6 +9,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Added
 
+- Added `unit:M-PER-M` (metre per metre, `quantitykind:Gradient` and `quantitykind:LengthRatio`), the coherent unit of the gradient, alongside `unit:M2-PER-M2` and `unit:M3-PER-M3`. `unit:GR` is a scaling of it.
 - Added `qudt:organizedUnder quantitykind:DimensionlessRatio` to `quantitykind:RefractiveIndex`, like `quantitykind:SpeedRatio`, and `unit:FRACTION` as one of its units ([#397](https://github.com/qudt/qudt-public-repo/issues/397)).
 - Added `quantitykind:MassFraction` to `unit:PERMILLE`, `unit:GM-PER-KiloGM`, and `unit:KiloGM-PER-KiloGM`, in which mass fractions such as sea-water salinity and specific humidity are commonly given ([#1562](https://github.com/qudt/qudt-public-repo/issues/1562)).
 - Added `qudt:specializationOf quantitykind:MassRatio` to `quantitykind:MassRatioOfWaterVapourToDryGas`, like `quantitykind:SpecificHumidity`, so that mass-ratio units such as g/kg and kg/kg apply to it, and `unit:FRACTION` as a unit for `quantitykind:PressureRatio`, inherited by `quantitykind:RelativePartialPressure` and `quantitykind:RelativeHumidity` ([#1569](https://github.com/qudt/qudt-public-repo/issues/1569)).
@@ -21,6 +22,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Fixed
 
+- Replaced the conversion multiplier of 0.0 (the marker for "no linear conversion") on three units that have an exact linear factor: `unit:SpeedOfLight` (299792458, `qudt:scalingOf unit:M-PER-SEC`), `unit:MegaEV-PER-SpeedOfLight` (5.344285992678308138091986290062040E-22 kg·m/s: 10⁶ × 1.602176634E-19 J divided by c) and `unit:GR` (0.01, percent grade, `qudt:scalingOf unit:M-PER-M`). `unit:GR` is now a unit of `quantitykind:Gradient` instead of `quantitykind:DimensionlessRatio` ([#1434](https://github.com/qudt/qudt-public-repo/issues/1434)).
 - Hardened the CI Build workflow (`maven.yml`) against script injection: pull-request branch names and the changelog text are now passed to its shell steps through environment variables instead of being written into the scripts, and the `pull_request_target` run now happens only for merged pull requests, which are the only ones that need it.
 - Corrected the Wikidata and OM links of `unit:PERMILLE`, which were those of `unit:PERCENT`: `qudt:wikidataMatch` is now Q181011 (per mille) instead of Q11229 (percent), and `qudt:omUnit om-2/percent` is removed, since OM 2.0 defines no per mille unit ([#1566](https://github.com/qudt/qudt-public-repo/issues/1566)).
 
