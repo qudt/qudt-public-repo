@@ -14,6 +14,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `quantitykind:MassFraction` to `unit:PERMILLE`, `unit:GM-PER-KiloGM`, and `unit:KiloGM-PER-KiloGM`, in which mass fractions such as sea-water salinity and specific humidity are commonly given ([#1562](https://github.com/qudt/qudt-public-repo/issues/1562)).
 - Added `qudt:specializationOf quantitykind:MassRatio` to `quantitykind:MassRatioOfWaterVapourToDryGas`, like `quantitykind:SpecificHumidity`, so that mass-ratio units such as g/kg and kg/kg apply to it, and `unit:FRACTION` as a unit for `quantitykind:PressureRatio`, inherited by `quantitykind:RelativePartialPressure` and `quantitykind:RelativeHumidity` ([#1569](https://github.com/qudt/qudt-public-repo/issues/1569)).
 - Added `quantitykind:SpecificLatentHeat`, the latent heat of a phase transition per unit mass, such as the specific latent heats of vaporization, sublimation and fusion, as a specialization of `quantitykind:SpecificEnergy`, with `qudt:wikidataMatch` Q104217205 ([#1577](https://github.com/qudt/qudt-public-repo/issues/1577)).
+- Added `qudt:wikidataMatch` Q2253551 (specific humidity) to `quantitykind:SpecificHumidity`; the Wikidata item links back with P8393 `SpecificHumidity`.
 
 ### Changed
 
