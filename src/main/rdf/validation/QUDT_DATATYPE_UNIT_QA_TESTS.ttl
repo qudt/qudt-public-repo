@@ -1,0 +1,80 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+<http://qudt.org/$$QUDT_VERSION$$/collection/qa/datatype-units>
+  a owl:Ontology ;
+  dcterms:description """
+  Checks that where an array, vector or collection kind, or a tuple member spec, gives both a quantity
+  kind and a unit, the unit is one of the quantity kind's applicable units. The applicable units are
+  read from qudt:applicableUnit on the quantity kind, which the build infers, so the data validated
+  must include the built quantity-kind vocabulary (target/dist/vocab/quantitykinds), and the SHACL
+  datatype schema for the subclasses of the target classes.
+  """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/datatype-units> ;
+  rdfs:label "QUDT QA TESTS - Units of datatype kinds and member specs - v $$QUDT_VERSION$$" .
+
+<http://qudt.org/$$QUDT_VERSION$$/collection/qa/datatype-unitsPrefixes>
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+    sh:prefix "qudt" ;
+  ] .
+
+qudt:QuantityKindWithoutApplicableUnitsCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    The quantity kind lists no applicable units at all, so the stated unit cannot be checked against
+    it. Usually no unit has a qudt:unitForQuantityKind link to the quantity kind or to one it
+    specializes.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/datatype-units> ;
+  sh:message "The quantity kind {?quantityKind} lists no applicable units, so the unit {?unit} cannot be checked against it." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/datatype-unitsPrefixes> ;
+  sh:select """
+        SELECT $this ?unit ?quantityKind
+        WHERE {
+            $this qudt:hasUnit ?unit .
+            $this qudt:hasQuantityKind ?quantityKind .
+            FILTER NOT EXISTS { ?quantityKind qudt:applicableUnit ?anyUnit . }
+        }
+    """ .
+
+qudt:UnitApplicableToQuantityKindCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    The quantity kind lists applicable units, but the stated unit is not one of them. Usually the unit
+    lacks a qudt:unitForQuantityKind link to the quantity kind, or the quantity kind or the unit is the
+    wrong one.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/datatype-units> ;
+  sh:message "The unit {?unit} is not an applicable unit of the quantity kind {?quantityKind}." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/datatype-unitsPrefixes> ;
+  sh:select """
+        SELECT $this ?unit ?quantityKind
+        WHERE {
+            $this qudt:hasUnit ?unit .
+            $this qudt:hasQuantityKind ?quantityKind .
+            FILTER EXISTS { ?quantityKind qudt:applicableUnit ?anyUnit . }
+            FILTER NOT EXISTS { ?quantityKind qudt:applicableUnit ?unit . }
+        }
+    """ .
+
+qudt:UnitNotApplicableToQuantityKindWarning
+  a sh:NodeShape ;
+  rdfs:comment "Warns when a kind or member spec gives a quantity kind and a unit and the quantity kind lists no applicable units, or the unit is not among them. The datatype counterpart of qudt:ConstantUnitNotApplicableToQuantityKindWarning for physical constants." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/datatype-units> ;
+  rdfs:label "Unit not applicable to quantity kind warning" ;
+  sh:severity sh:Warning ;
+  sh:sparql qudt:QuantityKindWithoutApplicableUnitsCheck ;
+  sh:sparql qudt:UnitApplicableToQuantityKindCheck ;
+  sh:targetClass qudt:ArrayKind ;
+  sh:targetClass qudt:CollectionKind ;
+  sh:targetClass qudt:NTupleMemberTypeSpec ;
+  sh:targetClass qudt:VectorKind .
+
+

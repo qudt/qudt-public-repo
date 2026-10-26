@@ -271,7 +271,7 @@ The build never runs the tuple, array and vector constraints of the SHACL dataty
 src/build/engine-check/engine-check.sh
 ```
 
-It works from any directory, needs the build's dependencies already in `~/.m2` (Maven runs offline), and writes its results to `target/engine-check/`. Run it after `mvn install`: the unit/quantity-kind consistency checks need the inferred `qudt:applicableUnit` links in `target/dist`, and without them the script leaves those checks' results out, with a warning. Compare them with the expected results, and see the options for comparing with an earlier run, in [validating-with-the-shacl-engine.md](src/main/rdf/schema/shacl/design-notes/validating-with-the-shacl-engine.md).
+It works from any directory, needs the build's dependencies already in `~/.m2` (Maven runs offline), and writes its results to `target/engine-check/`. The units of the examples are checked by the build instead, against the built quantity-kind vocabulary: see `src/main/rdf/validation/QUDT_DATATYPE_UNIT_QA_TESTS.ttl` and the reports `target/validation/validationReport-unitQuantityKind-*.ttl`. Compare them with the expected results, and see the options for comparing with an earlier run, in [validating-with-the-shacl-engine.md](src/main/rdf/schema/shacl/design-notes/validating-with-the-shacl-engine.md).
 
 ## Recommended Workflows (What To Run)
 

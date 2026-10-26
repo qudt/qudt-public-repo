@@ -104,11 +104,12 @@ The meaning of a value is stated where its type is, at the same level:
   specs, one position each.
 
 This replaced `qudt:hasQuantityKindsList`, a list of quantity kinds kept on the value parallel to
-its values, on 2026-10-24. Since 2026-10-25, where a kind or member spec gives both, two shapes check
-that they fit, as for physical constants: `qudt:UnitQuantityKindDimensionConstraint` (a violation)
-requires the unit to have the quantity kind's dimension vector, and
-`qudt:UnitNotApplicableToQuantityKindWarning` (a warning) flags a unit of the right dimension that is
-not one of the quantity kind's `qudt:applicableUnit`s.
+its values, on 2026-10-24. Where a kind or member spec gives both, a warning shape,
+`qudt:UnitNotApplicableToQuantityKindWarning` in `src/main/rdf/validation/QUDT_DATATYPE_UNIT_QA_TESTS.ttl`,
+checks that the unit is one of the quantity kind's `qudt:applicableUnit`s, and warns when the quantity
+kind lists none. `qudt:applicableUnit` is inferred, so the check needs the built quantity-kind
+vocabulary; the build runs it on the examples (see
+[validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md), "Units of the examples").
 
 ## Optional positions — `Maybe`
 

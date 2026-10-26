@@ -35,17 +35,12 @@ The checker and its script are in the repository, in `src/build/engine-check/`:
 
 - `EngineCheck.java` calls TopBraid directly, with report details off, and prints one
   tab-separated line per result: focus node, severity, source constraint, message, value and path.
-- `UnitFacts.java` takes, from the built vocabularies in `target/dist`, the facts the
-  unit/quantity-kind consistency checks need (see below).
 - `engine-check.sh` builds the two graphs, reads the plugin's exact classpath from Maven, runs the
   checker and summarises the results.
 
 You need Maven, a JDK 11 or newer (for single-file `java EngineCheck.java` launches; tested
 with JDK 25), and the plugin's jars in `~/.m2`, which any normal build puts there. Maven runs
-offline, only to resolve the classpath. For the unit/quantity-kind consistency checks it also needs a
-build first (`mvn install`), whose `target/dist` holds the inferred `qudt:applicableUnit` links; without
-one it still runs, leaves those two checks' results out, and says so in a warning. Run the script
-from any directory:
+offline, only to resolve the classpath. Run the script from any directory:
 
 ```bash
 src/build/engine-check/engine-check.sh
@@ -56,13 +51,12 @@ output and the full `results.tsv` go to `target/engine-check/`, which `mvn clean
 The script reads the `shacl-maven-plugin` version from `pom.xml`, so it always runs the build's
 engine. Options, as environment variables:
 
-|         Variable         |                                            Effect                                            |
-|--------------------------|----------------------------------------------------------------------------------------------|
-| `WORK=<dir>`             | write to this directory instead of `target/engine-check/`                                    |
-| `COORDINATES=1`          | also load the coordinates schema and vocabulary, which the default omits                     |
-| `DATATYPE_SCHEMA=<file>` | use this file in place of `SCHEMA_QUDT-DATATYPES_NoOWL.ttl`                                  |
-| `BASELINE=<results.tsv>` | compare the results with an earlier run's, ignoring blank-node labels                        |
-| `DIST=<dir>`             | take the unit and quantity-kind facts from this built distribution instead of `target/dist/` |
+|         Variable         |                                  Effect                                  |
+|--------------------------|--------------------------------------------------------------------------|
+| `WORK=<dir>`             | write to this directory instead of `target/engine-check/`                |
+| `COORDINATES=1`          | also load the coordinates schema and vocabulary, which the default omits |
+| `DATATYPE_SCHEMA=<file>` | use this file in place of `SCHEMA_QUDT-DATATYPES_NoOWL.ttl`              |
+| `BASELINE=<results.tsv>` | compare the results with an earlier run's, ignoring blank-node labels    |
 
 Until 2026-10-24 this note embedded both files, to be copied into a scratch directory; a copy
 there was lost once, which is why they now live in the repository.
@@ -82,10 +76,6 @@ there was lost once, which is why they now live in the repository.
   - The stub gives a type to every `unit:` and `quantitykind:` IRI the examples use, so
     `sh:class qudt:Unit` facets resolve. Loading the full unit and quantity-kind
     vocabularies also works, but is slower and adds results to ignore.
-  - The unit facts, from `UnitFacts.java`, add for those units and quantity kinds their
-    dimension vectors and the `qudt:applicableUnit` links between them, which only the build's
-    inference produces. Each dimension vector reached is copied whole, and its reference
-    quantity kind typed, so that the main schema's shapes find nothing missing on them.
 - Concatenating the Turtle files is safe: repeated `@prefix` lines are allowed, and the files
   use anonymous blank nodes, so blank-node labels can't collide.
 - Results on resources other than the examples — the stub's units, schema resources — are
@@ -117,7 +107,6 @@ Every bad example fires exactly its intended check. All of them are in
 | `ex:badExampleMapLength`                         | `EXAMPLES_QUDT-INVALID-COLLECTION-DATATYPES.ttl` | `qudt:MapKeysLengthCheck`                                                                                   |
 | `ex:badExampleMemberSpecKindSharedUnit`          | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
 | `ex:badExampleMemberSpecQuantityKind`            | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `sh:ClassConstraintComponent` (from `qudt:NTupleMemberTypeSpec-hasQuantityKind`)                            |
-| `ex:badExampleMemberSpecUnitNotApplicable`       | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:UnitApplicableToQuantityKindCheck` (a warning)                                                        |
 | `ex:badExampleQuantityValueTuple`                | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
 | `ex:badExampleSetDuplicate`                      | `EXAMPLES_QUDT-INVALID-COLLECTION-DATATYPES.ttl` | `qudt:SetDistinctValuesCheck`                                                                               |
 | `ex:badExampleTuple2a`                           | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
@@ -133,7 +122,6 @@ Every bad example fires exactly its intended check. All of them are in
 | `ex:badExampleVectorKindBothCellDescriptions`    | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
 | `ex:badExampleVectorKindDatatype`                | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:MaxCountConstraintComponent` (from `qudt:StructuredDataKind-datatype`)                                  |
 | `ex:badExampleVectorKindNoCellDescription`       | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
-| `ex:badExampleVectorKindUnitDimension`           | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `qudt:UnitQuantityKindDimensionCheck`                                                                       |
 | `ex:badExampleVectorLatitudeRange`               | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `qudt:NTupleRangeCheck`                                                                                     |
 | `ex:cpaBadLengthShort`                           | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck`                                            |
 | `ex:cpaBadMicroseconds`                          | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleRangeCheck`                                                                                     |
@@ -142,9 +130,8 @@ Every bad example fires exactly its intended check. All of them are in
 | `ex:cpaBadSign`                                  | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `ex:IfcCompoundPlaneAngleConsistentSign` (reported twice)                                                   |
 | `ex:cpaBadType`                                  | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
 
-The two unit/quantity-kind examples are reported only when the unit facts are loaded (see
-"Running the check"); `ex:badExampleMemberSpecUnitNotApplicable` is a warning, not a violation, as
-for physical constants.
+The units of the examples are not checked here but by the build, against the built quantity-kind
+vocabulary, since `qudt:applicableUnit` is inferred there (see "Units of the examples" below).
 
 `ex:cpaBadSign` is reported once per positive/negative pair in `( 52 -31 12 )`, because a
 `SELECT` constraint yields one result per solution row; `SELECT DISTINCT $this` would make it
@@ -177,6 +164,28 @@ collection that stated no fault, and the collection's quantity were removed. See
 [array-as-ntuple-parallel.md](array-as-ntuple-parallel.md).
 
 Any other result on an example subject is a regression.
+
+## Units of the examples
+
+Where a kind or member spec gives both a quantity kind and a unit, the unit should be one of the
+quantity kind's applicable units. `src/main/rdf/validation/QUDT_DATATYPE_UNIT_QA_TESTS.ttl` checks this
+with one warning shape, `qudt:UnitNotApplicableToQuantityKindWarning`, and two SPARQL constraints:
+`qudt:QuantityKindWithoutApplicableUnitsCheck`, when the quantity kind lists no applicable units, and
+`qudt:UnitApplicableToQuantityKindCheck`, when the unit is not among them. Both read
+`qudt:applicableUnit` on the quantity kind, which only the build infers, so the check runs in the
+Maven build, not in the engine check, against the built quantity-kind vocabulary in `target/dist`
+and the SHACL datatype schema, which gives the target classes' subclasses:
+
+- The valid examples must raise no warning; the build fails if they do
+  (`target/validation/validationReport-unitQuantityKind-valid.ttl`).
+- The invalid examples are reported only
+  (`target/validation/validationReport-unitQuantityKind-invalid.ttl`), and should raise exactly two
+  warnings, both from `qudt:UnitApplicableToQuantityKindCheck`:
+  `ex:badExampleVectorKindUnitNotApplicable` (unit:M for quantitykind:LinearVelocity) and
+  `ex:badExampleMemberSpecUnitNotApplicable` (unit:J for quantitykind:Torque).
+
+Anyone can run the same check on their own data, with the shapes file and data that include the
+built quantity-kind vocabulary.
 
 ## Comparing against an earlier version
 
