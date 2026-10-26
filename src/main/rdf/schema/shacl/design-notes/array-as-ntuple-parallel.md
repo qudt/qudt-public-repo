@@ -820,7 +820,15 @@ members as it does the cells of homogeneous arrays, and a new `qudt:SetDistinctV
 `qudt:quantify` were removed. Examples: `EXAMPLES_QUDT-COLLECTION-DATATYPES.ttl` (a set and a
 multiset of temperatures) and its invalid counterpart (a repeated set member, a member of the
 wrong type, a collection with no kind).
-J. **Give `qudt:Map` a key/value model** *(added 2026-10-25)*. `qudt:Map` is a subclass of
-`qudt:Collection`, so it inherits the collection model, but a map also has keys. Decide how keys
-and values are held (two parallel lists, a list of pairs, or tuples) and whether the kind gives a
-key type as well as a value type.
+J. ~~**Give `qudt:Map` a key/value model**~~ *(added 2026-10-25)*. **Done the same day.** A map holds
+its keys in `qudt:keys`, a list parallel to the inherited `qudt:values`: the key at each position maps
+to the value at the same position. Parallel lists were chosen over a list of entry nodes or of
+2-tuples because `qudt:Map` is a `qudt:Collection`: its `qudt:values` must stay the values, which the
+inherited `qudt:ValuesListElementTypeCheck` types, and entry nodes in `qudt:values` would fail that
+check. A new `qudt:MapKind`, a `qudt:CollectionKind`, adds `qudt:keyType`; keys have a type only.
+`qudt:MapKeysLengthCheck`, `qudt:MapDistinctKeysCheck` and `qudt:MapKeyTypeCheck` check a map.
+K. **Reconcile `qudt:AssociativeArray` with `qudt:Map`** *(added 2026-10-25)*. Its description calls an
+associative array "(or Map)", and the two classes point at each other with `rdfs:seeAlso`, but
+`qudt:AssociativeArray` is a `qudt:Array` subclass with no kind and no key model, while `qudt:Map`
+now has both. Decide whether it should become a subclass of `qudt:Map`, be deprecated in its favour,
+or stay as an array-shaped alternative.

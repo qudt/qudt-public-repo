@@ -33,7 +33,7 @@ SPARQL constraint idioms look the way they do, and how to apply the pattern to a
    - `qudt:datatypeKind` — points at the value's kind, the same property for every
      structured datatype.
 2. **Kind shape** (`qudt:NTupleKind`, `qudt:ArrayKind` and its subclasses, `qudt:VectorKind`,
-   `qudt:CollectionKind`) —
+   `qudt:CollectionKind` and its subclass `qudt:MapKind`) —
    the *blueprint*, a `qudt:Concept` that many values can share. A tuple kind, and a
    heterogeneous array or vector kind, holds an ordered list of per-position member specs in
    `qudt:tupleMemberSpecs`, walked via `sh:zeroOrMorePath rdf:rest / rdf:first`. A homogeneous kind
@@ -48,7 +48,10 @@ SPARQL constraint idioms look the way they do, and how to apply the pattern to a
    (`qudt:StructuredDataKind-datatype`, `sh:maxCount 0`). Array and vector kinds also give sizes: rank, extents, element count, data order. A
    collection kind gives no size: a collection holds a variable number of members, which
    `qudt:ValuesListElementTypeCheck` checks against the kind's element type, and a `qudt:Set` must
-   not repeat one (`qudt:SetDistinctValuesCheck`).
+   not repeat one (`qudt:SetDistinctValuesCheck`). A `qudt:Map` adds a parallel `qudt:keys` list,
+   whose type its `qudt:MapKind` gives in `qudt:keyType`; `qudt:MapKeysLengthCheck`,
+   `qudt:MapDistinctKeysCheck` and `qudt:MapKeyTypeCheck` keep the two lists aligned, the keys
+   unique and of the key type.
 3. **Member-type spec shape** (`qudt:NTupleMemberTypeSpec`) — one entry per position.
    Carries `qudt:index`, a **type facet** that must be one of the four alternatives below,
    and optionally a quantity kind and unit.

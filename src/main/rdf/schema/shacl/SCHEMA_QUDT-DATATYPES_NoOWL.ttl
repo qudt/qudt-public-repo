@@ -366,8 +366,8 @@ qudt:Collection
    <code>qudt:datatypeKind</code> at a <code>qudt:CollectionKind</code>, which gives the type shared by every
    member and, optionally, their shared quantity kind and unit. The number of members is not fixed. The
    order of the list is significant only for ordered collections, such as <code>qudt:Sequence</code> and
-   <code>qudt:OrderedCollection</code>. A <code>qudt:Map</code>, which also has keys, inherits this model
-   until it has one of its own.
+   <code>qudt:OrderedCollection</code>. A <code>qudt:Map</code> adds a parallel list of keys,
+   <code>qudt:keys</code>, whose type its <code>qudt:MapKind</code> gives.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Collection Type" ;
@@ -936,11 +936,33 @@ qudt:Map
   The operation of finding the value associated with a key is called a lookup or indexing,
    and this is the most important operation supported by an associative array. 
   The relationship between a key and its value is sometimes called a mapping or binding.
+  
+  As a collection, a map holds its values in qudt:values. It holds its keys in a second list, qudt:keys,
+   of the same length: the key at each position maps to the value at the same position. It points with
+   qudt:datatypeKind at a qudt:MapKind, which gives the type of the values (qudt:elementType, with an
+   optional quantity kind and unit) and the type of the keys (qudt:keyType). No key may appear twice.
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Map Type" ;
   rdfs:seeAlso qudt:AssociativeArray ;
-  rdfs:subClassOf qudt:Collection .
+  rdfs:subClassOf qudt:Collection ;
+  sh:property qudt:Map-datatypeKind ;
+  sh:property qudt:Map-keys ;
+  sh:sparql qudt:MapDistinctKeysCheck ;
+  sh:sparql qudt:MapKeyTypeCheck ;
+  sh:sparql qudt:MapKeysLengthCheck .
+
+qudt:MapKind
+  a rdfs:Class, sh:NodeShape ;
+  dcterms:description """
+  <p>A <em>Map Kind</em> is the blueprint for a <code>qudt:Map</code>. As a collection kind it gives the type
+   shared by every value (<code>qudt:elementType</code>) and, optionally, their quantity kind and unit. It
+   also gives the type shared by every key (<code>qudt:keyType</code>), a datatype or a class.
+  </p>"""^^rdf:HTML ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Map Kind" ;
+  rdfs:subClassOf qudt:CollectionKind ;
+  sh:property qudt:MapKind-keyType .
 
 qudt:MassPropertiesArray
   a rdfs:Class, sh:NodeShape ;
@@ -2327,6 +2349,18 @@ qudt:jsName
   rdfs:label "Javascript name" ;
   rdfs:subPropertyOf qudt:id .
 
+qudt:keyType
+  a rdf:Property ;
+  dcterms:description "The single type shared by every key of a map, given as a datatype IRI (matched against each key's literal datatype) or a class IRI (matched against each key's rdf:type)." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "key type" .
+
+qudt:keys
+  a rdf:Property ;
+  dcterms:description "The keys of a map, as an RDF list parallel to its qudt:values." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "keys" .
+
 qudt:kinestheticCue
   a rdf:Property ;
   rdfs:label "kinesthetic cue" ;
@@ -3433,6 +3467,120 @@ qudt:ListElementTypeCheck
             FILTER ( !isLiteral(?value) || datatype(?value) != ?rdfsDatatype )
         }
     """ .
+
+qudt:Map-datatypeKind
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:class qudt:MapKind ;
+  sh:maxCount 1 ;
+  sh:path qudt:datatypeKind .
+
+qudt:Map-keys
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:description "The keys of the map, as an RDF list parallel to its qudt:values: the key at each position maps to the value at the same position." ;
+  sh:maxCount 1 ;
+  sh:node qudt:RDFListShape ;
+  sh:path qudt:keys .
+
+qudt:MapDistinctKeysCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    Distinct-key check for maps: no key in a qudt:Map's qudt:keys list may appear more than once.
+    Keys are compared by value with =, as qudt:SetDistinctValuesCheck compares set members.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "Map key {?key} appears more than once." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+        SELECT DISTINCT $this ?key
+        WHERE {
+            $this qudt:keys ?keys .
+            ?keys rdf:rest* ?cell .
+            ?cell rdf:first ?key .
+            ?keys rdf:rest* ?otherCell .
+            ?otherCell rdf:first ?otherKey .
+            FILTER ( ?cell != ?otherCell && ?key = ?otherKey )
+        }
+    """ .
+
+qudt:MapKeyTypeCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    Key-type check for maps: every key in a qudt:Map's qudt:keys list must satisfy the qudt:keyType
+    of its qudt:MapKind, either as a literal datatype or as membership of a class. The keys
+    counterpart of qudt:ValuesListElementTypeCheck, which checks the map's values.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "Map key {?key} does not satisfy the key type {?keyType} of its kind." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+        SELECT $this ?key ?keyType
+        WHERE {
+            $this qudt:datatypeKind ?kind .
+            ?kind qudt:keyType ?keyType .
+            $this qudt:keys ?keys .
+            ?keys rdf:rest* ?keyCell .
+            ?keyCell rdf:first ?key .
+
+            OPTIONAL {
+                ?key rdf:type/rdfs:subClassOf* ?keyType .
+                BIND ( true AS ?classMatch )
+            }
+            BIND ( ( isLiteral(?key) && datatype(?key) = ?keyType ) AS ?datatypeMatch )
+            FILTER ( !bound(?classMatch) && !COALESCE(?datatypeMatch, false) )
+        }
+    """ .
+
+qudt:MapKeysLengthCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    Length check for maps: a qudt:Map's qudt:keys and qudt:values lists must have the same length,
+    since the key at each position maps to the value at the same position. A missing list counts
+    as empty.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "Map has {?keyCount} keys but {?valueCount} values." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+        SELECT $this ?keyCount ?valueCount
+        WHERE {
+            {
+                SELECT $this (COUNT(?keyCell) AS ?keyCount)
+                WHERE {
+                    $this a qudt:Map .
+                    OPTIONAL {
+                        $this qudt:keys ?keys .
+                        ?keys rdf:rest* ?keyCell .
+                        ?keyCell rdf:first ?key .
+                    }
+                }
+                GROUP BY $this
+            }
+            {
+                SELECT $this (COUNT(?valueCell) AS ?valueCount)
+                WHERE {
+                    $this a qudt:Map .
+                    OPTIONAL {
+                        $this qudt:values ?values .
+                        ?values rdf:rest* ?valueCell .
+                        ?valueCell rdf:first ?value .
+                    }
+                }
+                GROUP BY $this
+            }
+            FILTER ( ?keyCount != ?valueCount )
+        }
+    """ .
+
+qudt:MapKind-keyType
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:description "The type shared by every key of a map of this kind: a datatype IRI, matched against each key's literal datatype, or a class IRI, matched against each key's rdf:type." ;
+  sh:maxCount 1 ;
+  sh:minCount 1 ;
+  sh:nodeKind sh:IRI ;
+  sh:path qudt:keyType .
 
 qudt:Matrix-2X4-FLOAT-SP
   a qudt:Matrix ;
