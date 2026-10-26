@@ -4654,6 +4654,7 @@ qudt:Quantifiable-dataEncoding
 
 qudt:RDFListShape
   a sh:NodeShape ;
+  dcterms:description "A well-formed RDF list: every cell is rdf:nil, or has exactly one rdf:first and exactly one rdf:rest whose rest is again a well-formed list. The member-spec, value and key lists of the structured datatypes are checked with it, because their checks compute positions by counting cells. See \"Why the lists must be well formed\" in the design note spec-plus-values-pattern.md." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:or ( [
     sh:hasValue ( ) ;
@@ -4975,9 +4976,19 @@ qudt:StructuredDataKind-tupleMemberSpecs
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   sh:description """
-  The member specs of a tuple kind, or of a heterogeneous array or vector kind: an RDF list with one
-  qudt:NTupleMemberTypeSpec per position, addressed 1-based over the value list.
-  """ ;
+  <p>The member specs of a tuple kind, or of a heterogeneous array or vector kind: an RDF list with one
+   <code>qudt:NTupleMemberTypeSpec</code> per position, addressed 1-based over the flat
+   <code>qudt:values</code> list.
+  </p>
+  <p>The list must be well formed (<code>sh:node qudt:RDFListShape</code>): every cell is
+   <code>rdf:nil</code> or has exactly one <code>rdf:first</code> and one <code>rdf:rest</code>. The tuple
+   checks find a value's position by counting the cells before it, which is right only on a
+   single-stranded list; a cell with two members, a fork, a missing member or a missing end would
+   otherwise surface as misleading type, range or length results. <code>sh:node</code> checks this
+   structure, which <code>sh:class rdf:List</code> could not, because the cells of a Turtle
+   <code>( … )</code> list are untyped. See "Why the lists must be well formed" in the design note
+   spec-plus-values-pattern.md.
+  </p>"""^^rdf:HTML ;
   sh:maxCount 1 ;
   sh:node qudt:RDFListShape ;
   sh:path qudt:tupleMemberSpecs .

@@ -253,10 +253,73 @@ examples are clean, each Maybe invalid example is flagged at its intended positi
 `NTupleTypeCheck` as it was before this change every `( )` cell is flagged. See
 [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md).
 
+## Why the lists must be well formed — `qudt:RDFListShape`
+
+`qudt:tupleMemberSpecs` points at the first cell of an RDF list, and every tuple check walks that
+list to work out positions. `qudt:StructuredDataKind-tupleMemberSpecs` therefore requires the list to
+be well formed with `sh:node qudt:RDFListShape`, before any check relies on it. The same holds for
+the value side: `qudt:values`, and a map's `qudt:keys`, point at the same shape.
+
+### What the shape requires
+
+`qudt:RDFListShape` is recursive. Every cell must be either the empty list, `rdf:nil`, or a node with
+exactly one `rdf:first` and exactly one `rdf:rest`, whose rest again satisfies the shape:
+
+```turtle
+qudt:RDFListShape
+  sh:or ( [ sh:hasValue ( ) ]
+          [ sh:property [ sh:path rdf:first ; sh:minCount 1 ; sh:maxCount 1 ] ;
+            sh:property [ sh:path rdf:rest ; sh:minCount 1 ; sh:maxCount 1 ;
+                          sh:node qudt:RDFListShape ] ] ) .
+```
+
+That rules out cells with two members, forks, cells with no member, and dead ends that never reach
+`rdf:nil`.
+
+### Why the tuple checks need it
+
+The tuple checks find a value's position by counting the cells before it (`rdf:rest*`, then
+`COUNT(?previousCell) + 1`; see idiom 1 below), and compare that position with each member spec's
+`qudt:index`. The arithmetic is right only on a clean, single-stranded list:
+
+- **Two `rdf:first` on one cell:** two member specs share a position.
+- **Two `rdf:rest`:** the list forks, so the cells after the fork are counted along both branches
+  and their positions come out wrong.
+- **A cell with no `rdf:first`:** every later position shifts by one, so each member spec is
+  compared with the wrong value.
+- **No `rdf:nil` at the end:** the list ends silently, and the length checks count a truncated list.
+
+None of these shows up as a clear error. Each surfaces as misleading type, range or length results
+on the values. The shape reports the fault where it is, as a fault in the list.
+
+### Why `sh:node`, not `sh:class rdf:List`
+
+Turtle's `( … )` syntax builds lists from untyped blank nodes: the cells carry no
+`rdf:type rdf:List`. A class check would fail every list. `sh:node` checks the structure, which is
+what matters.
+
+### How it fits with the other shapes
+
+- `qudt:StructuredDataKind-tupleMembers` checks each member, along the path
+  `qudt:tupleMemberSpecs / rdf:rest* / rdf:first`, as a `qudt:NTupleMemberTypeSpec`. The list shape
+  checks the backbone; that shape checks what hangs on it.
+- `sh:maxCount 1` on `qudt:tupleMemberSpecs` itself catches a kind with two lists. That happened when
+  a member spec was defined in two example files: loaded together, it had two member lists, which
+  caused spurious cardinality and length results.
+- `qudt:StructuredDataKind-nonEmptyTupleMemberSpecs` rejects the empty list `( )`, which the list
+  shape accepts as well formed and `qudt:HeterogeneousCellsShape` counts as a value, but which
+  describes no positions.
+
+### What it does not catch
+
+A cycle: a list whose `rdf:rest` leads back to an earlier cell never reaches `rdf:nil`. The SHACL
+specification leaves the behaviour of recursive shapes such as this one undefined, so how an engine
+handles a cyclic list is engine-specific. Turtle's list syntax cannot produce one.
+
 ## SPARQL constraint idioms
 
 Every structured-datatype instance shape hangs one or more `sh:sparql`
-constraints off itself. `qudt:NTuple` uses five:
+constraints off itself. `qudt:NTuple` uses six:
 
 |            Constraint             |                                                                                                                Purpose                                                                                                                 |
 |-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -269,7 +332,7 @@ constraints off itself. `qudt:NTuple` uses five:
 
 `NTupleTypeCheck` and `NTupleRangeCheck` share the "compute the 1-based position
 in a sub-SELECT, then correlate it with the member spec's `qudt:index`" idiom;
-all five rely on the four idioms below. Idioms 3 and 4 exist because the obvious
+all six rely on the four idioms below. Idioms 3 and 4 exist because the obvious
 way to write those two steps is silently non-portable — read them before writing
 a new constraint.
 
@@ -300,7 +363,8 @@ OPTIONAL {
 
 `?valueCell` discriminates each list position (each cell is a unique blank
 node), so grouping by it gives one row per position. `COUNT(?previousCell) + 1`
-yields the 1-based index. This same idiom walks any RDF list.
+yields the 1-based index. This same idiom walks any RDF list, and gives the right positions only on
+a well-formed one — see [Why the lists must be well formed](#why-the-lists-must-be-well-formed--qudtrdflistshape).
 
 ### Idiom 2: SHACL pre-binding in sub-SELECTs
 
