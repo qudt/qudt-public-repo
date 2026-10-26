@@ -18,11 +18,14 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 ### Changed
 
 - The derived OWL schemas (`SCHEMA_QUDT.ttl`, `SCHEMA_QUDT-DATATYPE.ttl`, `SCHEMA_QUDT-COORDINATES.ttl`) are now formatted by Spotless after derivation, like the other source files, so their blank nodes get the stable ordering introduced in [#1516](https://github.com/qudt/qudt-public-repo/pull/1516) and re-deriving an unchanged schema no longer produces a diff. The three schemas were rederived and reformatted; their content is unchanged.
+- `quantitykind:KermaRate` is now `qudt:organizedUnder quantitykind:SpecificPower` (previously `qudt:specializationOf`), matching `quantitykind:Kerma` under `quantitykind:SpecificEnergy` and the other dose-rate kinds, so gray per second is no longer asserted commensurable with watt per kilogram ([#1545](https://github.com/qudt/qudt-public-repo/issues/1545)).
+- `unit:REM-PER-SEC` is now a unit of `quantitykind:DoseEquivalentRate` instead of `quantitykind:AbsorbedDoseRate` and `quantitykind:KermaRate`, since the rem is a unit of dose equivalent ([#1545](https://github.com/qudt/qudt-public-repo/issues/1545)).
 
 ### Fixed
 
 - Hardened the CI Build workflow (`maven.yml`) against script injection: pull-request branch names and the changelog text are now passed to its shell steps through environment variables instead of being written into the scripts, and the `pull_request_target` run now happens only for merged pull requests, which are the only ones that need it.
 - Corrected the Wikidata and OM links of `unit:PERMILLE`, which were those of `unit:PERCENT`: `qudt:wikidataMatch` is now Q181011 (per mille) instead of Q11229 (percent), and `qudt:omUnit om-2/percent` is removed, since OM 2.0 defines no per mille unit ([#1566](https://github.com/qudt/qudt-public-repo/issues/1566)).
+- Removed `qudt:informativeReference` to the Wikipedia article on half-value layer from `quantitykind:KermaRate`, which is a different concept, and corrected the description of `unit:REM-PER-SEC`, which gave 1 rem/s as 1 Sv/s instead of 0.01 Sv/s ([#1545](https://github.com/qudt/qudt-public-repo/issues/1545)).
 
 ## [3.5.3] - 2026-10-20
 
