@@ -13,15 +13,45 @@ WHERE {
                 SELECT ?this (GROUP_CONCAT(?singleSig) as ?sig)
                 WHERE {
                     {
-                        SELECT ?this (CONCAT(qfn:localname(?base),"^",STR(?exp)) AS ?singleSig)
+                        SELECT ?this ?singleSig
                         WHERE {
-                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                ?this qudt:hasFactorUnit [
-                                    qudt:hasUnit ?base ;
-                                    qudt:exponent ?exp
-                                ]
+                            {
+                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                    ?this qudt:hasFactorUnit [
+                                        qudt:hasUnit ?base ;
+                                        qudt:exponent ?exp
+                                    ]
+                                }
+                                FILTER NOT EXISTS {
+                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?this qudt:hasFactorUnit [] }
+                                    FILTER NOT EXISTS {
+                                        GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?this qudt:hasFactorUnit [ qudt:hasUnit ?b ; qudt:exponent ?e ] }
+                                        FILTER NOT EXISTS {
+                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?this qudt:hasFactorUnit [ qudt:hasUnit ?b ; qudt:exponent ?e2 ] }
+                                            FILTER(?e2 = -1 * ?e)
+                                        }
+                                    }
+                                }
+                                BIND(CONCAT(qfn:localname(?base),"^",STR(?exp)) AS ?singleSig)
+                            } UNION {
+                                # a unit whose factor units are their own negation (rad = m/m, sr = m2/m2) says nothing about
+                                # what is inverted, so it counts as one factor: itself (rad is then the reciprocal of PER-RAD)
+                                {
+                                    SELECT DISTINCT ?this
+                                    WHERE {
+                                        GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?this qudt:hasFactorUnit [] }
+                                        FILTER NOT EXISTS {
+                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?this qudt:hasFactorUnit [ qudt:hasUnit ?b ; qudt:exponent ?e ] }
+                                            FILTER NOT EXISTS {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?this qudt:hasFactorUnit [ qudt:hasUnit ?b ; qudt:exponent ?e2 ] }
+                                                FILTER(?e2 = -1 * ?e)
+                                            }
+                                        }
+                                    }
+                                }
+                                BIND(CONCAT(qfn:localname(?this),"^1") AS ?singleSig)
                             }
-                         }
+                        }
                         ORDER BY ?this ?base ?exp
                     }
                 } GROUP BY ?this
@@ -30,16 +60,44 @@ WHERE {
                 SELECT ?reciprocalUnit (GROUP_CONCAT(?singleSig) as ?reciprocalSig)
                 WHERE {
                     {
-                        SELECT (?unit as ?reciprocalUnit)  (CONCAT(qfn:localname(?base),"^",STR(?negExp)) AS ?singleSig)
+                        SELECT (?unit as ?reciprocalUnit) ?singleSig
                         WHERE {
-                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                                ?unit qudt:hasFactorUnit [
-                                    qudt:hasUnit ?base ;
-                                    qudt:exponent ?exp
-                                ]
+                            {
+                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                    ?unit qudt:hasFactorUnit [
+                                        qudt:hasUnit ?base ;
+                                        qudt:exponent ?exp
+                                    ]
+                                }
+                                FILTER NOT EXISTS {
+                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?unit qudt:hasFactorUnit [] }
+                                    FILTER NOT EXISTS {
+                                        GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?unit qudt:hasFactorUnit [ qudt:hasUnit ?b ; qudt:exponent ?e ] }
+                                        FILTER NOT EXISTS {
+                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?unit qudt:hasFactorUnit [ qudt:hasUnit ?b ; qudt:exponent ?e2 ] }
+                                            FILTER(?e2 = -1 * ?e)
+                                        }
+                                    }
+                                }
+                                BIND(?exp * -1 as ?negExp)
+                                BIND(CONCAT(qfn:localname(?base),"^",STR(?negExp)) AS ?singleSig)
+                            } UNION {
+                                {
+                                    SELECT DISTINCT ?unit
+                                    WHERE {
+                                        GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?unit qudt:hasFactorUnit [] }
+                                        FILTER NOT EXISTS {
+                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?unit qudt:hasFactorUnit [ qudt:hasUnit ?b ; qudt:exponent ?e ] }
+                                            FILTER NOT EXISTS {
+                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> { ?unit qudt:hasFactorUnit [ qudt:hasUnit ?b ; qudt:exponent ?e2 ] }
+                                                FILTER(?e2 = -1 * ?e)
+                                            }
+                                        }
+                                    }
+                                }
+                                BIND(CONCAT(qfn:localname(?unit),"^-1") AS ?singleSig)
                             }
-                            BIND(?exp * -1 as ?negExp)
-                         }
+                        }
                         ORDER BY ?unit ?base ?negExp
                     }
                 } GROUP BY ?reciprocalUnit
