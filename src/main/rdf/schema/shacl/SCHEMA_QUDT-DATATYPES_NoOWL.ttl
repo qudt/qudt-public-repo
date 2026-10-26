@@ -101,7 +101,7 @@ qudt:AlignmentType
 qudt:Array
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>An <em>Array></em> is a data structure that stores a collection of elements, typically of the same type, in a contiguous block of memory. 
+  <p>An <em>Array</em> is a data structure that stores a collection of elements, typically of the same type, in a contiguous block of memory. 
   Each element in an array is identified by an index or key, which is typically a numerical identifier, either starting at '0' or '1'.
   </p>
   <p>The key considerations for an Array are:
@@ -111,22 +111,23 @@ qudt:Array
   <li>Index-Based Access: Elements can be accessed, updated, or modified using their index;</li>
   <li>Contiguous Memory Allocation: The elements are stored in consecutive memory locations, which allows efficient access using the index.</li>
   </ol>
-  <p>An Array is represented as ordered entries of values arranged according to its dimensionality.
-  The number of dimensions is specified in the attribute 'dimensionality'.
+  <p>An array value holds its cells in a single flat list, <code>qudt:values</code>, and points with
+   <code>qudt:datatypeKind</code> at a <code>qudt:ArrayKind</code>. The kind gives the rank
+   (<code>qudt:dimensionality</code>), the extent of each dimension (<code>qudt:dimensions</code>), the
+   number of cells (<code>qudt:elementCount</code>), the element types, and the order of the flat list
+   (<code>qudt:dataOrder</code>).
   </p>
-  <p>An array can be multi-dimensional.
-  Multiple indices are used but they are treated as extensions of the same structure.
-  For example, for a 2D array arr[2][3], the indices refer to the row and column positions.
+  <p>An array can be multi-dimensional, but its values are never nested. A 2D array arr[2][3] is not a
+   list of rows: it is one list of six values, and the indices [i][j] pick out a position in that list.
   </p>
-  <p>The values of an array are held in a single flat list (the property 'qudt:values').
-  By default the innermost (last) index varies fastest: the values sharing the same outer indices
-  occur contiguously before the outer index advances, so the values of the first dimension occur
-  first, followed by the values of the next dimension, and so on. Higher dimensional arrays follow
-  the same pattern for each additional dimension. For a 2D array arr[2][3] the default order is:
+  <p>By default the innermost (last) index varies fastest (<code>qudt:InnermostIndexFastest</code>): the
+   values that share their outer indices occur together, and an outer index advances only once the
+   inner index has run through its extent. Higher-dimensional arrays follow the same pattern. For a 2D
+   array arr[2][3] the default order is:
   </p>
   <pre>arr[0][0] arr[0][1] arr[0][2]  arr[1][0] arr[1][1] arr[1][2]</pre>
-  <p>An instance may override this default ordering by stating a 'qudt:dataOrder'
-  (see 'qudt:ArrayDataOrder' for the available orderings).
+  <p>The kind may choose the other order, <code>qudt:OutermostIndexFastest</code>, with
+   <code>qudt:dataOrder</code> (see <code>qudt:ArrayDataOrder</code>).
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Array" ;
@@ -753,31 +754,21 @@ qudt:HeterogenousArray
 qudt:HeterogenousArrayKind
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A <em>Heterogenous Array Kind></em> is a data structure that stores a collection of elements, typically of the same type, in a contiguous block of memory. 
-  Each element in an array is identified by an index or key, which is typically a numerical identifier, either starting at '0' or '1'.
+  <p>A <em>Heterogenous Array Kind</em> is the blueprint for a <code>qudt:HeterogenousArray</code>: an array
+   kind whose cells may be of different types. It lists, in <code>qudt:tupleMemberSpecs</code>, one
+   member spec per cell, giving that position's type and, optionally, its quantity kind and unit
+   (<code>qudt:HeterogeneousCellsShape</code>).
   </p>
-  <p>The key considerations for a <em>Heterogenous Array Kind</em> are:
+  <p>Like every array kind it gives the rank, the extent of each dimension, the number of cells and the
+   order of the flat value list, and it holds no values itself. However many dimensions it has, an
+   array that uses it holds its cells in one flat <code>qudt:values</code> list, and the member specs
+   address positions 1-based over that list: for a 2D array arr[2][3] in the default order, position 4
+   is arr[1][0].
   </p>
-  <ol>
-  <li>Fixed Size: The size of an array may be pre-determined when it is created and cannot be changed;</li>
-  <li>Index-Based Access: Elements can be accessed, updated, or modified using their index;</li>
-  <li>Heterogenous Elements: all elements in the array may be of different data types;</li>
-  <li>Contiguous Memory Allocation: 
-    the elements are stored in consecutive memory locations, which allows efficient access using the index.</li>
-  </ol>
-  <p>The array is represented as ordered entries of values arranged according to its dimensionality.
-  The number of dimensions is specified in the attribute 'dimensionality'.
-  </p>
-  <p>A heterogeneous array is an N-Tuple laid out in a grid: 
-   its per-position element types are given by the member specs in its qudt:tupleMemberSpecs,
-   so it reuses the N-Tuple constraints verbatim (positions are 1-based over
-   the flat qudt:values list).
-  The array-level qudt:ValuesListLengthCheck (values = elementCount) and these NTuple checks together tie value count,
-  element count, and spec positions to one another.
-  </p>
-  <p>An heterogenous array can be multi-dimensional.
-  Multiple indices are used but they are treated as extensions of the same structure.
-  For example: for a 2D array arr[2][3], indices refer to the row and column positions.
+  <p>A heterogeneous array is therefore an N-Tuple laid out in a grid, and it reuses the N-Tuple
+   constraints verbatim. The array-level <code>qudt:ValuesListLengthCheck</code> (values = elementCount)
+   and the N-Tuple checks together tie value count, element count and member-spec positions to one
+   another.
   </p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -813,26 +804,17 @@ qudt:HomogeneousArray
 qudt:HomogeneousArrayKind
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A <em>Homogeneous Array Kind></em> is a data structure that stores a collection of elements, typically of the same type, in a contiguous block of memory. 
-  Each element in the array is identified by an index or key, which is typically a numerical identifier, either starting at '0' or '1'.
+  <p>A <em>Homogeneous Array Kind</em> is the blueprint for a <code>qudt:HomogeneousArray</code>: an array
+   kind whose cells all share one type, given once by <code>qudt:elementType</code>, together with any
+   quantity kind (<code>qudt:hasQuantityKind</code>) and unit (<code>qudt:hasUnit</code>) they share
+   (<code>qudt:HomogeneousCellsShape</code>).
   </p>
-  <p>The key considerations for a <em>Homogeneous Array Kind</em> are:
-  </p>
-  <ol>
-  <li>Fixed Size: The size of an array may be pre-determined when it is created and cannot be changed;</li>
-  <li>Index-Based Access: Elements can be accessed, updated, or modified using their index;</li>
-  <li>Homogeneous Elements: all elements in an array must be of the same datatype;</li>
-  <li>Contiguous Memory Allocation: The elements are stored in consecutive memory locations, which allows efficient access using the index.</li>
-  </ol>
-  <p>A <em>Homogeneous Array Kind</em> is represented as ordered entries of values arranged according to its dimensionality.
-  The number of dimensions is specified in the attribute 'dimensionality'.
-  </p>
-  <p>The property <code>qudt:elementType</code> gives the datatype shared by every element.
-  </p>
-  <p>An array can be multi-dimensional.
-  Multiple indices are used but they are treated as extensions of the same structure.
-  For Example: for a 2D array arr[2][3], indices refer to the row and column positions.
-  A 2D array is still represented as a list, where each member of the list is a list.
+  <p>Like every array kind it gives the rank (<code>qudt:dimensionality</code>), the extent of each
+   dimension (<code>qudt:dimensions</code>), the number of cells (<code>qudt:elementCount</code>) and the
+   order of the flat value list (<code>qudt:dataOrder</code>), and it holds no values itself. However
+   many dimensions it has, an array that uses it holds its cells in one flat <code>qudt:values</code>
+   list, not in nested lists: a 2D array arr[2][3] has six values, in the order that
+   <code>qudt:dataOrder</code> gives.
   </p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -978,7 +960,9 @@ qudt:MathsFunctionType
 qudt:Matrix
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A <em>Matrix</em> is a datatype that specifies the properties of an N-dimensional data structure.
+  <p>A <em>Matrix</em> is a two-dimensional array: its kind has <code>qudt:dimensionality 2</code>, and, like
+   every <code>qudt:Array</code>, it holds its cells in one flat <code>qudt:values</code> list, row by row
+   in the default order.
   </p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
@@ -1015,14 +999,18 @@ qudt:MultiDimensionalArray
   It is a collection of elements arranged in a tabular or multi-dimensional structure for representing complex datasets,
    such as matrices, tensors, or higher-dimensional data.
   </p>
-  <p>The elements of a multi-dimensional array are N-tuples, where 'N' corresponds to the dimensionality of the array.
-  Each element is specified using the property 'qudt:element'.
+  <p>Its values are not nested, and they are not tuples of indices. Like every <code>qudt:Array</code>, a
+   multi-dimensional array holds its cells in one flat <code>qudt:values</code> list and points with
+   <code>qudt:datatypeKind</code> at a <code>qudt:ArrayKind</code> whose <code>qudt:dimensionality</code> is
+   two or more.
   </p>
   <p>Ordinary or one-dimensional arrays are indexed by a single integer. 
   For a multi-dimensional array, the index into the array uses an ordered list of integers, such as in 'a[3,1,5]'. 
   The length of the list of integers used to index into the multi-dimensional array is always the same.
   This is referred to as the array's dimensionality. 
   The bounds on each of these are called the array's dimensions.
+  Both are given by the array's kind, and the kind's <code>qudt:dataOrder</code> says which position in the
+   flat list an index such as a[3,1,5] refers to.
   </p>
   """^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;

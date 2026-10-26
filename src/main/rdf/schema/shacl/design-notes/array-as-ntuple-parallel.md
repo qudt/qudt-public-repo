@@ -200,11 +200,14 @@ temperature array (since removed).
 - `qudt:StructuredDatatype-nTuple`, `qudt:TimeSeriesArray-vector` and `qudt:TimeSeriesArray-dimensions`
   are defined but not referenced by any `sh:property` — deliberate detachment, pending a decision to
   delete them. (`qudt:TimeSeriesArray` attached `-vector` in the released schema.)
-- `qudt:ArrayKind`'s `dcterms:description` is still a near-verbatim copy of `qudt:Array`'s (it
+- ~~`qudt:ArrayKind`'s `dcterms:description` is still a near-verbatim copy of `qudt:Array`'s (it
   describes `qudt:values` as living on the kind), its `rdfs:label` is still `"Array"`, and whether
-  `rdfs:subClassOf qudt:StructuredDatatype` is right for a blueprint node is unsettled.
-- `ex:badExampleQuantityValueTuple` is defined twice in the invalid examples file, so its
-  position-3 fault is reported twice.
+  `rdfs:subClassOf qudt:StructuredDatatype` is right for a blueprint node is unsettled.~~ **Resolved:**
+  the description describes the blueprint, the label is "Array Kind", and every kind is a
+  `qudt:Concept`, not a `qudt:StructuredDatatype`.
+- ~~`ex:badExampleQuantityValueTuple` is defined twice in the invalid examples file, so its
+  position-3 fault is reported twice.~~ **Resolved:** it is defined once, in
+  `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`, and reported once.
 
 ## Design revision (2026-07-27) — self-describing array, no `qudt:ArraySpec` (Option B)
 
@@ -762,8 +765,16 @@ did not forbid `qudt:datatype`, so it was a third way to type the cells; now
 `qudt:StructuredDataKind-datatype` (`sh:maxCount 0`) forbids it on every array and vector kind, and
 `ex:badExampleVectorKindDatatype` shows it firing. The descriptions of `qudt:HeterogenousArrayKind`
 and `qudt:HomogeneousArrayKind` no longer say that `qudt:datatype` gives the element types.
-D. Rewrite the nested-list prose on `qudt:HomogeneousArray`, `qudt:HeterogenousArray`, and
-`qudt:MultiDimensionalArray` to match the flat representation.
+D. ~~Rewrite the nested-list prose on `qudt:HomogeneousArray`, `qudt:HeterogenousArray`, and
+`qudt:MultiDimensionalArray` to match the flat representation.~~ **Done (2026-10-25).** The value
+classes `qudt:HomogeneousArray` and `qudt:HeterogenousArray` already described the flat list; the
+nested-list wording had moved to their kinds. `qudt:HomogeneousArrayKind` and
+`qudt:HeterogenousArrayKind` now describe blueprints that hold no values, in place of a copy of
+`qudt:Array`'s data-structure description ("a 2D array is still represented as a list, where each
+member of the list is a list"). `qudt:MultiDimensionalArray` no longer says its elements are
+N-tuples given with `qudt:element`. `qudt:Array` no longer places `qudt:dimensionality` and
+`qudt:dataOrder` on the value, and `qudt:Matrix` is described as two-dimensional, not
+N-dimensional.
 E. Hold the "specifying the types of an array's values" discussion (see "Open discussion" above), now
 in light of the Option-B hybrid decision.
 F. ~~**Consider how to allow structured datatypes for numeric values**~~ *(added 2026-10-21)*.
