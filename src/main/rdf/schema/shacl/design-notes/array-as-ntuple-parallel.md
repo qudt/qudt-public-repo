@@ -1,11 +1,15 @@
 # Array as NTuple-parallel — design discussion
 
 **Opened:** 2026-05-16 (branch `rh-pr1440`, post-merge with `main`)
-**Status:** open — flat representation confirmed; data order **implemented**. **Design revised
+**Status:** open, with two small items left (see "Still open from this revision"): `qudt:Matrix`
+and `qudt:MultiDimensionalArray` have no kind of their own, and three unattached shapes await a
+keep-or-delete decision. Every lettered item, A to L, is closed (the last on 2026-10-26). Flat
+representation confirmed; data order **implemented**. **Design revised
 2026-08-22 (branch `rh-arrays`): the blueprint node is back as `qudt:ArrayKind`, reached by
 `qudt:datatypeKind`.** This reverses the 2026-07-27 "self-describing array" decision. Array
 constraints are **validated** (valid examples clean, every invalid example flagged); three
-portability defects in the shared tuple engine were found and fixed in the process. Confirmed on
+portability defects in the shared tuple engine were found and fixed in the process, and a fourth on
+2026-10-22. Confirmed on
 2026-10-19 in the build's own SHACL engine, TopBraid SHACL 1.4.3 — see
 [validating-with-the-shacl-engine.md](validating-with-the-shacl-engine.md).
 Read the revisions newest-first: "Design revision (2026-10-24)" folds the tuple spec into the
