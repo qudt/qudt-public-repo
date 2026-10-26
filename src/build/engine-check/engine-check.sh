@@ -14,9 +14,13 @@
 #   DATATYPE_SCHEMA=<file>  use this file in place of SCHEMA_QUDT-DATATYPES_NoOWL.ttl, for example
 #                           an earlier version taken with git show
 #   BASELINE=<results.tsv>  compare the results with those of an earlier run
+#   DIST=<dir>              take the unit and quantity-kind facts from this built distribution
+#                           (default: target/dist)
 #
 # Needs Java 11 or later and Maven, with the build's dependencies already downloaded: Maven runs
-# offline here, only to resolve the plugin's classpath.
+# offline here, only to resolve the plugin's classpath. The unit/quantity-kind consistency checks
+# need the vocabularies a build writes to target/dist, since qudt:applicableUnit is inferred there;
+# without them, the script still runs but leaves those two checks' results out, with a warning.
 set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -27,6 +31,7 @@ abspath() { case "$1" in /*) echo "$1" ;; *) echo "$CALLER/$1" ;; esac; }
 WORK=$(abspath "${WORK:-$ROOT/target/engine-check}")
 DATATYPE_SCHEMA=${DATATYPE_SCHEMA:+$(abspath "$DATATYPE_SCHEMA")}
 BASELINE=${BASELINE:+$(abspath "$BASELINE")}
+DIST=$(abspath "${DIST:-$ROOT/target/dist}")
 cd "$ROOT"
 mkdir -p "$WORK"
 
@@ -96,16 +101,39 @@ fi
 MAVEN_HOME=$(mvn -v | awk -F': ' '/^Maven home/ {print $2}')
 CP="$CP$(ls "$MAVEN_HOME"/lib/slf4j-api-*.jar | head -1)"
 
-# 4. Validate
-java -cp "$CP" "$HERE/EngineCheck.java" "$WORK/shapes.ttl" "$WORK/data.ttl" > "$WORK/results.tsv"
+# 4. Add the unit and quantity-kind facts the consistency checks need, from the built
+#    vocabularies, for the units and quantity kinds the examples mention
+UNIT_VOCAB=$DIST/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl
+QK_VOCAB=$DIST/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl
+QKDV_VOCAB=$DIST/vocab/dimensionvectors/VOCAB_QUDT-DIMENSION-VECTORS.ttl
+if [[ -f "$UNIT_VOCAB" && -f "$QK_VOCAB" && -f "$QKDV_VOCAB" ]]; then
+  java -cp "$CP" "$HERE/UnitFacts.java" "$UNIT_VOCAB" "$QK_VOCAB" "$QKDV_VOCAB" "$WORK/stub.ttl" \
+    "$WORK/unit-facts.ttl"
+  cat "$WORK/unit-facts.ttl" >> "$WORK/data.ttl"
+  UNIT_FACTS=1
+else
+  UNIT_FACTS=0
+fi
 
-# 5. Results on the example subjects, one line per (focus node, check) with a count
+# 5. Validate. Without the facts, every unit would look inapplicable, so the two consistency
+#    checks' results are left out
+java -cp "$CP" "$HERE/EngineCheck.java" "$WORK/shapes.ttl" "$WORK/data.ttl" > "$WORK/results.tsv"
+UNIT_WARNING=""
+if [[ "$UNIT_FACTS" == 0 ]]; then
+  awk -F'\t' '$3 != "qudt:UnitQuantityKindDimensionCheck" && $3 != "qudt:UnitApplicableToQuantityKindCheck"' \
+    "$WORK/results.tsv" > "$WORK/results.tmp" && mv "$WORK/results.tmp" "$WORK/results.tsv"
+  UNIT_WARNING="WARNING: no built vocabularies in $DIST (run mvn install first), so the unit/quantity-kind consistency checks (qudt:UnitQuantityKindDimensionCheck, qudt:UnitApplicableToQuantityKindCheck) were not checked; their results are left out."
+  echo "$UNIT_WARNING" >&2
+fi
+
+# 6. Results on the example subjects, one line per (focus node, check) with a count
 grep -hoE '^(ex|qudt):[A-Za-z0-9_-]+$' "${EXAMPLES[@]}" | sort -u > "$WORK/subjects.txt"
 awk -F'\t' 'NR==FNR {s[$1]=1; next} ($1 in s) {print $1 "\t" $3}' "$WORK/subjects.txt" "$WORK/results.tsv" |
   sort | uniq -c
 echo "$(wc -l < "$WORK/results.tsv" | tr -d ' ') results in all, in $WORK/results.tsv"
+[[ -n "$UNIT_WARNING" ]] && echo "$UNIT_WARNING"
 
-# 6. Compare with an earlier run, ignoring blank-node labels
+# 7. Compare with an earlier run, ignoring blank-node labels
 if [[ -n "${BASELINE:-}" ]]; then
   normalise() { sed -E 's/_:[0-9a-f]+/_:b/g' "$1" | sort; }
   if diff <(normalise "$BASELINE") <(normalise "$WORK/results.tsv") > "$WORK/baseline.diff"; then

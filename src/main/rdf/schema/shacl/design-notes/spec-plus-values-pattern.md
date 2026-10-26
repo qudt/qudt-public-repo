@@ -103,8 +103,11 @@ The meaning of a value is stated where its type is, at the same level:
   specs, one position each.
 
 This replaced `qudt:hasQuantityKindsList`, a list of quantity kinds kept on the value parallel to
-its values, on 2026-10-24. Nothing yet checks that a unit belongs to its quantity kind; that check
-is deferred.
+its values, on 2026-10-24. Since 2026-10-25, where a kind or member spec gives both, two shapes check
+that they fit, as for physical constants: `qudt:UnitQuantityKindDimensionConstraint` (a violation)
+requires the unit to have the quantity kind's dimension vector, and
+`qudt:UnitNotApplicableToQuantityKindWarning` (a warning) flags a unit of the right dimension that is
+not one of the quantity kind's `qudt:applicableUnit`s.
 
 ## Optional positions — `Maybe`
 

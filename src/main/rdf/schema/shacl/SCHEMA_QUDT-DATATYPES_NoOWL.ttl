@@ -5057,6 +5057,80 @@ qudt:TypeVector-datatype
   sh:class qudt:Datatype ;
   sh:path qudt:datatype .
 
+qudt:UnitApplicableToQuantityKindCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    Where an array, vector or collection kind, or a member spec, gives both a quantity kind and a unit,
+    the unit should be one of the quantity kind's applicable units (qudt:applicableUnit, which the
+    build infers). A unit of the wrong dimension is reported by qudt:UnitQuantityKindDimensionCheck
+    instead, so this check skips it.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "The unit {?unit} is not an applicable unit of the quantity kind {?quantityKind}." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+        SELECT $this ?unit ?quantityKind
+        WHERE {
+            $this qudt:hasUnit ?unit .
+            $this qudt:hasQuantityKind ?quantityKind .
+            FILTER NOT EXISTS { ?quantityKind qudt:applicableUnit ?unit . }
+            FILTER NOT EXISTS {
+                ?unit qudt:hasDimensionVector ?unitDimension .
+                ?quantityKind qudt:hasDimensionVector ?quantityKindDimension .
+                FILTER ( ?unitDimension != ?quantityKindDimension
+                    && ?unitDimension != <http://qudt.org/vocab/dimensionvector/NotApplicable>
+                    && ?quantityKindDimension != <http://qudt.org/vocab/dimensionvector/NotApplicable> )
+            }
+        }
+    """ .
+
+qudt:UnitNotApplicableToQuantityKindWarning
+  a sh:NodeShape ;
+  rdfs:comment "Warns when a kind or member spec gives a unit that is not an applicable unit of its quantity kind. Usually the unit lacks a qudt:unitForQuantityKind link to the quantity kind, or the quantity kind is the wrong one. The datatype counterpart of qudt:ConstantUnitNotApplicableToQuantityKindWarning for physical constants." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Unit not applicable to quantity kind warning" ;
+  sh:severity sh:Warning ;
+  sh:sparql qudt:UnitApplicableToQuantityKindCheck ;
+  sh:targetClass qudt:ArrayKind ;
+  sh:targetClass qudt:CollectionKind ;
+  sh:targetClass qudt:NTupleMemberTypeSpec ;
+  sh:targetClass qudt:VectorKind .
+
+qudt:UnitQuantityKindDimensionCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    Where an array, vector or collection kind, or a member spec, gives both a quantity kind and a unit,
+    the unit must have the quantity kind's dimension vector. qkdv:NotApplicable on either side is not
+    compared.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "The unit {?unit} has dimension vector {?unitDimension}, which is not the dimension vector {?quantityKindDimension} of the quantity kind {?quantityKind}." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+        SELECT $this ?unit ?unitDimension ?quantityKind ?quantityKindDimension
+        WHERE {
+            $this qudt:hasUnit ?unit .
+            $this qudt:hasQuantityKind ?quantityKind .
+            ?unit qudt:hasDimensionVector ?unitDimension .
+            ?quantityKind qudt:hasDimensionVector ?quantityKindDimension .
+            FILTER ( ?unitDimension != <http://qudt.org/vocab/dimensionvector/NotApplicable> )
+            FILTER ( ?quantityKindDimension != <http://qudt.org/vocab/dimensionvector/NotApplicable> )
+            FILTER ( ?unitDimension != ?quantityKindDimension )
+        }
+    """ .
+
+qudt:UnitQuantityKindDimensionConstraint
+  a sh:NodeShape ;
+  rdfs:comment "Checks that where a kind or member spec gives both a quantity kind and a unit, the unit has the quantity kind's dimension vector. The datatype counterpart of qudt:InconsistentConstantUnitAndQuantityKindDimensionVectorConstraint for physical constants." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  rdfs:label "Unit and quantity kind dimension constraint" ;
+  sh:severity sh:Violation ;
+  sh:sparql qudt:UnitQuantityKindDimensionCheck ;
+  sh:targetClass qudt:ArrayKind ;
+  sh:targetClass qudt:CollectionKind ;
+  sh:targetClass qudt:NTupleMemberTypeSpec ;
+  sh:targetClass qudt:VectorKind .
+
 qudt:UnsignedBigIntegerType-abbreviation
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
