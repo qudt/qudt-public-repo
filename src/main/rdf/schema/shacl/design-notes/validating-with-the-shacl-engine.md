@@ -115,6 +115,7 @@ Every bad example fires exactly its intended check. All of them are in
 | `ex:badExampleTupleNothingInRequiredPosition`    | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
 | `ex:badExampleTupleTimeInAnyDatePosition`        | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
 | `ex:badExampleVectorKindBothCellDescriptions`    | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
+| `ex:badExampleVectorKindDatatype`                | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:MaxCountConstraintComponent` (from `qudt:StructuredDataKind-datatype`)                                  |
 | `ex:badExampleVectorKindNoCellDescription`       | `EXAMPLES_QUDT-INVALID-ARRAY-DATATYPES.ttl`      | `sh:OrConstraintComponent` (from `qudt:VectorKind`: neither alternative of `qudt:CellDescriptionUnionType`) |
 | `ex:cpaBadLengthShort`                           | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleLengthCheck`, `qudt:NTupleMissingRequiredValueCheck`                                            |
 | `ex:cpaBadMicroseconds`                          | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleRangeCheck`                                                                                     |

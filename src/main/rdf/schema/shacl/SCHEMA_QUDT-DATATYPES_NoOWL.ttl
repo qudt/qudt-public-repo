@@ -179,6 +179,7 @@ qudt:ArrayKind
   sh:property qudt:ArrayKind-elementCount ;
   sh:property qudt:DimensionalityPropertyShape ;
   sh:property qudt:DimensionsPropertyShape ;
+  sh:property qudt:StructuredDataKind-datatype ;
   sh:property qudt:StructuredDataKind-elementType ;
   sh:property qudt:StructuredDataKind-hasQuantityKind ;
   sh:property qudt:StructuredDataKind-hasUnit ;
@@ -767,8 +768,6 @@ qudt:HeterogenousArrayKind
   <p>The array is represented as ordered entries of values arranged according to its dimensionality.
   The number of dimensions is specified in the attribute 'dimensionality'.
   </p>
-  <p>The property 'qudt:datatype' refers to a list if the datatypes of the elements.  
-  </p>
   <p>A heterogeneous array is an N-Tuple laid out in a grid: 
    its per-position element types are given by the member specs in its qudt:tupleMemberSpecs,
    so it reuses the N-Tuple constraints verbatim (positions are 1-based over
@@ -784,8 +783,7 @@ qudt:HeterogenousArrayKind
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
   rdfs:label "Heterogenous Array Kind" ;
   rdfs:subClassOf qudt:ArrayKind ;
-  sh:node qudt:HeterogeneousCellsShape ;
-  sh:property qudt:HeterogenousArray-datatype .
+  sh:node qudt:HeterogeneousCellsShape .
 
 qudt:HexBinaryType
   a rdfs:Class, sh:NodeShape ;
@@ -829,7 +827,7 @@ qudt:HomogeneousArrayKind
   <p>A <em>Homogeneous Array Kind</em> is represented as ordered entries of values arranged according to its dimensionality.
   The number of dimensions is specified in the attribute 'dimensionality'.
   </p>
-  <p>The property 'qudt:datatype' refers to the datatype of the elements.  
+  <p>The property <code>qudt:elementType</code> gives the datatype shared by every element.
   </p>
   <p>An array can be multi-dimensional.
   Multiple indices are used but they are treated as extensions of the same structure.
@@ -1962,6 +1960,7 @@ qudt:VectorKind
   rdfs:label "Vector Kind" ;
   rdfs:subClassOf qudt:Concept ;
   sh:or qudt:CellDescriptionUnionType ;
+  sh:property qudt:StructuredDataKind-datatype ;
   sh:property qudt:StructuredDataKind-elementType ;
   sh:property qudt:StructuredDataKind-hasQuantityKind ;
   sh:property qudt:StructuredDataKind-hasUnit ;
@@ -3295,13 +3294,6 @@ qudt:HeterogeneousCellsShape
     sh:minCount 1 ;
     sh:path qudt:tupleMemberSpecs ;
   ] .
-
-qudt:HeterogenousArray-datatype
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
-  sh:class qudt:Datatype ;
-  sh:maxCount 1 ;
-  sh:path qudt:datatype .
 
 qudt:HeterogenousArray-datatypeKind
   a sh:PropertyShape ;
@@ -4728,6 +4720,18 @@ qudt:StringUTF8-memberDatatype
   sh:class qudt:CharacterType ;
   sh:hasValue datatype:UTF8-CHAR ;
   sh:path qudt:memberDatatype .
+
+qudt:StructuredDataKind-datatype
+  a sh:PropertyShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:description """
+  An array or vector kind types its cells with qudt:elementType, one type shared by every cell, or with
+  qudt:tupleMemberSpecs, one member spec per position (qudt:CellDescriptionUnionType), never with
+  qudt:datatype.
+  """ ;
+  sh:maxCount 0 ;
+  sh:message "An array or vector kind types its cells with qudt:elementType or qudt:tupleMemberSpecs, not qudt:datatype." ;
+  sh:path qudt:datatype .
 
 qudt:StructuredDataKind-elementType
   a sh:PropertyShape ;

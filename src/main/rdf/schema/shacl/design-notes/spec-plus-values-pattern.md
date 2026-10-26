@@ -44,7 +44,8 @@ SPARQL constraint idioms look the way they do, and how to apply the pattern to a
    member specs). Each requires what the other forbids, so a kind matches one or neither, never
    both. Tuple kinds and heterogeneous array kinds must match `qudt:HeterogeneousCellsShape`, and
    homogeneous array kinds and collection kinds `qudt:HomogeneousCellsShape`, each through
-   `sh:node`. Array and vector kinds also give sizes: rank, extents, element count, data order. A
+   `sh:node`. An array or vector kind never types its cells with `qudt:datatype`
+   (`qudt:StructuredDataKind-datatype`, `sh:maxCount 0`). Array and vector kinds also give sizes: rank, extents, element count, data order. A
    collection kind gives no size: a collection holds a variable number of members, which
    `qudt:ValuesListElementTypeCheck` checks against the kind's element type, and a `qudt:Set` must
    not repeat one (`qudt:SetDistinctValuesCheck`).

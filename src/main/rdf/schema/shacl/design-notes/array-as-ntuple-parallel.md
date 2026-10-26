@@ -714,7 +714,7 @@ shared spec and **heterogeneous** arrays need one spec per position. The discuss
 4. ~~Fix or delete `qudt:DimensionalityShape`.~~ **Done — deleted**, replaced by
    `ArrayRankCheck` + `ArrayLengthCheck`.
 5. ~~Decide the fate of `qudt:HeterogenousArray-datatype`.~~ **Partial** — relaxed to optional
-   (bridge). Full deprecation/removal still open.
+   (bridge). **Removed 2026-10-25** (see C).
 
 **Still to do:**
 
@@ -755,7 +755,13 @@ string value `"seventy-two"`, which `qudt:Quantifiable-value` rejects. The colle
 was removed with its quantity `ex:Room_Temperature` (see I). All eight legacy invalid examples
 were named `qudt:` until 2026-10-25, when the invalid examples were split into one file per valid
 graph.
-C. **Finish deprecating `qudt:HeterogenousArray-datatype`** in favour of the kind's `qudt:tupleMemberSpecs`.
+C. ~~**Finish deprecating `qudt:HeterogenousArray-datatype`**~~ **Done (2026-10-25).** The shape was detached
+from `qudt:HeterogenousArrayKind` and removed: it allowed one `qudt:datatype` for the whole kind,
+while the cell types come from the member specs, and nothing used it. `qudt:HeterogeneousCellsShape`
+did not forbid `qudt:datatype`, so it was a third way to type the cells; now
+`qudt:StructuredDataKind-datatype` (`sh:maxCount 0`) forbids it on every array and vector kind, and
+`ex:badExampleVectorKindDatatype` shows it firing. The descriptions of `qudt:HeterogenousArrayKind`
+and `qudt:HomogeneousArrayKind` no longer say that `qudt:datatype` gives the element types.
 D. Rewrite the nested-list prose on `qudt:HomogeneousArray`, `qudt:HeterogenousArray`, and
 `qudt:MultiDimensionalArray` to match the flat representation.
 E. Hold the "specifying the types of an array's values" discussion (see "Open discussion" above), now
