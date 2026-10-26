@@ -26,6 +26,8 @@ on:
 
 jobs:
   build:
+    # pull_request_target runs with this repository's token; only a merged PR needs it (snapshot release)
+    if: github.event_name != 'pull_request_target' || github.event.pull_request.merged == true
 
     runs-on: ubuntu-latest
 
@@ -53,6 +55,8 @@ jobs:
     # the destination branch is currently checked out. Instead, we fetch into remote-
     # tracking refs and diff those refs explicitly.
     - name: Determine comparison refs
+      env:
+        PR_HEAD_REF: ${{ github.head_ref }}
       run: |
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
           echo "BASE_REF=${{ inputs.base_ref || 'main' }}" >> $GITHUB_ENV
@@ -60,7 +64,7 @@ jobs:
           echo "DIFF_HEAD=HEAD" >> $GITHUB_ENV
         else
           echo "BASE_REF=${{ github.base_ref }}" >> $GITHUB_ENV
-          echo "HEAD_REF=${{ github.head_ref }}" >> $GITHUB_ENV
+          echo "HEAD_REF=$PR_HEAD_REF" >> $GITHUB_ENV
         fi
 
       # configure git
@@ -71,6 +75,8 @@ jobs:
 
     - name: Fetch branches (unless PR was merged)
       if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'false' }}
+      env:
+        PR_FORK_HEAD_REF: ${{ github.event.pull_request.head.ref }}
       run: |
         # Always fetch the base branch into a remote-tracking ref so later steps can
         # diff against a stable name regardless of how checkout represented HEAD.
@@ -85,7 +91,7 @@ jobs:
           # PR from a contributor fork: fetch the contributor branch into a named
           # remote-tracking ref so we can compare it without touching local branches.
           git remote add fork ${{ github.event.pull_request.head.repo.clone_url }}
-          git fetch fork "${{ github.event.pull_request.head.ref }}:refs/remotes/fork/$HEAD_REF"
+          git fetch fork "$PR_FORK_HEAD_REF:refs/remotes/fork/$HEAD_REF"
           echo "DIFF_HEAD=refs/remotes/fork/$HEAD_REF" >> $GITHUB_ENV
         else
           # PR from the same repository: fetch the source branch into origin/<head>
@@ -120,6 +126,18 @@ jobs:
     - name: Build with Maven
       run: mvn -Pzip install
 
+    # the OWL schemas are derived from the SHACL schemas by hand; a fresh derivation must reproduce the committed files
+    - name: Fail if the derived OWL schemas are out of date (unless PR was merged)
+      if: ${{ env.MAKE_SNAPSHOT_RELEASE == 'false' }}
+      run: |
+        mvn -q -Powl-schema-derive antrun:run@derive-owl-schema
+        mvn -q -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
+        mvn -q -Powl-coordinates-derive antrun:run@derive-owl-coordinates-schema
+        if ! git diff --exit-code --stat -- src/main/rdf/schema/; then
+          echo "::error::The committed OWL schemas differ from a fresh derivation. Re-derive them (OWL SCHEMA DERIVATION in pom.xml) and commit the result."
+          exit 1
+        fi
+
     # delete the snapshot release (the release action does not update the
     # body, so we have to delete the whole thing)
     - name: Delete Snapshot Release
@@ -136,12 +154,12 @@ jobs:
 
     - name: Make Release Body
       if: ${{ env.MAKE_SNAPSHOT_RELEASE  == 'true' }}
+      env:
+        CHANGELOG_BODY: ${{ steps.get-changelog.outputs.changelog }}
       run: |
         cat src/build/snapshot-release/release-body-header.md > target/release-body.md
         echo "# Changes" >> target/release-body.md
-        cat <<'EOF' >> target/release-body.md 
-        ${{ steps.get-changelog.outputs.changelog }}
-        EOF
+        printf '%s\n' "$CHANGELOG_BODY" >> target/release-body.md
         cat src/build/snapshot-release/release-body-footer.md >> target/release-body.md        
 
     # Make github release

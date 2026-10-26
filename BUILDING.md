@@ -173,7 +173,7 @@ The OWL schema is derived to:
 - `src/main/rdf/schema/SCHEMA_QUDT.ttl`
 
 The legacy baseline is kept at:
-- `src/main/rdf/schema/SCHEMA_QUDT.ttl.backup`
+- `src/build/schema-derivation-config/baselines/SCHEMA_QUDT.ttl.backup`
 
 ### Run derivation only
 
@@ -208,7 +208,7 @@ The OWL datatypes schema is derived to:
 - `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl`
 
 The datatype legacy baseline is kept at:
-- `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl.backup`
+- `src/build/schema-derivation-config/baselines/SCHEMA_QUDT-DATATYPE.ttl.backup`
 
 ### Run datatypes derivation only
 
@@ -240,7 +240,7 @@ The OWL coordinates schema is derived to:
 - `src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl`
 
 The coordinates legacy baseline is kept at:
-- `src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl.backup`
+- `src/build/schema-derivation-config/baselines/SCHEMA_QUDT-COORDINATES.ttl.backup`
 
 ### Run coordinates derivation only
 
@@ -344,9 +344,9 @@ mvn -Powl-baseline-promote antrun:run@promote-owl-baselines
 ```
 
 This copies:
-- `src/main/rdf/schema/SCHEMA_QUDT.ttl` -> `src/main/rdf/schema/SCHEMA_QUDT.ttl.backup`
-- `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl` -> `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl.backup`
-- `src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl` -> `src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl.backup`
+- `src/main/rdf/schema/SCHEMA_QUDT.ttl` -> `src/build/schema-derivation-config/baselines/SCHEMA_QUDT.ttl.backup`
+- `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl` -> `src/build/schema-derivation-config/baselines/SCHEMA_QUDT-DATATYPE.ttl.backup`
+- `src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl` -> `src/build/schema-derivation-config/baselines/SCHEMA_QUDT-COORDINATES.ttl.backup`
 
 3. Re-run inspections to confirm clean diffs against the new baseline, then commit.
 

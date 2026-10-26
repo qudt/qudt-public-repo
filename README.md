@@ -20,7 +20,7 @@ Overview
 
 This QUDT<sup>1</sup> public repository contains the schema and vocabulary source files for the graphs making up the QUDT collection. It is probably the most convenient way for software developers to include the QUDT ontologies in their work, and is the most up-to-date. However, for those who prefer the linked data world, each QUDT graph is also available in both a versioned and an unversioned form on the <a href="http://qudt.org">qudt.org</a> website.
 
-DOI reference for citations: https://doi.org/10.25504/FAIRsharing.d3pqw7
+QUDT is licensed under CC BY 4.0. See [Citing QUDT](#citing-qudt) and [License](#license) below.
 
 Here is the core design pattern of the QUDT ontology:
 
@@ -63,6 +63,21 @@ Status
 
 Please see the documentation supporting each Release. There are also [New Features and Releases](https://github.com/qudt/qudt-public-repo/discussions/315) discussed in the Discussions section.
 
+Citing QUDT
+-----------
+
+Cite QUDT.org, the organization, and name the release you used:
+
+> QUDT — Quantities, Units, Dimensions and Types, by QUDT.org (https://qudt.org), release _x.y.z_, licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+
+[CITATION.cff](CITATION.cff) carries the same information in machine-readable form; GitHub renders it behind the *Cite this repository* button.
+QUDT is also listed in the FAIRsharing registry: https://doi.org/10.25504/FAIRsharing.d3pqw7 (this DOI identifies the registry record, not the QUDT release).
+
+License
+-------
+
+QUDT is licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/), which requires attribution to QUDT.org. UCUM codes and the archived UCUM resources are third-party material under the UCUM license. See [LICENSING.md](LICENSING.md) for details and [LICENSE](LICENSE) for the legal code.
+
 <hr/>
 <p style="font-size:xx-small;"><sup>1</sup> QUDT.org is a 501(c)(3) not-for-profit organization founded to provide semantic specifications for units of measure, quantity kind, dimensions and data types.   QUDT is an advocate for the development and implementation of standards to quantify data expressed in RDF and JSON.   Our mission is to improve interoperability of data and the specification of information structures through industry standards for Units of Measure, Quantity Kinds, Dimensions and Data Types. <a href="https://github.com/sponsors/qudt">Sponsorships</a> are greatly appreciated!
 
@@ -72,4 +87,4 @@ QUDT.org is a member of the World Wide Web Consortium (W3C)
 
 Last updated by: Steve Ray (steve.ray@qudt.org)
 
-Last updated: July 30, 2025
+Last updated: October 13, 2026
