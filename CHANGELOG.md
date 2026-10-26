@@ -17,10 +17,12 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ### Changed
 
+- Removed `qudt:hasExtendedDimensionVector` from the six property lists in `pom.xml`. The extended dimension vector was dropped in favour of the SI-7 vector, and no source file uses the property.
 - The derived OWL schemas (`SCHEMA_QUDT.ttl`, `SCHEMA_QUDT-DATATYPE.ttl`, `SCHEMA_QUDT-COORDINATES.ttl`) are now formatted by Spotless after derivation, like the other source files, so their blank nodes get the stable ordering introduced in [#1516](https://github.com/qudt/qudt-public-repo/pull/1516) and re-deriving an unchanged schema no longer produces a diff. The three schemas were rederived and reformatted; their content is unchanged.
 
 ### Fixed
 
+- Removed the datatype from 1,531 `dcterms:description` literals that declared `rdf:HTML` (933) or `qudt:LatexString` (598) but contain no markup of that kind, so that they are plain strings, as new descriptions already are. The text itself is unchanged. Descriptions in the schema files, the examples, the propulsion extension and the coordinates and datatypes vocabularies are not covered.
 - Hardened the CI Build workflow (`maven.yml`) against script injection: pull-request branch names and the changelog text are now passed to its shell steps through environment variables instead of being written into the scripts, and the `pull_request_target` run now happens only for merged pull requests, which are the only ones that need it.
 - Corrected the Wikidata and OM links of `unit:PERMILLE`, which were those of `unit:PERCENT`: `qudt:wikidataMatch` is now Q181011 (per mille) instead of Q11229 (percent), and `qudt:omUnit om-2/percent` is removed, since OM 2.0 defines no per mille unit ([#1566](https://github.com/qudt/qudt-public-repo/issues/1566)).
 
