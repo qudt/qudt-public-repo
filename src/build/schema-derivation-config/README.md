@@ -29,12 +29,14 @@ SHACL sources into:
 
 - `src/main/rdf/schema/SCHEMA_QUDT.ttl`
 - `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl`
+- `src/main/rdf/schema/SCHEMA_QUDT-COORDINATES.ttl`
 
 The inspection pipelines then compare those derived OWL files against the
 accepted backup baselines:
 
-- `src/main/rdf/schema/SCHEMA_QUDT.ttl.backup`
-- `src/main/rdf/schema/SCHEMA_QUDT-DATATYPE.ttl.backup`
+- `src/build/schema-derivation-config/baselines/SCHEMA_QUDT.ttl.backup`
+- `src/build/schema-derivation-config/baselines/SCHEMA_QUDT-DATATYPE.ttl.backup`
+- `src/build/schema-derivation-config/baselines/SCHEMA_QUDT-COORDINATES.ttl.backup`
 
 The files in `inspection/` tell inspection which differences are acceptable and
 which should still be treated as unexpected.
