@@ -126,6 +126,7 @@ Every bad example fires exactly its intended check. All of them are in
 | `ex:badExampleTupleDateInDateTimePosition`       | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
 | `ex:badExampleTupleIntegerInIntPosition`         | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
 | `ex:badExampleTupleKindElementType`              | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `sh:NodeConstraintComponent` (from `qudt:NTupleKind`: not a `qudt:HeterogeneousCellsShape`)                 |
+| `ex:badExampleTupleKindEmptyMemberSpecs`         | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `sh:NotConstraintComponent` (from `qudt:StructuredDataKind-nonEmptyTupleMemberSpecs`)                       |
 | `ex:badExampleTupleLabelLanguage`                | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleLanguageCheck`                                                                                  |
 | `ex:badExampleTupleNothingInRequiredPosition`    | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |
 | `ex:badExampleTupleTimeInAnyDatePosition`        | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                      |

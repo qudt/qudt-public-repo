@@ -36,7 +36,8 @@ SPARQL constraint idioms look the way they do, and how to apply the pattern to a
    `qudt:CollectionKind` and its subclass `qudt:MapKind`) —
    the *blueprint*, a `qudt:Concept` that many values can share. A tuple kind, and a
    heterogeneous array or vector kind, holds an ordered list of per-position member specs in
-   `qudt:tupleMemberSpecs`, walked via `sh:zeroOrMorePath rdf:rest / rdf:first`. A homogeneous kind
+   `qudt:tupleMemberSpecs`, walked via `sh:zeroOrMorePath rdf:rest / rdf:first`. The list must be
+   well formed (`qudt:RDFListShape`) and not empty (`qudt:StructuredDataKind-nonEmptyTupleMemberSpecs`). A homogeneous kind
    instead gives one shared `qudt:elementType`. Array and vector kinds must use exactly one of the
    two, `sh:or qudt:CellDescriptionUnionType`, whose alternatives are `qudt:HeterogeneousCellsShape`
    (member specs, and no kind-level element type, quantity kind or unit) and
