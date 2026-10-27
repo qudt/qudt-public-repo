@@ -51,6 +51,12 @@ of the open threads; the open-thread docs assume familiarity with it.
   open:** `qudt:Matrix` and `qudt:MultiDimensionalArray` have no kind of their own, and three
   unattached shapes (`qudt:StructuredDatatype-nTuple`, `qudt:TimeSeriesArray-vector`,
   `qudt:TimeSeriesArray-dimensions`) await a keep-or-delete decision.
+- **[quantity-value-cells.md](quantity-value-cells.md)** *(opened 2026-10-26)* —
+  Instances of `qudt:QuantityValue` as the values of tuples, arrays, vectors, collections and maps.
+  They already work with no schema change: `sh:class qudt:QuantityValue` in a member spec, or
+  `qudt:elementType qudt:QuantityValue` on a kind, confirmed in TopBraid. **Still open:** a cell's
+  unit can contradict its kind's (A), sets and map keys compare quantity values as terms (B), and an
+  optional quantity-value tuple position probably fails `qudt:NTupleTypeCheck` (C).
 
 ## Adding a new note
 
