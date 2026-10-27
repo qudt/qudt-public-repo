@@ -28,6 +28,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - `quantitykind:KermaRate` is now `qudt:organizedUnder quantitykind:SpecificPower` (previously `qudt:specializationOf`), matching `quantitykind:Kerma` under `quantitykind:SpecificEnergy` and the other dose-rate kinds, so gray per second is no longer asserted commensurable with watt per kilogram ([#1545](https://github.com/qudt/qudt-public-repo/issues/1545)).
 - Removed `qudt:hasExtendedDimensionVector` from the six property lists in `pom.xml`. The extended dimension vector was dropped in favour of the SI-7 vector, and no source file uses the property.
 - `unit:REM-PER-SEC` is now a unit of `quantitykind:DoseEquivalentRate` instead of `quantitykind:AbsorbedDoseRate` and `quantitykind:KermaRate`, since the rem is a unit of dose equivalent ([#1545](https://github.com/qudt/qudt-public-repo/issues/1545)).
+- Removed incorrect alternate arabic label text (delimited by `;`) in `unit:GRAY` and `unit:WB` ([#1550](https://github.com/qudt/qudt-public-repo/issues/1550)).
 
 ### Fixed
 
