@@ -177,6 +177,10 @@ jobs:
         mvn -q -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
         mvn -q -Powl-coordinates-derive antrun:run@derive-owl-coordinates-schema
         if ! git diff --exit-code --stat -- src/main/rdf/schema/; then
-          echo "::error::The committed OWL schemas differ from a fresh derivation. Re-derive them (OWL SCHEMA DERIVATION in pom.xml) and commit the result."
+          if [ "$MAKE_SNAPSHOT_RELEASE" = "false" ]; then
+            echo "::error::The committed OWL schemas differ from a fresh derivation of the SHACL schemas. Run the 'Re-derive OWL schemas' Action on branch '$HEAD_REF' (in your fork, if this pull request comes from one), then close and reopen this pull request to re-run this check. With Maven installed, you can instead run the derive commands under OWL SCHEMA DERIVATION in pom.xml and commit the result."
+          else
+            echo "::error::The OWL schemas on main differ from a fresh derivation of the SHACL schemas. Create a branch off main, run the 'Re-derive OWL schemas' Action on it, and open a pull request."
+          fi
           exit 1
         fi
