@@ -53,7 +53,10 @@ SPARQL constraint idioms look the way they do, and how to apply the pattern to a
    not repeat one (`qudt:SetDistinctValuesCheck`). A `qudt:Map` adds a parallel `qudt:keys` list,
    whose type its `qudt:MapKind` gives in `qudt:keyType`; `qudt:MapKeysLengthCheck`,
    `qudt:MapDistinctKeysCheck` and `qudt:MapKeyTypeCheck` keep the two lists aligned, the keys
-   unique and of the key type.
+   unique and of the key type. Both distinctness checks compare with `=`: literals by value,
+   resources as terms, so two blank-node quantity values with the same value and unit count as
+   distinct. Comparing quantity values by value would mean converting units (see gap B in
+   [quantity-value-cells.md](quantity-value-cells.md)).
 3. **Member-type spec shape** (`qudt:NTupleMemberTypeSpec`) — one entry per position.
    Carries `qudt:index`, a **type facet** that must be one of the four alternatives below,
    and optionally a quantity kind and unit.
