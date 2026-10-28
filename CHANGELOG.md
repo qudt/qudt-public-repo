@@ -29,6 +29,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Removed `qudt:hasExtendedDimensionVector` from the six property lists in `pom.xml`. The extended dimension vector was dropped in favour of the SI-7 vector, and no source file uses the property.
 - `unit:REM-PER-SEC` is now a unit of `quantitykind:DoseEquivalentRate` instead of `quantitykind:AbsorbedDoseRate` and `quantitykind:KermaRate`, since the rem is a unit of dose equivalent ([#1545](https://github.com/qudt/qudt-public-repo/issues/1545)).
 - Removed incorrect alternate arabic label text (delimited by `;`) in `unit:GRAY` and `unit:WB` ([#1550](https://github.com/qudt/qudt-public-repo/issues/1550)).
+- The CI check that the committed OWL schemas match a fresh derivation now runs on a pull request only when it changes a derivation input (`src/main/rdf/schema/`, `src/build/schema-derivation-config/`, `pom.xml` or the CI Build workflow), so other pull requests no longer pay for it or fail because of someone else's schema change. It now also runs after every merge to `main`, after the snapshot release, so an out-of-date schema on `main` shows up at once.
 
 ### Fixed
 
