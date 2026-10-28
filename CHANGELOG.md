@@ -21,6 +21,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Added `unit:M-PER-M` (metre per metre, `quantitykind:Gradient` and `quantitykind:LengthRatio`), the coherent unit of the gradient, alongside `unit:M2-PER-M2` and `unit:M3-PER-M3`. `unit:GR` is a scaling of it.
 - Added `quantitykind:SpecificLatentHeat`, the latent heat of a phase transition per unit mass, such as the specific latent heats of vaporization, sublimation and fusion, as a specialization of `quantitykind:SpecificEnergy`, with `qudt:wikidataMatch` Q104217205 ([#1577](https://github.com/qudt/qudt-public-repo/issues/1577)).
 - Added `qudt:wikidataMatch` Q2253551 (specific humidity) to `quantitykind:SpecificHumidity`; the Wikidata item links back with P8393 `SpecificHumidity`.
+- Added `quantitykind:Geopotential`, as a specialization of `quantitykind:SpecificEnergy` with `unit:M2-PER-SEC2` as a unit, `quantitykind:GeopotentialHeight`, the geopotential divided by the standard acceleration of free fall, as a specialization of `quantitykind:Length`, and `quantitykind:PressureAltitude`, the geopotential height of the standard atmosphere at a pressure, as a specialization of `quantitykind:GeopotentialHeight`: the vertical coordinates of meteorology and aviation besides the altitude, with their `qudt:wikidataMatch` ([#1592](https://github.com/qudt/qudt-public-repo/issues/1592)).
 
 ### Changed
 
