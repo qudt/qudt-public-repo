@@ -65,7 +65,7 @@ there was lost once, which is why they now live in the repository.
 
 - **Shapes graph:** the datatype and main SHACL schemas and the ten example files. The examples must be
   shapes too, because some constraints are defined in them
-  (`ex:IfcCompoundPlaneAngleConsistentSign`); leave them out and those constraints silently
+  (`ex:IFCcompoundPlaneAngleConsistentSign`); leave them out and those constraints silently
   don't run.
 - **Data graph:** the same files, plus `VOCAB_QUDT-DATATYPES.ttl` and the stub. With
   `COORDINATES=1`, both graphs also get the coordinates schema and `VOCAB_QUDT-COORDINATES.ttl`,
@@ -134,7 +134,7 @@ Every bad example fires exactly its intended check. All of them are in
 | `ex:cpaBadMicroseconds`                          | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleRangeCheck`                                                                                                                               |
 | `ex:cpaBadMinutes`                               | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleRangeCheck`                                                                                                                               |
 | `ex:cpaBadSeconds`                               | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleRangeCheck`                                                                                                                               |
-| `ex:cpaBadSign`                                  | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `ex:IfcCompoundPlaneAngleConsistentSign` (reported twice)                                                                                             |
+| `ex:cpaBadSign`                                  | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `ex:IFCcompoundPlaneAngleConsistentSign` (reported twice)                                                                                             |
 | `ex:cpaBadType`                                  | `EXAMPLES_QUDT-INVALID-TUPLE-DATATYPES.ttl`      | `qudt:NTupleTypeCheck`                                                                                                                                |
 
 The units of the examples are not checked here but by the build, against the built quantity-kind
