@@ -3586,20 +3586,20 @@ qudt:MapKeySpecCheck
                 FILTER ( sameTerm(?value, ?allowedValue) )
                 BIND ( true AS ?hasValueMatch )
             }
-            # (2) Class membership
+            # (2) Class membership, direct or inside sh:or unions
             OPTIONAL {
-                ?spec sh:class ?targetClass .
+                ?spec ( sh:class | (sh:or/rdf:rest*/rdf:first)+/sh:class ) ?targetClass .
                 ?value rdf:type/rdfs:subClassOf* ?targetClass .
                 BIND ( true AS ?classMatch )
             }
-            # (3) An enumerated value
+            # (3) An enumerated value, direct or inside sh:or unions
             OPTIONAL {
-                ?spec qudt:value ?value .
+                ?spec ( qudt:value | (sh:or/rdf:rest*/rdf:first)+/qudt:value ) ?value .
                 BIND ( true AS ?enumeratedMatch )
             }
-            # (4) Any IRI
+            # (4) Any IRI, direct or inside sh:or unions
             OPTIONAL {
-                ?spec sh:nodeKind sh:IRI .
+                ?spec ( sh:nodeKind | (sh:or/rdf:rest*/rdf:first)+/sh:nodeKind ) sh:IRI .
                 FILTER ( isIRI(?value) )
                 BIND ( true AS ?iriMatch )
             }
@@ -4703,20 +4703,20 @@ qudt:NTupleTypeCheck
                 FILTER ( sameTerm(?value, ?allowedValue) )
                 BIND ( true AS ?hasValueMatch )
             }
-            # (2) Concept class membership — sh:class <C> where <C> a qudt:Concept
+            # (2) Class membership — direct sh:class <C>, or one inside an sh:or union
             OPTIONAL {
-                ?memberSpec sh:class ?targetClass .
+                ?memberSpec ( sh:class | (sh:or/rdf:rest*/rdf:first)+/sh:class ) ?targetClass .
                 ?value rdf:type/rdfs:subClassOf* ?targetClass .
                 BIND ( true AS ?classMatch )
             }
-            # (3) Enumerated value — qudt:value <enum1>, <enum2>, ...
+            # (3) Enumerated value — direct qudt:value <enum1>, <enum2>, ..., or inside an sh:or union
             OPTIONAL {
-                ?memberSpec qudt:value ?value .
+                ?memberSpec ( qudt:value | (sh:or/rdf:rest*/rdf:first)+/qudt:value ) ?value .
                 BIND ( true AS ?enumeratedMatch )
             }
-            # (4) Any IRI — sh:nodeKind sh:IRI on the memberSpec
+            # (4) Any IRI — direct sh:nodeKind sh:IRI, or one inside an sh:or union
             OPTIONAL {
-                ?memberSpec sh:nodeKind sh:IRI .
+                ?memberSpec ( sh:nodeKind | (sh:or/rdf:rest*/rdf:first)+/sh:nodeKind ) sh:IRI .
                 FILTER ( isIRI(?value) )
                 BIND ( true AS ?iriMatch )
             }
@@ -5339,20 +5339,20 @@ qudt:ValuesListElementSpecCheck
                 FILTER ( sameTerm(?value, ?allowedValue) )
                 BIND ( true AS ?hasValueMatch )
             }
-            # (2) Class membership
+            # (2) Class membership, direct or inside sh:or unions
             OPTIONAL {
-                ?spec sh:class ?targetClass .
+                ?spec ( sh:class | (sh:or/rdf:rest*/rdf:first)+/sh:class ) ?targetClass .
                 ?value rdf:type/rdfs:subClassOf* ?targetClass .
                 BIND ( true AS ?classMatch )
             }
-            # (3) An enumerated value
+            # (3) An enumerated value, direct or inside sh:or unions
             OPTIONAL {
-                ?spec qudt:value ?value .
+                ?spec ( qudt:value | (sh:or/rdf:rest*/rdf:first)+/qudt:value ) ?value .
                 BIND ( true AS ?enumeratedMatch )
             }
-            # (4) Any IRI
+            # (4) Any IRI, direct or inside sh:or unions
             OPTIONAL {
-                ?spec sh:nodeKind sh:IRI .
+                ?spec ( sh:nodeKind | (sh:or/rdf:rest*/rdf:first)+/sh:nodeKind ) sh:IRI .
                 FILTER ( isIRI(?value) )
                 BIND ( true AS ?iriMatch )
             }

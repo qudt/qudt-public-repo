@@ -283,6 +283,45 @@ ex:NTupleKind_OptionalReading
   ] ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
 
+ex:NTupleKind_OptionalSensorReading
+  a qudt:NTupleKind ;
+  dcterms:description """
+  <p>A dated sensor reading whose other three positions are optional: a temperature as a quantity value
+  (a class), an alarm state (an enumerated value) and the sensor (any IRI). Each optional position gives
+  its real type and rdf:nil as the two alternatives of an sh:or.</p>"""^^rdf:HTML ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:date ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:or ( [
+      sh:class qudt:QuantityValue ;
+    ] [
+      sh:hasValue ( ) ;
+    ] ) ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:or ( [
+      qudt:value ex:HighAlarm ;
+      qudt:value ex:LowAlarm ;
+      qudt:value ex:NoAlarm ;
+    ] [
+      sh:hasValue ( ) ;
+    ] ) ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 4 ;
+    sh:or ( [
+      sh:nodeKind sh:IRI ;
+    ] [
+      sh:hasValue ( ) ;
+    ] ) ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
 ex:NTupleKind_OptionalTemporal
   a qudt:NTupleKind ;
   qudt:tupleMemberSpecs ( [
@@ -510,6 +549,22 @@ ex:exampleTupleOptionalNumbersMixed
   a qudt:NTuple ;
   qudt:datatypeKind ex:NTupleKind_OptionalNumbers ;
   qudt:values ( true ( ) 2.37e1 ( ) 42 ( ) "42"^^xsd:long ( ) ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:exampleTupleOptionalSensorReadingJust
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalSensorReading ;
+  qudt:values ( "2026-10-27"^^xsd:date [
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:DEG_C ;
+    qudt:value 21.4 ;
+  ] ex:NoAlarm ex:KitchenSensor ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:exampleTupleOptionalSensorReadingMixed
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalSensorReading ;
+  qudt:values ( "2026-10-27"^^xsd:date ( ) ex:HighAlarm ( ) ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
 
 ex:exampleTupleOptionalTemporalJust
