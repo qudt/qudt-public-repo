@@ -138,7 +138,8 @@ qudt:Array
   sh:sparql qudt:ValuesListElementTypeCheck ;
   sh:sparql qudt:ValuesListLanguageCheck ;
   sh:sparql qudt:ValuesListLengthCheck ;
-  sh:sparql qudt:ValuesListRangeCheck .
+  sh:sparql qudt:ValuesListRangeCheck ;
+  sh:sparql qudt:ValuesListUnitCheck .
 
 qudt:ArrayDataOrder
   a rdfs:Class, sh:NodeShape ;
@@ -367,7 +368,8 @@ qudt:Collection
   sh:sparql qudt:ValuesListElementSpecCheck ;
   sh:sparql qudt:ValuesListElementTypeCheck ;
   sh:sparql qudt:ValuesListLanguageCheck ;
-  sh:sparql qudt:ValuesListRangeCheck .
+  sh:sparql qudt:ValuesListRangeCheck ;
+  sh:sparql qudt:ValuesListUnitCheck .
 
 qudt:CollectionKind
   a rdfs:Class, sh:NodeShape ;
@@ -745,7 +747,8 @@ qudt:HeterogenousArray
   sh:sparql qudt:NTupleLengthCheck ;
   sh:sparql qudt:NTupleMissingRequiredValueCheck ;
   sh:sparql qudt:NTupleRangeCheck ;
-  sh:sparql qudt:NTupleTypeCheck .
+  sh:sparql qudt:NTupleTypeCheck ;
+  sh:sparql qudt:NTupleUnitCheck .
 
 qudt:HeterogenousArrayKind
   a rdfs:Class, sh:NodeShape ;
@@ -1107,7 +1110,8 @@ qudt:NTuple
   sh:sparql qudt:NTupleLengthCheck ;
   sh:sparql qudt:NTupleMissingRequiredValueCheck ;
   sh:sparql qudt:NTupleRangeCheck ;
-  sh:sparql qudt:NTupleTypeCheck .
+  sh:sparql qudt:NTupleTypeCheck ;
+  sh:sparql qudt:NTupleUnitCheck .
 
 qudt:NTupleKind
   a rdfs:Class, sh:NodeShape ;
@@ -1961,11 +1965,13 @@ qudt:Vector
   sh:sparql qudt:NTupleMissingRequiredValueCheck ;
   sh:sparql qudt:NTupleRangeCheck ;
   sh:sparql qudt:NTupleTypeCheck ;
+  sh:sparql qudt:NTupleUnitCheck ;
   sh:sparql qudt:ValuesListElementSpecCheck ;
   sh:sparql qudt:ValuesListElementTypeCheck ;
   sh:sparql qudt:ValuesListLanguageCheck ;
   sh:sparql qudt:ValuesListLengthCheck ;
-  sh:sparql qudt:ValuesListRangeCheck .
+  sh:sparql qudt:ValuesListRangeCheck ;
+  sh:sparql qudt:ValuesListUnitCheck .
 
 qudt:VectorKind
   a rdfs:Class, sh:NodeShape ;
@@ -4726,6 +4732,50 @@ qudt:NTupleTypeCheck
         }
     """ .
 
+qudt:NTupleUnitCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    Unit check: at a position whose member specification gives qudt:hasUnit, a value that gives its
+    own qudt:hasUnit, such as a qudt:QuantityValue, must give the same unit. A value without a unit,
+    such as a number, takes the member specification's. The per-position counterpart of
+    qudt:ValuesListUnitCheck.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "N-Tuple value {?value} at position {?index} has the unit {?valueUnit}, but its member specification gives {?unit}." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+        SELECT $this ?index ?value ?valueUnit ?unit
+        WHERE {
+            # A tuple, or a heterogeneous array or vector, reaches its member specs
+            # through the kind it points at with qudt:datatypeKind.
+            $this qudt:datatypeKind ?spec .
+            ?spec qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
+            ?memberSpec qudt:index ?index .
+            ?memberSpec qudt:hasUnit ?unit .
+
+            {
+                SELECT $this ?value (COUNT(?previousCell) + 1 AS ?position)
+                WHERE {
+                    $this qudt:values ?values .
+                    ?values rdf:rest* ?valueCell .
+                    ?valueCell rdf:first ?value .
+
+                    OPTIONAL {
+                        ?values rdf:rest* ?previousCell .
+                        ?previousCell rdf:rest+ ?valueCell .
+                    }
+                }
+                GROUP BY $this ?value ?valueCell
+            }
+
+            # Correlate the computed position with the memberSpec's declared index.
+            FILTER ( ?position = ?index )
+
+            ?value qudt:hasUnit ?valueUnit .
+            FILTER ( !sameTerm(?valueUnit, ?unit) )
+        }
+    """ .
+
 qudt:NonNegativeIntegerUnionList
   a rdf:List ;
   rdf:first [
@@ -5491,6 +5541,30 @@ qudt:ValuesListRangeCheck
                 || ( BOUND(?minExclusive) && ?value <= ?minExclusive )
                 || ( BOUND(?maxExclusive) && ?value >= ?maxExclusive )
             )
+        }
+    """ .
+
+qudt:ValuesListUnitCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    Unit check for shared types (homogeneous arrays and vectors, and collections, including the values
+    of a map): where the kind gives qudt:hasUnit, a value in the flat qudt:values list that gives its own
+    qudt:hasUnit, such as a qudt:QuantityValue, must give the same unit. A value without a unit, such as
+    a number, takes the kind's. The shared-type counterpart of qudt:NTupleUnitCheck.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:message "Element {?value} has the unit {?valueUnit}, but its kind gives {?unit}." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+        SELECT $this ?value ?valueUnit ?unit
+        WHERE {
+            $this qudt:datatypeKind ?kind .
+            ?kind qudt:hasUnit ?unit .
+            $this qudt:values ?values .
+            ?values rdf:rest* ?valueCell .
+            ?valueCell rdf:first ?value .
+            ?value qudt:hasUnit ?valueUnit .
+            FILTER ( !sameTerm(?valueUnit, ?unit) )
         }
     """ .
 
