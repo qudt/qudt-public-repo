@@ -1,8 +1,8 @@
 # Quantity values as cells — design discussion
 
 **Opened:** 2026-10-26 (branch `rh-arrays-cusp3`)
-**Status:** open. Quantity values already work as cells of every structured datatype; three gaps
-(A to C below) remain, none fixed yet, and no committed example uses a quantity-value cell.
+**Status:** resolved 2026-10-27. Quantity values work as cells of every structured datatype, and
+the three gaps found (A to C below) are closed; see "Resolution". Committed examples cover each.
 **Related files:** `src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl`,
 `src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl` (`qudt:Quantifiable` and its property shapes)
 
@@ -83,11 +83,32 @@ also follow `(sh:or/rdf:rest*/rdf:first)+/sh:class`, as branch (1) already does 
 A smaller point: a bad quantity-value cell is reported on its own blank node, not on the tuple or
 array that holds it.
 
-## Next steps
+## Resolution (2026-10-27)
 
-1. Add valid examples of quantity-value cells (a tuple, an array, a collection and a map) and
-   invalid ones for each check above, with their rows in the expected-results table.
-2. Gap A: the unit and quantity-kind consistency constraint.
-3. Gap C: run the optional-position case; if it fails, extend branch (2).
-4. Gap B: a sentence in the pattern doc.
+**C, fixed.** Run in the engine, the case failed as predicted, and more widely: in
+`qudt:NTupleTypeCheck`, `qudt:ValuesListElementSpecCheck` and `qudt:MapKeySpecCheck`, a class, an
+enumerated value or any IRI given as an alternative of an `sh:or` rejected every such value. Branches
+(2) to (4) of all three checks now follow `(sh:or/rdf:rest*/rdf:first)+` as branch (1) does. Examples:
+`ex:NTupleKind_OptionalSensorReading`, `ex:HomogeneousArrayKind_OptionalReadings`,
+`ex:MapKind_DisplayNames`, and the invalid `ex:badExampleTupleNumberInQuantityValuePosition`.
+
+**A, fixed, for units only.** A `qudt:QuantityValue` carries a unit but no quantity kind, so there is
+no quantity kind to compare. `qudt:ValuesListUnitCheck` (on `qudt:Array`, `qudt:Collection` and
+`qudt:Vector`) and `qudt:NTupleUnitCheck` (on `qudt:NTuple`, `qudt:HeterogenousArray` and
+`qudt:Vector`) report a value whose `qudt:hasUnit` differs from its kind's or member spec's. Examples:
+`ex:HomogeneousArrayKind_TemperatureReadings`, `ex:MapKind_RoomReadings` and
+`ex:NTupleKind_DatedReadingInCelsius`, each with an invalid value in degrees Fahrenheit.
+
+Where a kind gives a quantity kind but no unit, the cells may differ in unit, which is the main reason
+to use quantity-value cells. The build's unit QA (`QUDT_DATATYPE_UNIT_QA_TESTS.ttl`) now checks that
+each such cell's unit is an applicable unit of the quantity kind
+(`qudt:CellUnitNotApplicableToQuantityKindWarning`, with `qudt:ValuesListUnitApplicableCheck` and
+`qudt:NTupleUnitApplicableCheck`). It reads the inferred `qudt:applicableUnit`, so it runs in the
+build, not in the engine check. Examples: `ex:HomogeneousArrayKind_MixedUnitTemperatures` (degrees
+Celsius and Fahrenheit) and `ex:NTupleKind_DatedReading`, with an invalid example of each in metres.
+
+**B, documented.** The comments of the two distinctness checks and the collections paragraph of
+[spec-plus-values-pattern.md](spec-plus-values-pattern.md) say that resources are compared as terms.
+
+The smaller point stays as it is: SHACL reports a constraint on the focus node it applies to.
 
