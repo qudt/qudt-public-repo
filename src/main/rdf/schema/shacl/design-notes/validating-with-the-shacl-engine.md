@@ -182,7 +182,11 @@ Where a kind or member spec gives both a quantity kind and a unit, the unit shou
 quantity kind's applicable units. `src/main/rdf/validation/QUDT_DATATYPE_UNIT_QA_TESTS.ttl` checks this
 with one warning shape, `qudt:UnitNotApplicableToQuantityKindWarning`, and two SPARQL constraints:
 `qudt:QuantityKindWithoutApplicableUnitsCheck`, when the quantity kind lists no applicable units, and
-`qudt:UnitApplicableToQuantityKindCheck`, when the unit is not among them. Both read
+`qudt:UnitApplicableToQuantityKindCheck`, when the unit is not among them. A second warning shape,
+`qudt:CellUnitNotApplicableToQuantityKindWarning`, does the same for the values: where a kind or
+member spec gives a quantity kind, a value that gives its own unit, such as a `qudt:QuantityValue`,
+must give one of the quantity kind's applicable units (`qudt:ValuesListUnitApplicableCheck` for shared
+types, `qudt:NTupleUnitApplicableCheck` per position). All of them read
 `qudt:applicableUnit` on the quantity kind, which only the build infers, so the check runs in the
 Maven build, not in the engine check, against the built quantity-kind vocabulary in `target/dist`
 and the SHACL datatype schema, which gives the target classes' subclasses:
@@ -190,10 +194,14 @@ and the SHACL datatype schema, which gives the target classes' subclasses:
 - The valid examples must raise no warning; the build fails if they do
   (`target/validation/validationReport-unitQuantityKind-valid.ttl`).
 - The invalid examples are reported only
-  (`target/validation/validationReport-unitQuantityKind-invalid.ttl`), and should raise exactly two
-  warnings, both from `qudt:UnitApplicableToQuantityKindCheck`:
+  (`target/validation/validationReport-unitQuantityKind-invalid.ttl`), and should raise exactly four
+  warnings: two from `qudt:UnitApplicableToQuantityKindCheck`,
   `ex:badExampleVectorKindUnitNotApplicable` (unit:M for quantitykind:LinearVelocity) and
-  `ex:badExampleMemberSpecUnitNotApplicable` (unit:J for quantitykind:Torque).
+  `ex:badExampleMemberSpecUnitNotApplicable` (unit:J for quantitykind:Torque); one from
+  `qudt:ValuesListUnitApplicableCheck`, `ex:badExampleArrayCellUnitNotApplicable` (a cell in unit:M for
+  quantitykind:Temperature); and one from `qudt:NTupleUnitApplicableCheck`,
+  `ex:badExampleTupleValueUnitNotApplicable` (a value in unit:M for quantitykind:Temperature). This run
+  loads only the invalid examples, so those two give their kinds inline.
 
 Anyone can run the same check on their own data, with the shapes file and data that include the
 built quantity-kind vocabulary.

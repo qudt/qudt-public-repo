@@ -11,13 +11,15 @@
   a owl:Ontology ;
   dcterms:description """
   Checks that where an array, vector or collection kind, or a tuple member spec, gives both a quantity
-  kind and a unit, the unit is one of the quantity kind's applicable units. The applicable units are
+  kind and a unit, the unit is one of the quantity kind's applicable units; and that where a kind or
+  member spec gives a quantity kind, a value that gives its own unit, such as a qudt:QuantityValue, gives
+  one of the quantity kind's applicable units. The applicable units are
   read from qudt:applicableUnit on the quantity kind, which the build infers, so the data validated
   must include the built quantity-kind vocabulary (target/dist/vocab/quantitykinds), and the SHACL
   datatype schema for the subclasses of the target classes.
   """ ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/datatype-units> ;
-  rdfs:label "QUDT QA TESTS - Units of datatype kinds and member specs - v $$QUDT_VERSION$$" ;
+  rdfs:label "QUDT QA TESTS - Units of datatype kinds, member specs and values - v $$QUDT_VERSION$$" ;
   vaem:hasGraphMetadata vaem:GMD_QA-DATATYPE-UNITS ;
   vaem:hasGraphRole vaem:ConstraintsGraph .
 
@@ -26,7 +28,66 @@
     a sh:PrefixDeclaration ;
     sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
     sh:prefix "qudt" ;
+  ] ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ;
+    sh:prefix "rdf" ;
   ] .
+
+qudt:CellUnitNotApplicableToQuantityKindWarning
+  a sh:NodeShape ;
+  rdfs:comment "Warns when a kind or member spec gives a quantity kind and a value of an array, vector, collection or tuple gives its own unit, such as a qudt:QuantityValue, that is not one of the quantity kind's applicable units." ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/datatype-units> ;
+  rdfs:label "Cell unit not applicable to quantity kind warning" ;
+  sh:severity sh:Warning ;
+  sh:sparql qudt:NTupleUnitApplicableCheck ;
+  sh:sparql qudt:ValuesListUnitApplicableCheck ;
+  sh:targetClass qudt:Array ;
+  sh:targetClass qudt:Collection ;
+  sh:targetClass qudt:NTuple ;
+  sh:targetClass qudt:Vector .
+
+qudt:NTupleUnitApplicableCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    At a position whose member spec gives a quantity kind, the value gives its own unit, such as a
+    qudt:QuantityValue, and the quantity kind lists applicable units, but the value's unit is not one of
+    them. A quantity kind that lists no applicable units is skipped. The per-position counterpart of
+    qudt:ValuesListUnitApplicableCheck.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/datatype-units> ;
+  sh:message "The unit {?unit} of the value {?value} at position {?index} is not an applicable unit of the quantity kind {?quantityKind} of its member spec." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/datatype-unitsPrefixes> ;
+  sh:select """
+        SELECT $this ?index ?value ?unit ?quantityKind
+        WHERE {
+            $this qudt:datatypeKind ?kind .
+            ?kind qudt:tupleMemberSpecs/rdf:rest*/rdf:first ?memberSpec .
+            ?memberSpec qudt:index ?index .
+            ?memberSpec qudt:hasQuantityKind ?quantityKind .
+
+            {
+                SELECT $this ?value (COUNT(?previousCell) + 1 AS ?position)
+                WHERE {
+                    $this qudt:values ?values .
+                    ?values rdf:rest* ?valueCell .
+                    ?valueCell rdf:first ?value .
+
+                    OPTIONAL {
+                        ?values rdf:rest* ?previousCell .
+                        ?previousCell rdf:rest+ ?valueCell .
+                    }
+                }
+                GROUP BY $this ?value ?valueCell
+            }
+
+            FILTER ( ?position = ?index )
+            ?value qudt:hasUnit ?unit .
+            FILTER EXISTS { ?quantityKind qudt:applicableUnit ?anyUnit . }
+            FILTER NOT EXISTS { ?quantityKind qudt:applicableUnit ?unit . }
+        }
+    """ .
 
 qudt:QuantityKindWithoutApplicableUnitsCheck
   a sh:SPARQLConstraint ;
@@ -80,12 +141,38 @@ qudt:UnitNotApplicableToQuantityKindWarning
   sh:targetClass qudt:NTupleMemberTypeSpec ;
   sh:targetClass qudt:VectorKind .
 
+qudt:ValuesListUnitApplicableCheck
+  a sh:SPARQLConstraint ;
+  rdfs:comment """
+    The kind gives a quantity kind, a value in the qudt:values list gives its own unit, such as a
+    qudt:QuantityValue, and the quantity kind lists applicable units, but the value's unit is not one of
+    them. A quantity kind that lists no applicable units is skipped. The shared-type counterpart of
+    qudt:NTupleUnitApplicableCheck.
+    """ ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/collection/qa/datatype-units> ;
+  sh:message "The unit {?unit} of the value {?value} is not an applicable unit of the quantity kind {?quantityKind} of its kind." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/collection/qa/datatype-unitsPrefixes> ;
+  sh:select """
+        SELECT $this ?value ?unit ?quantityKind
+        WHERE {
+            $this qudt:datatypeKind ?kind .
+            ?kind qudt:hasQuantityKind ?quantityKind .
+            $this qudt:values ?values .
+            ?values rdf:rest* ?valueCell .
+            ?valueCell rdf:first ?value .
+            ?value qudt:hasUnit ?unit .
+            FILTER EXISTS { ?quantityKind qudt:applicableUnit ?anyUnit . }
+            FILTER NOT EXISTS { ?quantityKind qudt:applicableUnit ?unit . }
+        }
+    """ .
+
 vaem:GMD_QA-DATATYPE-UNITS
   a vaem:GraphMetaData ;
   dcterms:description """
   <p>QA tests for the units of the structured datatypes: where an array, vector or collection kind, or a
    tuple member spec, gives both a quantity kind and a unit, the unit should be one of the quantity
-   kind's applicable units. The tests read qudt:applicableUnit on the quantity kind, which the build
+   kind's applicable units, and so should the unit of a value, such as a qudt:QuantityValue, that gives
+   its own. The tests read qudt:applicableUnit on the quantity kind, which the build
    infers, so the data validated must include the built quantity-kind vocabulary, and the SHACL
    datatype schema for the subclasses of the target classes.
   </p>"""^^rdf:HTML ;
