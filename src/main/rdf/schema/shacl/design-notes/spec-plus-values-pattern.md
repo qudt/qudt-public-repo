@@ -104,7 +104,7 @@ The meaning of a value is stated where its type is, at the same level:
 - **Per position:** a member spec may also carry `qudt:hasQuantityKind` and `qudt:hasUnit`, at
   most one of each (`qudt:NTupleMemberTypeSpec-hasQuantityKind`, `-hasUnit`). Because tuple kinds and
   heterogeneous array and vector kinds all hold member specs, this covers all three.
-  `ex:VectorKind_MassProperties` gives each of its six positions a quantity kind and unit, and
+  `ex:VectorKind_RocketLaunchMassProperties` gives each of its six positions a quantity kind and unit, and
   `ex:VectorKind_GeoPosition` gives latitude, longitude and altitude theirs.
 - **Shared:** an array or vector kind with a shared `qudt:elementType` may carry one
   `qudt:hasQuantityKind` and one `qudt:hasUnit` for every cell
@@ -233,8 +233,8 @@ ex:NTupleKind_OptionalReading  qudt:tupleMemberSpecs (
     [ qudt:index 2 ; sh:or qudt:MaybeNumericUnionType ]
     [ qudt:index 3 ; sh:class qudt:Unit ] ) .
 
-ex:MaybeTuple2_JustValues  qudt:values ( "2026-05-12"^^xsd:date 23.7 unit:DEG_C ) .
-ex:MaybeTuple2_NilValue    qudt:values ( "2026-05-12"^^xsd:date ( ) unit:DEG_C ) .
+ex:NTuple2_WithNoNullValues  qudt:values ( "2026-05-12"^^xsd:date 23.7 unit:DEG_C ) .
+ex:NTuple2_WithNilValue      qudt:values ( "2026-05-12"^^xsd:date ( ) unit:DEG_C ) .
 ```
 
 How a Nothing cell behaves in each check:

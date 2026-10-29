@@ -222,7 +222,7 @@ three split files into the old copy instead.
 
 This is how the `qudt:Maybe…UnionType` change to `NTupleTypeCheck` was confirmed: with the
 check as it was before `73ed45d2`, every `( )` cell in the Maybe examples is flagged, and so is
-`23.7` in `ex:MaybeTuple2_JustValues`; with the current check, none are.
+`23.7` in `ex:NTuple2_WithNoNullValues`; with the current check, none are.
 
 ## Pitfalls
 

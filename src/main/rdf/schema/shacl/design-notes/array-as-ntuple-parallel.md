@@ -747,7 +747,7 @@ were descriptions of structure: `qudt:StateSpaceMatrix` became a `qudt:Homogeneo
 `qudt:StateSpaceVector` had become a `qudt:VectorKind`, and the four examples became kinds stating
 `qudt:elementType xsd:double` and `qudt:elementCount` in place of `qudt:datatype`. (On 2026-10-24 the integer array was migrated, as
 `ex:HomogeneousArray_1D_Integers`, and the mass-properties array was replaced by the heterogeneous
-vector `ex:Vector_MassProperties`.) In the invalid examples, the two legacy arrays
+vector `ex:Vector_RocketLaunchMassProperties`.) In the invalid examples, the two legacy arrays
 (`ex:Array1D_Integers-INVALID`, `ex:EX_Array1D_INVALID`) failed only that check, not their
 intended length error, until 2026-10-25. They were identical, so `ex:EX_Array1D_INVALID` was removed,
 and `ex:Array1D_Integers-INVALID` became a `qudt:HomogeneousArray` with `qudt:values ( 1 2 3 )`
