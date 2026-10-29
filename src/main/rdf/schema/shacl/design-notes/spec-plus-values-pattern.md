@@ -104,8 +104,8 @@ The meaning of a value is stated where its type is, at the same level:
 - **Per position:** a member spec may also carry `qudt:hasQuantityKind` and `qudt:hasUnit`, at
   most one of each (`qudt:NTupleMemberTypeSpec-hasQuantityKind`, `-hasUnit`). Because tuple kinds and
   heterogeneous array and vector kinds all hold member specs, this covers all three.
-  `ex:VectorKind_RocketLaunchMassProperties` gives each of its six positions a quantity kind and unit, and
-  `ex:VectorKind_GeoPosition` gives latitude, longitude and altitude theirs.
+  `ex:VectorKind_RocketLaunchMassProperties` gives each of its six positions a quantity kind and
+  unit.
 - **Shared:** an array or vector kind with a shared `qudt:elementType` may carry one
   `qudt:hasQuantityKind` and one `qudt:hasUnit` for every cell
   (`qudt:StructuredDataKind-hasQuantityKind`, `-hasUnit`), as `ex:VectorKind_DroneVelocity` and

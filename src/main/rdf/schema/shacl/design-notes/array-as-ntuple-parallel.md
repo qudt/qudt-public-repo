@@ -120,8 +120,8 @@ expressed on the kind side, with `qudt:VectorKind` `rdfs:subClassOf qudt:ArrayKi
 `rdfs:subClassOf qudt:Concept`, with its own shapes for the component count and types, and no rank,
 dimensions or data order. A vector may be homogeneous (one `qudt:elementType`) or heterogeneous (member specs in
 `qudt:tupleMemberSpecs`, one type per component), so `qudt:Vector` carries the four `NTuple*`
-checks as well as the two `ValuesList*` checks. `ex:Vector_GeoPosition` and
-`ex:badExampleHeterogeneousVectorLength` exercise them. Since 2026-10-24 `qudt:Vector-datatypeKind`
+checks as well as the two `ValuesList*` checks. `ex:Vector_RocketLaunchMassProperties` exercises
+them. Since 2026-10-24 `qudt:Vector-datatypeKind`
 is `sh:minCount 1`: every vector must have a kind. The old-style vectors, which described themselves with `qudt:datatype`,
 `qudt:dimensions` and a singular `qudt:value`, were migrated on 2026-10-23. The three that hold
 values (`ex:Vector3D_FLOAT-DP`, `-SP` and `ex:Vector_DroneVelocities_3D`) now point at kinds and
@@ -167,9 +167,8 @@ sub-SELECTs. The one that counts all positions followed
 required positions read only `$this qudt:conformsToTupleSpec`. For a value whose spec comes through
 its kind, the second sub-SELECT returned no row, the join removed the solution, and the check never
 fired: no heterogeneous array's length was ever checked by it. Now both sub-SELECTs use the same
-path, and `ex:badExampleHeterogeneousArrayLength` and `ex:badExampleHeterogeneousVectorLength`
-report it. The array's and vector's length errors were still caught by `ValuesListLengthCheck` and by
-`NTupleExtraValueCheck` or `NTupleMissingRequiredValueCheck`, which is why this went unnoticed. When
+path, and `ex:badExampleHeterogeneousArrayLength` reports it. Its length error was still caught by
+`ValuesListLengthCheck` and by `NTupleExtraValueCheck`, which is why this went unnoticed. When
 several sub-SELECTs reach the same resource, write the same path in each.
 
 **Examples updated to the split.** Valid: each array now points at a kind
