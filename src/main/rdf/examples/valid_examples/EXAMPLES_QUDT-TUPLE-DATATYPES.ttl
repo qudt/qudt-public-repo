@@ -1,0 +1,674 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ex: <http://example.org#> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix vaem: <http://www.linkedmodel.org/schema/vaem#> .
+
+<http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple>
+  a owl:Ontology ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/datatype> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/quantitykind> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/unit> ;
+  owl:imports <http://www.linkedmodel.org/schema/dtype> ;
+  owl:imports <http://www.linkedmodel.org/schema/vaem> ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "QUDT Examples of Tuple Datatypes v$$QUDT_VERSION$$" ;
+  vaem:hasGraphMetadata vaem:GMD_TUPLE-DATATYPES ;
+  vaem:hasGraphRole vaem:VocabularyGraph .
+
+ex:IFCcompoundPlaneAngleMeasure
+  a rdfs:Class, sh:NodeShape ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "IFC Compound Plane Angle Measure" ;
+  rdfs:subClassOf qudt:NTuple ;
+  sh:sparql ex:IFCcompoundPlaneAngleConsistentSign .
+
+dcterms:contributor
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "contributor" ;
+  rdfs:range xsd:string .
+
+dcterms:creator
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "creator" ;
+  rdfs:range xsd:string .
+
+dcterms:description
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "description" ;
+  rdfs:range xsd:string .
+
+dcterms:rights
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "rights" ;
+  rdfs:range xsd:string .
+
+dcterms:subject
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "subject" ;
+  rdfs:range xsd:string .
+
+dcterms:title
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "title" ;
+  rdfs:range xsd:string .
+
+ex:IFCcompoundPlaneAngleConsistentSign
+  a sh:SPARQLConstraint ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  sh:message "Compound plane angle has components of mixed sign (ConsistentSign)." ;
+  sh:prefixes <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/datatype> ;
+  sh:select """
+      SELECT $this WHERE {
+          $this qudt:values ?values .
+          ?values rdf:rest*/rdf:first ?a .
+          ?values rdf:rest*/rdf:first ?b .
+          FILTER ( ?a > 0 && ?b < 0 )
+      }
+  """ .
+
+ex:NTuple2_WithNilValue
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalReading ;
+  qudt:values ( "2026-05-12"^^xsd:date ( ) unit:DEG_C ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "Temperature in Degrees C Maybe Example - no value" .
+
+ex:NTuple2_WithNoNullValues
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalReading ;
+  qudt:values ( "2026-05-12"^^xsd:date 23.7 unit:DEG_C ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "Temperature in Degrees C Maybe Example" .
+
+ex:NTupleKind_DateCount
+  a qudt:NTupleKind ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:date ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleKind_DatedReading
+  a qudt:NTupleKind ;
+  dcterms:description """
+  <p>A date and a temperature reading. The member spec of position 2 gives the quantity kind but no
+  unit, so the quantity value there may be in any unit; the build's unit QA checks that it is an
+  applicable unit of the quantity kind (qudt:NTupleUnitApplicableCheck).</p>"""^^rdf:HTML ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:date ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:index 2 ;
+    sh:class qudt:QuantityValue ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleKind_DatedReadingInCelsius
+  a qudt:NTupleKind ;
+  dcterms:description """
+  <p>A date and a temperature reading. The member spec of position 2 fixes the quantity kind and the
+  unit, degrees Celsius, so a quantity value there that gives its own unit must give that one
+  (qudt:NTupleUnitCheck).</p>"""^^rdf:HTML ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:date ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_C ;
+    qudt:index 2 ;
+    sh:class qudt:QuantityValue ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleKind_IFCcompoundPlaneAngleMeasure
+  a qudt:NTupleKind ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:integer ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:integer ;
+    sh:maxExclusive 60 ;
+    sh:minExclusive -60 ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:datatype xsd:integer ;
+    sh:maxExclusive 60 ;
+    sh:minExclusive -60 ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 4 ;
+    sh:datatype xsd:integer ;
+    sh:maxExclusive 1000000 ;
+    sh:minCount 0 ;
+    sh:minExclusive -1000000 ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "IfcCompoundPlaneAngleMeasure: (degrees, minutes, seconds, [millionth-seconds])" .
+
+ex:NTupleKind_Measurement
+  a qudt:NTupleKind ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:date ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:decimal ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:class qudt:Unit ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleKind_OptionalAnyDate
+  a qudt:NTupleKind ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:or qudt:MaybeAnyDateUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:or qudt:MaybeAnyDateUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:or qudt:MaybeAnyDateUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 4 ;
+    sh:or qudt:MaybeAnyDateUnionType ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleKind_OptionalBinary
+  a qudt:NTupleKind ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:or qudt:MaybeHexBinaryUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:or qudt:MaybeBase64BinaryUnionType ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleKind_OptionalIntegers
+  a qudt:NTupleKind ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:or qudt:MaybePositiveIntegerUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:or qudt:MaybeNegativeIntegerUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:or qudt:MaybeNonPositiveIntegerUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 4 ;
+    sh:or qudt:MaybeShortUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 5 ;
+    sh:or qudt:MaybeByteUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 6 ;
+    sh:or qudt:MaybeUnsignedLongUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 7 ;
+    sh:or qudt:MaybeUnsignedIntUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 8 ;
+    sh:or qudt:MaybeUnsignedShortUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 9 ;
+    sh:or qudt:MaybeUnsignedByteUnionType ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleKind_OptionalNumbers
+  a qudt:NTupleKind ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:or qudt:MaybeBooleanUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:or qudt:MaybeDecimalUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:or qudt:MaybeDoubleUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 4 ;
+    sh:or qudt:MaybeFloatUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 5 ;
+    sh:or qudt:MaybeIntegerUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 6 ;
+    sh:or qudt:MaybeIntUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 7 ;
+    sh:or qudt:MaybeLongUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 8 ;
+    sh:or qudt:MaybeNonNegativeIntegerUnionType ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleKind_OptionalReading
+  a qudt:NTupleKind ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:date ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:or qudt:MaybeNumericUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:class qudt:Unit ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleKind_OptionalSensorReading
+  a qudt:NTupleKind ;
+  dcterms:description """
+  <p>A dated sensor reading whose other three positions are optional: a temperature as a quantity value
+  (a class), an alarm state (an enumerated value) and the sensor (any IRI). Each optional position gives
+  its real type and rdf:nil as the two alternatives of an sh:or.</p>"""^^rdf:HTML ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:date ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:or ( [
+      sh:class qudt:QuantityValue ;
+    ] [
+      sh:hasValue ( ) ;
+    ] ) ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:or ( [
+      qudt:value ex:HighAlarm ;
+      qudt:value ex:LowAlarm ;
+      qudt:value ex:NoAlarm ;
+    ] [
+      sh:hasValue ( ) ;
+    ] ) ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 4 ;
+    sh:or ( [
+      sh:nodeKind sh:IRI ;
+    ] [
+      sh:hasValue ( ) ;
+    ] ) ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleKind_OptionalTemporal
+  a qudt:NTupleKind ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:or qudt:MaybeDateUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:or qudt:MaybeTimeUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:or qudt:MaybeDateTimeUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 4 ;
+    sh:or qudt:MaybeDateTimeStampUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 5 ;
+    sh:or qudt:MaybeGYearUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 6 ;
+    sh:or qudt:MaybeGMonthUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 7 ;
+    sh:or qudt:MaybeGDayUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 8 ;
+    sh:or qudt:MaybeGYearMonthUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 9 ;
+    sh:or qudt:MaybeGMonthDayUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 10 ;
+    sh:or qudt:MaybeDurationUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 11 ;
+    sh:or qudt:MaybeDayTimeDurationUnionType ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 12 ;
+    sh:or qudt:MaybeYearMonthDurationUnionType ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleKind_QuantityValueUnit
+  a qudt:NTupleKind ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:class qudt:QuantityKind ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:decimal ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:class qudt:Unit ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleKind_ResourceLabelRating
+  a qudt:NTupleKind ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:nodeKind sh:IRI ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype rdf:langString ;
+    sh:languageIn ( "en" ) ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 3 ;
+    sh:datatype xsd:integer ;
+    sh:maxInclusive 5 ;
+    sh:minInclusive 1 ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 4 ;
+    sh:class qudt:Unit ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 5 ;
+    sh:datatype xsd:date ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleKind_StatusFlag
+  a qudt:NTupleKind ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:string ;
+    sh:minLength 1 ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:boolean ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleWithNoNullAnyDates
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalAnyDate ;
+  qudt:values ( "2026-05-12"^^xsd:date "2026-05-12T14:30:00"^^xsd:dateTime "2026"^^xsd:gYear
+    "--05"^^xsd:gMonth ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleWithNoNullHEXbinaries
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalBinary ;
+  qudt:values ( "0FB7"^^xsd:hexBinary "D7c="^^xsd:base64Binary ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleWithNoNullIntegers
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalIntegers ;
+  qudt:values ( "42"^^xsd:positiveInteger "-42"^^xsd:negativeInteger "-42"^^xsd:nonPositiveInteger
+    "42"^^xsd:short "42"^^xsd:byte "42"^^xsd:unsignedLong "42"^^xsd:unsignedInt
+    "42"^^xsd:unsignedShort "42"^^xsd:unsignedByte ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleWithNoNullNumbers
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalNumbers ;
+  qudt:values ( true 23.7 2.37e1 "23.7"^^xsd:float 42 "42"^^xsd:int "42"^^xsd:long
+    "42"^^xsd:nonNegativeInteger ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleWithNoNullSensorReadings
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalSensorReading ;
+  qudt:values ( "2026-10-27"^^xsd:date [
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:DEG_C ;
+    qudt:value 21.4 ;
+  ] ex:NoAlarm ex:KitchenSensor ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleWithNoNullTemporals
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalTemporal ;
+  qudt:values ( "2026-05-12"^^xsd:date "14:30:00"^^xsd:time "2026-05-12T14:30:00"^^xsd:dateTime
+    "2026-05-12T14:30:00Z"^^xsd:dateTimeStamp "2026"^^xsd:gYear "--05"^^xsd:gMonth "---12"^^xsd:gDay
+    "2026-05"^^xsd:gYearMonth "--05-12"^^xsd:gMonthDay "P1Y2M3DT4H"^^xsd:duration
+    "P3DT4H"^^xsd:dayTimeDuration "P1Y2M"^^xsd:yearMonthDuration ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleWithNullBinary
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalBinary ;
+  qudt:values ( "0FB7"^^xsd:hexBinary ( ) ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleWithNullIntegers
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalIntegers ;
+  qudt:values ( "42"^^xsd:positiveInteger ( ) "-42"^^xsd:nonPositiveInteger ( ) "42"^^xsd:byte ( )
+    "42"^^xsd:unsignedInt ( ) "42"^^xsd:unsignedByte ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleWithNullNumbers
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalNumbers ;
+  qudt:values ( true ( ) 2.37e1 ( ) 42 ( ) "42"^^xsd:long ( ) ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleWithNullSensorReading
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalSensorReading ;
+  qudt:values ( "2026-10-27"^^xsd:date ( ) ex:HighAlarm ( ) ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleWithNullTemporal
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalTemporal ;
+  qudt:values ( "2026-05-12"^^xsd:date ( ) "2026-05-12T14:30:00"^^xsd:dateTime ( ) "2026"^^xsd:gYear
+    ( ) "---12"^^xsd:gDay ( ) "--05-12"^^xsd:gMonthDay ( ) "P3DT4H"^^xsd:dayTimeDuration ( ) ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:NTupleWithNullsForAnyDate
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_OptionalAnyDate ;
+  qudt:values ( "2026-05-12"^^xsd:date ( ) "2026"^^xsd:gYear ( ) ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> .
+
+ex:Tuple1_Date
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_DateCount ;
+  qudt:values ( "2026-05-12"^^xsd:date 42 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "Date Tuple Example" .
+
+ex:Tuple2_ApprovedTrue
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_StatusFlag ;
+  qudt:values ( "Approved" true ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "Approved True 2-Tuple Example" .
+
+ex:Tuple2_DatedReadingInCelsius
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_DatedReadingInCelsius ;
+  qudt:values ( "2026-10-27"^^xsd:date [
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:DEG_C ;
+    qudt:standardUncertainty 0.1 ;
+    qudt:value 21.4 ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "Dated temperature reading in degrees Celsius" .
+
+ex:Tuple2_DatedReadingInFahrenheit
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_DatedReading ;
+  qudt:values ( "2026-10-27"^^xsd:date [
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:value 70.5 ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "Dated temperature reading in degrees Fahrenheit" .
+
+ex:Tuple2_TemperatureInDegreesC
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_QuantityValueUnit ;
+  qudt:values ( quantitykind:Temperature 23.7 unit:DEG_C ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "Temperature in Degrees C Example" .
+
+ex:Tuple3_DatedTemperatureInDegreesC
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_Measurement ;
+  qudt:values ( "2026-05-12"^^xsd:date 23.7 unit:DEG_C ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "Dated Temperature in Degrees C Example" .
+
+ex:Tuple5_DatedAndLabelledTemperatureInDegreesC
+  a qudt:NTuple ;
+  qudt:datatypeKind ex:NTupleKind_ResourceLabelRating ;
+  qudt:values ( quantitykind:Temperature "Ambient temperature"@en 5 unit:DEG_C
+    "2026-05-12"^^xsd:date ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "Dated and Labelled Temperature in Degrees C Example" .
+
+ex:cpaBerlinLatitude
+  a ex:IFCcompoundPlaneAngleMeasure ;
+  qudt:datatypeKind ex:NTupleKind_IFCcompoundPlaneAngleMeasure ;
+  qudt:values ( 52 31 12 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "52 deg 31 min 12 sec N latitude (3-part form, no millionth-seconds)" .
+
+ex:cpaExactDegrees
+  a ex:IFCcompoundPlaneAngleMeasure ;
+  qudt:datatypeKind ex:NTupleKind_IFCcompoundPlaneAngleMeasure ;
+  qudt:values ( 45 0 0 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "exactly 45 degrees" .
+
+ex:cpaLongitudeExample
+  a ex:IFCcompoundPlaneAngleMeasure ;
+  qudt:datatypeKind ex:NTupleKind_IFCcompoundPlaneAngleMeasure ;
+  qudt:values ( 13 24 18 500000 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "13 deg 24 min 18.5 sec E longitude (4-part)" .
+
+ex:cpaRefLatitudeExample
+  a ex:IFCcompoundPlaneAngleMeasure ;
+  qudt:datatypeKind ex:NTupleKind_IFCcompoundPlaneAngleMeasure ;
+  qudt:values ( -50 -58 -33 -110400 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "-50 deg 58 min 33.110400 sec (the IFC spec worked example, 4-part, all negative)" .
+
+vaem:GMD_TUPLE-DATATYPES
+  a vaem:GraphMetaData ;
+  dcterms:description """
+  Examples of tuple datatypes: tuple kinds (qudt:NTupleKind) and the tuples (qudt:NTuple) that point at them,
+  including tuples with optional positions, and the IFC compound plane angle measure
+  (IfcCompoundPlaneAngleMeasure) modelled as a tuple.
+  """^^rdf:HTML ;
+  dcterms:modified "1234-12-12T12:34:56Z"^^xsd:dateTime ;
+  dcterms:subject "Datatypes" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  rdfs:label "QUDT Examples of Tuple Datatypes - Version $$QUDT_VERSION$$" ;
+  vaem:hasGraphRole vaem:VocabularyGraph ;
+  vaem:isMetadataFor <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/tuple> ;
+  vaem:logo "https://qudt.org/linkedmodels.org/assets/lib/lm/images/logos/qudt_logo-300x110.png"^^xsd:anyURI ;
+  vaem:name "QUDT" ;
+  vaem:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+  vaem:namespacePrefix "qudt" ;
+  vaem:owner "QUDT.ORG" ;
+  vaem:title "QUDT Examples of Tuple Datatypes - Version $$QUDT_VERSION$$" ;
+  vaem:usesNonImportedResource dcterms:abstract ;
+  vaem:usesNonImportedResource dcterms:created ;
+  vaem:usesNonImportedResource dcterms:creator ;
+  vaem:usesNonImportedResource dcterms:modified ;
+  vaem:usesNonImportedResource dcterms:rights ;
+  vaem:usesNonImportedResource dcterms:title ;
+  vaem:usesNonImportedResource <http://voag.linkedmodel.org/voag#QUDT-Attribution> ;
+  vaem:withAttributionTo <http://voag.linkedmodel.org/voag#QUDT-Attribution> .
+
+

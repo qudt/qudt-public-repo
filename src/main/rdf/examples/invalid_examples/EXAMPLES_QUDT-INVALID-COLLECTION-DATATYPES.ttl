@@ -1,0 +1,195 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ex: <http://example.org#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix vaem: <http://www.linkedmodel.org/schema/vaem#> .
+
+<http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection/invalid>
+  a owl:Ontology ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/datatype> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/quantitykind> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/unit> ;
+  owl:imports <http://www.linkedmodel.org/schema/dtype> ;
+  owl:imports <http://www.linkedmodel.org/schema/vaem> ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection/invalid> ;
+  rdfs:label "QUDT Examples of Invalid Collection Datatypes v$$QUDT_VERSION$$" ;
+  vaem:hasGraphMetadata vaem:GMD_INVALID-COLLECTION-DATATYPES ;
+  vaem:hasGraphRole vaem:VocabularyGraph .
+
+dcterms:contributor
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "contributor" ;
+  rdfs:range xsd:string .
+
+dcterms:creator
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "creator" ;
+  rdfs:range xsd:string .
+
+dcterms:description
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "description" ;
+  rdfs:range xsd:string .
+
+dcterms:rights
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "rights" ;
+  rdfs:range xsd:string .
+
+dcterms:subject
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "subject" ;
+  rdfs:range xsd:string .
+
+dcterms:title
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "title" ;
+  rdfs:range xsd:string .
+
+ex:badExampleCollectionElementType
+  a qudt:Sequence ;
+  dcterms:description """
+  <p>The kind's element type is xsd:decimal but the second member is the string "fifty-five".</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:CollectionKind_Temperatures ;
+  qudt:values ( 54.0 "fifty-five" 56.9 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection/invalid> ;
+  rdfs:label "Invalid collection - a member violates the element type" .
+
+ex:badExampleCollectionNoKind
+  a qudt:MultiSet ;
+  dcterms:description """
+  <p>A multiset with no qudt:datatypeKind, so nothing gives the type of its members.</p>"""^^rdf:HTML ;
+  qudt:values ( 1 2 2 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection/invalid> ;
+  rdfs:label "Invalid collection - no kind" .
+
+ex:badExampleMapDuplicateKey
+  a qudt:Map ;
+  dcterms:description """
+  <p>The key "Kitchen" appears twice, so the map gives two temperatures for one room.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:MapKind_RoomTemperatures ;
+  qudt:keys ( "Kitchen" "Lounge" "Kitchen" ) ;
+  qudt:values ( 68.0 70.5 66.2 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection/invalid> ;
+  rdfs:label "Invalid map - a repeated key" .
+
+ex:badExampleMapKeySpec
+  a qudt:Map ;
+  dcterms:description """
+  <p>The kind's key spec accepts any number, but the second key is the string "Roof".</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:MapKind_FloorTemperatures ;
+  qudt:keys ( 0 "Roof" 2 ) ;
+  qudt:values ( 19.5 20.0 21.0 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection/invalid> ;
+  rdfs:label "Invalid map - a key its kind's key spec does not accept" .
+
+ex:badExampleMapKeyType
+  a qudt:Map ;
+  dcterms:description """
+  <p>The kind's key type is xsd:string, but the second key is the integer 2.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:MapKind_RoomTemperatures ;
+  qudt:keys ( "Kitchen" 2 "Study" ) ;
+  qudt:values ( 68.0 70.5 66.2 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection/invalid> ;
+  rdfs:label "Invalid map - a key of the wrong type" .
+
+ex:badExampleMapKindBothKeyForms
+  a qudt:MapKind ;
+  dcterms:description """
+  <p>A map kind that gives its key type twice, as qudt:keyType and as qudt:keySpec. It must give exactly
+  one of the two.</p>"""^^rdf:HTML ;
+  qudt:elementType xsd:decimal ;
+  qudt:keySpec [
+    sh:or qudt:NumericUnionType ;
+  ] ;
+  qudt:keyType xsd:integer ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection/invalid> ;
+  rdfs:label "Invalid map kind - both qudt:keyType and qudt:keySpec" .
+
+ex:badExampleMapLength
+  a qudt:Map ;
+  dcterms:description """
+  <p>Three keys but only two values, so the study has no temperature.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:MapKind_RoomTemperatures ;
+  qudt:keys ( "Kitchen" "Lounge" "Study" ) ;
+  qudt:values ( 68.0 70.5 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection/invalid> ;
+  rdfs:label "Invalid map - more keys than values" .
+
+ex:badExampleMapValueUnit
+  a qudt:Map ;
+  dcterms:description """
+  <p>The kind gives degrees Celsius, but the lounge's reading is a quantity value in degrees
+  Fahrenheit.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:MapKind_RoomReadings ;
+  qudt:keys ( "Kitchen" "Lounge" ) ;
+  qudt:values ( [
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:DEG_C ;
+    qudt:value 20.0 ;
+  ] [
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:value 70.3 ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection/invalid> ;
+  rdfs:label "Invalid map - a value in a unit other than its kind's" .
+
+ex:badExampleSetDuplicate
+  a qudt:Set ;
+  dcterms:description """
+  <p>A set in which 54.0 appears twice. A set has no repeated values; a multiset would allow it.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:CollectionKind_Temperatures ;
+  qudt:values ( 54.0 55.6 54.0 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection/invalid> ;
+  rdfs:label "Invalid set - a repeated member" .
+
+ex:badExampleSetLabelLanguage
+  a qudt:Set ;
+  dcterms:description """
+  <p>The kind requires English labels, but the second label is German.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:CollectionKind_EnglishLabels ;
+  qudt:values ( "Kitchen"@en "Küche"@de ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection/invalid> ;
+  rdfs:label "Invalid set - a label in a language its kind does not allow" .
+
+vaem:GMD_INVALID-COLLECTION-DATATYPES
+  a vaem:GraphMetaData ;
+  dcterms:description """
+  Invalid examples of collections. Each breaks a constraint of the SHACL datatype schema.
+  """^^rdf:HTML ;
+  dcterms:modified "1234-12-12T12:34:56Z"^^xsd:dateTime ;
+  dcterms:subject "Datatypes" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection/invalid> ;
+  rdfs:label "QUDT Examples of Invalid Collection Datatypes - Version $$QUDT_VERSION$$" ;
+  vaem:hasGraphRole vaem:VocabularyGraph ;
+  vaem:isMetadataFor <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/collection/invalid> ;
+  vaem:logo "https://qudt.org/linkedmodels.org/assets/lib/lm/images/logos/qudt_logo-300x110.png"^^xsd:anyURI ;
+  vaem:name "QUDT" ;
+  vaem:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+  vaem:namespacePrefix "qudt" ;
+  vaem:owner "QUDT.ORG" ;
+  vaem:title "QUDT Examples of Invalid Collection Datatypes - Version $$QUDT_VERSION$$" ;
+  vaem:usesNonImportedResource dcterms:abstract ;
+  vaem:usesNonImportedResource dcterms:created ;
+  vaem:usesNonImportedResource dcterms:creator ;
+  vaem:usesNonImportedResource dcterms:modified ;
+  vaem:usesNonImportedResource dcterms:rights ;
+  vaem:usesNonImportedResource dcterms:title ;
+  vaem:usesNonImportedResource <http://voag.linkedmodel.org/voag#QUDT-Attribution> ;
+  vaem:withAttributionTo <http://voag.linkedmodel.org/voag#QUDT-Attribution> .
+
+

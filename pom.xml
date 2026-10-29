@@ -654,7 +654,11 @@ validAspectDirs.each { aspectDir ->
                                             src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
                                             src/main/rdf/vocab/**/*.ttl
                                             target/generated/supported-extensions/src/*.ttl
-                                            src/main/rdf/examples/EXAMPLES_QUDT-DATATYPES.ttl
+                                            src/main/rdf/examples/valid_examples/EXAMPLES_QUDT-DATATYPES.ttl
+                                            src/main/rdf/examples/valid_examples/EXAMPLES_QUDT-TUPLE-DATATYPES.ttl
+                                            src/main/rdf/examples/valid_examples/EXAMPLES_QUDT-ARRAY-DATATYPES.ttl
+                                            src/main/rdf/examples/valid_examples/EXAMPLES_QUDT-COLLECTION-DATATYPES.ttl
+                                            src/main/rdf/examples/valid_examples/EXAMPLES_QUDT-QUANTITIES.ttl
                                         </include>
                                     </data>
                                     <outputFile>target/validation/validationReportSrc.ttl</outputFile>
@@ -684,6 +688,7 @@ validAspectDirs.each { aspectDir ->
                                         <include>
                                             src/main/rdf/validation/COLLECTION_QUDT_USER_TESTS.ttl
                                             src/main/rdf/validation/COLLECTION_QUDT_QA_TESTS_ALL.ttl
+                                            src/main/rdf/validation/QUDT_DATATYPE_UNIT_QA_TESTS.ttl
                                             src/main/rdf/schema/shacl/SCHEMA_QUDT_NoOWL.ttl
                                             src/main/rdf/schema/shacl/SCHEMA_QUDT-DATATYPES_NoOWL.ttl
                                             src/main/rdf/schema/shacl/SCHEMA_QUDT-COORDINATES_NoOWL.ttl
@@ -3919,6 +3924,48 @@ GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
                                         </data>
                                         <validationReport>
                                             <file>target/validation/validationReport.ttl</file>
+                                        </validationReport>
+                                    </shaclValidate>
+                                    <!--
+                                    Units of the datatype examples: where a kind or member spec gives a quantity
+                                    kind and a unit, the unit must be one of the quantity kind's applicable units,
+                                    which only the built quantity-kind vocabulary holds (qudt:applicableUnit is
+                                    inferred). The valid examples must raise no warning; the invalid examples are
+                                    reported only, and should raise exactly the warnings listed in
+                                    src/main/rdf/schema/shacl/design-notes/validating-with-the-shacl-engine.md.
+                                    -->
+                                    <shaclValidate>
+                                        <message>Checking the units of the valid datatype examples against their quantity kinds</message>
+                                        <failOnSeverity>Warning</failOnSeverity>
+                                        <shapes>
+                                            <file>src/main/rdf/validation/QUDT_DATATYPE_UNIT_QA_TESTS.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <files>
+                                                <include>target/dist/examples/valid_examples/*.ttl</include>
+                                            </files>
+                                            <graph>dist:schema:SCHEMA_QUDT-DATATYPES_NoOWL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                        </data>
+                                        <validationReport>
+                                            <file>target/validation/validationReport-unitQuantityKind-valid.ttl</file>
+                                        </validationReport>
+                                    </shaclValidate>
+                                    <shaclValidate>
+                                        <message>Checking the units of the invalid datatype examples against their quantity kinds (report only)</message>
+                                        <failOnSeverity>None</failOnSeverity>
+                                        <shapes>
+                                            <file>src/main/rdf/validation/QUDT_DATATYPE_UNIT_QA_TESTS.ttl</file>
+                                        </shapes>
+                                        <data>
+                                            <files>
+                                                <include>target/dist/examples/invalid_examples/*.ttl</include>
+                                            </files>
+                                            <graph>dist:schema:SCHEMA_QUDT-DATATYPES_NoOWL.ttl</graph>
+                                            <graph>dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl</graph>
+                                        </data>
+                                        <validationReport>
+                                            <file>target/validation/validationReport-unitQuantityKind-invalid.ttl</file>
                                         </validationReport>
                                     </shaclValidate>
                                     <shaclValidate>

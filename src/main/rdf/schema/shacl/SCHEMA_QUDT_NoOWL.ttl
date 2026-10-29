@@ -162,13 +162,11 @@ qudt:CurrencyUnit
 qudt:DataItem
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A <em>Data Item</em> holds a value that maybe a scalar or structured datatype.
-  <em>Quantity Value</em> specifies which case applies.
+  <p>A <em>Data Item</em> is a parent class for a scalar or structured data object.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "Data Item" ;
-  rdfs:subClassOf qudt:Concept ;
-  sh:property qudt:DataItem-value .
+  rdfs:subClassOf qudt:Concept .
 
 qudt:Datatype
   a rdfs:Class, sh:NodeShape ;
@@ -256,61 +254,6 @@ qudt:EnumeratedQuantity
   sh:property qudt:EnumeratedQuantity-enumeratedValue ;
   sh:property qudt:EnumeratedQuantity-enumeration .
 
-qudt:EnumeratedValue
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>An <em>Enumerated Value</em> class defines the members of an enumeration. 
-  An enumeration is a set of literals from which a single value is selected. 
-  Each literal can have a tag as an integer within a standard encoding appropriate to the range of integer values. 
-  Consistency of enumeration types will allow them, and the enumerated values, to be referred to unambiguously either through symbolic name or encoding. 
-  </p>
-  <p>Enumerated values are also controlled vocabularies and as such need to be standardized. 
-  Without this consistency enumeration literals can be stated differently and result in  data conflicts and misinterpretations.
-  </p>
-  <p>The tags are a set of positive whole numbers, not necessarily contiguous and having no numerical significance, each corresponding to the associated literal identifier. 
-  An order attribute can also be given on the enumeration elements. 
-  An enumeration can itself be a member of an enumeration. 
-  This allows enumerations to be enumerated in a selection. 
-  </p>
-  <p>Enumerations are also subclasses of Scalar Datatype. 
-  This allows them to be used as the reference of a datatype specification.
-  </p>
-  """^^rdf:HTML ;
-  qudt:informativeReference "https://en.wikipedia.org/wiki/Enumeration"^^xsd:anyURI ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  rdfs:label "Enumerated Value" ;
-  rdfs:subClassOf dtype:EnumeratedValue ;
-  rdfs:subClassOf qudt:Verifiable ;
-  sh:property qudt:EnumeratedValue-abbreviation ;
-  sh:property qudt:EnumeratedValue-altSymbol ;
-  sh:property qudt:EnumeratedValue-description ;
-  sh:property qudt:EnumeratedValue-symbol .
-
-qudt:Enumeration
-  a rdfs:Class, sh:NodeShape ;
-  dcterms:description """
-  <p>An <em>Enumeration</em> is a set of literals from which a single value is selected. 
-  Each literal can have a tag as an integer within a standard encoding appropriate to the range of integer values. 
-  Consistency of enumeration types will allow them, and the enumerated values, to be referred to unambiguously either through symbolic name or encoding. 
-  Enumerated values are also controlled vocabularies and as such need to be standardized. 
-  Without this consistency enumeration literals can be stated differently and result in  data conflicts and misinterpretations.
-  </p>
-  <p>The tags are a set of positive whole numbers, not necessarily contiguous and having no numerical significance, each corresponding to the associated literal identifier. 
-  An order attribute can also be given on the enumeration elements. An enumeration can itself be a member of an enumeration. This allows enumerations to be enumerated in a selection. 
-  Enumerations are also subclasses of <em>Scalar Datatype</em>. 
-  This allows them to be used as the reference of a datatype specification.
-  </p>
-  """^^rdf:HTML ;
-  qudt:dbpediaMatch "http://dbpedia.org/resource/Enumeration"^^xsd:anyURI ;
-  qudt:informativeReference "https://en.wikipedia.org/wiki/Enumerated_type"^^xsd:anyURI ;
-  qudt:informativeReference "https://en.wikipedia.org/wiki/Enumeration"^^xsd:anyURI ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  rdfs:label "Enumeration" ;
-  rdfs:subClassOf qudt:Concept ;
-  sh:property qudt:Enumeration-abbreviation ;
-  sh:property qudt:Enumeration-default ;
-  sh:property qudt:Enumeration-element .
-
 qudt:FactorUnit
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
@@ -397,23 +340,6 @@ qudt:NominalScale
   rdfs:seeAlso qudt:OrdinalScale ;
   rdfs:seeAlso qudt:RatioScale ;
   rdfs:subClassOf qudt:Scale .
-
-qudt:NumericListShape
-  a rdfs:Class, sh:NodeShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  rdfs:subClassOf rdf:List ;
-  sh:property [
-    sh:or qudt:NumericTypeUnion ;
-    sh:path rdf:first ;
-  ] ;
-  sh:property [
-    sh:or ( [
-      sh:node ( ) ;
-    ] [
-      sh:node qudt:NumericListShape ;
-    ] ) ;
-    sh:path rdf:rest ;
-  ] .
 
 qudt:OrdinalScale
   a rdfs:Class, sh:NodeShape ;
@@ -661,7 +587,7 @@ qudt:QuantityType
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
   A $\\textit{Quantity Type}$ is an enumeration of quantity kinds. 
-  It specializes $\\boxed{dtype:EnumeratedValue}$ by constrinaing $\\boxed{dtype:value}$ to instances of $\\boxed{qudt:QuantityKind}$.
+  It specializes $\\boxed{dtype:EnumeratedValue}$ by constraining $\\boxed{dtype:value}$ to instances of $\\boxed{qudt:QuantityKind}$.
   """^^qudt:LatexString ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "Quantity type" ;
@@ -671,7 +597,9 @@ qudt:QuantityType
 qudt:QuantityValue
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A <em>Quantity Value</em> 
+  <p>A <em>Quantity Value</em> has two aspects: <em>Quantifiable</em> and <em>Verifiable</em>.
+  <em>Quantifiable</em> specifies its value and type.
+  <em>Verifiable</em> optionally provides normative and informative references.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "Quantity value" ;
@@ -718,11 +646,11 @@ qudt:RuleType
 qudt:ScalarDataItem
   a rdfs:Class, sh:NodeShape ;
   dcterms:description """
-  <p>A <em>Data Item</em> holds a value that is compliant with a specified <em>Datatype</em>.
+  <p>A <em>Scalar Data Item</em> holds a value that is compliant with a specified <em>Datatype</em>.
   </p>"""^^rdf:HTML ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "Scalar Data Item" ;
-  rdfs:subClassOf qudt:Concept ;
+  rdfs:subClassOf qudt:DataItem ;
   sh:property qudt:ScalarDataItem-datatype ;
   sh:property qudt:ScalarDataItem-value .
 
@@ -1171,12 +1099,6 @@ qudt:dbpediaMatch
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "dbpedia match" .
 
-qudt:default
-  a rdf:Property ;
-  dcterms:description "The default element in an enumeration"^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  rdfs:label "default" .
-
 qudt:definedUnitOfSystem
   a rdf:Property ;
   dcterms:description "This property relates a unit of measure with the unit system that defines the unit."^^rdf:HTML ;
@@ -1288,12 +1210,6 @@ qudt:eclassCode
   dcterms:description "Provides an IRDI (International Registration Data Identifier) that identifies the corresponding definition in the ECLASS Standard." ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   rdfs:label "ECLASS code" .
-
-qudt:element
-  a rdf:Property ;
-  dcterms:description "An element of an enumeration"^^rdf:HTML ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  rdfs:label "element" .
 
 qudt:enumeratedValue
   a rdf:Property ;
@@ -2013,7 +1929,7 @@ qudt:Citation-description
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
   sh:minCount 1 ;
-  sh:or qudt:TextTypeUnion ;
+  sh:or qudt:TextUnionType ;
   sh:path dcterms:description .
 
 qudt:Citation-url
@@ -2142,13 +2058,6 @@ qudt:CurrencyUnit-currencyNumber
   sh:path qudt:currencyNumber ;
   sh:pattern "^\\d{3}$" .
 
-qudt:DataItem-value
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  sh:maxCount 1 ;
-  sh:node qudt:NumericListShape ;
-  sh:path qudt:value .
-
 qudt:EnumeratedQuantity-enumeratedValue
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
@@ -2163,51 +2072,15 @@ qudt:EnumeratedQuantity-enumeration
   sh:maxCount 1 ;
   sh:path qudt:enumeration .
 
-qudt:EnumeratedValue-abbreviation
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  sh:datatype xsd:string ;
-  sh:maxCount 1 ;
-  sh:path qudt:abbreviation .
-
-qudt:EnumeratedValue-altSymbol
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  sh:path qudt:altSymbol .
+qudt:EnumeratedValue
+  sh:property qudt:EnumeratedValue-description .
 
 qudt:EnumeratedValue-description
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:or qudt:TextTypeUnion ;
+  sh:or qudt:TextUnionType ;
   sh:path dcterms:description .
-
-qudt:EnumeratedValue-symbol
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  sh:maxCount 1 ;
-  sh:path qudt:symbol .
-
-qudt:Enumeration-abbreviation
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  sh:datatype xsd:string ;
-  sh:maxCount 1 ;
-  sh:path qudt:abbreviation .
-
-qudt:Enumeration-default
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  sh:class qudt:EnumeratedValue ;
-  sh:maxCount 1 ;
-  sh:path qudt:default .
-
-qudt:Enumeration-element
-  a sh:PropertyShape ;
-  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  sh:class qudt:EnumeratedValue ;
-  sh:minCount 1 ;
-  sh:path qudt:element .
 
 qudt:FactorUnit-exponent
   a sh:PropertyShape ;
@@ -2295,18 +2168,17 @@ qudt:LatexString
   rdfs:label "Latex String" ;
   rdfs:subClassOf xsd:string .
 
-qudt:NumericTypeUnion
+qudt:NumericUnionType
   a rdf:List ;
   dcterms:description """
   An rdf:List that can be used in property constraints as value for sh:or to indicate that all values
-   of a property must be a string, an integer, a float, a double or a decimal.
+   of a property must be numeric: an integer (xsd:integer, xsd:int, xsd:nonNegativeInteger or
+   xsd:positiveInteger), a float, a double or a decimal.
   """ ;
   rdf:first [
-    sh:datatype xsd:string ;
+    sh:datatype xsd:nonNegativeInteger ;
   ] ;
   rdf:rest ( [
-    sh:datatype xsd:nonNegativeInteger ;
-  ] [
     sh:datatype xsd:positiveInteger ;
   ] [
     sh:datatype xsd:integer ;
@@ -2320,7 +2192,7 @@ qudt:NumericTypeUnion
     sh:datatype xsd:decimal ;
   ] ) ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
-  rdfs:label "Numeric Type Union" .
+  rdfs:label "Numeric Union Type" .
 
 qudt:OrderedType-literal
   a sh:PropertyShape ;
@@ -2528,18 +2400,12 @@ qudt:Quantifiable-value
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:node ( [
-    sh:or qudt:NumericTypeUnion ;
+  sh:or ( [
+    sh:or qudt:NumericUnionType ;
   ] [
-    sh:property [
-      sh:class qudt:DataItem ;
-      sh:path qudt:value ;
-    ] ;
+    sh:class qudt:StructuredDatatype ;
   ] [
-    sh:property [
-      sh:class qudt:EnumeratedValue ;
-      sh:path qudt:value ;
-    ] ;
+    sh:class qudt:EnumeratedValue ;
   ] ) ;
   sh:path qudt:value .
 
@@ -2614,35 +2480,35 @@ qudt:QuantityKind-baseCGSUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:or qudt:TextTypeUnion ;
+  sh:or qudt:TextUnionType ;
   sh:path qudt:baseCGSUnitDimensions .
 
 qudt:QuantityKind-baseISOUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:or qudt:TextTypeUnion ;
+  sh:or qudt:TextUnionType ;
   sh:path qudt:baseISOUnitDimensions .
 
 qudt:QuantityKind-baseImperialUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:or qudt:TextTypeUnion ;
+  sh:or qudt:TextUnionType ;
   sh:path qudt:baseImperialUnitDimensions .
 
 qudt:QuantityKind-baseSIUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:or qudt:TextTypeUnion ;
+  sh:or qudt:TextUnionType ;
   sh:path qudt:baseSIUnitDimensions .
 
 qudt:QuantityKind-baseUSCustomaryUnitDimensions
   a sh:PropertyShape ;
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:maxCount 1 ;
-  sh:or qudt:TextTypeUnion ;
+  sh:or qudt:TextUnionType ;
   sh:path qudt:baseUSCustomaryUnitDimensions .
 
 qudt:QuantityKind-belongsToSystemOfQuantities
@@ -2835,7 +2701,7 @@ qudt:ScalarDataItem-value
   sh:or ( [
     sh:class qudt:QuantityValue ;
   ] [
-    sh:or qudt:NumericTypeUnion ;
+    sh:or qudt:NumericUnionType ;
   ] ) ;
   sh:path qudt:value .
 
@@ -2972,6 +2838,23 @@ qudt:SystemOfUnits-prefix
   rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
   sh:class qudt:Prefix ;
   sh:path qudt:prefix .
+
+qudt:TextUnionType
+  a rdf:List ;
+  dcterms:description """
+  An rdf:List that can be used in property constraints as value for sh:or to indicate that all values of a property
+   must be a plain string, a string with HTML markup, or a string with LaTeX markup.
+  """ ;
+  rdf:first [
+    sh:datatype xsd:string ;
+  ] ;
+  rdf:rest ( [
+    sh:datatype rdf:HTML ;
+  ] [
+    sh:datatype qudt:LatexString ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  rdfs:label "Text Union Type" .
 
 qudt:UCUMcs
   a rdfs:Datatype, sh:NodeShape ;

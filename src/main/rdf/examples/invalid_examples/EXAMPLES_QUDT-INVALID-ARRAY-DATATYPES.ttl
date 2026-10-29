@@ -1,0 +1,412 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix datatype: <http://qudt.org/vocab/datatype/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ex: <http://example.org#> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix vaem: <http://www.linkedmodel.org/schema/vaem#> .
+
+<http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid>
+  a owl:Ontology ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/schema/shacl/qudt> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/datatype> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/quantitykind> ;
+  owl:imports <http://qudt.org/$$QUDT_VERSION$$/vocab/unit> ;
+  owl:imports <http://www.linkedmodel.org/schema/dtype> ;
+  owl:imports <http://www.linkedmodel.org/schema/vaem> ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "QUDT Examples of Invalid Array Datatypes v$$QUDT_VERSION$$" ;
+  vaem:hasGraphMetadata vaem:GMD_INVALID-ARRAY-DATATYPES ;
+  vaem:hasGraphRole vaem:VocabularyGraph .
+
+dcterms:contributor
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "contributor" ;
+  rdfs:range xsd:string .
+
+dcterms:creator
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "creator" ;
+  rdfs:range xsd:string .
+
+dcterms:description
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "description" ;
+  rdfs:range xsd:string .
+
+dcterms:rights
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "rights" ;
+  rdfs:range xsd:string .
+
+dcterms:subject
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "subject" ;
+  rdfs:range xsd:string .
+
+dcterms:title
+  a owl:AnnotationProperty ;
+  rdfs:isDefinedBy dcterms: ;
+  rdfs:label "title" ;
+  rdfs:range xsd:string .
+
+ex:Array1D_Integers-INVALID
+  a qudt:HomogeneousArray ;
+  dcterms:description """
+  <p>The kind declares two integer cells (qudt:elementCount 2) but the qudt:values list holds
+  three.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:BadLength1DArrayKind ;
+  qudt:values ( 1 2 3 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid 1-D homogeneous array - more values than the kind's element count" .
+
+ex:BadElementTypeArrayKind
+  a qudt:HomogeneousArrayKind ;
+  dcterms:description """
+  <p>Blueprint for the invalid array below: a 1-D homogeneous array of four
+  decimal cells. This kind is itself well-formed.</p>"""^^rdf:HTML ;
+  qudt:dimensionality 1 ;
+  qudt:dimensions ( 4 ) ;
+  qudt:elementCount 4 ;
+  qudt:elementType xsd:decimal ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Array kind for the invalid element type array" .
+
+ex:BadLength1DArrayKind
+  a qudt:HomogeneousArrayKind ;
+  dcterms:description """
+  <p>Blueprint for the invalid array ex:Array1D_Integers-INVALID: a 1-D homogeneous array of two
+  integer cells. This kind is itself well-formed.</p>"""^^rdf:HTML ;
+  qudt:dimensionality 1 ;
+  qudt:dimensions ( 2 ) ;
+  qudt:elementCount 2 ;
+  qudt:elementType xsd:integer ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Array kind for the invalid 1-D array with too many values" .
+
+ex:BadLengthArrayKind
+  a qudt:HomogeneousArrayKind ;
+  dcterms:description """
+  <p>Blueprint for the invalid array below: a 2&#215;2&#215;2 homogeneous array of
+  decimals, so eight cells are expected. This kind is itself well-formed.</p>"""^^rdf:HTML ;
+  qudt:dimensionality 3 ;
+  qudt:dimensions ( 2 2 2 ) ;
+  qudt:elementCount 8 ;
+  qudt:elementType xsd:decimal ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Array kind for the invalid short value list array" .
+
+ex:badExampleArrayAlarmState
+  a qudt:HomogeneousArray ;
+  dcterms:description """
+  <p>The kind's element spec enumerates three alarm states, but the second cell is ex:Unknown.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:HomogeneousArrayKind_AlarmStates ;
+  qudt:values ( ex:NoAlarm ex:Unknown ex:NoAlarm ex:HighAlarm ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid array - a cell that is not one of the enumerated values" .
+
+ex:badExampleArrayCellUnit
+  a qudt:HomogeneousArray ;
+  dcterms:description """
+  <p>The kind gives degrees Celsius, but the second cell is a quantity value in degrees Fahrenheit.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:HomogeneousArrayKind_TemperatureReadings ;
+  qudt:values ( [
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:DEG_C ;
+    qudt:value 20.6 ;
+  ] [
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:value 70.2 ;
+  ] [
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:DEG_C ;
+    qudt:value 21.5 ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid array - a cell in a unit other than its kind's" .
+
+ex:badExampleArrayCellUnitNotApplicable
+  a qudt:HomogeneousArray ;
+  dcterms:description """
+  <p>The kind, given inline so that the build's unit QA of the invalid examples sees it, gives the
+  quantity kind temperature but no unit. The second cell is a quantity value in metres, which is not an
+  applicable unit of temperature.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind [
+    a qudt:HomogeneousArrayKind ;
+    qudt:dimensionality 1 ;
+    qudt:dimensions ( 2 ) ;
+    qudt:elementCount 2 ;
+    qudt:elementType qudt:QuantityValue ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+  ] ;
+  qudt:values ( [
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:DEG_C ;
+    qudt:value 21.0 ;
+  ] [
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:M ;
+    qudt:value 2.5 ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid array - a cell whose unit is not an applicable unit of its kind's quantity kind" .
+
+ex:badExampleArrayKindBothElementForms
+  a qudt:HomogeneousArrayKind ;
+  dcterms:description """
+  <p>A homogeneous array kind that gives its shared type twice, as qudt:elementType and as
+  qudt:elementSpec. It must give exactly one of the two.</p>"""^^rdf:HTML ;
+  qudt:dimensionality 1 ;
+  qudt:dimensions ( 2 ) ;
+  qudt:elementCount 2 ;
+  qudt:elementSpec [
+    sh:or qudt:NumericUnionType ;
+  ] ;
+  qudt:elementType xsd:double ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid array kind - both qudt:elementType and qudt:elementSpec" .
+
+ex:badExampleArrayRank
+  a qudt:HomogeneousArrayKind ;
+  dcterms:description """
+  <p>dimensionality is 3 but the dimensions list has only 2 entries.</p>"""^^rdf:HTML ;
+  qudt:dimensionality 3 ;
+  qudt:dimensions ( 2 3 ) ;
+  qudt:elementCount 6 ;
+  qudt:elementType xsd:decimal ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid array kind - dimensionality does not match number of dimensions" .
+
+ex:badExampleArrayRatingRange
+  a qudt:HomogeneousArray ;
+  dcterms:description """
+  <p>The kind's element spec bounds ratings to 1 to 5, but the second rating is 6.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:HomogeneousArrayKind_Ratings ;
+  qudt:values ( 4 6 3 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid array - a rating outside its range" .
+
+ex:badExampleHeterogeneousArrayKindElementType
+  a qudt:HeterogenousArrayKind ;
+  dcterms:description """
+  <p>A heterogeneous array kind that gives one shared qudt:elementType instead of member specs. That
+  satisfies qudt:CellDescriptionUnionType, but a heterogeneous array kind must describe its cells
+  position by position (qudt:HeterogeneousCellsShape).</p>"""^^rdf:HTML ;
+  qudt:dimensionality 1 ;
+  qudt:dimensions ( 2 ) ;
+  qudt:elementCount 2 ;
+  qudt:elementType xsd:double ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid heterogeneous array kind - a shared element type instead of member specs" .
+
+ex:badExampleHeterogeneousArrayLength
+  a qudt:HeterogenousArray ;
+  dcterms:description """
+  <p>The kind's member specs have six positions but the qudt:values list holds seven cells.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:HeterogeneousArrayKind_2X3 ;
+  qudt:values ( "Temp" 23.7 unit:DEG_C "Pressure" 101.3 unit:PA "Humidity" ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid heterogeneous array - more values than the kind has positions" .
+
+ex:badExampleHeterogeneousArrayType
+  a qudt:HeterogenousArray ;
+  dcterms:description """
+  <p>Position 3 requires sh:class qudt:Unit but the cell is the string
+  "DegC".</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:HeterogeneousArrayKind_2X3 ;
+  qudt:values ( "Temp" 23.7 "DegC" "Pressure" 101.3 unit:PA ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid heterogeneous array - value at position 3 is not a unit" .
+
+ex:badExampleHeterogeneousVectorLength
+  a qudt:Vector ;
+  dcterms:description """
+  <p>The kind's member specs have six required components but the qudt:values list holds only five:
+  the product of inertia is missing.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:VectorKind_RocketLaunchMassProperties ;
+  qudt:values ( 0.1E0 0.5E0 1.0E0 2.0E0 3.0E0 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid heterogeneous vector - fewer values than the kind requires" .
+
+ex:badExampleHomogeneousArrayKindMemberSpecs
+  a qudt:HomogeneousArrayKind ;
+  dcterms:description """
+  <p>A homogeneous array kind that gives member specs instead of one shared qudt:elementType. That
+  satisfies qudt:CellDescriptionUnionType, but a homogeneous array kind must give a shared element type
+  (qudt:HomogeneousCellsShape).</p>"""^^rdf:HTML ;
+  qudt:dimensionality 1 ;
+  qudt:dimensions ( 2 ) ;
+  qudt:elementCount 2 ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:double ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:double ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid homogeneous array kind - member specs instead of a shared element type" .
+
+ex:badExampleHomogeneousArrayLength
+  a qudt:HomogeneousArray ;
+  dcterms:description """
+  <p>The kind declares elementCount 8 (2&#215;2&#215;2) but the qudt:values list
+  holds only 7 cells.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:BadLengthArrayKind ;
+  qudt:values ( 1.0 2.0 3.0 4.0 5.0 6.0 7.0 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid homogeneous array - values list length does not match elementCount" .
+
+ex:badExampleHomogeneousArrayType
+  a qudt:HomogeneousArray ;
+  dcterms:description """
+  <p>The kind declares elementType xsd:decimal but the fourth cell is a
+  string.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:BadElementTypeArrayKind ;
+  qudt:values ( 1.0 2.0 3.0 "four" ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid homogeneous array - a cell violates the shared element type" .
+
+ex:badExampleMemberSpecKindSharedUnit
+  a qudt:VectorKind ;
+  dcterms:description """
+  <p>A vector kind with member specs that also gives a kind-level qudt:hasUnit. A kind with member specs
+  gives each position its own unit, so it matches neither alternative of
+  qudt:CellDescriptionUnionType.</p>"""^^rdf:HTML ;
+  qudt:elementCount 2 ;
+  qudt:hasUnit unit:M ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:double ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:double ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid vector kind - member specs and a kind-level unit" .
+
+ex:badExampleVectorElementSpec
+  a qudt:Vector ;
+  dcterms:description """
+  <p>The kind's element spec accepts any number, but the second component is the string "two".</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:VectorKind_3_AnyNumber ;
+  qudt:values ( 1 "two" 3.0E0 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid vector - a component its kind's element spec does not accept" .
+
+ex:badExampleVectorKindBothCellDescriptions
+  a qudt:VectorKind ;
+  dcterms:description """
+  <p>A vector kind that gives both a shared qudt:elementType and member specs, so it matches neither
+  alternative of qudt:CellDescriptionUnionType.</p>"""^^rdf:HTML ;
+  qudt:elementCount 2 ;
+  qudt:elementType xsd:double ;
+  qudt:tupleMemberSpecs ( [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 1 ;
+    sh:datatype xsd:double ;
+  ] [
+    a qudt:NTupleMemberTypeSpec ;
+    qudt:index 2 ;
+    sh:datatype xsd:double ;
+  ] ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid vector kind - both a shared element type and member specs" .
+
+ex:badExampleVectorKindDatatype
+  a qudt:VectorKind ;
+  dcterms:description """
+  <p>A vector kind that types its cells with qudt:elementType, as it should, but also gives
+  qudt:datatype, which an array or vector kind may not.</p>"""^^rdf:HTML ;
+  qudt:datatype datatype:FLOAT-DP ;
+  qudt:elementCount 3 ;
+  qudt:elementType xsd:double ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid vector kind - gives qudt:datatype" .
+
+ex:badExampleVectorKindNoCellDescription
+  a qudt:VectorKind ;
+  dcterms:description """
+  <p>A vector kind that gives neither a shared qudt:elementType nor member specs, so it matches neither
+  alternative of qudt:CellDescriptionUnionType.</p>"""^^rdf:HTML ;
+  qudt:elementCount 3 ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid vector kind - no element type and no member specs" .
+
+ex:badExampleVectorKindUnitNotApplicable
+  a qudt:VectorKind ;
+  dcterms:description """
+  <p>A homogeneous vector kind whose shared quantity kind is a velocity, quantitykind:LinearVelocity, but
+  whose shared unit, unit:M, is a length, so it is not one of the velocity's applicable units.</p>"""^^rdf:HTML ;
+  qudt:elementCount 3 ;
+  qudt:elementType xsd:double ;
+  qudt:hasQuantityKind quantitykind:LinearVelocity ;
+  qudt:hasUnit unit:M ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid vector kind - a length unit for a velocity" .
+
+ex:badExampleVectorNegativeMass
+  a qudt:Vector ;
+  dcterms:description """
+  <p>The kind bounds the mass at position 4 to zero or more, but the mass is -2.0.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:VectorKind_RocketLaunchMassProperties ;
+  qudt:values ( 0.1E0 0.5E0 1.0E0 -2.0E0 3.0E0 4.0E0 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Invalid vector - a negative mass" .
+
+ex:exampleArrayWithBadRankKind
+  a qudt:HomogeneousArray ;
+  dcterms:description """
+  <p>A well-formed array instance -- six values matching the kind's
+  elementCount -- whose kind carries the rank fault. Present so that the
+  rank violation is reported only against
+  <code>ex:badExampleArrayRank</code>.</p>"""^^rdf:HTML ;
+  qudt:datatypeKind ex:badExampleArrayRank ;
+  qudt:values ( 1.0 2.0 3.0 4.0 5.0 6.0 ) ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "Array whose array kind has an invalid rank" .
+
+vaem:GMD_INVALID-ARRAY-DATATYPES
+  a vaem:GraphMetaData ;
+  dcterms:description """
+  Invalid examples of array and vector kinds, arrays and vectors. Each breaks a constraint of the
+  SHACL datatype schema.
+  """^^rdf:HTML ;
+  dcterms:modified "1234-12-12T12:34:56Z"^^xsd:dateTime ;
+  dcterms:subject "Datatypes" ;
+  rdfs:isDefinedBy <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  rdfs:label "QUDT Examples of Invalid Array Datatypes - Version $$QUDT_VERSION$$" ;
+  vaem:hasGraphRole vaem:VocabularyGraph ;
+  vaem:isMetadataFor <http://qudt.org/$$QUDT_VERSION$$/examples/datatype/array/invalid> ;
+  vaem:logo "https://qudt.org/linkedmodels.org/assets/lib/lm/images/logos/qudt_logo-300x110.png"^^xsd:anyURI ;
+  vaem:name "QUDT" ;
+  vaem:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ;
+  vaem:namespacePrefix "qudt" ;
+  vaem:owner "QUDT.ORG" ;
+  vaem:title "QUDT Examples of Invalid Array Datatypes - Version $$QUDT_VERSION$$" ;
+  vaem:usesNonImportedResource dcterms:abstract ;
+  vaem:usesNonImportedResource dcterms:created ;
+  vaem:usesNonImportedResource dcterms:creator ;
+  vaem:usesNonImportedResource dcterms:modified ;
+  vaem:usesNonImportedResource dcterms:rights ;
+  vaem:usesNonImportedResource dcterms:title ;
+  vaem:usesNonImportedResource <http://voag.linkedmodel.org/voag#QUDT-Attribution> ;
+  vaem:withAttributionTo <http://voag.linkedmodel.org/voag#QUDT-Attribution> .
+
+
