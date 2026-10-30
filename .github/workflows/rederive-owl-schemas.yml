@@ -1,0 +1,58 @@
+name: Re-derive OWL schemas
+
+# Re-derives the three OWL schemas from the SHACL schemas on a branch and commits the result back to it,
+# for contributors who cannot run Maven locally. Run it on the branch your pull request comes from.
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to re-derive and commit to (defaults to the branch selected above)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  rederive:
+    runs-on: ubuntu-latest
+    env:
+      BRANCH: ${{ inputs.branch || github.ref_name }}
+
+    steps:
+      - name: Refuse to commit to main of the QUDT repository
+        if: ${{ github.repository == 'qudt/qudt-public-repo' && (inputs.branch || github.ref_name) == 'main' }}
+        run: |
+          echo "::error::Create a branch off main and run this Action on that branch, then open a pull request."
+          exit 1
+
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.branch || github.ref_name }}
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5.6.0
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Re-derive the OWL schemas
+        run: |
+          mvn -q -Powl-schema-derive antrun:run@derive-owl-schema
+          mvn -q -Powl-datatypes-derive antrun:run@derive-owl-datatypes-schema
+          mvn -q -Powl-coordinates-derive antrun:run@derive-owl-coordinates-schema
+
+      # the same directory the CI Build compares after its own derivation
+      - name: Commit and push the re-derived schemas
+        run: |
+          git add -- src/main/rdf/schema/
+          if git diff --cached --quiet; then
+            echo "The OWL schemas on $BRANCH are already up to date; nothing to commit." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git commit -m "Re-derive the OWL schemas from the SHACL schemas"
+          git push origin "HEAD:refs/heads/$BRANCH"
+          echo "Committed the re-derived OWL schemas to $BRANCH. A commit made by an Action does not re-run the CI Build: close and reopen your pull request, or push another commit, to run it again." >> "$GITHUB_STEP_SUMMARY"
