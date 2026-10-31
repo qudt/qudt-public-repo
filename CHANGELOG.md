@@ -32,6 +32,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - `unit:REM-PER-SEC` is now a unit of `quantitykind:DoseEquivalentRate` instead of `quantitykind:AbsorbedDoseRate` and `quantitykind:KermaRate`, since the rem is a unit of dose equivalent ([#1545](https://github.com/qudt/qudt-public-repo/issues/1545)).
 - Removed incorrect alternate arabic label text (delimited by `;`) in `unit:GRAY` and `unit:WB` ([#1550](https://github.com/qudt/qudt-public-repo/issues/1550)).
 - The CI check that the committed OWL schemas match a fresh derivation now runs on a pull request only when it changes a derivation input (`src/main/rdf/schema/`, `src/build/schema-derivation-config/`, `pom.xml` or the CI Build workflow), so other pull requests no longer pay for it or fail because of someone else's schema change. It now also runs after every merge to `main`, after the snapshot release, so an out-of-date schema on `main` shows up at once.
+- Stated the positive direction in the descriptions of `quantitykind:Depth` (downward, as the CF standard name `depth`) and `quantitykind:Height` (upward, as the CF standard name `height`), and the sign of `quantitykind:TemperatureGradient`, which follows from its definition once the direction of the length is stated ([#1593](https://github.com/qudt/qudt-public-repo/issues/1593)).
 
 ### Fixed
 
