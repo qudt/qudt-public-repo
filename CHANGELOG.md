@@ -54,6 +54,7 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 - Corrected the Wikidata and OM links of `unit:PERMILLE`, which were those of `unit:PERCENT`: `qudt:wikidataMatch` is now Q181011 (per mille) instead of Q11229 (percent), and `qudt:omUnit om-2/percent` is removed, since OM 2.0 defines no per mille unit ([#1566](https://github.com/qudt/qudt-public-repo/issues/1566)).
 - Removed `qudt:informativeReference` to the Wikipedia article on half-value layer from `quantitykind:KermaRate`, which is a different concept, and corrected the description of `unit:REM-PER-SEC`, which gave 1 rem/s as 1 Sv/s instead of 0.01 Sv/s ([#1545](https://github.com/qudt/qudt-public-repo/issues/1545)).
 - Replaced the conversion multiplier of 0.0 (the marker for "no linear conversion") on three units that have an exact linear factor: `unit:SpeedOfLight` (299792458, `qudt:scalingOf unit:M-PER-SEC`), `unit:MegaEV-PER-SpeedOfLight` (5.344285992678308138091986290062040E-22 kg·m/s: 10⁶ × 1.602176634E-19 J divided by c) and `unit:GR` (0.01, percent grade, `qudt:scalingOf unit:M-PER-M`). `unit:GR` is now a unit of `quantitykind:Gradient` instead of `quantitykind:DimensionlessRatio` ([#1434](https://github.com/qudt/qudt-public-repo/issues/1434)).
+- Added the untagged and `@en` labels "Pascal Square Root Metre" and "Megapascal Square Root Metre" to `unit:PA-M0dot5` and `unit:MegaPA-M0dot5`, which had only an `@en-US` label; every other unit has an untagged label ([#1551](https://github.com/qudt/qudt-public-repo/issues/1551)).
 
 ## [3.5.3] - 2026-10-20
 
