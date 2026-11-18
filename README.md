@@ -18,6 +18,8 @@ There are three ways to bring the QUDT ontology into your environment.
 Overview
 --------
 
+The QUDT ontologies are a set of computer-readable models and vocabularies to support interoperability of numerical data by defining persistent URIs and relations for units of measure, quantity kinds, dimensions and datatypes. See the [QUDT website](https://qudt.org) for more details, catalogs and tools.
+
 This QUDT<sup>1</sup> public repository contains the schema and vocabulary source files for the graphs making up the QUDT collection. It is probably the most convenient way for software developers to include the QUDT ontologies in their work, and is the most up-to-date. However, for those who prefer the linked data world, each QUDT graph is also available in both a versioned and an unversioned form on the <a href="http://qudt.org">qudt.org</a> website.
 
 QUDT is licensed under CC BY 4.0. See [Citing QUDT](#citing-qudt) and [License](#license) below.
