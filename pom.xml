@@ -2640,7 +2640,7 @@ validAspectDirs.each { aspectDir ->
                                     <savepoint><id>08.6-infer-supported-extension-unit-repairs</id></savepoint>
 
                                     <sparqlQuery>
-                                        <message>Calculating default labels units that don't have them from 'en' labels</message>
+                                        <message>Calculating default labels of units, quantity kinds, constants and prefixes that don't have them from 'en' labels</message>
                                         <file>src/build/inference/labels/generate-default-labels.rq</file>
                                         <toGraph>inferred:labels:default</toGraph>
                                         <toFile>target/inferred/labels-default.ttl</toFile>
@@ -2650,12 +2650,12 @@ validAspectDirs.each { aspectDir ->
                                         <sparql>
                                             <![CDATA[
                                                         DELETE {
-                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                            GRAPH ?graph {
                                                                 ?unit rdfs:label ?incorrectLabel .
                                                             }
                                                         }
                                                         INSERT {
-                                                            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                            GRAPH ?graph {
                                                                 ?unit rdfs:label ?missingLabel .
                                                             }
                                                             GRAPH <fix:labels:default:toDelete> {
@@ -2666,8 +2666,14 @@ validAspectDirs.each { aspectDir ->
                                                             }
                                                         }
                                                         WHERE {
+                                                            VALUES ?graph {
+                                                                <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl>
+                                                                <dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl>
+                                                                <dist:vocab:VOCAB_QUDT-CONSTANTS.ttl>
+                                                                <dist:vocab:VOCAB_QUDT-PREFIXES.ttl>
+                                                            }
                                                             {
-                                                                GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                GRAPH ?graph {
                                                                         ?unit rdfs:label ?incorrectLabel .
                                                                 }
                                                                 FILTER EXISTS {
@@ -2690,8 +2696,11 @@ validAspectDirs.each { aspectDir ->
                                                                 GRAPH <inferred:labels:default> {
                                                                         ?unit rdfs:label ?missingLabel .
                                                                 }
+                                                                GRAPH ?graph {
+                                                                        ?unit rdfs:label ?existingLabel .
+                                                                }
                                                                 FILTER NOT EXISTS {
-                                                                    GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
+                                                                    GRAPH ?graph {
                                                                         ?unit rdfs:label ?missingLabel .
                                                                     }
                                                                 }
@@ -2860,39 +2869,7 @@ validAspectDirs.each { aspectDir ->
                                     <savepoint><id>10-infer-labels-factors</id></savepoint>
 
                                     <sparqlUpdate>
-                                        <message>Removing untagged rdfs:label duplicates that are redundant with an existing English-tagged label of identical text</message>
-                                        <sparql>
-                                            <![CDATA[
-                                                DELETE {
-                                                    GRAPH ?g { ?s rdfs:label ?untaggedLabel }
-                                                }
-                                                INSERT {
-                                                    GRAPH <fix:labels:lang-dedup:toDelete> { ?s rdfs:label ?untaggedLabel }
-                                                }
-                                                WHERE {
-                                                    GRAPH ?g {
-                                                        ?s rdfs:label ?untaggedLabel .
-                                                        ?s rdfs:label ?taggedLabel .
-                                                        { ?s a qudt:QuantityKind } UNION { ?s a qudt:Prefix }
-                                                        FILTER NOT EXISTS { ?s qudt:deprecated true }
-                                                    }
-                                                    FILTER(STRSTARTS(STR(?g), "dist:"))
-                                                    FILTER(LANG(?untaggedLabel) = "")
-                                                    FILTER(LANG(?taggedLabel) IN ("en", "en-US", "en-UK"))
-                                                    FILTER(STR(?untaggedLabel) = STR(?taggedLabel))
-                                                }
-                                            ]]>
-                                        </sparql>
-                                    </sparqlUpdate>
-                                    <write>
-                                        <graph>fix:labels:lang-dedup:toDelete</graph>
-                                        <toFile>target/fix/labels/lang-dedup/toDelete.ttl</toFile>
-                                    </write>
-
-                                    <savepoint><id>10-infer-labels-lang-dedup</id></savepoint>
-
-                                    <sparqlUpdate>
-                                        <message>Fixing English labels not in title case (capitalize first letter; split CamelCase) and tagging untagged labels as English</message>
+                                        <message>Fixing English and untagged labels not in title case (capitalize first letter; split CamelCase)</message>
                                         <sparql>
                                             <![CDATA[
                                                 DELETE { GRAPH ?g { ?s rdfs:label ?oldLabel } }
@@ -2911,8 +2888,8 @@ validAspectDirs.each { aspectDir ->
                                                     FILTER(LANG(?oldLabel) IN ("", "en", "en-US", "en-UK"))
                                                     FILTER(!REGEX(STR(?oldLabel), "^\\p{Ll}-"))
                                                     BIND(qfn:titleCase(STR(?oldLabel)) AS ?fixed)
-                                                    BIND(IF(LANG(?oldLabel) = "", STRLANG(?fixed, "en"), STRLANG(?fixed, LANG(?oldLabel))) AS ?newLabel)
-                                                    FILTER(STR(?fixed) != STR(?oldLabel) || LANG(?oldLabel) = "")
+                                                    BIND(IF(LANG(?oldLabel) = "", STR(?fixed), STRLANG(?fixed, LANG(?oldLabel))) AS ?newLabel)
+                                                    FILTER(STR(?fixed) != STR(?oldLabel))
                                                 }
                                             ]]>
                                         </sparql>
