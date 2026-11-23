@@ -1,37 +1,45 @@
 CONSTRUCT {
- ?unit rdfs:label ?newLabel .
+ ?entity rdfs:label ?newLabel .
 }
 WHERE
 {
-    SELECT ?unit ?newLabel
+    SELECT ?entity ?newLabel
     WHERE
     {
+        VALUES (?graph ?class) {
+            (<dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> qudt:Unit)
+            (<dist:vocab:VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl> qudt:QuantityKind)
+            (<dist:vocab:VOCAB_QUDT-CONSTANTS.ttl> qudt:PhysicalConstant)
+            (<dist:vocab:VOCAB_QUDT-PREFIXES.ttl> qudt:Prefix)
+        }
         {
-            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                ?unit a qudt:Unit .
-                ?unit rdfs:label ?label.
+            GRAPH ?graph {
+                ?entity a ?class .
+                FILTER NOT EXISTS { ?entity qudt:deprecated true }
+                ?entity rdfs:label ?label.
                 BIND(LANG(?label) AS ?lang)
                 FILTER(?lang = "en")
                 FILTER NOT EXISTS {
-                    ?unit rdfs:label ?noDefaultLabel;
+                    ?entity rdfs:label ?noDefaultLabel;
                     FILTER(LANG(?noDefaultLabel) = "")
                 }
             }
             BIND(STR(?label) as ?newLabel)
         } UNION {
-            GRAPH <dist:vocab:VOCAB_QUDT-UNITS-ALL.ttl> {
-                    ?unit a qudt:Unit .
-                    ?unit rdfs:label ?label.
+            GRAPH ?graph {
+                    ?entity a ?class .
+                    FILTER NOT EXISTS { ?entity qudt:deprecated true }
+                    ?entity rdfs:label ?label.
                     BIND(LANG(?label) AS ?lang)
                     FILTER(?lang = "")
                     FILTER NOT EXISTS {
-                        ?unit rdfs:label ?noENLabel;
+                        ?entity rdfs:label ?noENLabel;
                         FILTER(LANG(?noENLabel) = "en")
                     }
                 }
                 BIND(STRLANG(STR(?label),"en") as ?newLabel)
         }
     }
-    ORDER BY ?unit
+    ORDER BY ?entity
 
 }
