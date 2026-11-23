@@ -7,6 +7,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [3.5.4] - 2026-11-23
+
 ### Added
 
 - Added `qudt:exactMatch` (in both directions) between 36 pairs of units that are the same unit under two names: 34 pairs whose names list the same factors in a different order (for example `unit:K-M` and `unit:M-K`, `unit:BTU_IT-PER-FT2-HR-DEG_F` and `unit:BTU_IT-PER-HR-FT2-DEG_F`, and the `unit:LB-*-PER-*-GAL_*`, `unit:GM-*-PER-L-M3` and `unit:MilliGM-*-PER-L-M3` families), and `unit:KIP_F` / `unit:KiloLB_F` and `unit:KIP_F-PER-IN2` / `unit:KiloLB_F-PER-IN2`, which share a UCUM code. Each pair has the same factor units, conversion multiplier and dimension vector.
@@ -1089,7 +1091,8 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 [#1501]: https://github.com/qudt/qudt-public-repo/issues/1501
 [#1502]: https://github.com/qudt/qudt-public-repo/issues/1502
 [#1505]: https://github.com/qudt/qudt-public-repo/issues/1505
-[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.5.3...HEAD
+[Unreleased]: https://github.com/qudt/qudt-public-repo/compare/v3.5.4...HEAD
+[3.5.4]: https://github.com/qudt/qudt-public-repo/compare/v3.5.3...v3.5.4
 [3.5.3]: https://github.com/qudt/qudt-public-repo/compare/v3.5.2...v3.5.3
 [3.5.2]: https://github.com/qudt/qudt-public-repo/compare/v3.5.1...v3.5.2
 [3.5.1]: https://github.com/qudt/qudt-public-repo/compare/v3.5.0...v3.5.1
