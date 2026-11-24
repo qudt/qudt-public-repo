@@ -7,6 +7,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Fixed
+
+- Corrected the dimension vector of `quantitykind:MacroscopicCrossSection` and `quantitykind:MacroscopicTotalCrossSection` from L² to L⁻¹ (Σ = Σ nⱼσⱼ, a number density times a cross-section, so m⁻¹, as in ISO 80000-10). They had been placed under `quantitykind:CrossSection`, from which they inherited area units and, through them, the wrong dimension vector. `quantitykind:MacroscopicCrossSection` is now `qudt:organizedUnder quantitykind:InverseLength` with `unit:PER-M` and `unit:PER-CentiM` as its units, `quantitykind:MacroscopicTotalCrossSection` is `qudt:specializationOf quantitykind:MacroscopicCrossSection`, and both descriptions warn against confusing them with `quantitykind:CrossSection`. Their LaTeX symbols now use the letter Σ (`\Sigma`) instead of the summation sign (`\sum`) ([#1619](https://github.com/qudt/qudt-public-repo/issues/1619)).
+
 ## [3.5.4] - 2026-11-23
 
 ### Added
