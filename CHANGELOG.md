@@ -7,6 +7,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+- Added `quantitykind:SaturationVapourPressureSlope`, the derivative of the saturation vapour pressure with respect to temperature, such as the slope Delta of the Penman-Monteith equation, with `rdfs:seeAlso quantitykind:VapourPressure` and `unit:PA-PER-K`, `unit:HectoPA-PER-K` and `unit:KiloPA-PER-K` as its units.
+
 ## [3.5.4] - 2026-11-23
 
 ### Added
