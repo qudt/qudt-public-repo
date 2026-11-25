@@ -7,6 +7,10 @@ and this project is in the process of adopting [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Added
+
+- Added `quantitykind:MixingLineSlope`, the slope G of the mixing line in a diagram of water vapour partial pressure versus temperature, along which two air masses mix isobarically, as in the Schmidt-Appleman criterion of contrail formation, with `unit:PA-PER-K` and `unit:HectoPA-PER-K` as its units.
+
 ## [3.5.4] - 2026-11-23
 
 ### Added
